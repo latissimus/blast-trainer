@@ -12,9 +12,7 @@ let active = null;          // current view's { destroy } handle
 let routeToken = 0;         // guards against stale async mounts
 let authMode = 'login';     // 'login' | 'signup'
 
-const MARQUEE = `<div class="marquee"><div class="track">${
-  Array.from({ length: 6 }).map(() => '<span>SCHLAG DEIN LETZTES MAL ★ STYLE UND QUALITÄT OHNE KOMPROMISS ★</span>').join('')
-}</div></div>`;
+const MARQUEE = ''; // Laufband oben entfernt (auf Wunsch)
 
 function cleanupActive() {
   if (active && active.destroy) active.destroy();
