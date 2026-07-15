@@ -165,7 +165,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const tierSeg = wrap.querySelector('#lg-tier');
   const tierHintEl = wrap.querySelector('#lg-tierhint');
 
-  wrap.querySelector('#lg-wkup').onclick = () => { state.week++; queuePersist(); renderAll(); };
+  wrap.querySelector('#lg-wkup').onclick = () => { if (state.week < 8) { state.week++; queuePersist(); renderAll(); } }; // Blast 1-6 + Cruise 7-8
   wrap.querySelector('#lg-wkdn').onclick = () => { if (state.week > 1) { state.week--; queuePersist(); renderAll(); } };
   rotEl.onclick = () => {
     state.rot[state.week] = rotOf(state.week) === 'A' ? 'B' : 'A';

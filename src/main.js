@@ -26,7 +26,7 @@ function renderAuth() {
   app.innerHTML = `
     ${MARQUEE}
     <div class="auth-shell">
-      <div style="text-align:center;margin-bottom:6px"><span class="brand" style="font-size:46px"><span class="star">★</span>BLAST<span class="star">★</span></span></div>
+      <div style="text-align:center;margin-bottom:30px"><span class="brand" style="font-size:46px"><span class="star">★</span>BLAST<span class="star">★</span></span></div>
       <h1 class="auth-title">${isLogin ? 'Login' : 'Registrieren'}</h1>
       <p class="auth-sub">${isLogin ? 'Melde dich mit E-Mail und Passwort an.' : 'Erstelle deinen Trainings-Account.'}</p>
       <div id="auth-msg"></div>

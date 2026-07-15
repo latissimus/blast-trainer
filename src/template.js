@@ -8,9 +8,7 @@ export const TPL = {
     { id: 'delt',  mus: 'Schultern', type: 'load', sets: [1, 4], rest: 90,  reps: '6–12', ex: [{ r: 'Comp', n: 'Multi Frontdrücken' }, { r: 'Iso', n: 'KH Seitheben' }] },
     { id: 'p_quad', mus: 'Quads',       type: 'pump', sets: [1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
     { id: 'p_gh',   mus: 'Glutes/Hams', type: 'pump', sets: [1, 1], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
-    { id: 'p_calf', mus: 'Waden',       type: 'pump', sets: [1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
-    { id: 'p_arm',  mus: 'Bi + Tri',    type: 'pump', sets: [1, 2], rest: 60, reps: '12–20', free: 1, opt: 1, stretch: 1, ex: [{ n: 'Trizeps Überkopf' }, { n: 'Bizeps' }] },
-    { id: 'p_fore', mus: 'Unterarme',   type: 'pump', sets: [1, 2], rest: 60, reps: 'Halt/Wdh', ex: [{ n: 'Fat-Gripz Halt 30–60 s' }, { n: 'Reverse Curls' }] },
+    { id: 'p_calf', mus: 'Waden',       type: 'pump', sets: [1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },    { id: 'p_fore', mus: 'Unterarme',   type: 'pump', sets: [1, 2], rest: 60, reps: 'Halt/Wdh', ex: [{ n: 'Fat-Gripz Halt 30–60 s' }, { n: 'Reverse Curls' }] },
   ] },
   'UK-A': { label: 'UK-A', short: 'UK · Load', sub: 'Unterkörper Loading · Oberkörper Pump', rot: 'A', blocks: [
     { id: 'legs', mus: 'Beine',       type: 'load', sets: [1, 3], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: 'Beinpresse 45°' }] },
@@ -29,9 +27,7 @@ export const TPL = {
     { id: 'delt',  mus: 'Schultern', type: 'load', sets: [1, 4], rest: 90, reps: '6–12', ex: [{ r: 'Comp', n: 'Rudern aufrecht Kabel' }, { r: 'Iso', n: 'Seitheben Gewichtheber' }] },
     { id: 'p_quad', mus: 'Quads',       type: 'pump', sets: [1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
     { id: 'p_gh',   mus: 'Glutes/Hams', type: 'pump', sets: [1, 1], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
-    { id: 'p_calf', mus: 'Waden',       type: 'pump', sets: [1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
-    { id: 'p_arm',  mus: 'Bi + Tri',    type: 'pump', sets: [1, 2], rest: 60, reps: '12–20', free: 1, opt: 1, stretch: 1, ex: [{ n: 'Trizeps Überkopf' }, { n: 'Bizeps' }] },
-    { id: 'p_fore', mus: 'Unterarme',   type: 'pump', sets: [1, 2], rest: 60, reps: 'Halt/Wdh', ex: [{ n: 'Fat-Gripz Halt 30–60 s' }, { n: 'Reverse Curls' }] },
+    { id: 'p_calf', mus: 'Waden',       type: 'pump', sets: [1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },    { id: 'p_fore', mus: 'Unterarme',   type: 'pump', sets: [1, 2], rest: 60, reps: 'Halt/Wdh', ex: [{ n: 'Fat-Gripz Halt 30–60 s' }, { n: 'Reverse Curls' }] },
   ] },
   'UK-B': { label: 'UK-B', short: 'UK · Load', sub: 'Unterkörper Loading · Oberkörper Pump', rot: 'B', blocks: [
     { id: 'legs', mus: 'Beine',       type: 'load', sets: [1, 3], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: 'Beinpresse 45° Aqua' }] },
