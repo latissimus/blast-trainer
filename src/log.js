@@ -23,7 +23,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     data: p.data || {},
     tier: p.tier || {},
     rot: p.rot || {},
-    ex: p.ex || {},   // gemeinsame Übungsnamen pro Tag (über alle Wochen der Rotation)
+    ex: p.ex || {},      // gemeinsame Übungsnamen pro Tag (über alle Wochen der Rotation)
+    notes: p.notes || {}, // gemeinsame Notizen pro Tag/Übung
   };
   migrateData();
 
@@ -38,7 +39,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (saveStateEl) { saveStateEl.textContent = t; saveStateEl.className = 'save-state' + (ok ? ' ok' : ''); }
   }
   function payloadOut() {
-    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, v: 2 };
+    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, v: 2 };
   }
   async function persist() {
     if (readOnly) return true;
@@ -88,11 +89,19 @@ export async function mountLog(container, { userId, readOnly = false }) {
     });
   }
 
-  // Gemeinsame Übungsnamen für einen Tag/Block (über alle Wochen geteilt)
+  // Gemeinsame Übungsnamen für einen Tag/Block (über alle Wochen geteilt).
+  // Start LEER — jeder Coachee trägt seine Übungen selbst ein.
   function dayNames(day, blk) {
     state.ex[day] = state.ex[day] || {};
-    if (!state.ex[day][blk.id]) state.ex[day][blk.id] = blk.ex.map((e) => e.n);
+    if (!state.ex[day][blk.id]) state.ex[day][blk.id] = blk.ex.map(() => '');
     return state.ex[day][blk.id];
+  }
+
+  // Gemeinsame Notizen pro Tag/Block/Übung (über alle Wochen geteilt)
+  function dayNotes(day, blk) {
+    state.notes[day] = state.notes[day] || {};
+    if (!state.notes[day][blk.id]) state.notes[day][blk.id] = blk.ex.map(() => '');
+    return state.notes[day][blk.id];
   }
 
   // ---- structure helpers -------------------------------------------
@@ -133,12 +142,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
     ${readOnly ? '' : '<div class="log-top"><span class="save-state" id="lg-save">gespeichert</span></div>'}
     <div class="blastbar">
       <div class="wk">
-        <button id="lg-wkdn" aria-label="Woche runter">–</button>
+        <button id="lg-wkdn" aria-label="Woche zurück">←</button>
         <span class="num" id="lg-wknum">Wo 1</span>
-        <button id="lg-wkup" aria-label="Woche hoch">+</button>
+        <button id="lg-wkup" aria-label="Woche vor">→</button>
       </div>
-      <button class="rotchip" id="lg-rot">A-Woche</button>
-      <button class="ibtn" id="lg-info" aria-label="Prinzipien">?</button>
+      <span class="rotchip" id="lg-rot">A-Woche</span>
+      <button class="ibtn" id="lg-info" aria-label="FAQ">?</button>
       <span class="cruise" id="lg-cruise" hidden>Cruise fällig</span>
     </div>
     <div class="tabs" id="lg-tabs"></div>
@@ -151,7 +160,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     </div>
     <div class="daymeta" id="lg-daymeta"></div>
     <div id="lg-content"></div>
-    <div class="volbar" id="lg-vol"></div>`;
+    <div class="volbar" id="lg-vol"></div>
+    <div id="lg-phasereset"></div>`;
   container.appendChild(wrap);
 
   saveStateEl = wrap.querySelector('#lg-save');
@@ -164,16 +174,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const cruiseEl = wrap.querySelector('#lg-cruise');
   const tierSeg = wrap.querySelector('#lg-tier');
   const tierHintEl = wrap.querySelector('#lg-tierhint');
+  const phaseResetEl = wrap.querySelector('#lg-phasereset');
 
   wrap.querySelector('#lg-wkup').onclick = () => { if (state.week < 8) { state.week++; queuePersist(); renderAll(); } }; // Blast 1-6 + Cruise 7-8
   wrap.querySelector('#lg-wkdn').onclick = () => { if (state.week > 1) { state.week--; queuePersist(); renderAll(); } };
-  rotEl.onclick = () => {
-    state.rot[state.week] = rotOf(state.week) === 'A' ? 'B' : 'A';
-    const days = daysOfWeek(state.week);
-    if (!days.includes(state.day)) state.day = days[0];
-    queuePersist(); renderAll();
-    toast('Woche ' + state.week + ' ist jetzt ' + rotOf(state.week) + '-Woche');
-  };
+  // Das A/B-Feld ist nur Anzeige (folgt der Woche), nicht klickbar.
   tierSeg.querySelectorAll('button').forEach((b) => {
     b.onclick = () => { setTier(state.day, state.week, Number(b.dataset.t)); queuePersist(); renderAll(); };
   });
@@ -323,11 +328,52 @@ export async function mountLog(container, { userId, readOnly = false }) {
           add.onclick = () => { entry.sets[xi].push({ w: '', r: '', rir: '' }); queuePersist(); renderDay(); };
           exDiv.appendChild(add);
         }
+
+        // Notizen-Feld (gestrichelt) – pro Tag/Übung geteilt
+        const notes = dayNotes(state.day, blk);
+        const noteWrap = document.createElement('div'); noteWrap.className = 'notewrap';
+        const showNote = () => {
+          const ta = document.createElement('textarea');
+          ta.className = 'exnote'; ta.value = notes[xi] || ''; ta.placeholder = 'Notiz zur Übung…'; ta.rows = 2;
+          ta.disabled = readOnly;
+          if (!readOnly) ta.oninput = () => { notes[xi] = ta.value; queuePersist(); };
+          noteWrap.innerHTML = ''; noteWrap.appendChild(ta);
+        };
+        if (notes[xi]) {
+          showNote();
+        } else if (!readOnly) {
+          const nb = document.createElement('button'); nb.className = 'addnote'; nb.textContent = '+ Notizen';
+          nb.onclick = () => { showNote(); noteWrap.querySelector('textarea').focus(); };
+          noteWrap.appendChild(nb);
+        }
+        exDiv.appendChild(noteWrap);
+
         el.appendChild(exDiv);
       });
       contentEl.appendChild(el);
     });
     renderVolume(cell, tpl, tier);
+
+    // Reset-Button nur in der letzten Woche (Phase-Ende) – mittig, ganz unten
+    phaseResetEl.innerHTML = '';
+    if (!readOnly && state.week === 8) {
+      const rb = document.createElement('button');
+      rb.className = 'phase-reset';
+      rb.textContent = '🔄 Neue Phase starten – alle Daten löschen';
+      rb.onclick = resetAllData;
+      phaseResetEl.appendChild(rb);
+    }
+  }
+
+  async function resetAllData() {
+    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.')) return;
+    state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {};
+    state.week = 1; state.day = 'OK-A';
+    clearTimeout(saveTimer);
+    await persist();
+    renderAll();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    toast('Neue Phase – alles zurückgesetzt');
   }
 
   function renderVolume(cell, tpl, tier) {
@@ -394,26 +440,33 @@ export async function mountLog(container, { userId, readOnly = false }) {
     sheet.className = 'sheet'; sheet.hidden = true;
     sheet.innerHTML = `
       <div class="sheet-in">
-        <div class="sheet-hd"><h2>PRINZIPIEN</h2><button class="sp-x" id="lg-sheetx" aria-label="schließen">×</button></div>
-        <h4 class="g">Rangfolge</h4>
-        <p><b>1. Progressive Überlastung</b> — mehr Last oder mehr Wdh. gegenüber dem letzten Mal. Steht als Delta über jeder Übung.</p>
-        <p><b>2. Nähe zum Versagen</b> — 0–3 RIR. Der Reizauslöser pro Satz.</p>
-        <p><b>3. Erholung</b> — Schlaf, Protein, Stress. Das Fundament.</p>
-        <p>Volumen ist der Dosis-Regler (~10–20 Sätze/Muskel/Woche). Frequenz verteilt nur — 2–3×/Muskel. Kater ist kein Maß.</p>
-        <h4>Loading</h4>
-        <p>6–12 Wdh., 0–2 RIR. Zig-Zag: <b>Comp → Iso → Comp → Iso</b>. Versagen nur im <b>letzten Comp-Satz</b>; Iso-Sätze dürfen ans Versagen. Pause: Oberkörper 90 s, Unterkörper 120 s, Waden 90 s.</p>
-        <h4 class="p">Pump</h4>
-        <p>12–25 Wdh., leichte Last (~50 % 1RM), Pause 60 s, im Supersatz gekoppelt. Bis zum <b>metabolischen Versagen</b>, dann Teilwiederholungen im gedehnten Bereich. Übungen frei rotieren.</p>
-        <h4 class="m">Muscle Rounds</h4>
-        <p>6 Minisätze à 4 Wdh., ~10 s Pause, 5–10 min pro Round. Gewicht ≈ 15RM. <b>Nur ein Versagenspunkt</b>, im letzten Minisatz.</p>
-        <h4 class="g">Tiers (Autoregulation)</h4>
-        <p><b>Tier I</b> = wenig Sätze, schlechter Tag. <b>Tier III</b> = volles Volumen, guter Tag. Nach Tagesform wählen, nicht nach Ehrgeiz.</p>
-        <h4 class="g">Progression</h4>
-        <p>Doppelte Progression: erst Wdh. ans obere Ende, dann Last hoch (2,5–5 kg), Wdh. zurück. <b>2 Einheiten ohne Fortschritt</b> → Übung tauschen.</p>
-        <h4 class="g">Gedehnte Position</h4>
-        <p>Wo das ↕-Zeichen steht: Last in den verlängerten Bereich bringen, volle ROM oder Teilwdh. im gedehnten Bereich.</p>
-        <h4 class="g">Blast / Cruise</h4>
-        <p>Blast 3–6 Wochen progressiv (Tier steigend), dann Cruise ≈ 1/3 der Blast-Dauer: Volumen und Frequenz runter, nur Muscle Rounds.</p>
+        <div class="sheet-hd"><h2>FAQ</h2><button class="sp-x" id="lg-sheetx" aria-label="schließen">×</button></div>
+        <details class="faq"><summary>Worauf kommt es beim Training an?</summary>
+          <div class="faq-a">
+            <p><b>1. Progressive Überlastung</b> — mehr Last oder mehr Wdh. gegenüber dem letzten Mal. Steht als Delta über jeder Übung.</p>
+            <p><b>2. Nähe zum Versagen</b> — 0–3 RIR. Der Reizauslöser pro Satz.</p>
+            <p><b>3. Erholung</b> — Schlaf, Protein, Stress. Das Fundament.</p>
+            <p>Volumen ist der Dosis-Regler (~10–20 Sätze/Muskel/Woche). Frequenz verteilt nur — 2–3×/Muskel. Kater ist kein Maß.</p>
+          </div>
+        </details>
+        <details class="faq"><summary>Wie trainiere ich die Loading-Sätze?</summary>
+          <div class="faq-a"><p>6–12 Wdh., 0–2 RIR. Zig-Zag: <b>Comp → Iso → Comp → Iso</b>. Versagen nur im <b>letzten Comp-Satz</b>; Iso-Sätze dürfen ans Versagen. Pause: Oberkörper 90 s, Unterkörper 120 s, Waden 90 s.</p></div>
+        </details>
+        <details class="faq"><summary>Wie trainiere ich die Pump-Sätze?</summary>
+          <div class="faq-a"><p>12–25 Wdh., leichte Last (~50 % 1RM), Pause 60 s, im Supersatz gekoppelt. Bis zum <b>metabolischen Versagen</b>, dann Teilwiederholungen im gedehnten Bereich. Übungen frei rotieren.</p></div>
+        </details>
+        <details class="faq"><summary>Wie funktionieren die Muscle Rounds (MR)?</summary>
+          <div class="faq-a"><p>6 Minisätze à 4 Wdh., ~10 s Pause, 5–10 min pro Round. Gewicht ≈ 15RM. <b>Nur ein Versagenspunkt</b>, im letzten Minisatz.</p></div>
+        </details>
+        <details class="faq"><summary>Was bedeuten die Tiers (I/II/III)?</summary>
+          <div class="faq-a"><p><b>Tier I</b> = wenig Sätze, schlechter Tag. <b>Tier III</b> = volles Volumen, guter Tag. Nach Tagesform wählen, nicht nach Ehrgeiz.</p></div>
+        </details>
+        <details class="faq"><summary>Wie steigere ich mich (Progression)?</summary>
+          <div class="faq-a"><p>Doppelte Progression: erst Wdh. ans obere Ende, dann Last hoch (2,5–5 kg), Wdh. zurück. <b>2 Einheiten ohne Fortschritt</b> → Übung tauschen.</p></div>
+        </details>
+        <details class="faq"><summary>Was ist Blast und Cruise?</summary>
+          <div class="faq-a"><p>Blast = 6 Wochen progressiv (Tier steigend). Danach Cruise (2 Wochen): Volumen und Frequenz runter, nur Muscle Rounds — zum Erholen, bevor die nächste Phase startet.</p></div>
+        </details>
         <p class="src">Struktur: Fortitude Training, Scott Stevenson. Evidenz: Pelland et al. 2025 · Baz-Valle et al. 2022 · Schoenfeld et al. 2021 · Wolf/Schoenfeld 2025.</p>
       </div>`;
     document.body.appendChild(sheet);

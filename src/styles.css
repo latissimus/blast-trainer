@@ -117,10 +117,9 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .wk button{background:none;border:0;color:var(--ink);width:38px;height:40px;font-size:20px;font-family:var(--mono);font-weight:700}
 .wk button:active{background:var(--surface2)}
 .wk .num{font-family:var(--display);font-style:italic;font-size:16px;min-width:58px;text-align:center;font-weight:900}
-.rotchip{background:var(--surface);border:3px solid var(--ink);color:var(--ink);height:40px;padding:0 13px;
-  border-radius:var(--r);font-size:12.5px;font-weight:900;font-family:var(--display);font-style:italic;
-  text-transform:uppercase;box-shadow:var(--shadow-sm)}
-.rotchip:active{transform:translate(2px,2px);box-shadow:none}
+.rotchip{display:inline-flex;align-items:center;background:var(--surface);border:3px solid var(--ink);color:var(--ink);
+  height:40px;padding:0 13px;border-radius:var(--r);font-size:12.5px;font-weight:900;font-family:var(--display);
+  font-style:italic;text-transform:uppercase;box-shadow:var(--shadow-sm);cursor:default;user-select:none}
 .cruise{margin-left:auto;font-size:11px;color:var(--ink);background:var(--mr);border:2px solid var(--ink);
   padding:5px 9px;border-radius:var(--r);font-weight:800;font-family:var(--display);font-style:italic;text-transform:uppercase}
 
@@ -198,6 +197,14 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .addset{margin-top:10px;background:var(--surface2);border:2px dashed var(--ink);color:var(--ink);
   width:100%;padding:9px;border-radius:var(--r);font-size:12.5px;font-weight:800;font-family:var(--display);font-style:italic;text-transform:uppercase}
 .addset:active{background:var(--pink)}
+.notewrap{margin-top:8px}
+.addnote{background:var(--surface2);border:2px dashed var(--ink);color:var(--muted);
+  width:100%;padding:9px;border-radius:var(--r);font-size:12px;font-weight:800;font-family:var(--display);
+  font-style:italic;text-transform:uppercase}
+.addnote:active{background:var(--pink);color:var(--ink)}
+.exnote{width:100%;background:var(--surface2);border:2px dashed var(--ink);border-radius:var(--r);color:var(--ink);
+  font-family:var(--mono);font-size:13px;padding:9px 10px;resize:vertical;min-height:46px;line-height:1.4}
+.exnote:focus{outline:none;border-style:solid;border-color:var(--pink)}
 
 /* ---------- Volume ---------- */
 .volbar{background:var(--navy);color:#fff;border:3px solid var(--ink);border-radius:var(--r);padding:14px 15px;margin-bottom:14px;box-shadow:var(--shadow)}
@@ -215,7 +222,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .foot{font-size:11px;color:var(--muted);text-align:center;padding:8px 6px 20px;line-height:1.7;font-weight:600}
 
 /* ---------- Sticky save + timer ---------- */
-.savebar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(env(safe-area-inset-bottom) + 24px);
+.savebar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(env(safe-area-inset-bottom) + 16px);
   background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 45%);z-index:30}
 .savebar .inner{max-width:580px;margin:0 auto;display:flex;gap:9px;align-items:stretch}
 .savebar .btn-primary{flex:1;padding:15px}
@@ -227,9 +234,15 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .timer[hidden]{display:none}
 .timer .x{background:none;border:0;color:inherit;font-size:15px;padding:0;opacity:.75}
 
-.pad-bottom{padding-bottom:122px}
+/* "Neue Phase" – Reset-Button (nur letzte Woche) */
+.phase-reset{display:block;width:100%;margin:2px 0 6px;background:var(--mr);border:3px solid var(--ink);
+  border-radius:var(--r);box-shadow:var(--shadow);padding:15px;font-family:var(--display);font-style:italic;
+  font-weight:900;text-transform:uppercase;font-size:14px;color:var(--ink);text-align:center;letter-spacing:.02em}
+.phase-reset:active{transform:translate(4px,4px);box-shadow:none}
 
-.toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%) translateY(18px);opacity:0;
+.pad-bottom{padding-bottom:114px}
+
+.toast{position:fixed;left:50%;bottom:112px;transform:translateX(-50%) translateY(18px);opacity:0;
   background:var(--navy);color:#fff;font-size:12.5px;font-weight:800;padding:11px 18px;border-radius:var(--r);
   border:3px solid var(--ink);box-shadow:var(--shadow);z-index:40;transition:.22s;pointer-events:none;
   white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;font-family:var(--display);font-style:italic;text-transform:uppercase}
@@ -249,6 +262,18 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .sheet p{margin:0 0 6px;font-size:12.5px;color:var(--muted);line-height:1.55}
 .sheet p b{color:var(--ink);font-weight:700}
 .sheet .src{font-size:10px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:2px solid var(--ink);padding-top:10px}
+/* FAQ-Accordion */
+.faq{border:3px solid var(--ink);border-radius:var(--r);background:var(--surface);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow-xs)}
+.faq>summary{list-style:none;cursor:pointer;padding:12px 40px 12px 13px;position:relative;
+  font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:13px;color:var(--navy)}
+.faq>summary::-webkit-details-marker{display:none}
+.faq>summary::after{content:"+";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:900;color:var(--ink)}
+.faq[open]>summary::after{content:"–"}
+.faq[open]>summary{border-bottom:3px solid var(--ink);background:var(--surface2)}
+.faq-a{padding:12px 13px}
+.faq-a p{margin:0 0 6px;font-size:12.5px;color:var(--muted);line-height:1.55}
+.faq-a p:last-child{margin-bottom:0}
+.faq-a p b{color:var(--ink);font-weight:700}
 .sp-x{background:none;border:0;color:var(--ink);font-size:24px;padding:0 4px;font-weight:700}
 
 /* ---------- Profile ---------- */
