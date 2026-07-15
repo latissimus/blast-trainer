@@ -49,10 +49,14 @@ a{color:var(--navy)}
 .topbar .wrap{display:flex;align-items:center;gap:10px}
 /* BLAST-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
    Kein Layout-Effekt (Kontur/Schatten ändern die Header-Höhe nicht). */
-.brand{font-family:var(--display);font-style:italic;font-weight:900;font-size:26px;letter-spacing:-.03em;
+.brand{position:relative;z-index:0;display:inline-block;
+  font-family:var(--display);font-style:italic;font-weight:900;font-size:26px;letter-spacing:-.03em;
   color:var(--pink);-webkit-text-stroke:2.5px var(--navy);paint-order:stroke fill;
   text-shadow:2px 2px 0 var(--navy)}
-.brand .star{color:var(--pink)}
+/* Athleten-Silhouette (Navy) hinter dem Schriftzug */
+.brand::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:1.9em;height:1.9em;z-index:-1;pointer-events:none;
+  background:url(./assets/silhouette-navy.png) center/contain no-repeat}
 .nav{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .nav-btn{background:var(--surface);border:2px solid var(--ink);color:var(--ink);
   padding:7px 11px;border-radius:var(--r);font-size:12px;font-weight:700;

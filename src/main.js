@@ -26,7 +26,7 @@ function renderAuth() {
   app.innerHTML = `
     ${MARQUEE}
     <div class="auth-shell">
-      <div class="brand" style="text-align:center;font-size:34px;margin-bottom:2px">BLAST<span class="star">★</span></div>
+      <div class="brand" style="text-align:center;font-size:34px;margin-bottom:2px">BLAST</div>
       <h1 class="auth-title">${isLogin ? 'Login' : 'Registrieren'}</h1>
       <p class="auth-sub">${isLogin ? 'Melde dich mit E-Mail und Passwort an.' : 'Erstelle deinen Trainings-Account.'}</p>
       <div id="auth-msg"></div>
@@ -105,7 +105,7 @@ function renderChrome() {
     ${MARQUEE}
     <header class="topbar">
       <div class="wrap">
-        <span class="brand">BLAST<span class="star">★</span></span>
+        <span class="brand">BLAST</span>
         <nav class="nav">
           <button class="nav-btn" data-view="log">Log</button>
           ${isAdmin ? '<button class="nav-btn pink" data-view="admin">Admin</button>' : ''}
@@ -162,7 +162,7 @@ async function render() {
   if (!session) { profile = null; renderAuth(); return; }
 
   if (!profile || profile.id !== session.user.id) {
-    app.innerHTML = `${MARQUEE}<div class="wrap" style="padding-top:40px;text-align:center"><div class="brand" style="font-size:30px">BLAST<span class="star">★</span></div><p class="auth-sub">lädt…</p></div>`;
+    app.innerHTML = `${MARQUEE}<div class="wrap" style="padding-top:40px;text-align:center"><div class="brand" style="font-size:30px">BLAST</div><p class="auth-sub">lädt…</p></div>`;
     try {
       profile = await loadProfile(session.user.id);
     } catch (e) {
