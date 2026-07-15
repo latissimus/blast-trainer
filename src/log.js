@@ -109,10 +109,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const wrap = document.createElement('div');
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
-    <div class="log-top">
-      <button class="ibtn" id="lg-info" aria-label="Prinzipien">?</button>
-      ${readOnly ? '' : '<span class="save-state" id="lg-save">gespeichert</span>'}
-    </div>
+    ${readOnly ? '' : '<div class="log-top"><span class="save-state" id="lg-save">gespeichert</span></div>'}
     <div class="blastbar">
       <div class="wk">
         <button id="lg-wkdn" aria-label="Woche runter">–</button>
@@ -120,6 +117,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         <button id="lg-wkup" aria-label="Woche hoch">+</button>
       </div>
       <button class="rotchip" id="lg-rot">A-Woche</button>
+      <button class="ibtn" id="lg-info" aria-label="Prinzipien">?</button>
       <span class="cruise" id="lg-cruise" hidden>Cruise fällig</span>
     </div>
     <div class="tabs" id="lg-tabs"></div>
@@ -181,10 +179,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
     const tier = tierOf(state.day, state.week);
     tierSeg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', Number(b.dataset.t) === tier));
-    const tot = TPL[state.day].blocks.reduce((a, b) => a + targetSets(b, tier), 0);
-    tierHintEl.textContent = tier === 0 ? 'wenig Volumen · schlechter Tag · ' + tot + ' Sätze'
-      : tier === 1 ? 'mittleres Volumen · ' + tot + ' Sätze'
-      : 'volles Volumen · guter Tag · ' + tot + ' Sätze';
+    tierHintEl.textContent = tier === 0 ? 'wenig Volumen · schlechter Tag'
+      : tier === 1 ? 'mittleres Volumen'
+      : 'volles Volumen · guter Tag';
   }
 
   function renderPrev(node, prevSets, todaySets, pWeek) {
@@ -194,8 +191,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const pe = bestE1(prevSets), te = bestE1(todaySets);
     if (te > 0 && pe > 0) {
       const diff = te - pe;
-      if (diff > 0.4) chip = `<span class="delta d-up">▲ +${fmt(diff)}</span>`;
-      else if (diff < -0.4) chip = `<span class="delta d-down">▼ ${fmt(diff)}</span>`;
+      if (diff > 0.4) chip = `<span class="delta d-up">▲ gesteigert</span>`;
+      else if (diff < -0.4) chip = `<span class="delta d-down">▼ gesunken</span>`;
       else chip = `<span class="delta d-hold">= gehalten</span>`;
     }
     node.innerHTML = `<b>Wo ${pWeek}: ${txt}</b>${chip}`;
@@ -273,7 +270,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         <div class="bhead">
           <span class="mus">${blk.mus}</span>
           <span class="badge b-${blk.type}">${blk.type === 'mr' ? 'MR' : blk.type}</span>
-          <span class="target" data-tgt="${blk.id}">Ziel <b>${tgt}</b></span>
+          <span class="target" data-tgt="${blk.id}">Sätze <b>${tgt}</b></span>
         </div>
         <div class="cue">${cues.join('')}</div>`;
       if (!readOnly) el.querySelectorAll('.chip.rest').forEach((b) => (b.onclick = () => startTimer(Number(b.dataset.rest))));
@@ -336,7 +333,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       ((entry && entry.sets) || []).forEach((arr) => (arr || []).forEach((s) => { if (s && (s.w || s.r)) sets++; }));
       const tgt = targetSets(blk, tier);
       el.classList.toggle('met', tgt > 0 && sets >= tgt);
-      el.innerHTML = 'Ziel <b>' + tgt + '</b>';
+      el.innerHTML = 'Sätze <b>' + tgt + '</b>';
     });
   }
   function refreshVolume() { renderVolume(ensureCell(), TPL[state.day], tierOf(state.day, state.week)); }

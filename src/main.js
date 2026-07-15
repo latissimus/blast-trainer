@@ -86,6 +86,18 @@ function translateErr(err) {
   return err?.message || 'Etwas ist schiefgelaufen.';
 }
 
+/* Profilbild oben (statt "Profil"-Button); Klick öffnet die Profil-Seite. */
+function navAvatar() {
+  const email = session.user.email;
+  if (profile.avatar_url) {
+    return `<button class="nav-av" data-view="profile" aria-label="Profil"><img src="${profile.avatar_url}" alt=""></button>`;
+  }
+  const src = (profile.full_name || email || '?').trim();
+  const parts = src.split(/\s+/).filter(Boolean);
+  const ini = (parts.length >= 2 ? parts[0][0] + parts[1][0] : src.slice(0, 2)).toUpperCase();
+  return `<button class="nav-av nav-av-fb" data-view="profile" aria-label="Profil">${ini}</button>`;
+}
+
 /* ------------------------------------------------------------ app chrome */
 function renderChrome() {
   const isAdmin = profile?.role === 'admin';
@@ -96,22 +108,22 @@ function renderChrome() {
         <span class="brand">BLAST<span class="star">★</span></span>
         <nav class="nav">
           <button class="nav-btn" data-view="log">Log</button>
-          <button class="nav-btn" data-view="profile">Profil</button>
           ${isAdmin ? '<button class="nav-btn pink" data-view="admin">Admin</button>' : ''}
           <button class="nav-btn" id="nav-logout">Logout</button>
+          ${navAvatar()}
         </nav>
       </div>
     </header>
     <main id="view"></main>`;
 
-  app.querySelectorAll('.nav-btn[data-view]').forEach((b) => {
+  app.querySelectorAll('nav [data-view]').forEach((b) => {
     b.onclick = () => { location.hash = b.dataset.view; };
   });
   app.querySelector('#nav-logout').onclick = async () => { await signOut(); };
 }
 
 function setNavActive(view) {
-  app.querySelectorAll('.nav-btn[data-view]').forEach((b) => {
+  app.querySelectorAll('nav [data-view]').forEach((b) => {
     b.classList.toggle('active', b.dataset.view === view);
   });
 }
