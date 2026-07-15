@@ -106,8 +106,15 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   // ---- structure helpers -------------------------------------------
   const rotOf = (week) => state.rot[week] || (week % 2 === 1 ? 'A' : 'B');
-  const daysOfWeek = (week) => { const r = rotOf(week); return ['OK-' + r, 'UK-' + r, 'MRs']; };
-  const tierOf = (day, week) => { const t = state.tier[day + '|' + week]; return (t === 0 || t === 1 || t === 2) ? t : 2; };
+  const isCruise = (week) => week >= 7;   // Wochen 7-8 = Intensive Cruise: nur Muscle Rounds, Tier I
+  const daysOfWeek = (week) => {
+    if (isCruise(week)) return ['MRs'];
+    const r = rotOf(week); return ['OK-' + r, 'UK-' + r, 'MRs'];
+  };
+  const tierOf = (day, week) => {
+    if (isCruise(week)) return 0;   // Cruise fest auf Tier I
+    const t = state.tier[day + '|' + week]; return (t === 0 || t === 1 || t === 2) ? t : 2;
+  };
   const setTier = (day, week, t) => { state.tier[day + '|' + week] = t; };
   function targetSets(blk, tier) {
     const [mn, mx] = blk.sets;
@@ -206,9 +213,15 @@ export async function mountLog(container, { userId, readOnly = false }) {
       tabsEl.appendChild(b);
     });
 
+    const cruise = isCruise(state.week);
+    rotEl.style.display = cruise ? 'none' : '';   // A/B-Feld im Cruise ausblenden
     const tier = tierOf(state.day, state.week);
-    tierSeg.querySelectorAll('button').forEach((b) => b.classList.toggle('on', Number(b.dataset.t) === tier));
-    tierHintEl.textContent = tier === 0 ? 'wenig Volumen · schlechter Tag'
+    tierSeg.querySelectorAll('button').forEach((b) => {
+      b.classList.toggle('on', Number(b.dataset.t) === tier);
+      b.disabled = cruise;                        // Tier im Cruise gesperrt (I)
+    });
+    tierHintEl.textContent = cruise ? 'Cruise · nur Muscle Rounds · Tier I fest'
+      : tier === 0 ? 'wenig Volumen · schlechter Tag'
       : tier === 1 ? 'mittleres Volumen'
       : 'volles Volumen · guter Tag';
   }
@@ -271,6 +284,66 @@ export async function mountLog(container, { userId, readOnly = false }) {
     return row;
   }
 
+  // ---- Muscle Rounds: Gewichts-Gedächtnis + Cluster-Zeile -----------
+  // Letztes Gewicht für eine MR-Übung (nach Name), aus einer anderen Woche.
+  function mrLastWeight(name) {
+    const k = (name || '').trim().toLowerCase(); if (!k) return null;
+    const mrs = state.data['MRs'] || {};
+    const weeks = Object.keys(mrs).map(Number).filter((w) => w !== state.week).sort((a, b) => b - a);
+    for (const wk of weeks) {
+      const cell = mrs[wk] || {};
+      for (const e of Object.values(cell)) {
+        if (e && (e.name || '').trim().toLowerCase() === k) {
+          let mw = 0, raw = null;
+          (e.sets || []).forEach((arr) => (arr || []).forEach((s) => {
+            const w = parseFloat(String(s && s.w).replace(',', '.'));
+            if (w > mw) { mw = w; raw = s.w; }
+          }));
+          if (mw) return { w: raw, week: wk };
+        }
+      }
+    }
+    return null;
+  }
+  function renderMrMem(node, name) {
+    const m = mrLastWeight(name);
+    if (m) node.innerHTML = `<b>zuletzt: ${m.w} kg</b><span class="delta d-hold">Wo ${m.week}</span>`;
+    else node.innerHTML = (name && name.trim()) ? '<b>zuletzt: — (neue Übung)</b>' : '<b>zuletzt: —</b>';
+  }
+  // Eine Muscle Round = 6×4 Cluster. Kompakt: Gewicht + Wdh im letzten (6.) Satz.
+  function mrRow(entry, xi, si, blk, memNode) {
+    const s = entry.sets[xi][si];
+    const row = document.createElement('div'); row.className = 'setrow mrrow';
+    const idx = document.createElement('span'); idx.className = 'sidx'; idx.textContent = 'MR' + (si + 1); row.appendChild(idx);
+
+    const wF = document.createElement('div'); wF.className = 'fld';
+    const wIn = document.createElement('input'); wIn.type = 'text'; wIn.inputMode = 'decimal'; wIn.value = s.w || ''; wIn.placeholder = '–';
+    wIn.disabled = readOnly; wF.appendChild(wIn);
+    const wU = document.createElement('span'); wU.className = 'u'; wU.textContent = 'kg'; wF.appendChild(wU);
+    row.appendChild(wF);
+
+    const clu = document.createElement('span'); clu.className = 'mrclu'; clu.textContent = '6×4'; row.appendChild(clu);
+
+    const rF = document.createElement('div'); rF.className = 'fld mrlast';
+    const rIn = document.createElement('input'); rIn.type = 'text'; rIn.inputMode = 'numeric'; rIn.value = s.r || ''; rIn.placeholder = '4';
+    rIn.disabled = readOnly; rF.appendChild(rIn);
+    const rU = document.createElement('span'); rU.className = 'u'; rU.textContent = '6.Satz'; rF.appendChild(rU);
+    row.appendChild(rF);
+
+    if (!readOnly) {
+      const del = document.createElement('button'); del.className = 'delrow'; del.innerHTML = '×';
+      del.onclick = () => {
+        entry.sets[xi].splice(si, 1);
+        if (entry.sets[xi].length === 0) entry.sets[xi].push({ w: '', r: '', rir: '' });
+        queuePersist(); renderDay();
+      };
+      row.appendChild(del);
+      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMrMem(memNode, entry.name); refreshVolume(); queuePersist(); };
+      wIn.oninput = upd; rIn.oninput = upd;
+    }
+    return row;
+  }
+
   function renderDay() {
     const tpl = TPL[state.day];
     const tier = tierOf(state.day, state.week);
@@ -286,7 +359,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
         cell[blk.id] = { sets: blk.ex.map(() => Array.from({ length: per }, () => ({ w: '', r: '', rir: '' }))) };
       }
       const entry = cell[blk.id];
-      const names = dayNames(state.day, blk);
+      const isMR = blk.type === 'mr';
+      if (isMR) entry.name = entry.name || '';   // MR-Übung frei pro Woche (nicht geteilt)
+      const names = isMR ? null : dayNames(state.day, blk);
 
       const el = document.createElement('div'); el.className = 'block' + (blk.opt ? ' opt' : '');
       const cues = [];
@@ -310,21 +385,32 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const hd = document.createElement('div'); hd.className = 'exhead';
         if (exDef.r) { const rl = document.createElement('span'); rl.className = 'role' + (exDef.r === 'Comp' ? ' comp' : ''); rl.textContent = exDef.r; hd.appendChild(rl); }
         const nameIn = document.createElement('input');
-        nameIn.className = 'exname'; nameIn.value = names[xi] || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
+        nameIn.className = 'exname'; nameIn.value = (isMR ? entry.name : names[xi]) || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
         nameIn.disabled = readOnly;
-        if (!readOnly) nameIn.oninput = () => { names[xi] = nameIn.value; queuePersist(); };
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
-        const prevSets = (prev && prev.data[blk.id] && prev.data[blk.id].sets && prev.data[blk.id].sets[xi]) ? prev.data[blk.id].sets[xi] : null;
         entry.sets[xi] = entry.sets[xi] || [{ w: '', r: '', rir: '' }];
-        renderPrev(prevLine, prevSets, entry.sets[xi], prev ? prev.week : null);
-        exDiv.appendChild(prevLine);
 
-        entry.sets[xi].forEach((_, si) => exDiv.appendChild(setRow(entry, xi, si, blk, prevLine, prevSets, prev)));
+        if (!readOnly) nameIn.oninput = () => {
+          if (isMR) { entry.name = nameIn.value; renderMrMem(prevLine, entry.name); }
+          else { names[xi] = nameIn.value; }
+          queuePersist();
+        };
+
+        if (isMR) {
+          renderMrMem(prevLine, entry.name);
+          exDiv.appendChild(prevLine);
+          entry.sets[xi].forEach((_, si) => exDiv.appendChild(mrRow(entry, xi, si, blk, prevLine)));
+        } else {
+          const prevSets = (prev && prev.data[blk.id] && prev.data[blk.id].sets && prev.data[blk.id].sets[xi]) ? prev.data[blk.id].sets[xi] : null;
+          renderPrev(prevLine, prevSets, entry.sets[xi], prev ? prev.week : null);
+          exDiv.appendChild(prevLine);
+          entry.sets[xi].forEach((_, si) => exDiv.appendChild(setRow(entry, xi, si, blk, prevLine, prevSets, prev)));
+        }
 
         if (!readOnly) {
-          const add = document.createElement('button'); add.className = 'addset'; add.textContent = '+ Satz';
+          const add = document.createElement('button'); add.className = 'addset'; add.textContent = isMR ? '+ Muscle Round' : '+ Satz';
           add.onclick = () => { entry.sets[xi].push({ w: '', r: '', rir: '' }); queuePersist(); renderDay(); };
           exDiv.appendChild(add);
         }

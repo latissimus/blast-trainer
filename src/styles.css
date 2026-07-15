@@ -142,6 +142,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .seg button{background:none;border:0;color:var(--muted);padding:6px 14px;font-size:13px;font-weight:900;font-family:var(--display);font-style:italic;border-right:2px solid var(--ink)}
 .seg button:last-child{border-right:0}
 .seg button.on{background:var(--navy);color:#fff}
+.seg button:disabled{opacity:.4;cursor:default}
 .tierhint{font-size:10.5px;color:var(--muted);line-height:1.3;font-weight:600}
 
 .daymeta{font-size:12px;color:var(--muted);padding:0 2px 14px;font-weight:600}
@@ -192,6 +193,11 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .times{color:var(--ink);font-family:var(--display);font-style:italic;font-size:15px;flex:0 0 auto;font-weight:900}
 .fld.rir{flex:0 0 56px}
 .fld.rir input{padding:11px 2px;font-size:15px}
+/* Muscle-Round-Cluster-Zeile: Gewicht · 6×4 · Wdh im letzten Satz */
+.mrrow .mrclu{font-family:var(--display);font-style:italic;font-weight:900;font-size:14px;color:var(--navy);flex:0 0 auto;padding:0 1px}
+.fld.mrlast{flex:0 0 96px}
+.fld.mrlast input{padding-right:42px}
+.fld.mrlast .u{right:6px;font-size:8.5px}
 .delrow{background:none;border:0;color:var(--ink);font-size:20px;width:26px;padding:0;flex:0 0 auto;font-weight:700}
 .delrow:active{color:var(--down)}
 .addset{margin-top:10px;background:var(--surface2);border:2px dashed var(--ink);color:var(--ink);
