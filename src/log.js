@@ -122,6 +122,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (tier === 2) return mx;
     return Math.round((mn + mx) / 2);
   }
+  // ZigZag-Verteilung: die N Gesamtsätze des Blocks auf die Übungen aufteilen.
+  // 1. Übung (Comp) aufgerundet N/2, 2. Übung (Iso) abgerundet N/2. Eine Übung = alle N.
+  function setsForExercise(blk, tier, xi) {
+    const N = targetSets(blk, tier);
+    const E = blk.ex.length || 1;
+    return Math.floor(N / E) + (xi < (N % E) ? 1 : 0);
+  }
   function ensureCell() {
     state.data[state.day] = state.data[state.day] || {};
     state.data[state.day][state.week] = state.data[state.day][state.week] || {};
@@ -195,9 +202,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function renderHeader() {
     wkNumEl.textContent = 'Wo ' + state.week;
     rotEl.textContent = rotOf(state.week) + '-Woche';
-    // Blast läuft bis Woche 6, danach Cruise-Phase
+    // Cruise-Chip nur in den Cruise-Wochen (7-8)
     if (state.week >= 7) { cruiseEl.hidden = false; cruiseEl.textContent = 'Cruise'; }
-    else if (state.week === 6) { cruiseEl.hidden = false; cruiseEl.textContent = 'Letzte Blast-Woche'; }
     else { cruiseEl.hidden = true; }
 
     tabsEl.innerHTML = '';
@@ -220,7 +226,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       b.classList.toggle('on', Number(b.dataset.t) === tier);
       b.disabled = cruise;                        // Tier im Cruise gesperrt (I)
     });
-    tierHintEl.textContent = cruise ? 'Cruise · nur Muscle Rounds · Tier I fest'
+    tierHintEl.textContent = cruise ? 'nur Muscle Rounds · Tier I fest'
       : tier === 0 ? 'wenig Volumen · schlechter Tag'
       : tier === 1 ? 'mittleres Volumen'
       : 'volles Volumen · guter Tag';
@@ -240,7 +246,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     node.innerHTML = `<b>Wo ${pWeek}: ${txt}</b>${chip}`;
   }
 
-  function setRow(entry, xi, si, blk, prevLine, prevSets, prev) {
+  function setRow(entry, xi, si, blk, prevLine, prevSets, prev, count) {
     const s = entry.sets[xi][si];
     const row = document.createElement('div'); row.className = 'setrow';
     const idx = document.createElement('span'); idx.className = 'sidx'; idx.textContent = si + 1; row.appendChild(idx);
@@ -266,17 +272,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     }
 
     if (!readOnly) {
-      const del = document.createElement('button'); del.className = 'delrow'; del.innerHTML = '×';
-      del.onclick = () => {
-        entry.sets[xi].splice(si, 1);
-        if (entry.sets[xi].length === 0) entry.sets[xi].push({ w: '', r: '', rir: '' });
-        queuePersist(); renderDay();
-      };
-      row.appendChild(del);
-
       const upd = () => {
         s.w = wIn.value; s.r = rIn.value;
-        renderPrev(prevLine, prevSets, entry.sets[xi], prev ? prev.week : null);
+        renderPrev(prevLine, prevSets, entry.sets[xi].slice(0, count), prev ? prev.week : null);
         refreshVolume(); queuePersist();
       };
       wIn.oninput = upd; rIn.oninput = upd;
@@ -294,12 +292,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const cell = mrs[wk] || {};
       for (const e of Object.values(cell)) {
         if (e && (e.name || '').trim().toLowerCase() === k) {
-          let mw = 0, raw = null;
+          let mw = 0, raw = null, rr = null;
           (e.sets || []).forEach((arr) => (arr || []).forEach((s) => {
             const w = parseFloat(String(s && s.w).replace(',', '.'));
-            if (w > mw) { mw = w; raw = s.w; }
+            if (w > mw) { mw = w; raw = s.w; rr = s && s.r; }
           }));
-          if (mw) return { w: raw, week: wk };
+          if (mw) return { w: raw, r: rr, week: wk };
         }
       }
     }
@@ -307,14 +305,16 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
   function renderMrMem(node, name) {
     const m = mrLastWeight(name);
-    if (m) node.innerHTML = `<b>zuletzt: ${m.w} kg</b><span class="delta d-hold">Wo ${m.week}</span>`;
-    else node.innerHTML = (name && name.trim()) ? '<b>zuletzt: — (neue Übung)</b>' : '<b>zuletzt: —</b>';
+    if (m) {
+      const reps = (m.r != null && m.r !== '') ? ` · ${m.r} Wdh. im letzten MR` : '';
+      node.innerHTML = `<b>zuletzt: ${m.w} kg${reps}</b><span class="delta d-hold">Wo ${m.week}</span>`;
+    } else node.innerHTML = (name && name.trim()) ? '<b>zuletzt: — (neue Übung)</b>' : '<b>zuletzt: —</b>';
   }
   // Eine Muscle Round = 6×4 Cluster. Kompakt: Gewicht + Wdh im letzten (6.) Satz.
   function mrRow(entry, xi, si, blk, memNode) {
     const s = entry.sets[xi][si];
     const row = document.createElement('div'); row.className = 'setrow mrrow';
-    const idx = document.createElement('span'); idx.className = 'sidx'; idx.textContent = 'MR' + (si + 1); row.appendChild(idx);
+    const idx = document.createElement('span'); idx.className = 'sidx'; idx.textContent = si + 1; row.appendChild(idx);
 
     const wF = document.createElement('div'); wF.className = 'fld';
     const wIn = document.createElement('input'); wIn.type = 'text'; wIn.inputMode = 'decimal'; wIn.value = s.w || ''; wIn.placeholder = '–';
@@ -331,13 +331,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
     row.appendChild(rF);
 
     if (!readOnly) {
-      const del = document.createElement('button'); del.className = 'delrow'; del.innerHTML = '×';
-      del.onclick = () => {
-        entry.sets[xi].splice(si, 1);
-        if (entry.sets[xi].length === 0) entry.sets[xi].push({ w: '', r: '', rir: '' });
-        queuePersist(); renderDay();
-      };
-      row.appendChild(del);
       const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMrMem(memNode, entry.name); refreshVolume(); queuePersist(); };
       wIn.oninput = upd; rIn.oninput = upd;
     }
@@ -354,9 +347,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
     tpl.blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
+      if (tgt === 0) return;   // Block bei diesem Tier nicht dabei (z.B. optionale MRs bei Tier I)
       if (!cell[blk.id]) {
-        const per = Math.max(1, Math.ceil(Math.max(tgt, 1) / blk.ex.length));
-        cell[blk.id] = { sets: blk.ex.map(() => Array.from({ length: per }, () => ({ w: '', r: '', rir: '' }))) };
+        cell[blk.id] = { sets: blk.ex.map(() => []) };
       }
       const entry = cell[blk.id];
       const isMR = blk.type === 'mr';
@@ -390,7 +383,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
-        entry.sets[xi] = entry.sets[xi] || [{ w: '', r: '', rir: '' }];
+        // Anzahl Sätze für diese Übung = Tier/ZigZag-Verteilung (kein manuelles +/-)
+        const count = setsForExercise(blk, tier, xi);
+        entry.sets[xi] = entry.sets[xi] || [];
+        while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
 
         if (!readOnly) nameIn.oninput = () => {
           if (isMR) { entry.name = nameIn.value; renderMrMem(prevLine, entry.name); }
@@ -401,18 +397,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
         if (isMR) {
           renderMrMem(prevLine, entry.name);
           exDiv.appendChild(prevLine);
-          entry.sets[xi].forEach((_, si) => exDiv.appendChild(mrRow(entry, xi, si, blk, prevLine)));
+          for (let si = 0; si < count; si++) exDiv.appendChild(mrRow(entry, xi, si, blk, prevLine));
         } else {
           const prevSets = (prev && prev.data[blk.id] && prev.data[blk.id].sets && prev.data[blk.id].sets[xi]) ? prev.data[blk.id].sets[xi] : null;
-          renderPrev(prevLine, prevSets, entry.sets[xi], prev ? prev.week : null);
+          renderPrev(prevLine, prevSets, entry.sets[xi].slice(0, count), prev ? prev.week : null);
           exDiv.appendChild(prevLine);
-          entry.sets[xi].forEach((_, si) => exDiv.appendChild(setRow(entry, xi, si, blk, prevLine, prevSets, prev)));
-        }
-
-        if (!readOnly) {
-          const add = document.createElement('button'); add.className = 'addset'; add.textContent = isMR ? '+ Muscle Round' : '+ Satz';
-          add.onclick = () => { entry.sets[xi].push({ w: '', r: '', rir: '' }); queuePersist(); renderDay(); };
-          exDiv.appendChild(add);
+          for (let si = 0; si < count; si++) exDiv.appendChild(setRow(entry, xi, si, blk, prevLine, prevSets, prev, count));
         }
 
         // Notizen-Feld (gestrichelt) – pro Tag/Übung geteilt
@@ -465,10 +455,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function renderVolume(cell, tpl, tier) {
     let total = 0, tgtTotal = 0;
     const rows = tpl.blocks.map((blk) => {
+      const tgt = targetSets(blk, tier);
+      if (tgt === 0) return null;
       const entry = cell[blk.id]; if (!entry) return null;
       let sets = 0;
-      (entry.sets || []).forEach((arr) => (arr || []).forEach((s) => { if (s && (s.w || s.r)) sets++; }));
-      const tgt = targetSets(blk, tier);
+      (entry.sets || []).forEach((arr, xi) => {
+        const cnt = setsForExercise(blk, tier, xi);
+        (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) sets++; });
+      });
       total += sets; tgtTotal += tgt;
       return { mus: blk.mus, sets, tgt };
     }).filter(Boolean);
@@ -486,8 +480,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
     contentEl.querySelectorAll('.target[data-tgt]').forEach((el) => {
       const blk = tpl.blocks.find((b) => b.id === el.dataset.tgt); if (!blk) return;
       const entry = cell[blk.id]; let sets = 0;
-      ((entry && entry.sets) || []).forEach((arr) => (arr || []).forEach((s) => { if (s && (s.w || s.r)) sets++; }));
       const tgt = targetSets(blk, tier);
+      ((entry && entry.sets) || []).forEach((arr, xi) => {
+        const cnt = setsForExercise(blk, tier, xi);
+        (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) sets++; });
+      });
       el.classList.toggle('met', tgt > 0 && sets >= tgt);
       el.innerHTML = 'Sätze <b>' + tgt + '</b>';
     });
