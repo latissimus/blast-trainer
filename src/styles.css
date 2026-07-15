@@ -57,6 +57,9 @@ a{color:var(--navy)}
 .brand::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   width:1.9em;height:1.9em;z-index:-1;pointer-events:none;
   background:url(./assets/silhouette-navy.png) center/contain no-repeat}
+/* Sterne links & rechts, ca. halbe Buchstabengröße */
+.brand .star{font-size:.5em;-webkit-text-stroke-width:1.5px;margin:0 .16em;vertical-align:.2em;
+  text-shadow:1px 1px 0 var(--navy)}
 .nav{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .nav-btn{background:var(--surface);border:2px solid var(--ink);color:var(--ink);
   padding:7px 11px;border-radius:var(--r);font-size:12px;font-weight:700;
@@ -90,7 +93,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 
 /* ---------- Auth ---------- */
 .auth-shell{max-width:420px;margin:40px auto;padding:0 14px}
-.auth-title{font-size:40px;margin:0 0 4px;text-align:center}
+.auth-title{font-size:26px;margin:0 0 4px;text-align:center}
 .auth-sub{text-align:center;color:var(--muted);font-size:13px;margin:0 0 22px}
 .auth-switch{text-align:center;font-size:13px;margin-top:16px}
 .auth-switch button{background:none;border:0;color:var(--navy);font-weight:800;text-decoration:underline;font-family:var(--mono)}
