@@ -117,10 +117,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
   };
   const setTier = (day, week, t) => { state.tier[day + '|' + week] = t; };
   function targetSets(blk, tier) {
-    const [mn, mx] = blk.sets;
-    if (tier === 0) return mn;
-    if (tier === 2) return mx;
-    return Math.round((mn + mx) / 2);
+    return blk.sets[tier];   // sets = [TierI, TierII, TierIII], feste Werte nach Sheet
+  }
+  // Effektiver Set-Typ je Tier (MR-Tag: Tris/Bis & Abs sind bei niedrigen Tiers Pump)
+  function effTypeOf(blk, tier) {
+    return (blk.typeByTier && blk.typeByTier[tier]) || blk.type;
   }
   // ZigZag-Verteilung: die N Gesamtsätze des Blocks auf die Übungen aufteilen.
   // 1. Übung (Comp) aufgerundet N/2, 2. Übung (Iso) abgerundet N/2. Eine Übung = alle N.
@@ -337,6 +338,32 @@ export async function mountLog(container, { userId, readOnly = false }) {
     return row;
   }
 
+  // Pump-Satz innerhalb eines MR-Blocks (Sheet-Ausnahme bei niedrigen Tiers): kg × Wdh
+  function pumpMrRow(entry, xi, si, memNode) {
+    const s = entry.sets[xi][si];
+    const row = document.createElement('div'); row.className = 'setrow';
+    const idx = document.createElement('span'); idx.className = 'sidx'; idx.textContent = si + 1; row.appendChild(idx);
+
+    const wF = document.createElement('div'); wF.className = 'fld';
+    const wIn = document.createElement('input'); wIn.type = 'text'; wIn.inputMode = 'decimal'; wIn.value = s.w || ''; wIn.placeholder = '–';
+    wIn.disabled = readOnly; wF.appendChild(wIn);
+    const wU = document.createElement('span'); wU.className = 'u'; wU.textContent = 'kg'; wF.appendChild(wU);
+    row.appendChild(wF);
+
+    const times = document.createElement('span'); times.className = 'times'; times.textContent = '×'; row.appendChild(times);
+
+    const rF = document.createElement('div'); rF.className = 'fld';
+    const rIn = document.createElement('input'); rIn.type = 'text'; rIn.inputMode = 'numeric'; rIn.value = s.r || ''; rIn.placeholder = 'Wdh';
+    rIn.disabled = readOnly; rF.appendChild(rIn);
+    row.appendChild(rF);
+
+    if (!readOnly) {
+      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMrMem(memNode, entry.name); refreshVolume(); queuePersist(); };
+      wIn.oninput = upd; rIn.oninput = upd;
+    }
+    return row;
+  }
+
   function renderDay() {
     const tpl = TPL[state.day];
     const tier = tierOf(state.day, state.week);
@@ -352,21 +379,24 @@ export async function mountLog(container, { userId, readOnly = false }) {
         cell[blk.id] = { sets: blk.ex.map(() => []) };
       }
       const entry = cell[blk.id];
-      const isMR = blk.type === 'mr';
-      if (isMR) entry.name = entry.name || '';   // MR-Übung frei pro Woche (nicht geteilt)
-      const names = isMR ? null : dayNames(state.day, blk);
+      const baseMR = blk.type === 'mr';
+      const effType = effTypeOf(blk, tier);              // Typ je Tier (Pump-Ausnahme bei MR)
+      if (baseMR) entry.name = entry.name || '';         // MR-Übung frei pro Woche (nicht geteilt)
+      const names = baseMR ? null : dayNames(state.day, blk);
+      const effRest = effType === 'mr' ? blk.rest : (effType === 'pump' ? 60 : blk.rest);
+      const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
 
-      const el = document.createElement('div'); el.className = 'block' + (blk.opt ? ' opt' : '');
+      const el = document.createElement('div'); el.className = 'block';
       const cues = [];
-      if (blk.type === 'load') cues.push('<span class="chip">' + blk.reps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');
-      if (blk.type === 'pump') cues.push('<span class="chip">' + blk.reps + ' · leicht</span>', '<span class="chip">bis metab. Versagen + Teilwdh.</span>');
-      if (blk.type === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
-      cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + blk.rest + '">⏱ ' + (blk.rest >= 60 ? (blk.rest / 60) + ' min' : blk.rest + ' s') + '</button>');
+      if (effType === 'load') cues.push('<span class="chip">' + effReps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');
+      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · leicht</span>', '<span class="chip">bis metab. Versagen + Teilwdh.</span>');
+      if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
+      cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + (effRest >= 60 ? (effRest / 60) + ' min' : effRest + ' s') + '</button>');
 
       el.innerHTML = `
         <div class="bhead">
           <span class="mus">${blk.mus}</span>
-          <span class="badge b-${blk.type}">${blk.type === 'mr' ? 'MR' : blk.type}</span>
+          <span class="badge b-${effType}">${effType === 'mr' ? 'MR' : effType}</span>
           <span class="target" data-tgt="${blk.id}">Sätze <b>${tgt}</b></span>
         </div>
         <div class="cue">${cues.join('')}</div>`;
@@ -378,7 +408,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const hd = document.createElement('div'); hd.className = 'exhead';
         if (exDef.r) { const rl = document.createElement('span'); rl.className = 'role' + (exDef.r === 'Comp' ? ' comp' : ''); rl.textContent = exDef.r; hd.appendChild(rl); }
         const nameIn = document.createElement('input');
-        nameIn.className = 'exname'; nameIn.value = (isMR ? entry.name : names[xi]) || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
+        nameIn.className = 'exname'; nameIn.value = (baseMR ? entry.name : names[xi]) || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
         nameIn.disabled = readOnly;
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
@@ -389,15 +419,15 @@ export async function mountLog(container, { userId, readOnly = false }) {
         while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
 
         if (!readOnly) nameIn.oninput = () => {
-          if (isMR) { entry.name = nameIn.value; renderMrMem(prevLine, entry.name); }
+          if (baseMR) { entry.name = nameIn.value; renderMrMem(prevLine, entry.name); }
           else { names[xi] = nameIn.value; }
           queuePersist();
         };
 
-        if (isMR) {
+        if (baseMR) {
           renderMrMem(prevLine, entry.name);
           exDiv.appendChild(prevLine);
-          for (let si = 0; si < count; si++) exDiv.appendChild(mrRow(entry, xi, si, blk, prevLine));
+          for (let si = 0; si < count; si++) exDiv.appendChild(effType === 'mr' ? mrRow(entry, xi, si, blk, prevLine) : pumpMrRow(entry, xi, si, prevLine));
         } else {
           const prevSets = (prev && prev.data[blk.id] && prev.data[blk.id].sets && prev.data[blk.id].sets[xi]) ? prev.data[blk.id].sets[xi] : null;
           renderPrev(prevLine, prevSets, entry.sets[xi].slice(0, count), prev ? prev.week : null);
