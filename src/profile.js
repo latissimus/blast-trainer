@@ -66,7 +66,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   meta.innerHTML = `
     <div style="font-weight:800;font-size:16px">${profile.full_name || '—'}</div>
     <div style="font-size:12px;color:var(--muted)">${email}</div>
-    <span class="role-tag ${profile.role === 'admin' ? 'admin' : ''}">${profile.role === 'admin' ? 'Admin' : 'Kunde'}</span>`;
+    <span class="role-tag ${profile.role === 'admin' ? 'admin' : ''}">${profile.role === 'admin' ? 'Admin' : 'Coachee'}</span>`;
   top.appendChild(avSlot); top.appendChild(meta);
   card.appendChild(top);
 

@@ -47,8 +47,12 @@ a{color:var(--navy)}
 .topbar{position:sticky;top:0;z-index:20;background:var(--bg);
   border-bottom:3px solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
 .topbar .wrap{display:flex;align-items:center;gap:10px}
-.brand{font-family:var(--display);font-style:italic;font-weight:900;font-size:26px;letter-spacing:-.02em}
-.brand .star{color:var(--pink);-webkit-text-stroke:1px var(--ink)}
+/* BLAST-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
+   Kein Layout-Effekt (Kontur/Schatten ändern die Header-Höhe nicht). */
+.brand{font-family:var(--display);font-style:italic;font-weight:900;font-size:26px;letter-spacing:-.03em;
+  color:var(--pink);-webkit-text-stroke:2.5px var(--navy);paint-order:stroke fill;
+  text-shadow:2px 2px 0 var(--navy)}
+.brand .star{color:var(--pink)}
 .nav{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .nav-btn{background:var(--surface);border:2px solid var(--ink);color:var(--ink);
   padding:7px 11px;border-radius:var(--r);font-size:12px;font-weight:700;
@@ -144,7 +148,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .badge{font-size:10px;font-weight:900;letter-spacing:.06em;padding:4px 8px;border-radius:4px;text-transform:uppercase;border:2px solid var(--ink);font-family:var(--display);font-style:italic}
 .b-load{background:var(--load);color:#fff}
 .b-pump{background:var(--pump);color:var(--ink)}
-.b-mr{background:var(--mr);color:var(--ink)}
+.b-mr{background:#1B6B3A;color:#fff}
 .target{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;white-space:nowrap;font-weight:700}
 .target b{color:var(--ink);font-weight:800}
 .target.met b{color:var(--up)}
@@ -231,7 +235,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .sheet-in{background:var(--surface);border:3px solid var(--ink);border-bottom:0;border-radius:16px 16px 0 0;
   width:100%;max-width:580px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:16px 15px calc(env(safe-area-inset-bottom) + 22px)}
-.sheet-hd{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);padding-bottom:10px}
+.sheet-hd{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px}
 .sheet-hd h2{margin:0;font-size:20px;font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase}
 .sheet h4{margin:16px 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);font-weight:900;font-family:var(--display);font-style:italic}
 .sheet h4.p{color:var(--pink-press)} .sheet h4.m{color:#8A6D00} .sheet h4.g{color:var(--navy)}

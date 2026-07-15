@@ -41,7 +41,7 @@ export async function mountAdmin(container, { session }) {
         ${av}
         <div>
           <div class="nm">${p.full_name || '(kein Name)'}${isSelf ? ' · du' : ''}
-            <span class="role-tag ${p.role === 'admin' ? 'admin' : ''}" style="margin-left:6px">${p.role === 'admin' ? 'Admin' : 'Kunde'}</span>
+            <span class="role-tag ${p.role === 'admin' ? 'admin' : ''}" style="margin-left:6px">${p.role === 'admin' ? 'Admin' : 'Coachee'}</span>
           </div>
           <div class="em">${p.email || p.id}</div>
         </div>

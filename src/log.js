@@ -20,10 +20,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const state = {
     week: p.week || 1,
     day: TPL[p.day] ? p.day : 'OK-A',
-    data: migrate(p.data || {}),
+    data: p.data || {},
     tier: p.tier || {},
     rot: p.rot || {},
+    ex: p.ex || {},   // gemeinsame Übungsnamen pro Tag (über alle Wochen der Rotation)
   };
+  migrateData();
 
   let saveTimer = null;
   let saveStateEl = null;
@@ -36,7 +38,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (saveStateEl) { saveStateEl.textContent = t; saveStateEl.className = 'save-state' + (ok ? ' ok' : ''); }
   }
   function payloadOut() {
-    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, v: 2 };
+    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, v: 2 };
   }
   async function persist() {
     if (readOnly) return true;
@@ -56,22 +58,41 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saveTimer = setTimeout(persist, 700);
   }
 
-  // ---- migration v1 (index) -> v2 (id) -----------------------------
-  function migrate(d) {
+  // ---- migration: v1 index->id + Übungsnamen in gemeinsamen Tag-Speicher heben ----
+  function migrateData() {
+    const d = state.data;
     Object.keys(d).forEach((day) => {
-      const map = LEGACY[day]; if (!map) return;
-      Object.keys(d[day] || {}).forEach((wk) => {
+      const map = LEGACY[day];
+      Object.keys(d[day] || {}).sort((a, b) => Number(a) - Number(b)).forEach((wk) => {
         const cell = d[day][wk]; if (!cell) return;
-        Object.keys(cell).forEach((k) => {
-          if (/^\d+$/.test(k)) {
-            const id = map[Number(k)];
-            if (id && !cell[id]) cell[id] = cell[k];
-            delete cell[k];
+        if (map) {
+          Object.keys(cell).forEach((k) => {
+            if (/^\d+$/.test(k)) {
+              const id = map[Number(k)];
+              if (id && !cell[id]) cell[id] = cell[k];
+              delete cell[k];
+            }
+          });
+        }
+        // Übungsnamen aus der Zelle ziehen -> state.ex[day][blockId] (spätere Wochen mit Namen gewinnen)
+        Object.keys(cell).forEach((bid) => {
+          const entry = cell[bid];
+          if (entry && entry.ex) {
+            const hasName = entry.ex.some((n) => n && n.trim());
+            state.ex[day] = state.ex[day] || {};
+            if (!state.ex[day][bid] || hasName) state.ex[day][bid] = entry.ex.slice();
+            delete entry.ex;
           }
         });
       });
     });
-    return d;
+  }
+
+  // Gemeinsame Übungsnamen für einen Tag/Block (über alle Wochen geteilt)
+  function dayNames(day, blk) {
+    state.ex[day] = state.ex[day] || {};
+    if (!state.ex[day][blk.id]) state.ex[day][blk.id] = blk.ex.map((e) => e.n);
+    return state.ex[day][blk.id];
   }
 
   // ---- structure helpers -------------------------------------------
@@ -162,7 +183,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function renderHeader() {
     wkNumEl.textContent = 'Wo ' + state.week;
     rotEl.textContent = rotOf(state.week) + '-Woche';
-    cruiseEl.hidden = state.week < 6;
+    // Blast läuft bis Woche 6, danach Cruise-Phase
+    if (state.week >= 7) { cruiseEl.hidden = false; cruiseEl.textContent = 'Cruise'; }
+    else if (state.week === 6) { cruiseEl.hidden = false; cruiseEl.textContent = 'Letzte Blast-Woche'; }
+    else { cruiseEl.hidden = true; }
 
     tabsEl.innerHTML = '';
     const days = daysOfWeek(state.week);
@@ -254,16 +278,16 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const tgt = targetSets(blk, tier);
       if (!cell[blk.id]) {
         const per = Math.max(1, Math.ceil(Math.max(tgt, 1) / blk.ex.length));
-        cell[blk.id] = { ex: blk.ex.map((e) => e.n), sets: blk.ex.map(() => Array.from({ length: per }, () => ({ w: '', r: '', rir: '' }))) };
+        cell[blk.id] = { sets: blk.ex.map(() => Array.from({ length: per }, () => ({ w: '', r: '', rir: '' }))) };
       }
       const entry = cell[blk.id];
+      const names = dayNames(state.day, blk);
 
       const el = document.createElement('div'); el.className = 'block' + (blk.opt ? ' opt' : '');
       const cues = [];
       if (blk.type === 'load') cues.push('<span class="chip">' + blk.reps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');
       if (blk.type === 'pump') cues.push('<span class="chip">' + blk.reps + ' · leicht</span>', '<span class="chip">bis metab. Versagen + Teilwdh.</span>');
       if (blk.type === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
-      if (blk.stretch) cues.push('<span class="chip stretch">↕ gedehnte Position</span>');
       cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + blk.rest + '">⏱ ' + (blk.rest >= 60 ? (blk.rest / 60) + ' min' : blk.rest + ' s') + '</button>');
 
       el.innerHTML = `
@@ -281,9 +305,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const hd = document.createElement('div'); hd.className = 'exhead';
         if (exDef.r) { const rl = document.createElement('span'); rl.className = 'role' + (exDef.r === 'Comp' ? ' comp' : ''); rl.textContent = exDef.r; hd.appendChild(rl); }
         const nameIn = document.createElement('input');
-        nameIn.className = 'exname'; nameIn.value = entry.ex[xi] || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
+        nameIn.className = 'exname'; nameIn.value = names[xi] || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
         nameIn.disabled = readOnly;
-        if (!readOnly) nameIn.oninput = () => { entry.ex[xi] = nameIn.value; queuePersist(); };
+        if (!readOnly) nameIn.oninput = () => { names[xi] = nameIn.value; queuePersist(); };
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
