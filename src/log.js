@@ -292,12 +292,15 @@ export async function mountLog(container, { userId, readOnly = false }) {
     for (const wk of weeks) {
       const cell = mrs[wk] || {};
       for (const e of Object.values(cell)) {
-        if (e && (e.name || '').trim().toLowerCase() === k) {
+        if (!e) continue;
+        const nms = e.names || (e.name != null ? [e.name] : []);
+        for (let xi = 0; xi < nms.length; xi++) {
+          if ((nms[xi] || '').trim().toLowerCase() !== k) continue;
           let mw = 0, raw = null, rr = null;
-          (e.sets || []).forEach((arr) => (arr || []).forEach((s) => {
+          ((e.sets && e.sets[xi]) || []).forEach((s) => {
             const w = parseFloat(String(s && s.w).replace(',', '.'));
             if (w > mw) { mw = w; raw = s.w; rr = s && s.r; }
-          }));
+          });
           if (mw) return { w: raw, r: rr, week: wk };
         }
       }
@@ -332,7 +335,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     row.appendChild(rF);
 
     if (!readOnly) {
-      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMrMem(memNode, entry.name); refreshVolume(); queuePersist(); };
+      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMrMem(memNode, entry.names[xi]); refreshVolume(); queuePersist(); };
       wIn.oninput = upd; rIn.oninput = upd;
     }
     return row;
@@ -358,7 +361,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     row.appendChild(rF);
 
     if (!readOnly) {
-      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMrMem(memNode, entry.name); refreshVolume(); queuePersist(); };
+      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMrMem(memNode, entry.names[xi]); refreshVolume(); queuePersist(); };
       wIn.oninput = upd; rIn.oninput = upd;
     }
     return row;
@@ -381,7 +384,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const entry = cell[blk.id];
       const baseMR = blk.type === 'mr';
       const effType = effTypeOf(blk, tier);              // Typ je Tier (Pump-Ausnahme bei MR)
-      if (baseMR) entry.name = entry.name || '';         // MR-Übung frei pro Woche (nicht geteilt)
+      if (baseMR) entry.names = entry.names || (entry.name != null ? [entry.name] : []);  // MR-Übungen frei pro Woche/Feld
       const names = baseMR ? null : dayNames(state.day, blk);
       const effRest = effType === 'mr' ? blk.rest : (effType === 'pump' ? 60 : blk.rest);
       const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
@@ -408,24 +411,24 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const hd = document.createElement('div'); hd.className = 'exhead';
         if (exDef.r) { const rl = document.createElement('span'); rl.className = 'role' + (exDef.r === 'Comp' ? ' comp' : ''); rl.textContent = exDef.r; hd.appendChild(rl); }
         const nameIn = document.createElement('input');
-        nameIn.className = 'exname'; nameIn.value = (baseMR ? entry.name : names[xi]) || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
+        nameIn.className = 'exname'; nameIn.value = (baseMR ? entry.names[xi] : names[xi]) || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
         nameIn.disabled = readOnly;
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
-        // Anzahl Sätze für diese Übung = Tier/ZigZag-Verteilung (kein manuelles +/-)
-        const count = setsForExercise(blk, tier, xi);
+        // Anzahl Sätze: MR-Übungen einzeln (jede volle Anzahl), sonst Tier/ZigZag-Verteilung
+        const count = baseMR ? targetSets(blk, tier) : setsForExercise(blk, tier, xi);
         entry.sets[xi] = entry.sets[xi] || [];
         while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
 
         if (!readOnly) nameIn.oninput = () => {
-          if (baseMR) { entry.name = nameIn.value; renderMrMem(prevLine, entry.name); }
+          if (baseMR) { entry.names[xi] = nameIn.value; renderMrMem(prevLine, entry.names[xi]); }
           else { names[xi] = nameIn.value; }
           queuePersist();
         };
 
         if (baseMR) {
-          renderMrMem(prevLine, entry.name);
+          renderMrMem(prevLine, entry.names[xi]);
           exDiv.appendChild(prevLine);
           for (let si = 0; si < count; si++) exDiv.appendChild(effType === 'mr' ? mrRow(entry, xi, si, blk, prevLine) : pumpMrRow(entry, xi, si, prevLine));
         } else {

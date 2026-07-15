@@ -228,7 +228,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .foot{font-size:11px;color:var(--muted);text-align:center;padding:8px 6px 20px;line-height:1.7;font-weight:600}
 
 /* ---------- Sticky save + timer ---------- */
-.savebar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(env(safe-area-inset-bottom) + 16px);
+.savebar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(env(safe-area-inset-bottom) + 8px);
   background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 45%);z-index:30}
 .savebar .inner{max-width:580px;margin:0 auto;display:flex;gap:9px;align-items:stretch}
 .savebar .btn-primary{flex:1;padding:15px}
@@ -246,7 +246,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   font-weight:900;text-transform:uppercase;font-size:14px;color:var(--ink);text-align:center;letter-spacing:.02em}
 .phase-reset:active{transform:translate(4px,4px);box-shadow:none}
 
-.pad-bottom{padding-bottom:114px}
+.pad-bottom{padding-bottom:106px}
 
 .toast{position:fixed;left:50%;bottom:112px;transform:translateX(-50%) translateY(18px);opacity:0;
   background:var(--navy);color:#fff;font-size:12.5px;font-weight:800;padding:11px 18px;border-radius:var(--r);
