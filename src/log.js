@@ -39,26 +39,37 @@ export async function mountLog(container, { userId, readOnly = false }) {
   let timerId = null;
 
   // ---- persistence -------------------------------------------------
-  function setStatus(t, ok) {
-    if (saveStateEl) { saveStateEl.textContent = t; saveStateEl.className = 'save-state' + (ok ? ' ok' : ''); }
+  // Dezenter Sync-Status als Icon: ✓ gespeichert · ↻ speichert · ⚠ Fehler
+  const STATUS = {
+    saved:   ['✓', 'ok',     'gespeichert'],
+    saving:  ['↻', 'saving', 'speichert…'],
+    pending: ['↻', 'saving', 'ungespeicherte Änderungen'],
+    error:   ['⚠', 'err',    'Fehler – nicht gespeichert'],
+  };
+  function setStatus(kind) {
+    if (!saveStateEl) return;
+    const [icon, cls, title] = STATUS[kind] || STATUS.saved;
+    saveStateEl.textContent = icon;
+    saveStateEl.className = 'save-dot ' + cls;
+    saveStateEl.title = title;
   }
   function payloadOut() {
     return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, v: 2 };
   }
   async function persist() {
     if (readOnly) return true;
-    setStatus('speichere…');
+    setStatus('saving');
     const { error: e } = await supabase.from('training_logs').upsert(
       { user_id: userId, payload: payloadOut(), updated_at: new Date().toISOString() },
       { onConflict: 'user_id' }
     );
-    if (e) { setStatus('Fehler – nicht gespeichert'); return false; }
-    setStatus('gespeichert', true);
+    if (e) { setStatus('error'); return false; }
+    setStatus('saved');
     return true;
   }
   function queuePersist() {
     if (readOnly) return;
-    setStatus('…');
+    setStatus('pending');
     clearTimeout(saveTimer);
     saveTimer = setTimeout(persist, 700);
   }
@@ -158,7 +169,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const wrap = document.createElement('div');
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
-    ${readOnly ? '' : '<div class="log-top"><span class="save-state" id="lg-save">gespeichert</span></div>'}
     <div class="blastbar">
       <div class="wk">
         <button id="lg-wkdn" aria-label="Woche zurück">←</button>
@@ -167,6 +177,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       </div>
       <span class="rotchip" id="lg-rot">A-Woche</span>
       <button class="ibtn" id="lg-info" aria-label="FAQ">?</button>
+      ${readOnly ? '' : '<span class="save-dot ok" id="lg-save" title="gespeichert">✓</span>'}
       <span class="cruise" id="lg-cruise" hidden>Cruise fällig</span>
     </div>
     <div class="tabs" id="lg-tabs"></div>
@@ -287,36 +298,45 @@ export async function mountLog(container, { userId, readOnly = false }) {
     return row;
   }
 
-  // ---- Muscle Rounds: Gewichts-Gedächtnis + Cluster-Zeile -----------
-  // Letztes Gewicht für eine MR-Übung (nach Name), aus einer anderen Woche.
-  function mrLastWeight(name) {
+  // ---- Gedächtnis für frei rotierende Übungen (Pump & Muscle Rounds) ----
+  // Laut PDF ist der Log bei Pump/MR kein Progressions-Werkzeug, sondern soll
+  // zeigen, welche Last/Wdh man zuletzt bei dieser Übung genommen hat.
+  function lastLogFor(name, kind) {
     const k = (name || '').trim().toLowerCase(); if (!k) return null;
-    const mrs = state.data['MRs'] || {};
-    const weeks = Object.keys(mrs).map(Number).filter((w) => w !== state.week).sort((a, b) => b - a);
-    for (const wk of weeks) {
-      const cell = mrs[wk] || {};
-      for (const e of Object.values(cell)) {
-        if (!e) continue;
-        const nms = e.names || (e.name != null ? [e.name] : []);
-        for (let xi = 0; xi < nms.length; xi++) {
-          if ((nms[xi] || '').trim().toLowerCase() !== k) continue;
-          let mw = 0, raw = null, rr = null;
-          ((e.sets && e.sets[xi]) || []).forEach((s) => {
-            const w = parseFloat(String(s && s.w).replace(',', '.'));
-            if (w > mw) { mw = w; raw = s.w; rr = s && s.r; }
+    let best = null;
+    Object.keys(state.data).forEach((day) => {
+      const tplDay = TPL[day]; if (!tplDay) return;
+      Object.keys(state.data[day] || {}).forEach((wkStr) => {
+        const wk = Number(wkStr);
+        if (day === state.day && wk === state.week) return;   // aktuelle Einheit ausklammern
+        const cell = state.data[day][wkStr] || {};
+        Object.keys(cell).forEach((bid) => {
+          const blk = tplDay.blocks.find((b) => b.id === bid);
+          if (!blk || blk.type !== kind) return;
+          const e = cell[bid]; if (!e) return;
+          const nms = e.names || (e.name != null ? [e.name] : []);
+          nms.forEach((nm, xi) => {
+            if ((nm || '').trim().toLowerCase() !== k) return;
+            ((e.sets && e.sets[xi]) || []).forEach((s) => {
+              const w = parseFloat(String(s && s.w).replace(',', '.'));
+              if (!w) return;
+              const bw = best ? parseFloat(String(best.w).replace(',', '.')) : -1;
+              if (!best || wk > best.week || (wk === best.week && w > bw)) best = { w: s.w, r: s.r, week: wk };
+            });
           });
-          if (mw) return { w: raw, r: rr, week: wk };
-        }
-      }
-    }
-    return null;
+        });
+      });
+    });
+    return best;
   }
-  function renderMrMem(node, name) {
-    const m = mrLastWeight(name);
-    if (m) {
-      const reps = (m.r != null && m.r !== '') ? ` · ${m.r} Wdh. im letzten MR` : '';
-      node.innerHTML = `<b>zuletzt: ${m.w} kg${reps}</b><span class="delta d-hold">Wo ${m.week}</span>`;
-    } else node.innerHTML = (name && name.trim()) ? '<b>zuletzt: — (neue Übung)</b>' : '<b>zuletzt: —</b>';
+  function renderMem(node, name, kind) {
+    const m = lastLogFor(name, kind);
+    if (!m) { node.innerHTML = (name && name.trim()) ? '<b>zuletzt: — (neue Übung)</b>' : '<b>zuletzt: —</b>'; return; }
+    const hasR = m.r != null && m.r !== '';
+    const txt = kind === 'mr'
+      ? `zuletzt: ${m.w} kg${hasR ? ` · ${m.r} Wdh. im letzten MR` : ''}`
+      : `zuletzt: ${m.w} kg${hasR ? ` × ${m.r} Wdh` : ''}`;
+    node.innerHTML = `<b>${txt}</b><span class="delta d-hold">Wo ${m.week}</span>`;
   }
   // Eine Muscle Round = 6×4 Cluster. Kompakt: Gewicht + Wdh im letzten (6.) Satz.
   function mrRow(entry, xi, si, blk, memNode) {
@@ -339,14 +359,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
     row.appendChild(rF);
 
     if (!readOnly) {
-      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMrMem(memNode, entry.names[xi]); refreshVolume(); queuePersist(); };
+      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMem(memNode, entry.names[xi], 'mr'); refreshVolume(); queuePersist(); };
       wIn.oninput = upd; rIn.oninput = upd;
     }
     return row;
   }
 
-  // Pump-Satz innerhalb eines MR-Blocks (Sheet-Ausnahme bei niedrigen Tiers): kg × Wdh
-  function pumpMrRow(entry, xi, si, memNode) {
+  // Freier Satz (Pump-Block oder Pump-Ausnahme im MR-Block): kg × Wdh + Gedächtnis
+  function pumpMrRow(entry, xi, si, memNode, kind) {
     const s = entry.sets[xi][si];
     const row = document.createElement('div'); row.className = 'setrow';
     const idx = document.createElement('span'); idx.className = 'sidx'; idx.textContent = si + 1; row.appendChild(idx);
@@ -365,7 +385,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     row.appendChild(rF);
 
     if (!readOnly) {
-      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMrMem(memNode, entry.names[xi]); refreshVolume(); queuePersist(); };
+      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMem(memNode, entry.names[xi], kind); refreshVolume(); queuePersist(); };
       wIn.oninput = upd; rIn.oninput = upd;
     }
     return row;
@@ -388,9 +408,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
       }
       const entry = cell[blk.id];
       const baseMR = blk.type === 'mr';
+      const freeEx = blk.type !== 'load';                // Pump & MR rotieren laut PDF frei
       const effType = effTypeOf(blk, tier);              // Typ je Tier (Pump-Ausnahme bei MR)
-      if (baseMR) entry.names = entry.names || (entry.name != null ? [entry.name] : []);  // MR-Übungen frei pro Woche/Feld
-      const names = baseMR ? null : dayNames(state.day, blk);
+      if (freeEx) entry.names = entry.names || (entry.name != null ? [entry.name] : []);  // frei pro Woche/Feld
+      const names = freeEx ? null : dayNames(state.day, blk);
       const effRest = effType === 'mr' ? MR_REST : (effType === 'pump' ? 60 : blk.rest);
       const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
 
@@ -416,7 +437,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const hd = document.createElement('div'); hd.className = 'exhead';
         if (exDef.r) { const rl = document.createElement('span'); rl.className = 'role' + (exDef.r === 'Comp' ? ' comp' : ''); rl.textContent = exDef.r; hd.appendChild(rl); }
         const nameIn = document.createElement('input');
-        nameIn.className = 'exname'; nameIn.value = (baseMR ? entry.names[xi] : names[xi]) || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
+        nameIn.className = 'exname'; nameIn.value = (freeEx ? entry.names[xi] : names[xi]) || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
         nameIn.disabled = readOnly;
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
@@ -426,16 +447,17 @@ export async function mountLog(container, { userId, readOnly = false }) {
         entry.sets[xi] = entry.sets[xi] || [];
         while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
 
+        const memKind = baseMR ? 'mr' : 'pump';
         if (!readOnly) nameIn.oninput = () => {
-          if (baseMR) { entry.names[xi] = nameIn.value; renderMrMem(prevLine, entry.names[xi]); }
+          if (freeEx) { entry.names[xi] = nameIn.value; renderMem(prevLine, entry.names[xi], memKind); }
           else { names[xi] = nameIn.value; }
           queuePersist();
         };
 
-        if (baseMR) {
-          renderMrMem(prevLine, entry.names[xi]);
+        if (freeEx) {
+          renderMem(prevLine, entry.names[xi], memKind);
           exDiv.appendChild(prevLine);
-          for (let si = 0; si < count; si++) exDiv.appendChild(effType === 'mr' ? mrRow(entry, xi, si, blk, prevLine) : pumpMrRow(entry, xi, si, prevLine));
+          for (let si = 0; si < count; si++) exDiv.appendChild(effType === 'mr' ? mrRow(entry, xi, si, blk, prevLine) : pumpMrRow(entry, xi, si, prevLine, memKind));
         } else {
           const prevSets = (prev && prev.data[blk.id] && prev.data[blk.id].sets && prev.data[blk.id].sets[xi]) ? prev.data[blk.id].sets[xi] : null;
           renderPrev(prevLine, prevSets, entry.sets[xi].slice(0, count), prev ? prev.week : null);
@@ -604,7 +626,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
       <div class="inner">
         <button class="btn btn-primary" id="lg-savebtn">Einheit speichern</button>
         <div class="timer" id="lg-timer" hidden><span id="lg-timertxt">0:00</span><button class="x" id="lg-timerx" aria-label="Timer abbrechen">×</button></div>
-        <button class="btn btn-navy btn-ghost" id="lg-reset" title="Diese Einheit leeren">⌫</button>
       </div>`;
     document.body.appendChild(saveBar);
     saveBar.querySelector('#lg-savebtn').onclick = async () => {
@@ -613,11 +634,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (ok) toast('Wo ' + state.week + ' · ' + state.day + ' gespeichert');
     };
     saveBar.querySelector('#lg-timerx').onclick = () => { clearInterval(timerId); saveBar.querySelector('#lg-timer').hidden = true; };
-    saveBar.querySelector('#lg-reset').onclick = () => {
-      if (!confirm('Diese Einheit (' + state.day + ', Woche ' + state.week + ') leeren?')) return;
-      if (state.data[state.day]) delete state.data[state.day][state.week];
-      queuePersist(); renderAll(); toast('Einheit geleert');
-    };
   }
 
   return {

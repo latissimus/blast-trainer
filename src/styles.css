@@ -101,14 +101,16 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .msg.err{background:#FFE0D8;color:#8A2A12}
 .msg.ok{background:#D8F5E6;color:#0B5C33}
 
-/* ---------- Log: top row ---------- */
-.log-top{display:flex;align-items:center;gap:10px;padding:12px 0 8px}
+/* ---------- Log: Info-Button + dezenter Sync-Status ---------- */
 .ibtn{background:var(--surface);border:2px solid var(--ink);color:var(--ink);
   width:30px;height:30px;border-radius:var(--r);font-size:14px;font-weight:900;
   box-shadow:var(--shadow-xs);font-family:var(--display);font-style:italic}
 .ibtn:active{transform:translate(2px,2px);box-shadow:none}
-.save-state{margin-left:auto;font-size:11px;color:var(--muted);font-family:var(--mono);font-weight:700}
-.save-state.ok{color:var(--up)}
+.save-dot{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;font-size:14px;font-weight:900;font-family:var(--mono);color:var(--muted)}
+.save-dot.ok{color:var(--up)}
+.save-dot.saving{color:var(--faint)}
+.save-dot.err{color:var(--down)}
 
 /* ---------- Log: week / rotation ---------- */
 .blastbar{display:flex;align-items:center;gap:8px;padding:0 0 10px}
@@ -220,7 +222,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .volrow{display:flex;align-items:center;gap:9px;padding:4px 0;font-size:12.5px}
 .volrow .m{flex:0 0 118px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .track{flex:1;height:8px;background:rgba(255,255,255,.16);border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,.25)}
-.fill{height:100%;background:#B9C6E8;transition:width .18s}
+.fill{display:block;height:100%;background:#B9C6E8;transition:width .18s}
 .fill.met{background:var(--up)}
 .volrow .v{flex:0 0 46px;text-align:right;font-family:var(--mono);font-size:11px;color:#B9C6E8}
 .volrow .v b{color:#fff;font-weight:700}
