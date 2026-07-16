@@ -15,7 +15,20 @@ let routeToken = 0;         // guards against stale async mounts
 let authMode = 'login';     // 'login' | 'signup'
 let recovery = false;       // aus der Zuruecksetzen-Mail gekommen: neues Passwort faellig
 
-const MARQUEE = ''; // Laufband oben entfernt (auf Wunsch)
+// Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
+// Fehler). In der App selbst bleibt es draussen: Dort willst du eintragen, nicht
+// angesprochen werden.
+//
+// Inhalt ist bewusst die These hinter der App und keine Werbung – hier gibt es
+// nichts zu verkaufen. Zwei identische Haelften, damit die Schleife nahtlos
+// laeuft; jede muss breiter als der Bildschirm sein.
+const MQ_TEXT = [
+  'SCHLAG DEIN LETZTES MAL',
+  'LOADING · PUMP · MUSCLE ROUNDS',
+  '6 WOCHEN BLAST · 2 WOCHEN CRUISE',
+  'TIER NACH TAGESFORM, NICHT NACH EHRGEIZ',
+].join(' ◆ ') + ' ◆ ';
+const MARQUEE = `<div class="marquee" aria-hidden="true"><span>${MQ_TEXT.repeat(2)}</span><span>${MQ_TEXT.repeat(2)}</span></div>`;
 
 function cleanupActive() {
   if (active && active.destroy) active.destroy();
@@ -163,7 +176,6 @@ function navAvatar() {
 function renderChrome() {
   const isAdmin = profile?.role === 'admin';
   app.innerHTML = `
-    ${MARQUEE}
     <header class="topbar">
       <div class="wrap">
         <span class="brand">${brandSvg()}</span>

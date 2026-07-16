@@ -22,6 +22,8 @@
   --down:#E8785B;
   --hold:#C7912A;
 
+  --mq-h:34px;      /* Hoehe des Laufbands – auth-shell rechnet damit */
+
   --shadow:4px 4px 0 var(--ink);
   --shadow-sm:3px 3px 0 var(--ink);
   --shadow-xs:2px 2px 0 var(--ink);
@@ -95,9 +97,23 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 /* ---------- Auth ---------- */
 /* Gesamter Anmelde-Block mittig im Viewport; Abstände untereinander bleiben unverändert.
    min-height statt height: ist der Inhalt höher (Signup/Tastatur), wächst er normal weiter. */
-/* Polster unten groesser als oben: schiebt den zentrierten Block etwas ueber die Mitte. */
+/* Laufband oben, nur auf den abgemeldeten Ansichten.
+   Zwei gleiche Haelften laufen um je 100% ihrer Breite nach links – dadurch
+   rueckt die zweite exakt dorthin, wo die erste war, und die Schleife hat
+   keinen Sprung. */
+.marquee{display:flex;overflow:hidden;height:var(--mq-h);align-items:center;
+  background:var(--navy);color:#fff;border-bottom:3px solid var(--ink);
+  font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.09em;white-space:nowrap}
+.marquee span{flex:0 0 auto;animation:mq 38s linear infinite}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+/* Dauerbewegung ist fuer manche unertraeglich – Systemwunsch respektieren. */
+@media (prefers-reduced-motion:reduce){.marquee span{animation:none}}
+
+/* Polster unten groesser als oben: schiebt den zentrierten Block etwas ueber die Mitte.
+   Die Banner-Hoehe abziehen, sonst waechst die Seite darueber hinaus. */
 .auth-shell{max-width:420px;margin:0 auto;padding:24px 14px 96px;
-  min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center}
+  min-height:calc(100vh - var(--mq-h));min-height:calc(100dvh - var(--mq-h));
+  display:flex;flex-direction:column;justify-content:center}
 .auth-title{font-size:26px;margin:0 0 4px;text-align:center}
 .auth-sub{text-align:center;color:var(--muted);font-size:13px;margin:0 0 22px}
 .auth-switch{text-align:center;font-size:13px;margin-top:16px}
