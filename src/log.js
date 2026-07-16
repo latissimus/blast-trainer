@@ -686,8 +686,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <p><b>Pump und MR:</b> gekoppelte Übungen sind Supersätze, die Zahl gilt <b>je Übung</b>. Brust/Rücken Tier III = 2 heißt also 2 Sätze Brust <i>und</i> 2 Sätze Rücken.</p>
           </div>
         </details>
-        <details class="faq"><summary>Was heißt das Zeichen neben „Einheit speichern"?</summary>
-          <div class="faq-a"><p><b>✓</b> gespeichert · <b>↻</b> speichert gerade oder noch nicht gesichert · <b>⚠</b> Fehler, nicht gespeichert. Die App speichert nach jeder Eingabe von selbst — der Button ist nur da, wenn du sofort sichern willst.</p></div>
+        <details class="faq"><summary>Was heißt das Zeichen oben rechts?</summary>
+          <div class="faq-a"><p>Rechts neben dem <b>?</b> steht der Sync-Status: <b>✓</b> gespeichert · <b>↻</b> speichert gerade oder noch nicht gesichert · <b>⚠</b> Fehler, nicht gespeichert. Die App speichert nach jeder Eingabe von selbst — „Einheit speichern" unten ist nur da, wenn du sofort sichern willst.</p></div>
         </details>
         <details class="faq"><summary>Wofür ist das Notizfeld?</summary>
           <div class="faq-a"><p>„+ Notiz" gehört zur Übung und gilt für <b>alle</b> Wochen — gedacht für Einstellungen und Cues, die gleich bleiben: Sitzhöhe, Griffbreite, Fußposition.</p></div>
@@ -705,9 +705,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <p>Solange die <b>laufende</b> Phase schon Werte zu der Übung hat, gewinnen die: dann steht dort <b>Wo 3</b> statt <b>Pool</b>. Die Wochennummer wäre bei Pool-Werten auch irreführend, weil sie mit jeder Phase wieder bei 1 startet.</p>
           </div>
         </details>
-        <details class="faq"><summary>Warum gibt es hier keine Stretches?</summary>
+        <details class="faq"><summary>Soll ich stretchen?</summary>
           <div class="faq-a">
-            <p>Fortitude sieht nach jedem Muskel optional einen Stretch vor (Flexibility / Occlusion / Extreme). Diese App lässt sie bewusst weg — hier der Stand, damit du selbst entscheiden kannst:</p>
             <p><b>1. Kein Verletzungsschutz.</b> Krafttraining senkt Verletzungen um rund zwei Drittel, Dehnen zeigt keinen günstigen Effekt. Stevenson schreibt das im Buch selbst: <i>„the data don't support this"</i>.</p>
             <p><b>2. Als Wachstumsreiz zu klein.</b> Aktuelle Meta-Analysen finden triviale bis kleine Effekte (d = 0,12–0,20) — und das nur bei 30–60 Minuten Dehnen pro Tag und Muskel. Neben deinem Load-, Pump- und MR-Volumen fällt das nicht ins Gewicht.</p>
             <p><b>3. Die Begründung ist überholt.</b> Der Occlusion Stretch stützt sich auf GH-Ausschüttung und „metabolischen Stress". Die Hormon-Hypothese gilt seit rund 2010 als widerlegt, metabolischer Stress als eigenständiger Treiber wurde stark zurückgestuft. Heute gilt mechanische Spannung als Haupttreiber.</p>
