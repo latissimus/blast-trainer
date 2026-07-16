@@ -270,8 +270,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     <div id="lg-content"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
-    <datalist id="lg-pool-pump"></datalist>
-    <datalist id="lg-pool-mr"></datalist>`;
+    <div id="lg-pool" hidden></div>`;
   container.appendChild(wrap);
 
   saveStateEl = wrap.querySelector('#lg-save');
@@ -428,10 +427,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
               const w = numOf(s && s.w); if (!w) return;
               const old = out[key];
               const ow = old ? numOf(old.w) : -1;
-              // n = Originalschreibweise. Der Schluessel ist kleingeschrieben,
-              // damit der Abgleich tolerant ist – im Vorschlag will man aber
-              // "Latzug Maschine" lesen und nicht "latzug maschine".
-              if (!old || wk > old.week || (wk === old.week && w > ow)) out[key] = { w: s.w, r: s.r, week: wk, n: String(nm).trim() };
+              // n = Originalschreibweise (der Schluessel ist kleingeschrieben,
+              // damit der Abgleich tolerant bleibt – im Vorschlag will man aber
+              // "Latzug Maschine" lesen).
+              // b = Block, in dem sie zuletzt lief. Nur fuer die Vorschlaege:
+              // Bei "Ruecken Dicke" sollen keine Wadenuebungen stehen. Das
+              // Gedaechtnis selbst bleibt blockunabhaengig – ein Gewicht ist
+              // ein Gewicht, egal wo die Uebung eingetragen wurde.
+              if (!old || wk > old.week || (wk === old.week && w > ow)) out[key] = { w: s.w, r: s.r, week: wk, n: String(nm).trim(), b: bid };
             });
           });
         });
@@ -440,70 +443,43 @@ export async function mountLog(container, { userId, readOnly = false }) {
     return out;
   }
 
-  // Alle je benutzten Uebungsnamen einer Art – fuer die Vorschlagsliste.
-  // Quelle sind der Pool (fruehere Phasen) und die laufenden Wochendaten.
-  // Zweck ist nicht Bequemlichkeit: Das Gedaechtnis matcht ueber den Namen,
-  // und ein Tippfehler trennt "Beinstrecker" still von "Beinstrecker ".
-  function poolNames(kind) {
-    const byLower = new Map();
-    const add = (n) => {
-      const t = String(n || '').trim();
-      if (t) byLower.set(t.toLowerCase(), t);
-    };
-    Object.keys(state.mem).forEach((k) => {
-      const i = k.indexOf('|');
-      if (i < 0 || k.slice(0, i) !== kind) return;
-      const e = state.mem[k];
-      add((e && e.n) || k.slice(i + 1));
-    });
-    Object.keys(state.data).forEach((day) => {
-      const tplDay = TPL[day]; if (!tplDay) return;
-      Object.keys(state.data[day] || {}).forEach((wk) => {
-        const cell = state.data[day][wk] || {};
-        Object.keys(cell).forEach((bid) => {
-          const blk = tplDay.blocks.find((b) => b.id === bid);
-          if (!blk || blk.type !== kind) return;
-          ((cell[bid] || {}).names || []).forEach(add);
-        });
-      });
-    });
-    return [...byLower.values()].sort((a, b) => a.localeCompare(b, 'de'));
-  }
-
-  // Zuletzt benutzte Uebungen einer Art, neueste zuerst – fuer die Chips unter
-  // dem Feld. Die native Browser-Liste (datalist) zeigt iOS nicht an, deshalb
-  // muessen die Vorschlaege sichtbar im Dokument stehen.
-  function recentNames(kind, limit = 6) {
+  // Zuletzt benutzte Uebungen fuer GENAU DIESEN Block, neueste zuerst.
+  // Bewusst streng: Bei "Ruecken Dicke" gehoeren nur Ruecken-Dicke-Uebungen hin.
+  // Das haelt die Liste von selbst kurz – niemand hat 30 davon – und macht sie
+  // als Anregung erst brauchbar.
+  //
+  // Ueber Rotationen und Cruise-Slots hinweg sammelt sich die Historie
+  // automatisch, weil die Block-IDs geteilt sind: m_bkth ist in MRs, MRs-2 und
+  // MRs-3 derselbe Block, p_quad in OK-A und OK-B.
+  function recentNames(kind, blockId) {
     const seen = new Map();
+    const add = (nm, wk) => {
+      const t = String(nm || '').trim(); if (!t) return;
+      const k = t.toLowerCase();
+      const cur = seen.get(k);
+      if (!cur || wk > cur.week) seen.set(k, { n: t, week: wk });
+    };
     Object.keys(state.data).forEach((day) => {
       const tplDay = TPL[day]; if (!tplDay) return;
+      const blk = tplDay.blocks.find((b) => b.id === blockId);
+      if (!blk || blk.type !== kind) return;
       Object.keys(state.data[day] || {}).forEach((wkStr) => {
-        const wk = Number(wkStr);
-        const cell = state.data[day][wkStr] || {};
-        Object.keys(cell).forEach((bid) => {
-          const blk = tplDay.blocks.find((b) => b.id === bid);
-          if (!blk || blk.type !== kind) return;
-          ((cell[bid] || {}).names || []).forEach((nm) => {
-            const t = String(nm || '').trim(); if (!t) return;
-            const k = t.toLowerCase();
-            const cur = seen.get(k);
-            if (!cur || wk > cur.week) seen.set(k, { n: t, week: wk });
-          });
-        });
+        const entry = (state.data[day][wkStr] || {})[blockId];
+        if (entry) (entry.names || []).forEach((nm) => add(nm, Number(wkStr)));
       });
     });
-    // Pool aus frueheren Phasen ans Ende, Wochennummern sind dort nicht vergleichbar.
+    // Pool aus frueheren Phasen ans Ende – Wochennummern starten je Phase neu.
+    // Alt-Eintraege ohne b kennen ihren Block nicht und bleiben aussen vor;
+    // fuer die Gewichts-Anzeige zaehlen sie weiterhin.
     Object.keys(state.mem).forEach((key) => {
       const i = key.indexOf('|');
       if (i < 0 || key.slice(0, i) !== kind) return;
-      const k = key.slice(i + 1);
-      if (seen.has(k)) return;
       const e = state.mem[key];
-      seen.set(k, { n: (e && e.n) || k, week: -1 });
+      if (!e || e.b !== blockId) return;
+      const k = key.slice(i + 1);
+      if (!seen.has(k)) seen.set(k, { n: e.n || k, week: -1 });
     });
-    return [...seen.values()]
-      .sort((a, b) => b.week - a.week || a.n.localeCompare(b.n, 'de'))
-      .slice(0, limit);
+    return [...seen.values()].sort((a, b) => b.week - a.week || a.n.localeCompare(b.n, 'de'));
   }
 
   function lastLogFor(name, kind) {
@@ -610,14 +586,19 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const prev = prevFilled(state.day, state.week);
     contentEl.innerHTML = '';
 
-    // Vorschlagslisten je Art neu aufbauen – der Bestand waechst mit jeder Eingabe.
-    ['pump', 'mr'].forEach((kind) => {
-      const dl = wrap.querySelector('#lg-pool-' + kind);
-      if (!dl) return;
-      dl.innerHTML = '';
-      poolNames(kind).forEach((n) => {
-        const o = document.createElement('option'); o.value = n; dl.appendChild(o);
+    // Je Block eine datalist – sonst widerspraeche die Tipp-Hilfe am Rechner den
+    // Chips darunter. Auf iOS zeigt Safari sie ohnehin nicht an; dort sind die
+    // Chips der eigentliche Weg.
+    const poolEl = wrap.querySelector('#lg-pool');
+    poolEl.innerHTML = '';
+    tpl.blocks.forEach((blk) => {
+      if (blk.type === 'load') return;
+      const dl = document.createElement('datalist');
+      dl.id = 'lg-pool-' + blk.id;
+      recentNames(blk.type === 'mr' ? 'mr' : 'pump', blk.id).forEach((r) => {
+        const o = document.createElement('option'); o.value = r.n; dl.appendChild(o);
       });
+      poolEl.appendChild(dl);
     });
 
     tpl.blocks.forEach((blk) => {
@@ -661,24 +642,39 @@ export async function mountLog(container, { userId, readOnly = false }) {
         nameIn.disabled = readOnly;
         // Frei rotierende Uebungen aus dem eigenen Bestand vorschlagen: Das
         // Gedaechtnis haengt am Namen, gleiche Schreibweise ist also Bedingung.
-        if (freeEx && !readOnly) nameIn.setAttribute('list', 'lg-pool-' + (baseMR ? 'mr' : 'pump'));
+        if (freeEx && !readOnly) nameIn.setAttribute('list', 'lg-pool-' + blk.id);
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
-        // Antippbare Vorschlaege aus dem eigenen Bestand. Nur bei leerem Feld –
-        // ist die Uebung gewaehlt, waeren sie nur noch Rauschen.
+        // Antippbare Vorschlaege aus dem eigenen Bestand dieses Blocks. Nur bei
+        // leerem Feld – ist die Uebung gewaehlt, waeren sie nur noch Rauschen.
         let syncSug = () => {};
         if (freeEx && !readOnly) {
-          const sugBar = document.createElement('div'); sugBar.className = 'exsug';
-          recentNames(baseMR ? 'mr' : 'pump').forEach((r) => {
-            const b = document.createElement('button');
-            b.type = 'button'; b.className = 'sug'; b.textContent = r.n;
-            b.onclick = () => {
-              nameIn.value = r.n;
-              nameIn.dispatchEvent(new Event('input', { bubbles: true }));
+          const all = recentNames(baseMR ? 'mr' : 'pump', blk.id);
+          if (all.length) {
+            const sugBar = document.createElement('div'); sugBar.className = 'exsug';
+            const chip = (r) => {
+              const b = document.createElement('button');
+              b.type = 'button'; b.className = 'sug'; b.textContent = r.n;
+              b.onclick = () => {
+                nameIn.value = r.n;
+                nameIn.dispatchEvent(new Event('input', { bubbles: true }));
+              };
+              return b;
             };
-            sugBar.appendChild(b);
-          });
-          if (sugBar.children.length) {
+            const SHOWN = 5;
+            all.slice(0, SHOWN).forEach((r) => sugBar.appendChild(chip(r)));
+            const rest = all.slice(SHOWN);
+            if (rest.length) {
+              // Rest hinter einem "+N", damit die Bloecke nicht in die Hoehe wachsen.
+              const more = document.createElement('button');
+              more.type = 'button'; more.className = 'sug more';
+              more.textContent = '+' + rest.length;
+              more.onclick = () => {
+                more.remove();
+                rest.forEach((r) => sugBar.appendChild(chip(r)));
+              };
+              sugBar.appendChild(more);
+            }
             syncSug = () => { sugBar.hidden = !!nameIn.value.trim(); };
             syncSug();
             exDiv.appendChild(sugBar);

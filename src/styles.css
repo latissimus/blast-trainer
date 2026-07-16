@@ -155,6 +155,8 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   cursor:pointer;box-shadow:2px 2px 0 var(--ink);max-width:100%;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .sug:active{transform:translate(2px,2px);box-shadow:none}
+/* "+N" ist kein Uebungsname, sondern eine Aktion – darum abgesetzt. */
+.sug.more{background:var(--navy);color:#fff}
 
 /* ---------- Log: tier ---------- */
 .tierbar{display:flex;align-items:center;gap:9px;padding:0 0 12px}
