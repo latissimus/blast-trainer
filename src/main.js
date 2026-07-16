@@ -1,6 +1,6 @@
 import './styles.css';
 import { supabase } from './supabase.js';
-import { signIn, signUp, signOut, loadProfile } from './auth.js';
+import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } from './auth.js';
 import { readProfile, writeProfile } from './localstore.js';
 import { mountLog } from './log.js';
 import { mountProfile } from './profile.js';
@@ -12,6 +12,7 @@ let profile = null;
 let active = null;          // current view's { destroy } handle
 let routeToken = 0;         // guards against stale async mounts
 let authMode = 'login';     // 'login' | 'signup'
+let recovery = false;       // aus der Zuruecksetzen-Mail gekommen: neues Passwort faellig
 
 const MARQUEE = ''; // Laufband oben entfernt (auf Wunsch)
 
@@ -44,12 +45,28 @@ function renderAuth() {
         ${isLogin ? 'Noch keinen Account?' : 'Schon registriert?'}
         <button id="auth-toggle">${isLogin ? 'Registrieren' : 'Zum Login'}</button>
       </div>
+      ${isLogin ? '<div class="auth-switch"><button id="auth-forgot">Passwort vergessen?</button></div>' : ''}
     </div>`;
 
   const msg = app.querySelector('#auth-msg');
   const showMsg = (text, kind) => { msg.innerHTML = `<div class="msg ${kind}">${text}</div>`; };
 
   app.querySelector('#auth-toggle').onclick = () => { authMode = isLogin ? 'signup' : 'login'; renderAuth(); };
+
+  const forgotBtn = app.querySelector('#auth-forgot');
+  if (forgotBtn) forgotBtn.onclick = async () => {
+    const email = app.querySelector('#af-email').value.trim();
+    if (!email) { showMsg('Trag oben deine E-Mail ein, dann schicken wir dir einen Link.', 'err'); return; }
+    forgotBtn.disabled = true;
+    try {
+      await resetPassword(email);
+      // Bewusst neutral: Ob es die Adresse gibt, verraten wir nicht.
+      showMsg(`Wenn es einen Account für ${email} gibt, ist ein Link zum Zurücksetzen unterwegs. Schau auch im Spam nach.`, 'ok');
+    } catch (err) {
+      showMsg(translateErr(err), 'err');
+    }
+    forgotBtn.disabled = false;
+  };
 
   app.querySelector('#auth-form').onsubmit = async (e) => {
     e.preventDefault();
@@ -71,6 +88,48 @@ function renderAuth() {
         }
         // if a session exists (confirmations disabled), onAuthStateChange takes over
       }
+    } catch (err) {
+      showMsg(translateErr(err), 'err');
+      btn.disabled = false;
+    }
+  };
+}
+
+// Nach dem Klick auf den Link aus der Zuruecksetzen-Mail: Supabase hat bereits
+// eine Sitzung angelegt, es fehlt nur noch das neue Passwort. Ohne diese Maske
+// landete man direkt im Log – mit dem alten, unbekannten Passwort.
+function renderRecovery() {
+  cleanupActive();
+  app.innerHTML = `
+    ${MARQUEE}
+    <div class="auth-shell">
+      <div style="text-align:center;margin-bottom:30px"><span class="brand" style="font-size:46px"><span class="star">★</span>BLAST<span class="star">★</span></span></div>
+      <h1 class="auth-title">Neues Passwort</h1>
+      <p class="auth-sub">Wähle ein neues Passwort für deinen Account.</p>
+      <div id="rc-msg"></div>
+      <form id="rc-form" class="card">
+        <label class="fld-l" for="rc-pass">Neues Passwort</label>
+        <input class="input" id="rc-pass" type="password" autocomplete="new-password" required minlength="6" placeholder="••••••••">
+        <label class="fld-l" for="rc-pass2">Wiederholen</label>
+        <input class="input" id="rc-pass2" type="password" autocomplete="new-password" required minlength="6" placeholder="••••••••">
+        <button class="btn btn-primary btn-block" type="submit" id="rc-submit">Passwort speichern</button>
+      </form>
+    </div>`;
+
+  const msg = app.querySelector('#rc-msg');
+  const showMsg = (t, k) => { msg.innerHTML = `<div class="msg ${k}">${t}</div>`; };
+
+  app.querySelector('#rc-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const p1 = app.querySelector('#rc-pass').value;
+    const p2 = app.querySelector('#rc-pass2').value;
+    if (p1 !== p2) { showMsg('Die beiden Passwörter stimmen nicht überein.', 'err'); return; }
+    const btn = app.querySelector('#rc-submit');
+    btn.disabled = true;
+    try {
+      await updatePassword(p1);
+      recovery = false;
+      await render();          // ab jetzt normal weiter, Sitzung besteht schon
     } catch (err) {
       showMsg(translateErr(err), 'err');
       btn.disabled = false;
@@ -160,7 +219,8 @@ async function routeView() {
 /* ------------------------------------------------------------ top-level render */
 async function render() {
   cleanupActive();
-  if (!session) { profile = null; renderAuth(); return; }
+  if (!session) { profile = null; recovery = false; renderAuth(); return; }
+  if (recovery) { renderRecovery(); return; }
 
   if (!profile || profile.id !== session.user.id) {
     app.innerHTML = `${MARQUEE}<div class="wrap" style="padding-top:40px;text-align:center"><div class="brand" style="font-size:30px"><span class="star">★</span>BLAST<span class="star">★</span></div><p class="auth-sub">lädt…</p></div>`;
@@ -190,9 +250,12 @@ async function render() {
 /* ------------------------------------------------------------ boot */
 window.addEventListener('hashchange', () => { if (session && profile) routeView(); });
 
-supabase.auth.onAuthStateChange((_event, newSession) => {
+supabase.auth.onAuthStateChange((event, newSession) => {
   const prevUser = session?.user?.id;
   session = newSession;
+  // Der Link aus der Zuruecksetzen-Mail legt bereits eine Sitzung an. Ohne
+  // dieses Flag ginge es direkt ins Log – und das Passwort bliebe unbekannt.
+  if (event === 'PASSWORD_RECOVERY') { recovery = true; render(); return; }
   if (session?.user?.id !== prevUser) render();
 });
 

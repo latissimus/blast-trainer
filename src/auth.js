@@ -19,6 +19,23 @@ export async function signOut() {
   await supabase.auth.signOut();
 }
 
+// Schickt den Zuruecksetzen-Link. Ziel ist die App selbst: Supabase haengt das
+// Recovery-Token an die URL, der Client liest es (detectSessionInUrl) und meldet
+// PASSWORD_RECOVERY – daraufhin zeigt main.js die Maske fuer das neue Passwort.
+//
+// Die Adresse muss in Supabase unter Auth -> URL Configuration als Redirect-URL
+// erlaubt sein, sonst landet der Link auf der Site-URL.
+export async function resetPassword(email) {
+  const redirectTo = window.location.origin + window.location.pathname;
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+  if (error) throw error;
+}
+
+export async function updatePassword(password) {
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) throw error;
+}
+
 // Laedt (oder wartet auf) die Profilzeile des eingeloggten Nutzers.
 // Der DB-Trigger legt sie bei der Registrierung an; kurz danach kann es
 // eine Millisekunde dauern, daher ein kleiner Retry.

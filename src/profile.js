@@ -134,7 +134,46 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     onProfileUpdated?.(profile);
   };
   card.appendChild(saveBtn);
-
   wrap.appendChild(card);
+
+  // --- Passwort aendern -------------------------------------------------
+  const pwCard = document.createElement('div');
+  pwCard.className = 'card';
+  pwCard.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 4px">Passwort ändern</h2>`;
+  const pwMsg = document.createElement('div');
+  pwCard.appendChild(pwMsg);
+
+  const pw1Wrap = document.createElement('div');
+  pw1Wrap.innerHTML = `<label class="fld-l" for="pf-pw1">Neues Passwort</label>`;
+  const pw1 = document.createElement('input');
+  pw1.id = 'pf-pw1'; pw1.className = 'input'; pw1.type = 'password';
+  pw1.autocomplete = 'new-password'; pw1.minLength = 6; pw1.placeholder = '••••••••';
+  pw1Wrap.appendChild(pw1); pwCard.appendChild(pw1Wrap);
+
+  const pw2Wrap = document.createElement('div');
+  pw2Wrap.innerHTML = `<label class="fld-l" for="pf-pw2">Wiederholen</label>`;
+  const pw2 = document.createElement('input');
+  pw2.id = 'pf-pw2'; pw2.className = 'input'; pw2.type = 'password';
+  pw2.autocomplete = 'new-password'; pw2.minLength = 6; pw2.placeholder = '••••••••';
+  pw2Wrap.appendChild(pw2); pwCard.appendChild(pw2Wrap);
+
+  const pwBtn = document.createElement('button');
+  pwBtn.className = 'btn btn-block';
+  pwBtn.textContent = 'Passwort speichern';
+  pwBtn.onclick = async () => {
+    pwMsg.innerHTML = '';
+    if (pw1.value.length < 6) { pwMsg.innerHTML = `<div class="msg err">Mindestens 6 Zeichen.</div>`; return; }
+    if (pw1.value !== pw2.value) { pwMsg.innerHTML = `<div class="msg err">Die beiden Passwörter stimmen nicht überein.</div>`; return; }
+    pwBtn.disabled = true;
+    const { error } = await supabase.auth.updateUser({ password: pw1.value });
+    pwBtn.disabled = false;
+    if (error) { pwMsg.innerHTML = `<div class="msg err">${error.message}</div>`; return; }
+    pw1.value = ''; pw2.value = '';
+    pwMsg.innerHTML = `<div class="msg ok">Passwort geändert.</div>`;
+    toast('Passwort geändert');
+  };
+  pwCard.appendChild(pwBtn);
+  wrap.appendChild(pwCard);
+
   container.appendChild(wrap);
 }

@@ -111,7 +111,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   box-shadow:var(--shadow-xs);font-family:var(--display);font-style:italic}
 .ibtn:active{transform:translate(2px,2px);box-shadow:none}
 .save-dot{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
-  width:22px;height:22px;font-size:14px;font-weight:900;font-family:var(--mono);color:var(--muted)}
+  width:26px;height:26px;font-size:18px;font-weight:900;font-family:var(--mono);color:var(--muted)}
 .save-dot.ok{color:var(--up)}
 .save-dot.saving{color:var(--faint)}
 /* wartet auf Verbindung – kein Fehler, die Daten liegen lokal sicher */

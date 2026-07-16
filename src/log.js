@@ -269,7 +269,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     <div class="daymeta" id="lg-daymeta"></div>
     <div id="lg-content"></div>
     <div class="volbar" id="lg-vol"></div>
-    <div id="lg-phasereset"></div>`;
+    <div id="lg-phasereset"></div>
+    <datalist id="lg-pool-pump"></datalist>
+    <datalist id="lg-pool-mr"></datalist>`;
   container.appendChild(wrap);
 
   saveStateEl = wrap.querySelector('#lg-save');
@@ -278,6 +280,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const volEl = wrap.querySelector('#lg-vol');
   const dayMetaEl = wrap.querySelector('#lg-daymeta');
   const wkNumEl = wrap.querySelector('#lg-wknum');
+  const wkDownEl = wrap.querySelector('#lg-wkdn');
+  const wkUpEl = wrap.querySelector('#lg-wkup');
   const rotEl = wrap.querySelector('#lg-rot');
   const cruiseEl = wrap.querySelector('#lg-cruise');
   const tierSeg = wrap.querySelector('#lg-tier');
@@ -295,6 +299,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // ---- render ------------------------------------------------------
   function renderHeader() {
     wkNumEl.textContent = 'Wo ' + state.week;
+    // Pfeile an den Enden ausblenden. visibility statt hidden, damit "Wo 1"
+    // nicht bei jedem Wochenwechsel seitlich springt.
+    wkDownEl.style.visibility = state.week > 1 ? 'visible' : 'hidden';
+    wkUpEl.style.visibility = state.week < 8 ? 'visible' : 'hidden';
     rotEl.textContent = rotOf(state.week) + '-Woche';
     // Cruise-Chip nur in den Cruise-Wochen (7-8)
     if (state.week >= 7) { cruiseEl.hidden = false; cruiseEl.textContent = 'Cruise'; }
@@ -420,13 +428,46 @@ export async function mountLog(container, { userId, readOnly = false }) {
               const w = numOf(s && s.w); if (!w) return;
               const old = out[key];
               const ow = old ? numOf(old.w) : -1;
-              if (!old || wk > old.week || (wk === old.week && w > ow)) out[key] = { w: s.w, r: s.r, week: wk };
+              // n = Originalschreibweise. Der Schluessel ist kleingeschrieben,
+              // damit der Abgleich tolerant ist – im Vorschlag will man aber
+              // "Latzug Maschine" lesen und nicht "latzug maschine".
+              if (!old || wk > old.week || (wk === old.week && w > ow)) out[key] = { w: s.w, r: s.r, week: wk, n: String(nm).trim() };
             });
           });
         });
       });
     });
     return out;
+  }
+
+  // Alle je benutzten Uebungsnamen einer Art – fuer die Vorschlagsliste.
+  // Quelle sind der Pool (fruehere Phasen) und die laufenden Wochendaten.
+  // Zweck ist nicht Bequemlichkeit: Das Gedaechtnis matcht ueber den Namen,
+  // und ein Tippfehler trennt "Beinstrecker" still von "Beinstrecker ".
+  function poolNames(kind) {
+    const byLower = new Map();
+    const add = (n) => {
+      const t = String(n || '').trim();
+      if (t) byLower.set(t.toLowerCase(), t);
+    };
+    Object.keys(state.mem).forEach((k) => {
+      const i = k.indexOf('|');
+      if (i < 0 || k.slice(0, i) !== kind) return;
+      const e = state.mem[k];
+      add((e && e.n) || k.slice(i + 1));
+    });
+    Object.keys(state.data).forEach((day) => {
+      const tplDay = TPL[day]; if (!tplDay) return;
+      Object.keys(state.data[day] || {}).forEach((wk) => {
+        const cell = state.data[day][wk] || {};
+        Object.keys(cell).forEach((bid) => {
+          const blk = tplDay.blocks.find((b) => b.id === bid);
+          if (!blk || blk.type !== kind) return;
+          ((cell[bid] || {}).names || []).forEach(add);
+        });
+      });
+    });
+    return [...byLower.values()].sort((a, b) => a.localeCompare(b, 'de'));
   }
 
   function lastLogFor(name, kind) {
@@ -533,6 +574,16 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const prev = prevFilled(state.day, state.week);
     contentEl.innerHTML = '';
 
+    // Vorschlagslisten je Art neu aufbauen – der Bestand waechst mit jeder Eingabe.
+    ['pump', 'mr'].forEach((kind) => {
+      const dl = wrap.querySelector('#lg-pool-' + kind);
+      if (!dl) return;
+      dl.innerHTML = '';
+      poolNames(kind).forEach((n) => {
+        const o = document.createElement('option'); o.value = n; dl.appendChild(o);
+      });
+    });
+
     tpl.blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
       if (tgt === 0) return;   // Block bei diesem Tier nicht dabei (z.B. optionale MRs bei Tier I)
@@ -572,6 +623,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const nameIn = document.createElement('input');
         nameIn.className = 'exname'; nameIn.value = (freeEx ? entry.names[xi] : names[xi]) || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
         nameIn.disabled = readOnly;
+        // Frei rotierende Uebungen aus dem eigenen Bestand vorschlagen: Das
+        // Gedaechtnis haengt am Namen, gleiche Schreibweise ist also Bedingung.
+        if (freeEx && !readOnly) nameIn.setAttribute('list', 'lg-pool-' + (baseMR ? 'mr' : 'pump'));
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
@@ -695,8 +749,47 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   // ---- pause timer (editable only) ---------------------------------
   let tEnd = 0;
+  // Signal am Ende der Pause.
+  //
+  // Vibration gibt es auf iOS nicht – WebKit hat navigator.vibrate nie
+  // ausgeliefert. Der Aufruf bleibt fuer Android drin und ist auf dem iPhone
+  // folgenlos. Traegt dort also der Ton.
+  //
+  // iOS gibt Audio nur nach einer Nutzeraktion frei, darum wird der Context
+  // beim Antippen des Timers geweckt und offen gehalten. Liegt das Handy mit
+  // dunklem Display in der Tasche, friert iOS das JavaScript ein – dann kommt
+  // weder Ton noch sonst etwas. Das ist die Grenze einer Web-App.
+  let audioCtx = null;
+  function primeAudio() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      if (!audioCtx) audioCtx = new AC();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) { /* kein Audio – der Timer laeuft trotzdem */ }
+  }
+  function alertDone() {
+    try { navigator.vibrate?.([180, 90, 180]); } catch (e) { /* egal */ }
+    if (!audioCtx || audioCtx.state !== 'running') return;
+    try {
+      // Zwei kurze Toene: hoerbar, aber kein Alarm.
+      [0, 0.22].forEach((offset) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const t0 = audioCtx.currentTime + offset;
+        osc.frequency.setValueAtTime(880, t0);
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.exponentialRampToValueAtTime(0.25, t0 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start(t0); osc.stop(t0 + 0.2);
+      });
+    } catch (e) { /* egal */ }
+  }
+
   function startTimer(sec) {
     if (!saveBar) return;
+    primeAudio();
     clearInterval(timerId);
     tEnd = Date.now() + sec * 1000;
     const box = saveBar.querySelector('#lg-timer'); box.hidden = false; box.classList.remove('done');
@@ -710,7 +803,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (left <= 0) {
       clearInterval(timerId);
       box.classList.add('done');
-      if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+      alertDone();
       setTimeout(() => { box.hidden = true; }, 4000);
     }
   }
