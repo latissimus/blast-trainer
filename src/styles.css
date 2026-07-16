@@ -113,7 +113,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .save-dot.err{color:var(--down)}
 
 /* ---------- Log: week / rotation ---------- */
-.blastbar{display:flex;align-items:center;gap:8px;padding:0 0 10px}
+.blastbar{display:flex;align-items:center;gap:8px;padding:18px 0 10px}
 .wk{display:flex;align-items:center;background:var(--surface);border:3px solid var(--ink);
   border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
 .wk button{background:none;border:0;color:var(--ink);width:38px;height:40px;font-size:20px;font-family:var(--mono);font-weight:700}
@@ -230,7 +230,9 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .foot{font-size:11px;color:var(--muted);text-align:center;padding:8px 6px 20px;line-height:1.7;font-weight:600}
 
 /* ---------- Sticky save + timer ---------- */
-.savebar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px calc(env(safe-area-inset-bottom) + 2px);
+/* Unterer Abstand: Safe-Area minus 14px (mind. 2px), damit der Button tiefer sitzt,
+   aber der iPhone-Home-Indicator frei bleibt. */
+.savebar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px max(2px, calc(env(safe-area-inset-bottom) - 14px));
   background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 45%);z-index:30}
 .savebar .inner{max-width:580px;margin:0 auto;display:flex;gap:9px;align-items:stretch}
 .savebar .btn-primary{flex:1;padding:15px}
