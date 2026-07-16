@@ -468,7 +468,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const el = document.createElement('div'); el.className = 'block';
       const cues = [];
       if (effType === 'load') cues.push('<span class="chip">' + effReps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');
-      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · leicht</span>', '<span class="chip">bis metab. Versagen + Teilwdh.</span>');
+      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · leicht</span>', '<span class="chip">bis metab. Versagen + Lengthened Partials</span>');
       if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
       cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + (effRest >= 60 ? (effRest / 60) + ' min' : effRest + ' s') + '</button>');
 
@@ -649,7 +649,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
           <div class="faq-a"><p>6–12 Wdh., 0–2 RIR. Zig-Zag: <b>Comp → Iso → Comp → Iso</b>. Versagen nur im <b>letzten Comp-Satz</b>; Iso-Sätze dürfen ans Versagen. Pause: Oberkörper 90 s, Unterkörper 120 s, Waden 60 s.</p></div>
         </details>
         <details class="faq"><summary>Wie trainiere ich die Pump-Sätze?</summary>
-          <div class="faq-a"><p>15–25 Wdh., leichte Last (~50 % 1RM), Pause 60 s, im Supersatz gekoppelt. Bis zum <b>metabolischen Versagen</b>, dann Teilwiederholungen im gedehnten Bereich. Übungen frei rotieren.</p></div>
+          <div class="faq-a">
+            <p>15–25 Wdh., leichte Last (~50 % 1RM), Pause 60 s, im Supersatz gekoppelt. Bis zum <b>metabolischen Versagen</b>, dann <b>Lengthened Partials</b>. Übungen frei rotieren.</p>
+            <p><b>Lengthened Partials</b> sind Teilwiederholungen <b>nur im gedehnten Bereich</b> — du kommst nicht mehr in die volle Kontraktion, sondern arbeitest weiter dort, wo der Muskel am längsten ist. Genau diese Position treibt das Wachstum überproportional; Teilwdh. dort erzielen ähnliche Anpassungen wie volle Wiederholungen.</p>
+            <p>Das funktioniert nur, wo unten auch Spannung anliegt: Fly-Maschine, Latzug, Beinstrecker, sitzender Beinbeuger, Schrägbank-Curl. Bei KH-Seitheben oder stehenden KH-Curls hängt der Arm unten spannungslos — dort bringt es nichts.</p>
+            <p>Nicht zu verwechseln mit der <b>1¼-Wdh.</b> („1/4 Wdh. unten"): volle Wiederholung <i>plus</i> ein Viertel unten, bei jeder Wdh. Verwandtes Prinzip, aber ohne eigene Studienlage.</p>
+          </div>
         </details>
         <details class="faq"><summary>Wie funktionieren die Muscle Rounds (MR)?</summary>
           <div class="faq-a"><p>6 Minisätze à 4 Wdh., ~10 s Pause, 5–10 min pro Round. Gewicht ≈ 15RM. <b>Nur ein Versagenspunkt</b>, im letzten Minisatz.</p></div>
