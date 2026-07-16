@@ -138,11 +138,15 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function effTypeOf(blk, tier) {
     return (blk.typeByTier && blk.typeByTier[tier]) || blk.type;
   }
+  // Übungsfelder je Tier (Quad+Ham-Pump hat bei Tier I nur ein Feld, sonst zwei)
+  function exOf(blk, tier) {
+    return (blk.exByTier && blk.exByTier[tier]) || blk.ex;
+  }
   // ZigZag-Verteilung (nur Load-Blöcke): die N Gesamtsätze des Muskels auf Comp/Iso aufteilen.
   // 1. Übung (Comp) aufgerundet N/2, 2. Übung (Iso) abgerundet N/2. Eine Übung = alle N.
   function setsForExercise(blk, tier, xi) {
     const N = targetSets(blk, tier);
-    const E = blk.ex.length || 1;
+    const E = exOf(blk, tier).length || 1;
     return Math.floor(N / E) + (xi < (N % E) ? 1 : 0);
   }
   function ensureCell() {
@@ -431,7 +435,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         <div class="cue">${cues.join('')}</div>`;
       if (!readOnly) el.querySelectorAll('.chip.rest').forEach((b) => (b.onclick = () => startTimer(Number(b.dataset.rest))));
 
-      blk.ex.forEach((exDef, xi) => {
+      exOf(blk, tier).forEach((exDef, xi) => {
         const exDiv = document.createElement('div'); exDiv.className = 'ex';
 
         const hd = document.createElement('div'); hd.className = 'exhead';
