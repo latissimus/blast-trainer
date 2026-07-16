@@ -9,7 +9,7 @@ export const TPL = {
     { id: 'delt',  mus: 'Schultern', type: 'load', sets: [1, 2, 4], rest: 90,  reps: '6–12', ex: [{ r: 'Comp', n: 'Multi Frontdrücken' }, { r: 'Iso', n: 'KH Seitheben' }] },
     { id: 'p_quad', mus: 'Beine',         type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
     // Sheet-Fussnote ‡: Tier I nur ein Satz fuer den schwaecheren von beiden, Tier II/III je einer.
-    { id: 'p_gh',   mus: 'Quad + Hams',   type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }, { n: '' }], exByTier: [[{ n: '' }], [{ n: '' }, { n: '' }], [{ n: '' }, { n: '' }]] },
+    { id: 'p_gh',   mus: 'Quads + Hams',  type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }, { n: '' }], exByTier: [[{ n: '' }], [{ n: '' }, { n: '' }], [{ n: '' }, { n: '' }]] },
     { id: 'p_calf', mus: 'Waden',         type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },  ] },
   'UK-A': { label: 'UK-A', short: 'UK · Load', sub: 'Unterkörper Loading · Oberkörper Pump', rot: 'A', blocks: [
     { id: 'legs', mus: 'Beine',       type: 'load', sets: [1, 2, 3], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: 'Beinpresse 45°' }] },
@@ -25,7 +25,7 @@ export const TPL = {
     { id: 'chest', mus: 'Brust',     type: 'load', sets: [1, 2, 4], rest: 90, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: 'PL Flach' }, { r: 'Iso', n: 'KH Flys' }] },
     { id: 'delt',  mus: 'Schultern', type: 'load', sets: [1, 2, 4], rest: 90, reps: '6–12', ex: [{ r: 'Comp', n: 'Rudern aufrecht Kabel' }, { r: 'Iso', n: 'Seitheben Gewichtheber' }] },
     { id: 'p_quad', mus: 'Beine',         type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
-    { id: 'p_gh',   mus: 'Quad + Hams',   type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }, { n: '' }], exByTier: [[{ n: '' }], [{ n: '' }, { n: '' }], [{ n: '' }, { n: '' }]] },
+    { id: 'p_gh',   mus: 'Quads + Hams',  type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }, { n: '' }], exByTier: [[{ n: '' }], [{ n: '' }, { n: '' }], [{ n: '' }, { n: '' }]] },
     { id: 'p_calf', mus: 'Waden',         type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },  ] },
   'UK-B': { label: 'UK-B', short: 'UK · Load', sub: 'Unterkörper Loading · Oberkörper Pump', rot: 'B', blocks: [
     { id: 'legs', mus: 'Beine',       type: 'load', sets: [1, 2, 3], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: 'Beinpresse 45° Aqua' }] },

@@ -139,7 +139,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function effTypeOf(blk, tier) {
     return (blk.typeByTier && blk.typeByTier[tier]) || blk.type;
   }
-  // Übungsfelder je Tier (Quad+Ham-Pump hat bei Tier I nur ein Feld, sonst zwei)
+  // Übungsfelder je Tier (Quads+Hams-Pump hat bei Tier I nur ein Feld, sonst zwei)
   function exOf(blk, tier) {
     return (blk.exByTier && blk.exByTier[tier]) || blk.ex;
   }
