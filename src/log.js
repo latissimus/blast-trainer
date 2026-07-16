@@ -470,6 +470,42 @@ export async function mountLog(container, { userId, readOnly = false }) {
     return [...byLower.values()].sort((a, b) => a.localeCompare(b, 'de'));
   }
 
+  // Zuletzt benutzte Uebungen einer Art, neueste zuerst – fuer die Chips unter
+  // dem Feld. Die native Browser-Liste (datalist) zeigt iOS nicht an, deshalb
+  // muessen die Vorschlaege sichtbar im Dokument stehen.
+  function recentNames(kind, limit = 6) {
+    const seen = new Map();
+    Object.keys(state.data).forEach((day) => {
+      const tplDay = TPL[day]; if (!tplDay) return;
+      Object.keys(state.data[day] || {}).forEach((wkStr) => {
+        const wk = Number(wkStr);
+        const cell = state.data[day][wkStr] || {};
+        Object.keys(cell).forEach((bid) => {
+          const blk = tplDay.blocks.find((b) => b.id === bid);
+          if (!blk || blk.type !== kind) return;
+          ((cell[bid] || {}).names || []).forEach((nm) => {
+            const t = String(nm || '').trim(); if (!t) return;
+            const k = t.toLowerCase();
+            const cur = seen.get(k);
+            if (!cur || wk > cur.week) seen.set(k, { n: t, week: wk });
+          });
+        });
+      });
+    });
+    // Pool aus frueheren Phasen ans Ende, Wochennummern sind dort nicht vergleichbar.
+    Object.keys(state.mem).forEach((key) => {
+      const i = key.indexOf('|');
+      if (i < 0 || key.slice(0, i) !== kind) return;
+      const k = key.slice(i + 1);
+      if (seen.has(k)) return;
+      const e = state.mem[key];
+      seen.set(k, { n: (e && e.n) || k, week: -1 });
+    });
+    return [...seen.values()]
+      .sort((a, b) => b.week - a.week || a.n.localeCompare(b.n, 'de'))
+      .slice(0, limit);
+  }
+
   function lastLogFor(name, kind) {
     const k = (name || '').trim().toLowerCase(); if (!k) return null;
     let best = null;
@@ -628,6 +664,27 @@ export async function mountLog(container, { userId, readOnly = false }) {
         if (freeEx && !readOnly) nameIn.setAttribute('list', 'lg-pool-' + (baseMR ? 'mr' : 'pump'));
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
+        // Antippbare Vorschlaege aus dem eigenen Bestand. Nur bei leerem Feld –
+        // ist die Uebung gewaehlt, waeren sie nur noch Rauschen.
+        let syncSug = () => {};
+        if (freeEx && !readOnly) {
+          const sugBar = document.createElement('div'); sugBar.className = 'exsug';
+          recentNames(baseMR ? 'mr' : 'pump').forEach((r) => {
+            const b = document.createElement('button');
+            b.type = 'button'; b.className = 'sug'; b.textContent = r.n;
+            b.onclick = () => {
+              nameIn.value = r.n;
+              nameIn.dispatchEvent(new Event('input', { bubbles: true }));
+            };
+            sugBar.appendChild(b);
+          });
+          if (sugBar.children.length) {
+            syncSug = () => { sugBar.hidden = !!nameIn.value.trim(); };
+            syncSug();
+            exDiv.appendChild(sugBar);
+          }
+        }
+
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
         // Anzahl Sätze: Pump-Paare sind Supersets und MR-Felder eigenständig -> jede Übung
         // bekommt die volle Zahl. Nur Load wird im ZigZag auf Comp/Iso aufgeteilt.
@@ -639,6 +696,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         if (!readOnly) nameIn.oninput = () => {
           if (freeEx) { entry.names[xi] = nameIn.value; renderMem(prevLine, entry.names[xi], memKind); }
           else { names[xi] = nameIn.value; }
+          syncSug();
           queuePersist();
         };
 
