@@ -178,7 +178,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
       <span class="tierhint" id="lg-tierhint"></span>
     </div>
     <div class="daymeta" id="lg-daymeta"></div>
-    <div id="lg-mrrest"></div>
     <div id="lg-content"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>`;
@@ -189,7 +188,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const contentEl = wrap.querySelector('#lg-content');
   const volEl = wrap.querySelector('#lg-vol');
   const dayMetaEl = wrap.querySelector('#lg-daymeta');
-  const mrRestEl = wrap.querySelector('#lg-mrrest');
   const wkNumEl = wrap.querySelector('#lg-wknum');
   const rotEl = wrap.querySelector('#lg-rot');
   const cruiseEl = wrap.querySelector('#lg-cruise');
@@ -378,17 +376,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const tier = tierOf(state.day, state.week);
     dayMetaEl.textContent = tpl.sub;
 
-    // Pause zwischen den Muscle Rounds – einmal oben, statt "10 s" auf jedem Block
-    mrRestEl.innerHTML = '';
-    if (state.day === 'MRs') {
-      const rb = document.createElement('button');
-      rb.className = 'chip rest mrrest';
-      rb.textContent = '⏱ ' + (MR_REST / 60) + ' min Pause zwischen den Muscle Rounds';
-      rb.disabled = readOnly;
-      if (!readOnly) rb.onclick = () => startTimer(MR_REST);
-      mrRestEl.appendChild(rb);
-    }
-
     const cell = ensureCell();
     const prev = prevFilled(state.day, state.week);
     contentEl.innerHTML = '';
@@ -404,7 +391,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const effType = effTypeOf(blk, tier);              // Typ je Tier (Pump-Ausnahme bei MR)
       if (baseMR) entry.names = entry.names || (entry.name != null ? [entry.name] : []);  // MR-Übungen frei pro Woche/Feld
       const names = baseMR ? null : dayNames(state.day, blk);
-      const effRest = effType === 'mr' ? blk.rest : (effType === 'pump' ? 60 : blk.rest);
+      const effRest = effType === 'mr' ? MR_REST : (effType === 'pump' ? 60 : blk.rest);
       const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
 
       const el = document.createElement('div'); el.className = 'block';
@@ -412,8 +399,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (effType === 'load') cues.push('<span class="chip">' + effReps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');
       if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · leicht</span>', '<span class="chip">bis metab. Versagen + Teilwdh.</span>');
       if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
-      // MR-Blöcke: keine Pause pro Block – die MR-Pause steht einmal oben
-      if (effType !== 'mr') cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + (effRest >= 60 ? (effRest / 60) + ' min' : effRest + ' s') + '</button>');
+      cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + (effRest >= 60 ? (effRest / 60) + ' min' : effRest + ' s') + '</button>');
 
       el.innerHTML = `
         <div class="bhead">
