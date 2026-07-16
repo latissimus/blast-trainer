@@ -29,6 +29,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     rot: p.rot || {},
     ex: p.ex || {},      // gemeinsame Übungsnamen pro Tag (über alle Wochen der Rotation)
     notes: p.notes || {}, // gemeinsame Notizen pro Tag/Übung
+    mem: p.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
   };
   migrateData();
 
@@ -54,7 +55,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saveStateEl.title = title;
   }
   function payloadOut() {
-    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, v: 2 };
+    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, mem: state.mem, v: 3 };
   }
   async function persist() {
     if (readOnly) return true;
@@ -305,6 +306,46 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // ---- Gedächtnis für frei rotierende Übungen (Pump & Muscle Rounds) ----
   // Laut PDF ist der Log bei Pump/MR kein Progressions-Werkzeug, sondern soll
   // zeigen, welche Last/Wdh man zuletzt bei dieser Übung genommen hat.
+  // ---- Übungs-Pool (Pump/MR) ---------------------------------------
+  // Pump- und MR-Übungen rotieren frei und haengen am Namen. Damit man beim
+  // naechsten Blast nachschauen kann, was man zuletzt geschafft hat, wird beim
+  // Phasen-Reset aus den Wochendaten ein Pool geerntet, der bestehen bleibt.
+  // Gelesen wird er nur als Rueckfalloption: solange die laufende Phase Daten
+  // zur Übung hat, gewinnen die – das Verhalten innerhalb einer Phase bleibt
+  // dadurch unveraendert.
+  const memKey = (name, kind) => {
+    const k = (name || '').trim().toLowerCase();
+    return k ? kind + '|' + k : null;
+  };
+  const numOf = (v) => parseFloat(String(v).replace(',', '.'));
+
+  function harvestMem(data) {
+    const out = {};
+    Object.keys(data || {}).forEach((day) => {
+      const tplDay = TPL[day]; if (!tplDay) return;
+      Object.keys(data[day] || {}).forEach((wkStr) => {
+        const wk = Number(wkStr);
+        const cell = data[day][wkStr] || {};
+        Object.keys(cell).forEach((bid) => {
+          const blk = tplDay.blocks.find((b) => b.id === bid);
+          if (!blk || (blk.type !== 'pump' && blk.type !== 'mr')) return;
+          const e = cell[bid]; if (!e) return;
+          const nms = e.names || (e.name != null ? [e.name] : []);
+          nms.forEach((nm, xi) => {
+            const key = memKey(nm, blk.type); if (!key) return;
+            ((e.sets && e.sets[xi]) || []).forEach((s) => {
+              const w = numOf(s && s.w); if (!w) return;
+              const old = out[key];
+              const ow = old ? numOf(old.w) : -1;
+              if (!old || wk > old.week || (wk === old.week && w > ow)) out[key] = { w: s.w, r: s.r, week: wk };
+            });
+          });
+        });
+      });
+    });
+    return out;
+  }
+
   function lastLogFor(name, kind) {
     const k = (name || '').trim().toLowerCase(); if (!k) return null;
     let best = null;
@@ -331,7 +372,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
         });
       });
     });
-    return best;
+    if (best) return best;
+    // Nichts in der laufenden Phase -> Pool aus frueheren Phasen.
+    const pooled = state.mem[memKey(name, kind)];
+    return pooled ? { w: pooled.w, r: pooled.r, week: pooled.week, pool: true } : null;
   }
   function renderMem(node, name, kind) {
     const m = lastLogFor(name, kind);
@@ -340,7 +384,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const txt = kind === 'mr'
       ? `zuletzt: ${m.w} kg${hasR ? ` · ${m.r} Wdh. im letzten MR` : ''}`
       : `zuletzt: ${m.w} kg${hasR ? ` × ${m.r} Wdh` : ''}`;
-    node.innerHTML = `<b>${txt}</b><span class="delta d-hold">Wo ${m.week}</span>`;
+    // Wochennummern starten pro Phase neu – Pool-Treffer stammen aus einer
+    // frueheren Phase und werden deshalb nicht als "Wo N" ausgewiesen.
+    node.innerHTML = `<b>${txt}</b><span class="delta d-hold">${m.pool ? 'Pool' : 'Wo ' + m.week}</span>`;
   }
   // Eine Muscle Round = 6×4 Cluster. Kompakt: Gewicht + Wdh im letzten (6.) Satz.
   function mrRow(entry, xi, si, blk, memNode) {
@@ -507,7 +553,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   async function resetAllData() {
-    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.')) return;
+    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein Pump- und MR-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
+    // Pool retten, bevor die Wochendaten fallen. Neuere Werte gewinnen.
+    state.mem = Object.assign({}, state.mem, harvestMem(state.data));
     state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {};
     state.week = 1; state.day = 'OK-A';
     clearTimeout(saveTimer);
@@ -640,7 +688,17 @@ export async function mountLog(container, { userId, readOnly = false }) {
           <div class="faq-a"><p>„+ Notiz" gehört zur Übung und gilt für <b>alle</b> Wochen — gedacht für Einstellungen und Cues, die gleich bleiben: Sitzhöhe, Griffbreite, Fußposition.</p></div>
         </details>
         <details class="faq"><summary>Was macht der Button in Woche 8?</summary>
-          <div class="faq-a"><p>„🔄 Neue Phase starten" löscht <b>alle</b> eingetragenen Daten und setzt dich zurück auf Woche 1: Übungen, Gewichte, Wdh., RIR und Notizen. Gedacht für den Start einer komplett neuen Blast-Phase.</p></div>
+          <div class="faq-a">
+            <p>„🔄 Neue Phase starten" leert alle eingetragenen Daten und setzt dich zurück auf Woche 1: Übungen, Gewichte, Wdh., RIR und Notizen. Gedacht für den Start einer komplett neuen Blast-Phase.</p>
+            <p><b>Dein Pump- und MR-Übungspool bleibt aber erhalten</b> — siehe unten.</p>
+          </div>
+        </details>
+        <details class="faq"><summary>Was ist der Übungs-Pool?</summary>
+          <div class="faq-a">
+            <p>Deine Pump- und MR-Übungen sammeln sich dauerhaft an — über Phasen hinweg. Wählst du im nächsten Blast wieder eine Übung, die du früher schon mal gemacht hast, siehst du sofort, was du damals geschafft hast: <i>„zuletzt: 40 kg · 3 Wdh. im letzten MR"</i>, markiert mit <b>Pool</b>.</p>
+            <p>Der Pool überlebt „Neue Phase starten" bewusst — genau dafür ist er da. Gelöscht wird er nie.</p>
+            <p>Solange die <b>laufende</b> Phase schon Werte zu der Übung hat, gewinnen die: dann steht dort <b>Wo 3</b> statt <b>Pool</b>. Die Wochennummer wäre bei Pool-Werten auch irreführend, weil sie mit jeder Phase wieder bei 1 startet.</p>
+          </div>
         </details>
         <p class="src">Struktur: Fortitude Training, Scott Stevenson. Evidenz: Pelland et al. 2025 · Baz-Valle et al. 2022 · Schoenfeld et al. 2021 · Wolf/Schoenfeld 2025.</p>
       </div>`;
