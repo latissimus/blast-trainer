@@ -700,6 +700,17 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <p>Solange die <b>laufende</b> Phase schon Werte zu der Übung hat, gewinnen die: dann steht dort <b>Wo 3</b> statt <b>Pool</b>. Die Wochennummer wäre bei Pool-Werten auch irreführend, weil sie mit jeder Phase wieder bei 1 startet.</p>
           </div>
         </details>
+        <details class="faq"><summary>Warum gibt es hier keine Stretches?</summary>
+          <div class="faq-a">
+            <p>Fortitude sieht nach jedem Muskel optional einen Stretch vor (Flexibility / Occlusion / Extreme). Diese App lässt sie bewusst weg — hier der Stand, damit du selbst entscheiden kannst:</p>
+            <p><b>1. Kein Verletzungsschutz.</b> Krafttraining senkt Verletzungen um rund zwei Drittel, Dehnen zeigt keinen günstigen Effekt. Stevenson schreibt das im Buch selbst: <i>„the data don't support this"</i>.</p>
+            <p><b>2. Als Wachstumsreiz zu klein.</b> Aktuelle Meta-Analysen finden triviale bis kleine Effekte (d = 0,12–0,20) — und das nur bei 30–60 Minuten Dehnen pro Tag und Muskel. Neben deinem Load-, Pump- und MR-Volumen fällt das nicht ins Gewicht.</p>
+            <p><b>3. Die Begründung ist überholt.</b> Der Occlusion Stretch stützt sich auf GH-Ausschüttung und „metabolischen Stress". Die Hormon-Hypothese gilt seit rund 2010 als widerlegt, metabolischer Stress als eigenständiger Treiber wurde stark zurückgestuft. Heute gilt mechanische Spannung als Haupttreiber.</p>
+            <p><b>4. Der gute Kern lebt woanders.</b> Was wirkt, ist Belastung bei <b>langer Muskellänge</b> — über Übungsauswahl und volle ROM in den Arbeitssätzen, nicht über einen 60–90-Sekunden-Halt danach.</p>
+            <p><b>5. Beweglichkeit kommt ohnehin.</b> Krafttraining über volle ROM verbessert die Beweglichkeit genauso stark wie dediziertes Dehnen.</p>
+            <p><b>Wann Dehnen trotzdem sinnvoll ist:</b> gezielt gegen eine konkrete Einschränkung, die deine Technik verschlechtert — verkürzte Hüftbeuger oder Brust vom Sitzen etwa. Das ist ein Technik-Argument, kein Gelenk-Argument, und es ist Stevensons bestes. Vor dem Heben kurz und dynamisch halten; langes statisches Dehnen (über 60 s) senkt die Kraft kurzfristig.</p>
+          </div>
+        </details>
         <p class="src">Struktur: Fortitude Training, Scott Stevenson. Evidenz: Pelland et al. 2025 · Baz-Valle et al. 2022 · Schoenfeld et al. 2021 · Wolf/Schoenfeld 2025.</p>
       </div>`;
     document.body.appendChild(sheet);
