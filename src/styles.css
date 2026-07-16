@@ -138,8 +138,12 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .tab:active{transform:translate(2px,2px);box-shadow:none}
 .tab .t2{font-size:9px;font-weight:700;letter-spacing:.02em;opacity:.75;font-style:normal;text-transform:none;font-family:var(--mono)}
 .tab.active{background:var(--navy);color:#fff}
-.tab .dot{position:absolute;top:6px;right:7px;width:7px;height:7px;border-radius:50%;background:var(--up);border:1.5px solid var(--ink)}
-.tab.active .dot{background:var(--pink)}
+/* Punkt = Fortschritt der Einheit. Offener Ring: angefangen. Gefuellt: Soll-Saetze erreicht.
+   Ring in currentColor, damit er auf hellem wie auf navyfarbenem (aktivem) Tab sichtbar ist. */
+.tab .dot{position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:50%;
+  background:transparent;border:2px solid currentColor}
+.tab .dot.met{background:var(--up)}
+.tab .opt{font-style:normal;font-weight:700;font-size:9px;opacity:.7;letter-spacing:0}
 
 /* ---------- Log: tier ---------- */
 .tierbar{display:flex;align-items:center;gap:9px;padding:0 0 12px}

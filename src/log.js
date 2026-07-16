@@ -123,8 +123,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // ---- structure helpers -------------------------------------------
   const rotOf = (week) => state.rot[week] || (week % 2 === 1 ? 'A' : 'B');
   const isCruise = (week) => week >= 7;   // Wochen 7-8 = Intensive Cruise: nur Muscle Rounds, Tier I
+  // Cruise: 2-3 Einheiten pro Woche, alle nur Muscle Rounds (PDF S. 82/100) -> drei
+  // eigene Slots, damit jede Einheit getrennt geloggt wird. Der dritte ist optional.
   const daysOfWeek = (week) => {
-    if (isCruise(week)) return ['MRs'];
+    if (isCruise(week)) return ['MRs', 'MRs-2', 'MRs-3'];
     const r = rotOf(week); return ['OK-' + r, 'UK-' + r, 'MRs'];
   };
   const tierOf = (day, week) => {
@@ -160,6 +162,25 @@ export async function mountLog(container, { userId, readOnly = false }) {
     return Object.values(cell).some((b) => ((b && b.sets) || []).some((arr) => (arr || []).some((s) => s && (s.w || s.r))));
   }
   const dayHasData = (day, week) => cellHasData((state.data[day] || {})[week]);
+  // Fortschritt einer Einheit fuer den Punkt auf dem Tab. Zaehlt wie die Volumen-Leiste,
+  // damit Punkt und "X / Y ARBEITSSÄTZE" nie widersprechen.
+  function dayProgress(day, week) {
+    const tpl = TPL[day];
+    const cell = (state.data[day] || {})[week];
+    if (!tpl || !cell) return { any: false, met: false };
+    const tier = tierOf(day, week);
+    let done = 0, tgtTotal = 0;
+    tpl.blocks.forEach((blk) => {
+      const tgt = targetSets(blk, tier); if (tgt === 0) return;
+      tgtTotal += tgt;
+      const entry = cell[blk.id]; if (!entry) return;
+      (entry.sets || []).forEach((arr, xi) => {
+        const cnt = setsForExercise(blk, tier, xi);
+        (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) done++; });
+      });
+    });
+    return { any: done > 0, met: tgtTotal > 0 && done >= tgtTotal };
+  }
   function prevFilled(day, week) {
     const d = state.data[day] || {};
     const ws = Object.keys(d).map(Number).filter((w) => w < week && cellHasData(d[w])).sort((a, b) => b - a);
@@ -230,12 +251,22 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tabsEl.innerHTML = '';
     const days = daysOfWeek(state.week);
     if (!days.includes(state.day)) state.day = days[0];
-    days.forEach((d) => {
+    const cruiseWk = isCruise(state.week);
+    days.forEach((d, i) => {
       const tpl = TPL[d];
       const b = document.createElement('button');
       b.className = 'tab' + (d === state.day ? ' active' : '');
-      b.innerHTML = `<span>${tpl.label}</span><span class="t2">${tpl.short}</span>`;
-      if (dayHasData(d, state.week)) { const dot = document.createElement('span'); dot.className = 'dot'; b.appendChild(dot); }
+      // Tag-Nummer aus der Position: Blast = Tag 1-3, Cruise = drei MR-Einheiten,
+      // die dritte laut PDF optional (2-3x pro Woche).
+      const opt = cruiseWk && i === 2 ? ' <span class="opt">(opt.)</span>' : '';
+      b.innerHTML = `<span>Tag ${i + 1}${opt}</span><span class="t2">${tpl.short}</span>`;
+      const pr = dayProgress(d, state.week);
+      if (pr.any) {
+        const dot = document.createElement('span');
+        dot.className = 'dot' + (pr.met ? ' met' : '');
+        dot.title = pr.met ? 'Soll-Sätze erreicht' : 'angefangen';
+        b.appendChild(dot);
+      }
       b.onclick = () => { state.day = d; queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
       tabsEl.appendChild(b);
     });
@@ -684,6 +715,15 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <p>Die Zahl hinter <b>Sätze</b> steht fest im Fortitude-Sheet und hängt am gewählten Tier — du musst nichts selbst rechnen.</p>
             <p><b>Loading:</b> die Sätze des Muskels werden im ZigZag auf Comp und Iso verteilt. Rücken Tier III = 4 → 2 Comp + 2 Iso. Tier I = 1 → nur der Comp-Satz, das Iso-Feld bleibt leer.</p>
             <p><b>Pump und MR:</b> gekoppelte Übungen sind Supersätze, die Zahl gilt <b>je Übung</b>. Brust/Rücken Tier III = 2 heißt also 2 Sätze Brust <i>und</i> 2 Sätze Rücken.</p>
+          </div>
+        </details>
+        <details class="faq"><summary>Was bedeutet der Punkt auf den Tag-Feldern?</summary>
+          <div class="faq-a">
+            <p>Er zeigt, wie weit die Einheit in dieser Woche ist:</p>
+            <p><b>Offener Ring</b> — angefangen, aber die Soll-Sätze fehlen noch.<br>
+            <b>Gefüllt (grün)</b> — alle Soll-Sätze des Tages sind eingetragen.<br>
+            <b>Kein Punkt</b> — hier steht noch nichts.</p>
+            <p>Gezählt wird gegen dasselbe Ziel wie unten in der Volumen-Leiste („X / Y Arbeitssätze") — die beiden können sich also nicht widersprechen. Maßgeblich ist das Tier, das du für den Tag gewählt hast.</p>
           </div>
         </details>
         <details class="faq"><summary>Was heißt das Zeichen oben rechts?</summary>
