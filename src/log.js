@@ -598,10 +598,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
           </div>
         </details>
         <details class="faq"><summary>Wie trainiere ich die Loading-Sätze?</summary>
-          <div class="faq-a"><p>6–12 Wdh., 0–2 RIR. Zig-Zag: <b>Comp → Iso → Comp → Iso</b>. Versagen nur im <b>letzten Comp-Satz</b>; Iso-Sätze dürfen ans Versagen. Pause: Oberkörper 90 s, Unterkörper 120 s, Waden 90 s.</p></div>
+          <div class="faq-a"><p>6–12 Wdh., 0–2 RIR. Zig-Zag: <b>Comp → Iso → Comp → Iso</b>. Versagen nur im <b>letzten Comp-Satz</b>; Iso-Sätze dürfen ans Versagen. Pause: Oberkörper 90 s, Unterkörper 120 s, Waden 60 s.</p></div>
         </details>
         <details class="faq"><summary>Wie trainiere ich die Pump-Sätze?</summary>
-          <div class="faq-a"><p>12–25 Wdh., leichte Last (~50 % 1RM), Pause 60 s, im Supersatz gekoppelt. Bis zum <b>metabolischen Versagen</b>, dann Teilwiederholungen im gedehnten Bereich. Übungen frei rotieren.</p></div>
+          <div class="faq-a"><p>15–25 Wdh., leichte Last (~50 % 1RM), Pause 60 s, im Supersatz gekoppelt. Bis zum <b>metabolischen Versagen</b>, dann Teilwiederholungen im gedehnten Bereich. Übungen frei rotieren.</p></div>
         </details>
         <details class="faq"><summary>Wie funktionieren die Muscle Rounds (MR)?</summary>
           <div class="faq-a"><p>6 Minisätze à 4 Wdh., ~10 s Pause, 5–10 min pro Round. Gewicht ≈ 15RM. <b>Nur ein Versagenspunkt</b>, im letzten Minisatz.</p></div>
@@ -614,6 +614,33 @@ export async function mountLog(container, { userId, readOnly = false }) {
         </details>
         <details class="faq"><summary>Was ist Blast und Cruise?</summary>
           <div class="faq-a"><p>Blast = 6 Wochen progressiv (Tier steigend). Danach Cruise (2 Wochen): Volumen und Frequenz runter, nur Muscle Rounds — zum Erholen, bevor die nächste Phase startet.</p></div>
+        </details>
+        <details class="faq"><summary>Wie merkt sich die App meine Übungen und Gewichte?</summary>
+          <div class="faq-a">
+            <p><b>Loading-Übungen</b> gehören fest zum Tag: einmal eingetragen, stehen sie in jeder Woche derselben A/B-Woche wieder da. Darunter siehst du <i>„Wo 3: 80×8, 80×7"</i> — die Werte vom letzten Mal, plus <b>▲ gesteigert</b> / <b>= gehalten</b> / <b>▼ gesunken</b>, sobald du heute etwas einträgst.</p>
+            <p><b>Pump- und MR-Übungen</b> rotierst du frei. Sie hängen deshalb nicht am Tag, sondern <b>am Namen</b>: Trägst du dieselbe Übung irgendwann wieder ein — egal an welchem Tag oder in welcher Woche — erscheint automatisch <i>„zuletzt: 30 kg × 18 Wdh · Wo 3"</i> bzw. bei MR <i>„zuletzt: 40 kg · 3 Wdh. im letzten MR"</i>.</p>
+            <p>Der Name muss dafür gleich geschrieben sein — Groß-/Kleinschreibung und Leerzeichen am Rand sind egal, aber <i>„Beinstrecker"</i> und <i>„Beinstrecker Maschine"</i> gelten als zwei verschiedene Übungen.</p>
+            <p>Bei Pump und MR gibt es bewusst <b>kein</b> ▲/▼-Delta: Diese Sätze sind laut Fortitude nicht zum Progressions-Tracking gedacht — der Wert dient nur als Anhaltspunkt fürs Einstellen.</p>
+          </div>
+        </details>
+        <details class="faq"><summary>Was bedeutet die A/B-Woche?</summary>
+          <div class="faq-a"><p>Die Loading-Tage wechseln wöchentlich zwischen zwei Übungs-Gruppierungen: <b>A</b> in ungeraden, <b>B</b> in geraden Wochen. So kommt jede Übung alle zwei Wochen wieder — oft genug, um Fortschritt sauber zu vergleichen. Pump und MR sind davon nicht betroffen, die wählst du jedes Mal frei.</p></div>
+        </details>
+        <details class="faq"><summary>Wie kommen die Satzzahlen zustande?</summary>
+          <div class="faq-a">
+            <p>Die Zahl hinter <b>Sätze</b> steht fest im Fortitude-Sheet und hängt am gewählten Tier — du musst nichts selbst rechnen.</p>
+            <p><b>Loading:</b> die Sätze des Muskels werden im ZigZag auf Comp und Iso verteilt. Rücken Tier III = 4 → 2 Comp + 2 Iso. Tier I = 1 → nur der Comp-Satz, das Iso-Feld bleibt leer.</p>
+            <p><b>Pump und MR:</b> gekoppelte Übungen sind Supersätze, die Zahl gilt <b>je Übung</b>. Brust/Rücken Tier III = 2 heißt also 2 Sätze Brust <i>und</i> 2 Sätze Rücken.</p>
+          </div>
+        </details>
+        <details class="faq"><summary>Was heißt das Zeichen neben „Einheit speichern"?</summary>
+          <div class="faq-a"><p><b>✓</b> gespeichert · <b>↻</b> speichert gerade oder noch nicht gesichert · <b>⚠</b> Fehler, nicht gespeichert. Die App speichert nach jeder Eingabe von selbst — der Button ist nur da, wenn du sofort sichern willst.</p></div>
+        </details>
+        <details class="faq"><summary>Wofür ist das Notizfeld?</summary>
+          <div class="faq-a"><p>„+ Notiz" gehört zur Übung und gilt für <b>alle</b> Wochen — gedacht für Einstellungen und Cues, die gleich bleiben: Sitzhöhe, Griffbreite, Fußposition.</p></div>
+        </details>
+        <details class="faq"><summary>Was macht der Button in Woche 8?</summary>
+          <div class="faq-a"><p>„🔄 Neue Phase starten" löscht <b>alle</b> eingetragenen Daten und setzt dich zurück auf Woche 1: Übungen, Gewichte, Wdh., RIR und Notizen. Gedacht für den Start einer komplett neuen Blast-Phase.</p></div>
         </details>
         <p class="src">Struktur: Fortitude Training, Scott Stevenson. Evidenz: Pelland et al. 2025 · Baz-Valle et al. 2022 · Schoenfeld et al. 2021 · Wolf/Schoenfeld 2025.</p>
       </div>`;
