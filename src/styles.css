@@ -92,7 +92,10 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .input:focus{outline:none;border-color:var(--pink);box-shadow:var(--shadow-sm)}
 
 /* ---------- Auth ---------- */
-.auth-shell{max-width:420px;margin:40px auto;padding:0 14px}
+/* Gesamter Anmelde-Block mittig im Viewport; Abstände untereinander bleiben unverändert.
+   min-height statt height: ist der Inhalt höher (Signup/Tastatur), wächst er normal weiter. */
+.auth-shell{max-width:420px;margin:0 auto;padding:24px 14px;
+  min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center}
 .auth-title{font-size:26px;margin:0 0 4px;text-align:center}
 .auth-sub{text-align:center;color:var(--muted);font-size:13px;margin:0 0 22px}
 .auth-switch{text-align:center;font-size:13px;margin-top:16px}
@@ -230,9 +233,9 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .foot{font-size:11px;color:var(--muted);text-align:center;padding:8px 6px 20px;line-height:1.7;font-weight:600}
 
 /* ---------- Sticky save + timer ---------- */
-/* Unterer Abstand: Safe-Area minus 14px (mind. 2px), damit der Button tiefer sitzt,
-   aber der iPhone-Home-Indicator frei bleibt. */
-.savebar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px max(2px, calc(env(safe-area-inset-bottom) - 14px));
+/* Unterer Abstand: Safe-Area minus 8px (mind. 4px) – tief, aber der
+   iPhone-Home-Indicator bleibt frei. */
+.savebar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px max(4px, calc(env(safe-area-inset-bottom) - 8px));
   background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 45%);z-index:30}
 .savebar .inner{max-width:580px;margin:0 auto;display:flex;gap:9px;align-items:stretch}
 .savebar .btn-primary{flex:1;padding:15px}

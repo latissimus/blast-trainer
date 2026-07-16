@@ -105,7 +105,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   // Gemeinsame Übungsnamen für einen Tag/Block (über alle Wochen geteilt).
-  // Start LEER — jeder Coachee trägt seine Übungen selbst ein.
+  // Start LEER — jeder Trainee trägt seine Übungen selbst ein.
   function dayNames(day, blk) {
     state.ex[day] = state.ex[day] || {};
     if (!state.ex[day][blk.id]) state.ex[day][blk.id] = blk.ex.map(() => '');
