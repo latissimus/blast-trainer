@@ -2,6 +2,7 @@ import './styles.css';
 import { supabase } from './supabase.js';
 import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } from './auth.js';
 import { readProfile, writeProfile } from './localstore.js';
+import { brandSvg } from './brand.js';
 import { mountLog } from './log.js';
 import { mountProfile } from './profile.js';
 import { mountAdmin } from './admin.js';
@@ -28,7 +29,7 @@ function renderAuth() {
   app.innerHTML = `
     ${MARQUEE}
     <div class="auth-shell">
-      <div style="text-align:center;margin-bottom:30px"><span class="brand" style="font-size:46px"><span class="star">★</span>BLAST<span class="star">★</span></span></div>
+      <div style="text-align:center;margin-bottom:30px"><span class="brand" style="font-size:46px">${brandSvg()}</span></div>
       <h1 class="auth-title">${isLogin ? 'Login' : 'Registrieren'}</h1>
       <p class="auth-sub">${isLogin ? 'Melde dich mit E-Mail und Passwort an.' : 'Erstelle deinen Trainings-Account.'}</p>
       <div id="auth-msg"></div>
@@ -103,7 +104,7 @@ function renderRecovery() {
   app.innerHTML = `
     ${MARQUEE}
     <div class="auth-shell">
-      <div style="text-align:center;margin-bottom:30px"><span class="brand" style="font-size:46px"><span class="star">★</span>BLAST<span class="star">★</span></span></div>
+      <div style="text-align:center;margin-bottom:30px"><span class="brand" style="font-size:46px">${brandSvg()}</span></div>
       <h1 class="auth-title">Neues Passwort</h1>
       <p class="auth-sub">Wähle ein neues Passwort für deinen Account.</p>
       <div id="rc-msg"></div>
@@ -165,7 +166,7 @@ function renderChrome() {
     ${MARQUEE}
     <header class="topbar">
       <div class="wrap">
-        <span class="brand"><span class="star">★</span>BLAST<span class="star">★</span></span>
+        <span class="brand">${brandSvg()}</span>
         <nav class="nav">
           <button class="nav-btn" data-view="log">Log</button>
           ${isAdmin ? '<button class="nav-btn pink" data-view="admin">Admin</button>' : ''}
@@ -223,7 +224,7 @@ async function render() {
   if (recovery) { renderRecovery(); return; }
 
   if (!profile || profile.id !== session.user.id) {
-    app.innerHTML = `${MARQUEE}<div class="wrap" style="padding-top:40px;text-align:center"><div class="brand" style="font-size:30px"><span class="star">★</span>BLAST<span class="star">★</span></div><p class="auth-sub">lädt…</p></div>`;
+    app.innerHTML = `${MARQUEE}<div class="wrap" style="padding-top:40px;text-align:center"><div class="brand" style="font-size:30px">${brandSvg()}</div><p class="auth-sub">lädt…</p></div>`;
     try {
       profile = await loadProfile(session.user.id);
       if (profile) writeProfile(session.user.id, profile);
