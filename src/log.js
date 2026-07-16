@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { readLog, writeLog, mergePayload } from './localstore.js';
 import { TPL, LEGACY, TIER_NAMES } from './template.js';
 
 // Pause zwischen zwei Muscle Rounds (s). Die PDF nennt keinen festen Wert
@@ -13,14 +14,33 @@ const MR_REST = 120;
    Returns { destroy } to remove the sticky save bar / sheet on nav.
    ------------------------------------------------------------------ */
 export async function mountLog(container, { userId, readOnly = false }) {
-  const { data, error } = await supabase
-    .from('training_logs')
-    .select('payload')
-    .eq('user_id', userId)
-    .maybeSingle();
-  if (error) throw error;
+  // Local-first laden: Der Server ist die Sicherungskopie, nicht die Voraussetzung.
+  // Nur wenn lokal ungespeicherte Aenderungen liegen, wird zusammengefuehrt –
+  // sonst gewinnt der Server (sein Stand ist dann identisch mit dem lokalen).
+  const local = readLog(userId);
+  let server = null, serverOk = false;
+  try {
+    const { data, error } = await supabase
+      .from('training_logs')
+      .select('payload')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error) throw error;
+    server = data?.payload || {};
+    serverOk = true;
+  } catch (e) {
+    // Kein Netz und nichts lokal -> wie bisher scheitern. Sonst: offline weiter.
+    if (!local) throw e;
+  }
 
-  const p = data?.payload || {};
+  let p, mergedOffline = false;
+  if (serverOk && local && local.dirty) {
+    // Nach einem Phasen-Reset ersetzt der lokale Stand den Server, statt sich mit
+    // ihm zu vereinigen – sonst kaemen die bewusst geloeschten Wochen zurueck.
+    p = local.replace ? local.payload : mergePayload(server, local.payload);
+    mergedOffline = true;
+  } else if (serverOk) p = server;
+  else { p = local.payload; mergedOffline = true; }
   const state = {
     week: p.week || 1,
     day: TPL[p.day] ? p.day : 'OK-A',
@@ -45,7 +65,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saved:   ['✓', 'ok',     'gespeichert'],
     saving:  ['↻', 'saving', 'speichert…'],
     pending: ['↻', 'saving', 'ungespeicherte Änderungen'],
-    error:   ['⚠', 'err',    'Fehler – nicht gespeichert'],
+    // Nicht hochgeladen heisst nicht mehr "verloren": lokal liegt es sicher.
+    offline: ['↑', 'wait',   'auf diesem Gerät gesichert · wartet auf Verbindung'],
+    error:   ['⚠', 'err',    'auf diesem Gerät gesichert · Upload fehlgeschlagen'],
   };
   function setStatus(kind) {
     if (!saveStateEl) return;
@@ -57,22 +79,52 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function payloadOut() {
     return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, mem: state.mem, v: 3 };
   }
+  // Lokal vormerken, ohne ein gesetztes replace-Kennzeichen zu verlieren:
+  // Es darf erst fallen, wenn der Server den Stand wirklich hat.
+  function markLocal(payload, dirty) {
+    const cur = readLog(userId);
+    writeLog(userId, payload, dirty, !!(cur && cur.replace));
+  }
+
   async function persist() {
     if (readOnly) return true;
+    const payload = payloadOut();
+    markLocal(payload, true);                 // lokal zuerst – ueberlebt App-Kill
     setStatus('saving');
     const { error: e } = await supabase.from('training_logs').upsert(
-      { user_id: userId, payload: payloadOut(), updated_at: new Date().toISOString() },
+      { user_id: userId, payload, updated_at: new Date().toISOString() },
       { onConflict: 'user_id' }
     );
-    if (e) { setStatus('error'); return false; }
+    if (e) {
+      // Daten sind lokal sicher; nur der Upload fehlt. Wird automatisch nachgeholt.
+      setStatus(navigator.onLine ? 'error' : 'offline');
+      return false;
+    }
+    writeLog(userId, payload, false, false);  // sauber: Server hat denselben Stand
     setStatus('saved');
     return true;
   }
   function queuePersist() {
     if (readOnly) return;
+    // Synchron und sofort, nicht erst nach der Debounce: Wenn iOS die App
+    // dazwischen abraeumt, ist der Satz trotzdem da.
+    markLocal(payloadOut(), true);
     setStatus('pending');
     clearTimeout(saveTimer);
     saveTimer = setTimeout(persist, 700);
+  }
+
+  // Upload nachholen. 'online' feuert auf iOS nicht zuverlaessig, deshalb
+  // zusaetzlich ein ruhiger Takt, der nur bei offenen Aenderungen etwas tut.
+  function retrySync() {
+    if (readOnly) return;
+    const l = readLog(userId);
+    if (l && l.dirty) persist();
+  }
+  let retryId = null;
+  if (!readOnly) {
+    window.addEventListener('online', retrySync);
+    retryId = setInterval(retrySync, 20000);
   }
 
   // ---- migration: v1 index->id + Übungsnamen in gemeinsamen Tag-Speicher heben ----
@@ -590,6 +642,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {};
     state.week = 1; state.day = 'OK-A';
     clearTimeout(saveTimer);
+    // Leeren ist eine Absicht: Dieser Stand ersetzt den Server, auch wenn der
+    // Upload erst spaeter gelingt. Sonst holt der Abgleich alles wieder zurueck.
+    writeLog(userId, payloadOut(), true, true);
     await persist();
     renderAll();
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -763,6 +818,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
   buildSheet();
 
+  // Offline geladen oder zusammengefuehrt: Der lokale Stand ist jetzt der
+  // gueltige und muss noch hoch. Markieren und (falls Netz da ist) sofort senden.
+  if (mergedOffline && !readOnly) {
+    writeLog(userId, payloadOut(), true);
+    setStatus('offline');
+    if (navigator.onLine) persist();
+  }
+
   // ---- sticky save bar (editable only) -----------------------------
   if (!readOnly) {
     saveBar = document.createElement('div');
@@ -785,6 +848,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     destroy() {
       clearTimeout(saveTimer);
       clearInterval(timerId);
+      clearInterval(retryId);
+      window.removeEventListener('online', retrySync);
       if (saveBar) saveBar.remove();
       if (sheet) sheet.remove();
     },

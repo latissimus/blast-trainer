@@ -1,6 +1,7 @@
 import './styles.css';
 import { supabase } from './supabase.js';
 import { signIn, signUp, signOut, loadProfile } from './auth.js';
+import { readProfile, writeProfile } from './localstore.js';
 import { mountLog } from './log.js';
 import { mountProfile } from './profile.js';
 import { mountAdmin } from './admin.js';
@@ -165,10 +166,16 @@ async function render() {
     app.innerHTML = `${MARQUEE}<div class="wrap" style="padding-top:40px;text-align:center"><div class="brand" style="font-size:30px"><span class="star">★</span>BLAST<span class="star">★</span></div><p class="auth-sub">lädt…</p></div>`;
     try {
       profile = await loadProfile(session.user.id);
+      if (profile) writeProfile(session.user.id, profile);
     } catch (e) {
-      app.innerHTML = `${MARQUEE}<div class="auth-shell"><div class="msg err">Profil konnte nicht geladen werden: ${e.message}</div><button class="btn btn-block" id="lo">Logout</button></div>`;
-      app.querySelector('#lo').onclick = () => signOut();
-      return;
+      // Ohne Netz auf das zuletzt bekannte Profil zurueckfallen. Sonst kaeme man
+      // im Studio nie bis zum Log – obwohl die Trainingsdaten dort lokal liegen.
+      profile = readProfile(session.user.id);
+      if (!profile) {
+        app.innerHTML = `${MARQUEE}<div class="auth-shell"><div class="msg err">Profil konnte nicht geladen werden: ${e.message}</div><button class="btn btn-block" id="lo">Logout</button></div>`;
+        app.querySelector('#lo').onclick = () => signOut();
+        return;
+      }
     }
     if (!profile) {
       app.innerHTML = `${MARQUEE}<div class="auth-shell"><div class="msg err">Kein Profil gefunden. Bitte neu einloggen.</div><button class="btn btn-block" id="lo">Logout</button></div>`;

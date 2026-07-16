@@ -114,6 +114,8 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   width:22px;height:22px;font-size:14px;font-weight:900;font-family:var(--mono);color:var(--muted)}
 .save-dot.ok{color:var(--up)}
 .save-dot.saving{color:var(--faint)}
+/* wartet auf Verbindung – kein Fehler, die Daten liegen lokal sicher */
+.save-dot.wait{color:var(--navy)}
 .save-dot.err{color:var(--down)}
 
 /* ---------- Log: week / rotation ---------- */
