@@ -138,7 +138,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function effTypeOf(blk, tier) {
     return (blk.typeByTier && blk.typeByTier[tier]) || blk.type;
   }
-  // ZigZag-Verteilung: die N Gesamtsätze des Blocks auf die Übungen aufteilen.
+  // ZigZag-Verteilung (nur Load-Blöcke): die N Gesamtsätze des Muskels auf Comp/Iso aufteilen.
   // 1. Übung (Comp) aufgerundet N/2, 2. Übung (Iso) abgerundet N/2. Eine Übung = alle N.
   function setsForExercise(blk, tier, xi) {
     const N = targetSets(blk, tier);
@@ -442,8 +442,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
-        // Anzahl Sätze: MR-Übungen einzeln (jede volle Anzahl), sonst Tier/ZigZag-Verteilung
-        const count = baseMR ? targetSets(blk, tier) : setsForExercise(blk, tier, xi);
+        // Anzahl Sätze: Pump-Paare sind Supersets und MR-Felder eigenständig -> jede Übung
+        // bekommt die volle Zahl. Nur Load wird im ZigZag auf Comp/Iso aufgeteilt.
+        const count = freeEx ? targetSets(blk, tier) : setsForExercise(blk, tier, xi);
         entry.sets[xi] = entry.sets[xi] || [];
         while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
 
