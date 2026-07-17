@@ -63,7 +63,10 @@
   /* Logo: Das gedeckte Navy verschwindet auf dunklem Grund, die Kontur waere
      weg. Dunkles Blau bleibt als Kontur, ist aber vom Hintergrund abgesetzt. */
   --brand-outline:#0A1330;
-  --sil-filter:brightness(2.9);
+  /* Silhouette weiss: die saubere Umkehrung von "dunkle Form auf hellem Grund".
+     brightness(0) faerbt das PNG schwarz und laesst die Transparenz stehen,
+     invert(1) macht daraus Weiss – so bleibt es bei einer Bilddatei. */
+  --sil-filter:brightness(0) invert(1);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
