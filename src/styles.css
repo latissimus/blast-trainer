@@ -83,7 +83,11 @@ a{color:var(--navy)}
   font-weight:900;font-family:var(--display);font-style:italic;text-transform:uppercase;
   letter-spacing:.02em;box-shadow:var(--shadow);background:var(--surface);color:var(--ink)}
 .btn:active{transform:translate(4px,4px);box-shadow:none}
-.btn-primary{background:var(--pink);color:var(--ink)}
+.btn-primary{background:var(--pink);color:var(--ink);transition:background .3s ease}
+/* Bestaetigung beim Speichern: sofort gelb, danach zurueck ins Pink faden.
+   transition:none beim Aufleuchten, damit der Farbwechsel nicht selbst faded. */
+.btn-primary.flash{background:var(--mr);transition:none}
+@media (prefers-reduced-motion:reduce){.btn-primary{transition:none}}
 .btn-navy{background:var(--navy);color:#fff}
 .btn-block{width:100%}
 .btn:disabled{opacity:.5;box-shadow:none;transform:none}

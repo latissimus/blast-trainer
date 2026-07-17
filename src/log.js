@@ -984,26 +984,19 @@ export async function mountLog(container, { userId, readOnly = false }) {
       </div>`;
     document.body.appendChild(saveBar);
     saveBar.querySelector('#lg-savebtn').onclick = async (e) => {
-      // Waehrend des Speicherns deaktivieren: Das blasst den Button ueber
-      // .btn:disabled ab – dieselbe Rueckmeldung wie beim Einloggen. Nebenbei
-      // verhindert es Doppelklicks. finally, damit er nie deaktiviert haengen
-      // bleibt, falls persist wider Erwarten wirft.
+      // Kurz gelb aufleuchten und zurueck ins Pink faden: sichtbare Bestaetigung,
+      // dass der Tipp angekommen ist. Bewusst unabhaengig vom Upload – der ist
+      // mal nach 90ms durch, mal nach einer Sekunde; die Rueckmeldung soll immer
+      // gleich aussehen. Was tatsaechlich passiert ist, sagen Toast und Sync-Zeichen.
       const btn = e.currentTarget;
-      btn.disabled = true;
+      btn.classList.remove('flash');
+      void btn.offsetWidth;              // Reflow: laesst schnelles Nachtippen erneut aufleuchten
+      btn.classList.add('flash');
+      setTimeout(() => btn.classList.remove('flash'), 200);
+
       clearTimeout(saveTimer);
-      const t0 = performance.now();
-      try {
-        const ok = await persist();
-        // Mindestens kurz blass lassen: Gemessen ist der Upload oft nach ~90ms
-        // durch, das nimmt man als Flackern wahr, nicht als Rueckmeldung. Bei
-        // langsamer Verbindung greift die Untergrenze nicht – dann dauert es
-        // ohnehin laenger und zeigt die Wahrheit.
-        const rest = 180 - (performance.now() - t0);
-        if (rest > 0) await new Promise((r) => setTimeout(r, rest));
-        if (ok) toast('Wo ' + state.week + ' · ' + state.day + ' gespeichert');
-      } finally {
-        btn.disabled = false;
-      }
+      const ok = await persist();
+      if (ok) toast('Wo ' + state.week + ' · ' + state.day + ' gespeichert');
     };
     saveBar.querySelector('#lg-timerx').onclick = () => { clearInterval(timerId); saveBar.querySelector('#lg-timer').hidden = true; };
   }
