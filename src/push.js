@@ -7,6 +7,8 @@
 // Der oeffentliche VAPID-Schluessel darf im Code stehen – er ist per Definition
 // oeffentlich. Der private liegt ausserhalb des Repos und wird erst gebraucht,
 // wenn tatsaechlich jemand Pushes verschickt.
+import { supabase } from './supabase.js';
+
 const VAPID_PUBLIC = 'BEi1duvMCessLiCp4mxksfnoMPI6tXOqziOXyllyLpsr_px2_WhmNwwO3Cb4NxYLeLvUyZ-rDYQUh2Ac3T5z1y8';
 
 // iOS liefert Push nur an Web-Apps aus, die vom Homescreen gestartet wurden –
@@ -49,6 +51,25 @@ export async function abonniere() {
     userVisibleOnly: true,
     applicationServerKey: base64UrlZuUint8(VAPID_PUBLIC),
   });
+}
+
+// Ohne gespeichertes Abo kann niemand senden: Endpunkt und Schluessel des
+// Geraets sind die Adresse. Eigene Zeile je Geraet – Handy und Rechner haben
+// verschiedene Endpunkte, und iOS wirft das Abo weg, wenn die App geloescht wird.
+export async function speichereAbo(abo, userId) {
+  const j = abo.toJSON();
+  const { error } = await supabase.from('push_subscriptions').upsert(
+    {
+      endpoint: j.endpoint,
+      user_id: userId,
+      p256dh: j.keys.p256dh,
+      auth: j.keys.auth,
+      user_agent: navigator.userAgent.slice(0, 200),
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'endpoint' },
+  );
+  if (error) throw error;
 }
 
 export async function testMitteilung() {

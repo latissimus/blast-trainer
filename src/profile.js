@@ -1,7 +1,7 @@
 import { supabase } from './supabase.js';
 import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
-import { diagnose, registriereSW, abonniere, testMitteilung } from './push.js';
+import { diagnose, registriereSW, abonniere, testMitteilung, speichereAbo } from './push.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -250,8 +250,14 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
 
       if (abo) {
         const ep = abo.endpoint || '';
+        // Ohne gespeichertes Abo kann niemand senden - der Endpunkt ist die Adresse.
+        let gespeichert = true, speicherfehler = null;
+        try { await speichereAbo(abo, session.user.id); }
+        catch (e) { gespeichert = false; speicherfehler = e.message; }
         sag(`<b>Push funktioniert auf diesem Gerät.</b><br>Eine Testmitteilung sollte angekommen sein.<br>
-             <span style="font-size:11px;color:var(--muted)">Zusteller: ${ep.replace(/^https:\/\/([^/]+).*/, '$1') || '—'}</span>`, 'ok');
+             ${gespeichert ? 'Abo gespeichert — dieses Gerät ist jetzt erreichbar.' : '<b>Abo NICHT gespeichert:</b> ' + speicherfehler}<br>
+             <span style="font-size:11px;color:var(--muted)">Zusteller: ${ep.replace(/^https:\/\/([^/]+).*/, '$1') || '—'}</span>`,
+          gespeichert ? 'ok' : 'err');
       } else {
         sag(`Mitteilungen gehen, aber die <b>Push-Anmeldung schlug fehl</b>:<br>
              <span style="font-size:11px">${abofehler || 'unbekannt'}</span>`, 'err');
