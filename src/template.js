@@ -4,7 +4,7 @@
 // niedrigen Tiers Pump statt Muscle Round – genau wie im Sheet).
 export const TPL = {
   'OK-A': { short: 'OK · Load', sub: 'Oberkörper Loading · Unterkörper Pump', rot: 'A', blocks: [
-    { id: 'back',  mus: 'Rücken',    type: 'load', sets: [2, 3, 4], rest: 90,  reps: '6–12', ex: [{ r: 'Dicke', n: 'Multipresse Rudern' }, { r: 'Breite', n: 'Latzug Untergriff' }] },
+    { id: 'back',  mus: 'Rücken',    type: 'load', sets: [2, 3, 4], rest: 90,  reps: '6–12', ex: [{ r: 'Comp', n: 'Multipresse Rudern' }, { r: 'Iso', n: 'Latzug Untergriff' }] },
     { id: 'chest', mus: 'Brust',     type: 'load', sets: [1, 2, 4], rest: 90,  reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: 'Brustpresse Aqua' }, { r: 'Iso', n: 'Flys Maschine' }] },
     { id: 'delt',  mus: 'Schultern', type: 'load', sets: [1, 2, 4], rest: 90,  reps: '6–12', ex: [{ r: 'Comp', n: 'Multi Frontdrücken' }, { r: 'Iso', n: 'KH Seitheben' }] },
     { id: 'p_quad', mus: 'Beine',         type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
@@ -21,7 +21,7 @@ export const TPL = {
     { id: 'p_da', mus: 'Schultern + Abs', type: 'pump', sets: [1, 2, 3], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }, { n: '' }] },
     { id: 'p_arm', mus: 'Bi + Tri',   type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, stretch: 1, ex: [{ n: '' }, { n: '' }] },  ] },
   'OK-B': { short: 'OK · Load', sub: 'Oberkörper Loading · Unterkörper Pump', rot: 'B', blocks: [
-    { id: 'back',  mus: 'Rücken',    type: 'load', sets: [2, 3, 4], rest: 90, reps: '6–12', stretch: 1, ex: [{ r: 'Dicke', n: 'PL Rows' }, { r: 'Breite', n: 'KH Überzüge' }] },
+    { id: 'back',  mus: 'Rücken',    type: 'load', sets: [2, 3, 4], rest: 90, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: 'PL Rows' }, { r: 'Iso', n: 'KH Überzüge' }] },
     { id: 'chest', mus: 'Brust',     type: 'load', sets: [1, 2, 4], rest: 90, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: 'PL Flach' }, { r: 'Iso', n: 'KH Flys' }] },
     { id: 'delt',  mus: 'Schultern', type: 'load', sets: [1, 2, 4], rest: 90, reps: '6–12', ex: [{ r: 'Comp', n: 'Rudern aufrecht Kabel' }, { r: 'Iso', n: 'Seitheben Gewichtheber' }] },
     { id: 'p_quad', mus: 'Beine',         type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
