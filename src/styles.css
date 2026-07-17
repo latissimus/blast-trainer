@@ -118,6 +118,18 @@ a{color:var(--navy)}
 .card{background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
 /* Zwei Karten direkt untereinander (Profil) sollen sich nicht beruehren. */
 .card + .card{margin-top:22px}
+
+/* Begruessung nach dem Einloggen: nur das Logo, das aufzieht.
+   Verzoegert zum Schluss (cubic-bezier), damit es ankommt statt abzubrechen. */
+.splash{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);padding:20px}
+.splash .brand{font-size:46px;animation:splash-in 2s cubic-bezier(.16,.84,.32,1) both}
+@keyframes splash-in{
+  from{transform:scale(.45);opacity:0}
+  30%{opacity:1}
+  to{transform:scale(1.25);opacity:1}
+}
+@media (prefers-reduced-motion:reduce){.splash .brand{animation:none}}
 /* Theme-Wahl im Profil – gleiche Optik wie die Tier-Umschaltung im Log. */
 .themeseg{display:flex;border:3px solid var(--ink);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
 .themebtn{flex:1;background:var(--surface);border:0;border-right:3px solid var(--ink);color:var(--ink);

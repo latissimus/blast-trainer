@@ -18,6 +18,7 @@ let active = null;          // current view's { destroy } handle
 let routeToken = 0;         // guards against stale async mounts
 let authMode = 'login';     // 'login' | 'signup'
 let recovery = false;       // aus der Zuruecksetzen-Mail gekommen: neues Passwort faellig
+let splash = false;         // frisch eingeloggt: einmal das Logo zeigen
 
 // Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
 // Fehler). In der App selbst bleibt es draussen: Dort willst du eintragen, nicht
@@ -95,6 +96,9 @@ function renderAuth() {
     btn.disabled = true;
     try {
       if (isLogin) {
+        // Muss VOR signIn stehen: onAuthStateChange feuert waehrend des Aufrufs,
+        // nicht danach – danach gesetzt kaeme das Flag zu spaet fuer render().
+        splash = true;
         await signIn(email, pass);
         // onAuthStateChange handles the rest
       } else {
@@ -107,6 +111,7 @@ function renderAuth() {
         // if a session exists (confirmations disabled), onAuthStateChange takes over
       }
     } catch (err) {
+      splash = false;   // Login gescheitert: kein Logo zeigen
       showMsg(translateErr(err), 'err');
       btn.disabled = false;
     }
@@ -233,14 +238,28 @@ async function routeView() {
   }
 }
 
+// Begruessung nach dem Einloggen: nur das Logo, das aufzieht.
+// Die 2 Sekunden sind keine Wartezeit, die wir draufschlagen – Profil und Log
+// laden waehrenddessen im Hintergrund. Wer schneller fertig ist, wartet auf den
+// anderen.
+function showSplash() {
+  cleanupActive();
+  app.innerHTML = `<div class="splash"><span class="brand">${brandSvg()}</span></div>`;
+  return new Promise((r) => setTimeout(r, 2000));
+}
+
 /* ------------------------------------------------------------ top-level render */
 async function render() {
   cleanupActive();
-  if (!session) { profile = null; recovery = false; renderAuth(); return; }
+  if (!session) { profile = null; recovery = false; splash = false; renderAuth(); return; }
   if (recovery) { renderRecovery(); return; }
 
+  const splashFertig = splash ? showSplash() : null;
+  splash = false;
+
   if (!profile || profile.id !== session.user.id) {
-    app.innerHTML = `${MARQUEE}<div class="wrap" style="padding-top:40px;text-align:center"><div class="brand" style="font-size:30px">${brandSvg()}</div><p class="auth-sub">lädt…</p></div>`;
+    // Nur wenn kein Splash laeuft – sonst wuerde er ihn ueberschreiben.
+    if (!splashFertig) app.innerHTML = `${MARQUEE}<div class="wrap" style="padding-top:40px;text-align:center"><div class="brand" style="font-size:30px">${brandSvg()}</div><p class="auth-sub">lädt…</p></div>`;
     try {
       profile = await loadProfile(session.user.id);
       if (profile) writeProfile(session.user.id, profile);
@@ -260,6 +279,10 @@ async function render() {
       return;
     }
   }
+  // Splash stehen lassen, bis er seine 2 Sekunden hatte – auch wenn das Profil
+  // laengst da ist. Die Fehlerpfade oben sind vorher raus, ein Fehler soll nicht
+  // hinter dem Logo warten muessen.
+  if (splashFertig) await splashFertig;
   renderChrome();
   await routeView();
 }
