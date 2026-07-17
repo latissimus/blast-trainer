@@ -33,6 +33,16 @@ export async function speichereGewicht(userId, kg, datum = heute()) {
   if (error) throw error;
 }
 
+// Beide Reihen leeren. Bewusst nacheinander und mit Fehlerabbruch: Bliebe eine
+// der beiden stehen, saehe man eine halb geleerte Erfolgskontrolle und wuesste
+// nicht, warum. Trainingsdaten liegen in anderen Tabellen und bleiben unberuehrt.
+export async function loescheAlleMessungen(userId) {
+  const sf = await supabase.from('skinfolds').delete().eq('user_id', userId);
+  if (sf.error) throw sf.error;
+  const wt = await supabase.from('weights').delete().eq('user_id', userId);
+  if (wt.error) throw wt.error;
+}
+
 
 const delta = (neu, alt, einheit, kleinerIstBesser = true) => {
   if (alt == null || neu == null) return '';
@@ -200,6 +210,28 @@ export function mountErfolg(wrap, { session, profile, onProfileUpdated }) {
     catch (e) { toast('Speichern fehlgeschlagen'); }
     btn.disabled = false;
   };
+
+  // ---- Alles zuruecksetzen ----
+  // Gelb wie der Phasen-Reset im Log – dieselbe Geste, dieselbe Warnfarbe.
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'phase-reset';
+  resetBtn.style.marginTop = '18px';
+  resetBtn.textContent = 'Messdaten zurücksetzen';
+  resetBtn.onclick = async () => {
+    if (!confirm('ALLE Hautfalten- und Gewichts-Messungen löschen?\n\nDie Kurven und Werte starten danach leer. Deine Trainingsdaten bleiben unberührt.')) return;
+    resetBtn.disabled = true;
+    try {
+      await loescheAlleMessungen(uid);
+      wtForm.querySelector('#wt-in').value = '';
+      await zeigeFalten();
+      await zeigeGewicht();
+      toast('Messdaten zurückgesetzt');
+    } catch (e) {
+      toast('Zurücksetzen fehlgeschlagen');
+    }
+    resetBtn.disabled = false;
+  };
+  wrap.appendChild(resetBtn);
 
   zeigeFalten();
   zeigeGewicht();

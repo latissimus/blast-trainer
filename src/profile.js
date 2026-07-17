@@ -198,6 +198,11 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   wrap.appendChild(thCard);
 
   // --- Erfolgskontrolle: Hautfalten und Gewicht --------------------------
+  // Sichtbar von den Einstellungen darueber abgesetzt: Das hier ist kein
+  // Schalter mehr, sondern ein eigener Bereich.
+  const trenner = document.createElement('div');
+  trenner.className = 'abschnitt-trenner';
+  wrap.appendChild(trenner);
   mountErfolg(wrap, { session, profile, onProfileUpdated });
 
   // --- Version ----------------------------------------------------------
