@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js';
 import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
+import { mountErfolg } from './erfolg.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -195,6 +196,9 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   });
   thCard.appendChild(seg);
   wrap.appendChild(thCard);
+
+  // --- Erfolgskontrolle: Hautfalten und Gewicht --------------------------
+  mountErfolg(wrap, { session, profile, onProfileUpdated });
 
   // --- Version ----------------------------------------------------------
   // Zur Bauzeit eingebrannt. Der Service Worker liefert die App aus dem Cache:
