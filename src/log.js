@@ -788,7 +788,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       return { mus: blk.mus, sets, tgt };
     }).filter(Boolean);
 
-    volEl.innerHTML = '<h3>Volumen · Tier ' + TIER_NAMES[tier] + '</h3>' +
+    volEl.innerHTML = '<h3>Volumen · Level ' + TIER_NAMES[tier] + '</h3>' +
       '<div class="voltot">' + total + ' <span>/ ' + tgtTotal + ' ARBEITSSÄTZE</span></div>' +
       rows.map((r) => {
         const pct = r.tgt ? Math.min(100, Math.round(r.sets / r.tgt * 100)) : (r.sets ? 100 : 0);
