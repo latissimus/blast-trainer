@@ -1,5 +1,6 @@
 import { supabase } from './supabase.js';
 import { toast } from './log.js';
+import { getTheme, setTheme } from './theme.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -174,6 +175,27 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   };
   pwCard.appendChild(pwBtn);
   wrap.appendChild(pwCard);
+
+  // --- Darstellung -------------------------------------------------------
+  const thCard = document.createElement('div');
+  thCard.className = 'card';
+  thCard.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 4px">Darstellung</h2>
+    <p style="font-size:12.5px;color:var(--muted);margin:0 0 4px">Gilt nur auf diesem Gerät.</p>`;
+  const seg = document.createElement('div');
+  seg.className = 'themeseg';
+  [['retro', 'Retro'], ['dark', 'Dark']].forEach(([wert, label]) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'themebtn' + (getTheme() === wert ? ' on' : '');
+    b.textContent = label;
+    b.onclick = () => {
+      setTheme(wert);
+      seg.querySelectorAll('.themebtn').forEach((x) => x.classList.toggle('on', x === b));
+    };
+    seg.appendChild(b);
+  });
+  thCard.appendChild(seg);
+  wrap.appendChild(thCard);
 
   container.appendChild(wrap);
 }

@@ -3,9 +3,13 @@ import { supabase } from './supabase.js';
 import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } from './auth.js';
 import { readProfile, writeProfile } from './localstore.js';
 import { brandSvg } from './brand.js';
+import { getTheme, applyTheme } from './theme.js';
 import { mountLog } from './log.js';
 import { mountProfile } from './profile.js';
 import { mountAdmin } from './admin.js';
+
+// Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
+applyTheme(getTheme());
 
 const app = document.getElementById('app');
 let session = null;

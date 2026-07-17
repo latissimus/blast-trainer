@@ -28,13 +28,17 @@ export function brandSvg() {
     `<tspan font-size="27" stroke-width="3.1" dx="${DX_R}" dy="-${LIFT}">★</tspan>`;
   const path = `<textPath href="#${id}" startOffset="50%">${txt}</textPath>`;
   // viewBox eng am Inhalt (gemessen), damit der Bogen keine Luft verschenkt.
+  // Farben ueber CSS-Variablen statt fest verdrahtet: So zieht das Logo beim
+  // Theme-Wechsel mit. Kontur und Schatten haengen an --brand-outline – im
+  // Dunkelmodus darf das nicht das gedeckte Navy bleiben, sonst verschwindet
+  // die Kontur im Hintergrund und das pinke BLAST schwebt konturlos.
   return `<svg class="brand-svg" viewBox="53 18 252 83" role="img" aria-label="BLAST">
   <defs><path id="${id}" d="${d}" fill="none"/></defs>
   <g font-family="'Helvetica Neue',Arial,system-ui,sans-serif" font-style="italic" font-weight="900"
      font-size="54" letter-spacing="-1.62" text-anchor="middle"
-     stroke="#0B1B44" stroke-width="5.2" stroke-linejoin="round">
-    <text transform="translate(4.2,4.2)" fill="#0B1B44">${path}</text>
-    <text fill="#F48FB8" paint-order="stroke fill">${path}</text>
+     stroke="var(--brand-outline)" stroke-width="5.2" stroke-linejoin="round">
+    <text transform="translate(4.2,4.2)" fill="var(--brand-outline)">${path}</text>
+    <text fill="var(--pink)" paint-order="stroke fill">${path}</text>
   </g>
 </svg>`;
 }

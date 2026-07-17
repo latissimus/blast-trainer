@@ -23,6 +23,8 @@
   --hold:#C7912A;
 
   --mq-h:34px;      /* Hoehe des Laufbands – auth-shell rechnet damit */
+  --brand-outline:#0B1B44;   /* Kontur und Schatten des Schriftzugs */
+  --sil-filter:none;         /* Silhouette hinter dem Schriftzug */
 
   --shadow:4px 4px 0 var(--ink);
   --shadow-sm:3px 3px 0 var(--ink);
@@ -31,6 +33,37 @@
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
   --display:"Helvetica Neue",Arial,system-ui,sans-serif;
+}
+
+/* ============================================================
+   Theme "Dark" — derselbe Neo-Brutalismus, nur umgedreht.
+   --ink traegt Text, Raender UND Schatten gleichzeitig. Wird es hell,
+   kippt der ganze Look mit, ohne dass eine einzelne Regel angefasst
+   werden muss. Das ist der Grund, warum das hier so kurz ausfaellt.
+   ============================================================ */
+:root[data-theme="dark"]{
+  --bg:#12141A;
+  --surface:#1E212A;
+  --surface2:#272B36;
+  --ink:#EDF0F6;       /* Text, Raender, Schatten – der Kern der Umkehrung */
+  --line:#EDF0F6;
+  --muted:#98A2B3;
+  --faint:#6C7585;
+
+  /* Navy verschwindet auf Fast-Schwarz. Aufgehellt bleibt es erkennbar
+     dasselbe Blau und traegt weiter Laufband, LOAD-Badge, aktiven Tab. */
+  --navy:#4B6FD6;
+  --load:#4B6FD6;
+
+  /* Akzente bleiben unveraendert – sie sind die Marke. */
+  --up:#28C46B;        /* nur aufgehellt: das Original war auf dunkel zu satt */
+  --green:#1E6E3C;
+  --hold:#E0A93C;
+
+  /* Logo: Das gedeckte Navy verschwindet auf dunklem Grund, die Kontur waere
+     weg. Dunkles Blau bleibt als Kontur, ist aber vom Hintergrund abgesetzt. */
+  --brand-outline:#0A1330;
+  --sil-filter:brightness(2.9);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
@@ -57,9 +90,12 @@ a{color:var(--navy)}
    damit die Aufrufstellen unveraendert bleiben. */
 .brand{position:relative;z-index:0;display:inline-block;font-size:26px;line-height:0}
 .brand-svg{display:block;width:4.674em;height:auto;overflow:visible}
-/* Athleten-Silhouette (Navy) hinter dem Schriftzug */
+/* Athleten-Silhouette (Navy) hinter dem Schriftzug.
+   Das Bild ist navy und geht auf dunklem Grund unter – im Dark-Theme hellt ein
+   Filter es auf, statt eine zweite Bilddatei zu pflegen. */
 .brand::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
   width:1.9em;height:1.9em;z-index:-1;pointer-events:none;
+  filter:var(--sil-filter);
   background:url(./assets/silhouette-navy.png) center/contain no-repeat}
 .nav{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .nav-btn{background:var(--surface);border:2px solid var(--ink);color:var(--ink);
@@ -79,6 +115,13 @@ a{color:var(--navy)}
 .card{background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
 /* Zwei Karten direkt untereinander (Profil) sollen sich nicht beruehren. */
 .card + .card{margin-top:22px}
+/* Theme-Wahl im Profil – gleiche Optik wie die Tier-Umschaltung im Log. */
+.themeseg{display:flex;border:3px solid var(--ink);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
+.themebtn{flex:1;background:var(--surface);border:0;border-right:3px solid var(--ink);color:var(--ink);
+  padding:12px 0;font-family:var(--display);font-style:italic;font-weight:900;font-size:14px;
+  text-transform:uppercase;cursor:pointer}
+.themebtn:last-child{border-right:0}
+.themebtn.on{background:var(--navy);color:#fff}
 .btn{border:3px solid var(--ink);border-radius:var(--r);padding:14px 16px;font-size:15px;
   font-weight:900;font-family:var(--display);font-style:italic;text-transform:uppercase;
   letter-spacing:.02em;box-shadow:var(--shadow);background:var(--surface);color:var(--ink)}
