@@ -267,13 +267,18 @@ async function render() {
   if (!profile || profile.id !== session.user.id) {
     // Nur wenn kein Splash laeuft – sonst wuerde er ihn ueberschreiben.
     if (!splashFertig) app.innerHTML = `${MARQUEE}<div class="wrap" style="padding-top:40px;text-align:center"><div class="brand" style="font-size:30px">${brandSvg()}</div><p class="auth-sub">lädt…</p></div>`;
-    try {
+    const zwischengespeichert = readProfile(session.user.id);
+    if (!navigator.onLine && zwischengespeichert) {
+      // Nachweislich offline: gar nicht erst fragen. Der Versuch laeuft nur in
+      // einen Timeout, und solange haengt man auf dem Ladebildschirm.
+      profile = zwischengespeichert;
+    } else try {
       profile = await loadProfile(session.user.id);
       if (profile) writeProfile(session.user.id, profile);
     } catch (e) {
       // Ohne Netz auf das zuletzt bekannte Profil zurueckfallen. Sonst kaeme man
       // im Studio nie bis zum Log – obwohl die Trainingsdaten dort lokal liegen.
-      profile = readProfile(session.user.id);
+      profile = zwischengespeichert;
       if (!profile) {
         app.innerHTML = `${MARQUEE}<div class="auth-shell"><div class="msg err">Profil konnte nicht geladen werden: ${e.message}</div><button class="btn btn-block" id="lo">Logout</button></div>`;
         app.querySelector('#lo').onclick = () => signOut();
@@ -329,6 +334,14 @@ supabase.auth.onAuthStateChange((event, newSession) => {
 });
 
 (async function boot() {
+  // Offline gar nicht erst fragen: getSession() versucht ein abgelaufenes Token
+  // zu erneuern und laeuft dabei in einen Timeout. Die gespeicherte Sitzung
+  // reicht hier – offline brauchen wir daraus nur die Nutzer-ID.
+  if (!navigator.onLine) {
+    session = gespeicherteSitzung();
+    await render();
+    return;
+  }
   const { data, error } = await supabase.auth.getSession();
   session = data.session;
   // Nur bei einem Netzfehler zurueckfallen. Supabase unterscheidet das selbst:

@@ -19,18 +19,27 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // sonst gewinnt der Server (sein Stand ist dann identisch mit dem lokalen).
   const local = readLog(userId);
   let server = null, serverOk = false;
-  try {
-    const { data, error } = await supabase
-      .from('training_logs')
-      .select('payload')
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (error) throw error;
-    server = data?.payload || {};
-    serverOk = true;
-  } catch (e) {
-    // Kein Netz und nichts lokal -> wie bisher scheitern. Sonst: offline weiter.
-    if (!local) throw e;
+  // Sagt das Geraet selbst, dass es offline ist, den Serverversuch ueberspringen.
+  // Er laeuft sonst nur in einen Timeout, und solange starrt man auf den
+  // Ladebildschirm – auf ein Scheitern, das schon feststeht. navigator.onLine
+  // ist umgekehrt unzuverlaessig (WLAN ohne Internet meldet "online"), aber ein
+  // klares "offline" stimmt: Dann gibt es keine Verbindung.
+  if (navigator.onLine) {
+    try {
+      const { data, error } = await supabase
+        .from('training_logs')
+        .select('payload')
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (error) throw error;
+      server = data?.payload || {};
+      serverOk = true;
+    } catch (e) {
+      // Kein Netz und nichts lokal -> wie bisher scheitern. Sonst: offline weiter.
+      if (!local) throw e;
+    }
+  } else if (!local) {
+    throw new Error('Keine Verbindung – und auf diesem Gerät liegt noch kein Log. Bitte einmal mit Internet öffnen.');
   }
 
   let p, mergedOffline = false;

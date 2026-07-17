@@ -179,7 +179,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   // --- Darstellung -------------------------------------------------------
   const thCard = document.createElement('div');
   thCard.className = 'card';
-  thCard.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 4px">Darstellung</h2>`;
+  thCard.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 16px">Darstellung</h2>`;
   const seg = document.createElement('div');
   seg.className = 'themeseg';
   [['retro', 'Retro'], ['dark', 'Dark']].forEach(([wert, label]) => {
@@ -195,6 +195,15 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   });
   thCard.appendChild(seg);
   wrap.appendChild(thCard);
+
+  // --- Version ----------------------------------------------------------
+  // Zur Bauzeit eingebrannt. Der Service Worker liefert die App aus dem Cache:
+  // Beim ersten Oeffnen nach einem Push sieht man noch den alten Stand. Ohne
+  // diese Zeile raet man bei jedem Fehler, ob der Code oder der Cache schuld ist.
+  const ver = document.createElement('p');
+  ver.className = 'buildinfo';
+  ver.textContent = `Version ${__BUILD_COMMIT__} · ${__BUILD_TIME__}`;
+  wrap.appendChild(ver);
 
   container.appendChild(wrap);
 }
