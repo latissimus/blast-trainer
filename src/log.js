@@ -965,12 +965,19 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
   buildSheet();
 
-  // Offline geladen oder zusammengefuehrt: Der lokale Stand ist jetzt der
-  // gueltige und muss noch hoch. Markieren und (falls Netz da ist) sofort senden.
   if (mergedOffline && !readOnly) {
+    // Offline geladen oder zusammengefuehrt: Der lokale Stand ist jetzt der
+    // gueltige und muss noch hoch. Markieren und (falls Netz da ist) senden.
     writeLog(userId, payloadOut(), true);
     setStatus('offline');
     if (navigator.onLine) persist();
+  } else if (serverOk && !readOnly) {
+    // Frisch vom Server geladen: Spiegel sofort anlegen, sauber (nichts offen).
+    //
+    // Ohne das entstand der Spiegel erst beim ersten Tippen – wer die App nur
+    // oeffnete und schaute, hatte offline nichts und bekam einen Fehler. Jeder
+    // Besuch mit Netz macht die App jetzt fuer das naechste Funkloch bereit.
+    writeLog(userId, payloadOut(), false, false);
   }
 
   // ---- sticky save bar (editable only) -----------------------------

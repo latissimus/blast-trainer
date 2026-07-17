@@ -297,7 +297,29 @@ async function render() {
 /* ------------------------------------------------------------ boot */
 window.addEventListener('hashchange', () => { if (session && profile) routeView(); });
 
+// Das Zugangstoken laeuft nach einer Stunde ab. Ist man dann ohne Netz, kann
+// Supabase es nicht erneuern und gibt gar keine Sitzung zurueck – die App
+// warf einen im Funkloch also raus, obwohl die Anmeldung voellig in Ordnung ist.
+//
+// Die gespeicherte Sitzung liegt dabei unberuehrt im Speicher. Offline brauchen
+// wir daraus nur die Nutzer-ID, um den lokalen Spiegel zu lesen; Serveraufrufe
+// scheitern ohnehin und holt die Warteschlange nach. Sobald wieder Netz da ist,
+// erneuert Supabase von selbst.
+function gespeicherteSitzung() {
+  try {
+    const ref = new URL(import.meta.env.VITE_SUPABASE_URL).hostname.split('.')[0];
+    const roh = localStorage.getItem(`sb-${ref}-auth-token`);
+    const s = roh ? JSON.parse(roh) : null;
+    return s && s.user && s.user.id ? s : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 supabase.auth.onAuthStateChange((event, newSession) => {
+  // Ein fehlgeschlagener Token-Refresh kann offline als "keine Sitzung"
+  // hereinkommen. Das ist kein Logout – nur ausdrueckliches SIGNED_OUT ist einer.
+  if (!newSession && event !== 'SIGNED_OUT') return;
   const prevUser = session?.user?.id;
   session = newSession;
   // Der Link aus der Zuruecksetzen-Mail legt bereits eine Sitzung an. Ohne
@@ -307,7 +329,13 @@ supabase.auth.onAuthStateChange((event, newSession) => {
 });
 
 (async function boot() {
-  const { data } = await supabase.auth.getSession();
+  const { data, error } = await supabase.auth.getSession();
   session = data.session;
+  // Nur bei einem Netzfehler zurueckfallen. Supabase unterscheidet das selbst:
+  // AuthRetryableFetchError heisst "Netz weg", ein AuthApiError hiesse "Token
+  // ungueltig" – dann gehoert man tatsaechlich abgemeldet.
+  if (!session && error && error.name === 'AuthRetryableFetchError') {
+    session = gespeicherteSitzung();
+  }
   await render();
 })();
