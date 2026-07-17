@@ -983,10 +983,27 @@ export async function mountLog(container, { userId, readOnly = false }) {
         <div class="timer" id="lg-timer" hidden><span id="lg-timertxt">0:00</span><button class="x" id="lg-timerx" aria-label="Timer abbrechen">×</button></div>
       </div>`;
     document.body.appendChild(saveBar);
-    saveBar.querySelector('#lg-savebtn').onclick = async () => {
+    saveBar.querySelector('#lg-savebtn').onclick = async (e) => {
+      // Waehrend des Speicherns deaktivieren: Das blasst den Button ueber
+      // .btn:disabled ab – dieselbe Rueckmeldung wie beim Einloggen. Nebenbei
+      // verhindert es Doppelklicks. finally, damit er nie deaktiviert haengen
+      // bleibt, falls persist wider Erwarten wirft.
+      const btn = e.currentTarget;
+      btn.disabled = true;
       clearTimeout(saveTimer);
-      const ok = await persist();
-      if (ok) toast('Wo ' + state.week + ' · ' + state.day + ' gespeichert');
+      const t0 = performance.now();
+      try {
+        const ok = await persist();
+        // Mindestens kurz blass lassen: Gemessen ist der Upload oft nach ~90ms
+        // durch, das nimmt man als Flackern wahr, nicht als Rueckmeldung. Bei
+        // langsamer Verbindung greift die Untergrenze nicht – dann dauert es
+        // ohnehin laenger und zeigt die Wahrheit.
+        const rest = 180 - (performance.now() - t0);
+        if (rest > 0) await new Promise((r) => setTimeout(r, rest));
+        if (ok) toast('Wo ' + state.week + ' · ' + state.day + ' gespeichert');
+      } finally {
+        btn.disabled = false;
+      }
     };
     saveBar.querySelector('#lg-timerx').onclick = () => { clearInterval(timerId); saveBar.querySelector('#lg-timer').hidden = true; };
   }
