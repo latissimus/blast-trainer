@@ -197,12 +197,22 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   thCard.appendChild(seg);
   wrap.appendChild(thCard);
 
-  // --- Erfolgskontrolle: Hautfalten und Gewicht --------------------------
+  // --- Körperwerte: Hautfalten und Gewicht -------------------------------
   // Sichtbar von den Einstellungen darueber abgesetzt: Das hier ist kein
-  // Schalter mehr, sondern ein eigener Bereich.
+  // Schalter mehr, sondern ein eigener Bereich. Ueberschrift + Zweck-Satz
+  // machen aus den zwei Karten eine allgemeine Funktion statt einer
+  // spezifischen Hautfalten-Messung.
   const trenner = document.createElement('div');
   trenner.className = 'abschnitt-trenner';
   wrap.appendChild(trenner);
+
+  const werteKopf = document.createElement('div');
+  werteKopf.className = 'werte-kopf';
+  werteKopf.innerHTML = `<h2 class="section-title" style="font-size:22px;margin:0 0 8px">Körperwerte</h2>
+    <p class="werte-intro">Zwei einfache Zahlen über die Zeit — <b>Hautfaltensumme</b> (mm) und <b>Körpergewicht</b>.
+      Der einzelne Tag schwankt; erst die <b>Kurve über Wochen</b> zeigt, ob du Fett verlierst oder deine Form hältst.</p>`;
+  wrap.appendChild(werteKopf);
+
   mountErfolg(wrap, { session, profile, onProfileUpdated });
 
   // --- Version ----------------------------------------------------------
