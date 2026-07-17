@@ -2,12 +2,16 @@ import { supabase } from './supabase.js';
 import { readLog, writeLog, mergePayload } from './localstore.js';
 import { TPL, LEGACY, TIER_NAMES } from './template.js';
 
-// Pause zwischen zwei Muscle Rounds (s). Die PDF nennt keinen festen Wert
-// ("so viel wie nötig", Richtwert eine MR alle ~10 min) – hier bewusst gesetzt.
+// Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
+// ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
 const MR_REST = 120;
 
+// Anzeige-Labels der Set-Typen. Die internen Keys (load/pump/mr) bleiben, damit
+// gespeicherte Logs gueltig bleiben – nur die Beschriftung wechselt.
+const TYPE_LABEL = { load: 'HEAVY', pump: 'PUMP', mr: 'CLUSTER' };
+
 /* ------------------------------------------------------------------
-   Mount the BLAST log (v2: Tiers, A/B-Wochen, Rollen, Pausen-Timer)
+   Mount the BLAST log (v2: Level, A/B-Wochen, Rollen, Pausen-Timer)
    into `container`.
      userId    – whose training_logs row to load
      readOnly  – true for the admin viewing a customer (no editing/saving)
@@ -183,22 +187,22 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   // ---- structure helpers -------------------------------------------
   const rotOf = (week) => state.rot[week] || (week % 2 === 1 ? 'A' : 'B');
-  const isCruise = (week) => week >= 7;   // Wochen 7-8 = Intensive Cruise: nur Muscle Rounds, Tier I
-  // Cruise: 2-3 Einheiten pro Woche, alle nur Muscle Rounds (PDF S. 82/100) -> drei
+  const isCruise = (week) => week >= 7;   // Wochen 7-8 = Deload: nur Clusters, Level I
+  // Deload: 2-3 Einheiten pro Woche, alle nur Clusters -> drei
   // eigene Slots, damit jede Einheit getrennt geloggt wird. Der dritte ist optional.
   const daysOfWeek = (week) => {
     if (isCruise(week)) return ['MRs', 'MRs-2', 'MRs-3'];
     const r = rotOf(week); return ['OK-' + r, 'UK-' + r, 'MRs'];
   };
   const tierOf = (day, week) => {
-    if (isCruise(week)) return 0;   // Cruise fest auf Tier I
+    if (isCruise(week)) return 0;   // Deload fest auf Level I
     const t = state.tier[day + '|' + week]; return (t === 0 || t === 1 || t === 2) ? t : 2;
   };
   const setTier = (day, week, t) => { state.tier[day + '|' + week] = t; };
   function targetSets(blk, tier) {
-    return blk.sets[tier];   // sets = [TierI, TierII, TierIII], feste Werte nach Sheet
+    return blk.sets[tier];   // sets = [Level I, II, III], feste Werte
   }
-  // Effektiver Set-Typ je Tier (MR-Tag: Tris/Bis & Abs sind bei niedrigen Tiers Pump)
+  // Effektiver Set-Typ je Level (Cluster-Tag: Tris/Bis & Abs sind bei niedrigen Leveln Pump)
   function effTypeOf(blk, tier) {
     return (blk.typeByTier && blk.typeByTier[tier]) || blk.type;
   }
@@ -206,7 +210,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function exOf(blk, tier) {
     return (blk.exByTier && blk.exByTier[tier]) || blk.ex;
   }
-  // ZigZag-Verteilung (nur Load-Blöcke): die N Gesamtsätze des Muskels auf Comp/Iso aufteilen.
+  // Wechsel-Verteilung (nur Heavy-Blöcke): die N Gesamtsätze des Muskels auf Comp/Iso aufteilen.
   // 1. Übung (Comp) aufgerundet N/2, 2. Übung (Iso) abgerundet N/2. Eine Übung = alle N.
   function setsForExercise(blk, tier, xi) {
     const N = targetSets(blk, tier);
@@ -265,11 +269,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
       <span class="rotchip" id="lg-rot">A-Woche</span>
       <button class="ibtn" id="lg-info" aria-label="FAQ">?</button>
       ${readOnly ? '' : '<span class="save-dot ok" id="lg-save" title="gespeichert">✓</span>'}
-      <span class="cruise" id="lg-cruise" hidden>Cruise fällig</span>
+      <span class="cruise" id="lg-cruise" hidden>Deload</span>
     </div>
     <div class="tabs" id="lg-tabs"></div>
     <div class="tierbar">
-      <span class="lbl">Tier</span>
+      <span class="lbl">Level</span>
       <div class="seg" id="lg-tier">
         <button data-t="0">I</button><button data-t="1">II</button><button data-t="2">III</button>
       </div>
@@ -296,7 +300,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const tierHintEl = wrap.querySelector('#lg-tierhint');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
 
-  wrap.querySelector('#lg-wkup').onclick = () => { if (state.week < 8) { state.week++; queuePersist(); renderAll(); } }; // Blast 1-6 + Cruise 7-8
+  wrap.querySelector('#lg-wkup').onclick = () => { if (state.week < 8) { state.week++; queuePersist(); renderAll(); } }; // SMASH 1-6 + Deload 7-8
   wrap.querySelector('#lg-wkdn').onclick = () => { if (state.week > 1) { state.week--; queuePersist(); renderAll(); } };
   // Das A/B-Feld ist nur Anzeige (folgt der Woche), nicht klickbar.
   tierSeg.querySelectorAll('button').forEach((b) => {
@@ -312,8 +316,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     wkDownEl.style.visibility = state.week > 1 ? 'visible' : 'hidden';
     wkUpEl.style.visibility = state.week < 8 ? 'visible' : 'hidden';
     rotEl.textContent = rotOf(state.week) + '-Woche';
-    // Cruise-Chip nur in den Cruise-Wochen (7-8)
-    if (state.week >= 7) { cruiseEl.hidden = false; cruiseEl.textContent = 'Cruise'; }
+    // Deload-Chip nur in den Deload-Wochen (7-8)
+    if (state.week >= 7) { cruiseEl.hidden = false; cruiseEl.textContent = 'Deload'; }
     else { cruiseEl.hidden = true; }
 
     tabsEl.innerHTML = '';
@@ -324,8 +328,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const tpl = TPL[d];
       const b = document.createElement('button');
       b.className = 'tab' + (d === state.day ? ' active' : '');
-      // Tag-Nummer aus der Position: Blast = Tag 1-3, Cruise = drei MR-Einheiten,
-      // die dritte laut PDF optional (2-3x pro Woche).
+      // Tag-Nummer aus der Position: SMASH = Tag 1-3, Deload = drei Cluster-Einheiten,
+      // die dritte optional (2-3x pro Woche).
       const opt = cruiseWk && i === 2 ? ' <span class="opt">(opt.)</span>' : '';
       b.innerHTML = `<span>Tag ${i + 1}${opt}</span><span class="t2">${tpl.short}</span>`;
       const pr = dayProgress(d, state.week);
@@ -340,13 +344,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     });
 
     const cruise = isCruise(state.week);
-    rotEl.style.display = cruise ? 'none' : '';   // A/B-Feld im Cruise ausblenden
+    rotEl.style.display = cruise ? 'none' : '';   // A/B-Feld im Deload ausblenden
     const tier = tierOf(state.day, state.week);
     tierSeg.querySelectorAll('button').forEach((b) => {
       b.classList.toggle('on', Number(b.dataset.t) === tier);
-      b.disabled = cruise;                        // Tier im Cruise gesperrt (I)
+      b.disabled = cruise;                        // Level im Deload gesperrt (I)
     });
-    tierHintEl.textContent = cruise ? 'nur Muscle Rounds · Tier I fest'
+    tierHintEl.textContent = cruise ? 'nur Clusters · Level I fest'
       : tier === 0 ? 'wenig Volumen · schlechter Tag'
       : tier === 1 ? 'mittleres Volumen'
       : 'volles Volumen · guter Tag';
@@ -402,12 +406,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
     return row;
   }
 
-  // ---- Gedächtnis für frei rotierende Übungen (Pump & Muscle Rounds) ----
-  // Laut PDF ist der Log bei Pump/MR kein Progressions-Werkzeug, sondern soll
+  // ---- Gedächtnis für frei rotierende Übungen (Pump & Clusters) ----
+  // Bei Pump/Cluster ist der Log kein Progressions-Werkzeug, sondern soll
   // zeigen, welche Last/Wdh man zuletzt bei dieser Übung genommen hat.
-  // ---- Übungs-Pool (Pump/MR) ---------------------------------------
-  // Pump- und MR-Übungen rotieren frei und haengen am Namen. Damit man beim
-  // naechsten Blast nachschauen kann, was man zuletzt geschafft hat, wird beim
+  // ---- Übungs-Pool (Pump/Cluster) ---------------------------------------
+  // Pump- und Cluster-Übungen rotieren frei und haengen am Namen. Damit man in der
+  // naechsten SMASH-Phase nachschauen kann, was man zuletzt geschafft hat, wird beim
   // Phasen-Reset aus den Wochendaten ein Pool geerntet, der bestehen bleibt.
   // Gelesen wird er nur als Rueckfalloption: solange die laufende Phase Daten
   // zur Übung hat, gewinnen die – das Verhalten innerhalb einer Phase bleibt
@@ -457,7 +461,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // Das haelt die Liste von selbst kurz – niemand hat 30 davon – und macht sie
   // als Anregung erst brauchbar.
   //
-  // Ueber Rotationen und Cruise-Slots hinweg sammelt sich die Historie
+  // Ueber Rotationen und Deload-Slots hinweg sammelt sich die Historie
   // automatisch, weil die Block-IDs geteilt sind: m_bkth ist in MRs, MRs-2 und
   // MRs-3 derselbe Block, p_quad in OK-A und OK-B.
   function recentNames(kind, blockId) {
@@ -527,13 +531,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (!m) { node.innerHTML = (name && name.trim()) ? '<b>zuletzt: — (neue Übung)</b>' : '<b>zuletzt: —</b>'; return; }
     const hasR = m.r != null && m.r !== '';
     const txt = kind === 'mr'
-      ? `zuletzt: ${m.w} kg${hasR ? ` · ${m.r} Wdh. im letzten MR` : ''}`
+      ? `zuletzt: ${m.w} kg${hasR ? ` · ${m.r} Wdh. im letzten Cluster` : ''}`
       : `zuletzt: ${m.w} kg${hasR ? ` × ${m.r} Wdh` : ''}`;
     // Wochennummern starten pro Phase neu – Pool-Treffer stammen aus einer
     // frueheren Phase und werden deshalb nicht als "Wo N" ausgewiesen.
     node.innerHTML = `<b>${txt}</b><span class="delta d-hold">${m.pool ? 'Pool' : 'Wo ' + m.week}</span>`;
   }
-  // Eine Muscle Round = 6×4 Cluster. Kompakt: Gewicht + Wdh im letzten (6.) Satz.
+  // Ein Cluster = 6×4 Minisätze. Kompakt: Gewicht + Wdh im letzten (6.) Satz.
   function mrRow(entry, xi, si, blk, memNode) {
     const s = entry.sets[xi][si];
     const row = document.createElement('div'); row.className = 'setrow mrrow';
@@ -560,7 +564,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     return row;
   }
 
-  // Freier Satz (Pump-Block oder Pump-Ausnahme im MR-Block): kg × Wdh + Gedächtnis
+  // Freier Satz (Pump-Block oder Pump-Ausnahme im Cluster-Block): kg × Wdh + Gedächtnis
   function pumpMrRow(entry, xi, si, memNode, kind) {
     const s = entry.sets[xi][si];
     const row = document.createElement('div'); row.className = 'setrow';
@@ -618,7 +622,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       }
       const entry = cell[blk.id];
       const baseMR = blk.type === 'mr';
-      const freeEx = blk.type !== 'load';                // Pump & MR rotieren laut PDF frei
+      const freeEx = blk.type !== 'load';                // Pump & Cluster rotieren frei
       const effType = effTypeOf(blk, tier);              // Typ je Tier (Pump-Ausnahme bei MR)
       if (freeEx) entry.names = entry.names || (entry.name != null ? [entry.name] : []);  // frei pro Woche/Feld
       const names = freeEx ? null : dayNames(state.day, blk);
@@ -635,7 +639,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       el.innerHTML = `
         <div class="bhead">
           <span class="mus">${blk.mus}</span>
-          <span class="badge b-${effType}">${effType === 'mr' ? 'MR' : effType}</span>
+          <span class="badge b-${effType}">${TYPE_LABEL[effType] || effType}</span>
           <span class="target" data-tgt="${blk.id}">Sätze <b>${tgt}</b></span>
         </div>
         <div class="cue">${cues.join('')}</div>`;
@@ -692,8 +696,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
         }
 
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
-        // Anzahl Sätze: Pump-Paare sind Supersets und MR-Felder eigenständig -> jede Übung
-        // bekommt die volle Zahl. Nur Load wird im ZigZag auf Comp/Iso aufgeteilt.
+        // Anzahl Sätze: Pump-Paare sind Supersets und Cluster-Felder eigenständig -> jede Übung
+        // bekommt die volle Zahl. Nur Heavy wird im Wechsel auf Comp/Iso aufgeteilt.
         const count = freeEx ? targetSets(blk, tier) : setsForExercise(blk, tier, xi);
         entry.sets[xi] = entry.sets[xi] || [];
         while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
@@ -754,7 +758,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   async function resetAllData() {
-    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein Pump- und MR-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
+    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein Pump- und Cluster-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
     // Pool retten, bevor die Wochendaten fallen. Neuere Werte gewinnen.
     state.mem = Object.assign({}, state.mem, harvestMem(state.data));
     state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {};
@@ -906,8 +910,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <p>Volumen ist der Dosis-Regler (~10–20 Sätze/Muskel/Woche). Frequenz verteilt nur — 2–3×/Muskel. Kater ist kein Maß.</p>
           </div>
         </details>
-        <details class="faq"><summary>Wie trainiere ich die Loading-Sätze?</summary>
-          <div class="faq-a"><p>6–12 Wdh., 0–2 RIR. Zig-Zag: <b>Comp → Iso → Comp → Iso</b>. Versagen nur im <b>letzten Comp-Satz</b>; Iso-Sätze dürfen ans Versagen. Pause: Oberkörper 90 s, Unterkörper 120 s, Waden 60 s.</p></div>
+        <details class="faq"><summary>Wie trainiere ich die Heavy-Sätze?</summary>
+          <div class="faq-a"><p>6–12 Wdh., 0–2 RIR. Im Wechsel: <b>Comp → Iso → Comp → Iso</b>. Versagen nur im <b>letzten Comp-Satz</b>; Iso-Sätze dürfen ans Versagen. Pause: Oberkörper 90 s, Unterkörper 120 s, Waden 60 s.</p></div>
         </details>
         <details class="faq"><summary>Wie trainiere ich die Pump-Sätze?</summary>
           <div class="faq-a">
@@ -917,34 +921,34 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <p>Nicht zu verwechseln mit der <b>1¼-Wdh.</b> („1/4 Wdh. unten"): volle Wiederholung <i>plus</i> ein Viertel unten, bei jeder Wdh. Verwandtes Prinzip, aber ohne eigene Studienlage.</p>
           </div>
         </details>
-        <details class="faq"><summary>Wie funktionieren die Muscle Rounds (MR)?</summary>
+        <details class="faq"><summary>Wie funktionieren die Clusters?</summary>
           <div class="faq-a"><p>6 Minisätze à 4 Wdh., ~10 s Pause, 5–10 min pro Round. Gewicht ≈ 15RM. <b>Nur ein Versagenspunkt</b>, im letzten Minisatz.</p></div>
         </details>
-        <details class="faq"><summary>Was bedeuten die Tiers (I/II/III)?</summary>
-          <div class="faq-a"><p><b>Tier I</b> = wenig Sätze, schlechter Tag. <b>Tier III</b> = volles Volumen, guter Tag. Nach Tagesform wählen, nicht nach Ehrgeiz.</p></div>
+        <details class="faq"><summary>Was bedeuten die Level (I/II/III)?</summary>
+          <div class="faq-a"><p><b>Level I</b> = wenig Sätze, schlechter Tag. <b>Level III</b> = volles Volumen, guter Tag. Nach Tagesform wählen, nicht nach Ehrgeiz.</p></div>
         </details>
         <details class="faq"><summary>Wie steigere ich mich (Progression)?</summary>
           <div class="faq-a"><p>Doppelte Progression: erst Wdh. ans obere Ende, dann Last hoch (2,5–5 kg), Wdh. zurück. <b>2 Einheiten ohne Fortschritt</b> → Übung tauschen.</p></div>
         </details>
-        <details class="faq"><summary>Was ist Blast und Cruise?</summary>
-          <div class="faq-a"><p>Blast = 6 Wochen progressiv (Tier steigend). Danach Cruise (2 Wochen): Volumen und Frequenz runter, nur Muscle Rounds — zum Erholen, bevor die nächste Phase startet.</p></div>
+        <details class="faq"><summary>Was ist SMASH und Deload?</summary>
+          <div class="faq-a"><p>SMASH = 6 Wochen progressiv (Level steigend). Danach Deload (2 Wochen): Volumen und Frequenz runter, nur Clusters — zum Erholen, bevor die nächste Phase startet.</p></div>
         </details>
         <details class="faq"><summary>Wie merkt sich die App meine Übungen und Gewichte?</summary>
           <div class="faq-a">
-            <p><b>Loading-Übungen</b> gehören fest zum Tag: einmal eingetragen, stehen sie in jeder Woche derselben A/B-Woche wieder da. Darunter siehst du <i>„Wo 3: 80×8, 80×7"</i> — die Werte vom letzten Mal, plus <b>▲ gesteigert</b> / <b>= gehalten</b> / <b>▼ gesunken</b>, sobald du heute etwas einträgst.</p>
-            <p><b>Pump- und MR-Übungen</b> rotierst du frei. Sie hängen deshalb nicht am Tag, sondern <b>am Namen</b>: Trägst du dieselbe Übung irgendwann wieder ein — egal an welchem Tag oder in welcher Woche — erscheint automatisch <i>„zuletzt: 30 kg × 18 Wdh · Wo 3"</i> bzw. bei MR <i>„zuletzt: 40 kg · 3 Wdh. im letzten MR"</i>.</p>
+            <p><b>Heavy-Übungen</b> gehören fest zum Tag: einmal eingetragen, stehen sie in jeder Woche derselben A/B-Woche wieder da. Darunter siehst du <i>„Wo 3: 80×8, 80×7"</i> — die Werte vom letzten Mal, plus <b>▲ gesteigert</b> / <b>= gehalten</b> / <b>▼ gesunken</b>, sobald du heute etwas einträgst.</p>
+            <p><b>Pump- und Cluster-Übungen</b> rotierst du frei. Sie hängen deshalb nicht am Tag, sondern <b>am Namen</b>: Trägst du dieselbe Übung irgendwann wieder ein — egal an welchem Tag oder in welcher Woche — erscheint automatisch <i>„zuletzt: 30 kg × 18 Wdh · Wo 3"</i> bzw. beim Cluster <i>„zuletzt: 40 kg · 3 Wdh. im letzten Cluster"</i>.</p>
             <p>Der Name muss dafür gleich geschrieben sein — Groß-/Kleinschreibung und Leerzeichen am Rand sind egal, aber <i>„Beinstrecker"</i> und <i>„Beinstrecker Maschine"</i> gelten als zwei verschiedene Übungen.</p>
-            <p>Bei Pump und MR gibt es bewusst <b>kein</b> ▲/▼-Delta: Diese Sätze sind laut Fortitude nicht zum Progressions-Tracking gedacht — der Wert dient nur als Anhaltspunkt fürs Einstellen.</p>
+            <p>Bei Pump und Cluster gibt es bewusst <b>kein</b> ▲/▼-Delta: Diese Sätze sind nicht zum Progressions-Tracking gedacht — der Wert dient nur als Anhaltspunkt fürs Einstellen.</p>
           </div>
         </details>
         <details class="faq"><summary>Was bedeutet die A/B-Woche?</summary>
-          <div class="faq-a"><p>Die Loading-Tage wechseln wöchentlich zwischen zwei Übungs-Gruppierungen: <b>A</b> in ungeraden, <b>B</b> in geraden Wochen. So kommt jede Übung alle zwei Wochen wieder — oft genug, um Fortschritt sauber zu vergleichen. Pump und MR sind davon nicht betroffen, die wählst du jedes Mal frei.</p></div>
+          <div class="faq-a"><p>Die Heavy-Tage wechseln wöchentlich zwischen zwei Übungs-Gruppierungen: <b>A</b> in ungeraden, <b>B</b> in geraden Wochen. So kommt jede Übung alle zwei Wochen wieder — oft genug, um Fortschritt sauber zu vergleichen. Pump und Cluster sind davon nicht betroffen, die wählst du jedes Mal frei.</p></div>
         </details>
         <details class="faq"><summary>Wie kommen die Satzzahlen zustande?</summary>
           <div class="faq-a">
-            <p>Die Zahl hinter <b>Sätze</b> steht fest im Fortitude-Sheet und hängt am gewählten Tier — du musst nichts selbst rechnen.</p>
-            <p><b>Loading:</b> die Sätze des Muskels werden im ZigZag auf Comp und Iso verteilt. Rücken Tier III = 4 → 2 Comp + 2 Iso. Tier I = 1 → nur der Comp-Satz, das Iso-Feld bleibt leer.</p>
-            <p><b>Pump und MR:</b> gekoppelte Übungen sind Supersätze, die Zahl gilt <b>je Übung</b>. Brust/Rücken Tier III = 2 heißt also 2 Sätze Brust <i>und</i> 2 Sätze Rücken.</p>
+            <p>Die Zahl hinter <b>Sätze</b> ist fest in der App hinterlegt und hängt am gewählten Level — du musst nichts selbst rechnen.</p>
+            <p><b>Heavy:</b> die Sätze des Muskels werden im Wechsel auf Comp und Iso verteilt. Rücken Level III = 4 → 2 Comp + 2 Iso. Level I = 1 → nur der Comp-Satz, das Iso-Feld bleibt leer.</p>
+            <p><b>Pump und Cluster:</b> gekoppelte Übungen sind Supersätze, die Zahl gilt <b>je Übung</b>. Brust/Rücken Level III = 2 heißt also 2 Sätze Brust <i>und</i> 2 Sätze Rücken.</p>
           </div>
         </details>
         <details class="faq"><summary>Was bedeutet der Punkt auf den Tag-Feldern?</summary>
@@ -953,7 +957,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <p><b>Offener Ring</b> — angefangen, aber die Soll-Sätze fehlen noch.<br>
             <b>Gefüllt (grün)</b> — alle Soll-Sätze des Tages sind eingetragen.<br>
             <b>Kein Punkt</b> — hier steht noch nichts.</p>
-            <p>Gezählt wird gegen dasselbe Ziel wie unten in der Volumen-Leiste („X / Y Arbeitssätze") — die beiden können sich also nicht widersprechen. Maßgeblich ist das Tier, das du für den Tag gewählt hast.</p>
+            <p>Gezählt wird gegen dasselbe Ziel wie unten in der Volumen-Leiste („X / Y Arbeitssätze") — die beiden können sich also nicht widersprechen. Maßgeblich ist das Level, das du für den Tag gewählt hast.</p>
           </div>
         </details>
         <details class="faq"><summary>Was heißt das Zeichen oben rechts?</summary>
@@ -964,28 +968,28 @@ export async function mountLog(container, { userId, readOnly = false }) {
         </details>
         <details class="faq"><summary>Was macht der Button in Woche 8?</summary>
           <div class="faq-a">
-            <p>„🔄 Neue Phase starten" leert alle eingetragenen Daten und setzt dich zurück auf Woche 1: Übungen, Gewichte, Wdh., RIR und Notizen. Gedacht für den Start einer komplett neuen Blast-Phase.</p>
-            <p><b>Dein Pump- und MR-Übungspool bleibt aber erhalten</b> — siehe unten.</p>
+            <p>„🔄 Neue Phase starten" leert alle eingetragenen Daten und setzt dich zurück auf Woche 1: Übungen, Gewichte, Wdh., RIR und Notizen. Gedacht für den Start einer komplett neuen SMASH-Phase.</p>
+            <p><b>Dein Pump- und Cluster-Übungspool bleibt aber erhalten</b> — siehe unten.</p>
           </div>
         </details>
         <details class="faq"><summary>Was ist der Übungs-Pool?</summary>
           <div class="faq-a">
-            <p>Deine Pump- und MR-Übungen sammeln sich dauerhaft an — über Phasen hinweg. Wählst du im nächsten Blast wieder eine Übung, die du früher schon mal gemacht hast, siehst du sofort, was du damals geschafft hast: <i>„zuletzt: 40 kg · 3 Wdh. im letzten MR"</i>, markiert mit <b>Pool</b>.</p>
+            <p>Deine Pump- und Cluster-Übungen sammeln sich dauerhaft an — über Phasen hinweg. Wählst du in der nächsten SMASH-Phase wieder eine Übung, die du früher schon mal gemacht hast, siehst du sofort, was du damals geschafft hast: <i>„zuletzt: 40 kg · 3 Wdh. im letzten Cluster"</i>, markiert mit <b>Pool</b>.</p>
             <p>Der Pool überlebt „Neue Phase starten" bewusst — genau dafür ist er da. Gelöscht wird er nie.</p>
             <p>Solange die <b>laufende</b> Phase schon Werte zu der Übung hat, gewinnen die: dann steht dort <b>Wo 3</b> statt <b>Pool</b>. Die Wochennummer wäre bei Pool-Werten auch irreführend, weil sie mit jeder Phase wieder bei 1 startet.</p>
           </div>
         </details>
         <details class="faq"><summary>Soll ich stretchen?</summary>
           <div class="faq-a">
-            <p><b>1. Kein Verletzungsschutz.</b> Krafttraining senkt Verletzungen um rund zwei Drittel, Dehnen zeigt keinen günstigen Effekt. Stevenson schreibt das im Buch selbst: <i>„the data don't support this"</i>.</p>
-            <p><b>2. Als Wachstumsreiz zu klein.</b> Aktuelle Meta-Analysen finden triviale bis kleine Effekte (d = 0,12–0,20) — und das nur bei 30–60 Minuten Dehnen pro Tag und Muskel. Neben deinem Load-, Pump- und MR-Volumen fällt das nicht ins Gewicht.</p>
-            <p><b>3. Die Begründung ist überholt.</b> Der Occlusion Stretch stützt sich auf GH-Ausschüttung und „metabolischen Stress". Die Hormon-Hypothese gilt seit rund 2010 als widerlegt, metabolischer Stress als eigenständiger Treiber wurde stark zurückgestuft. Heute gilt mechanische Spannung als Haupttreiber.</p>
+            <p><b>1. Kein Verletzungsschutz.</b> Krafttraining senkt Verletzungen um rund zwei Drittel, Dehnen zeigt keinen günstigen Effekt — die Daten stützen einen Schutzeffekt schlicht nicht.</p>
+            <p><b>2. Als Wachstumsreiz zu klein.</b> Aktuelle Meta-Analysen finden triviale bis kleine Effekte (d = 0,12–0,20) — und das nur bei 30–60 Minuten Dehnen pro Tag und Muskel. Neben deinem Heavy-, Pump- und Cluster-Volumen fällt das nicht ins Gewicht.</p>
+            <p><b>3. Die Begründung ist überholt.</b> Die alte Begründung fürs Dehnen stützt sich auf GH-Ausschüttung und „metabolischen Stress". Die Hormon-Hypothese gilt seit rund 2010 als widerlegt, metabolischer Stress als eigenständiger Treiber wurde stark zurückgestuft. Heute gilt mechanische Spannung als Haupttreiber.</p>
             <p><b>4. Der gute Kern lebt woanders.</b> Was wirkt, ist Belastung bei <b>langer Muskellänge</b> — über Übungsauswahl und volle ROM in den Arbeitssätzen, nicht über einen 60–90-Sekunden-Halt danach.</p>
             <p><b>5. Beweglichkeit kommt ohnehin.</b> Krafttraining über volle ROM verbessert die Beweglichkeit genauso stark wie dediziertes Dehnen.</p>
-            <p><b>Wann Dehnen trotzdem sinnvoll ist:</b> gezielt gegen eine konkrete Einschränkung, die deine Technik verschlechtert — verkürzte Hüftbeuger oder Brust vom Sitzen etwa. Das ist ein Technik-Argument, kein Gelenk-Argument, und es ist Stevensons bestes. Vor dem Heben kurz und dynamisch halten; langes statisches Dehnen (über 60 s) senkt die Kraft kurzfristig.</p>
+            <p><b>Wann Dehnen trotzdem sinnvoll ist:</b> gezielt gegen eine konkrete Einschränkung, die deine Technik verschlechtert — verkürzte Hüftbeuger oder Brust vom Sitzen etwa. Das ist ein Technik-Argument, kein Gelenk-Argument, und es ist das stärkste Argument fürs Dehnen. Vor dem Heben kurz und dynamisch halten; langes statisches Dehnen (über 60 s) senkt die Kraft kurzfristig.</p>
           </div>
         </details>
-        <p class="src">Struktur: Fortitude Training, Scott Stevenson. Evidenz: Pelland et al. 2025 · Baz-Valle et al. 2022 · Schoenfeld et al. 2021 · Wolf/Schoenfeld 2025.</p>
+        <p class="src">Evidenz: Pelland et al. 2025 · Baz-Valle et al. 2022 · Schoenfeld et al. 2021 · Wolf/Schoenfeld 2025.</p>
       </div>`;
     document.body.appendChild(sheet);
     sheet.querySelector('#lg-sheetx').onclick = () => { sheet.hidden = true; };
