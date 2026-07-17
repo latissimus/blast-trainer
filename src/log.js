@@ -11,7 +11,7 @@ const MR_REST = 120;
 const TYPE_LABEL = { load: 'HEAVY', pump: 'PUMP', mr: 'CLUSTER' };
 
 /* ------------------------------------------------------------------
-   Mount the BLAST log (v2: Level, A/B-Wochen, Rollen, Pausen-Timer)
+   Mount the LOGMAN log (v2: Level, A/B-Wochen, Rollen, Pausen-Timer)
    into `container`.
      userId    – whose training_logs row to load
      readOnly  – true for the admin viewing a customer (no editing/saving)

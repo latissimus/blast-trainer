@@ -1,7 +1,7 @@
 {
-  "name": "BLAST",
-  "short_name": "BLAST",
-  "description": "BLAST Trainings-Log",
+  "name": "LOGMAN",
+  "short_name": "LOGMAN",
+  "description": "LOGMAN Trainings-Log",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

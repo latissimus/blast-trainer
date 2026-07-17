@@ -1,4 +1,4 @@
-// BLAST-Trainingsvorlage v3 — feste Satzzahlen je Level.
+// LOGMAN-Trainingsvorlage v3 — feste Satzzahlen je Level.
 // sets: [Level I, II, III]  (Gesamt-Sätze des Blocks; Wechsel-Split Comp/Iso auf die Übungen).
 // typeByTier: optionaler Typ-Wechsel je Level (z.B. Cluster-Tag: Tris/Bis & Abs sind bei
 // niedrigen Leveln Pump statt Cluster).

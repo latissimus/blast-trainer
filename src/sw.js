@@ -36,7 +36,7 @@ self.addEventListener('push', (event) => {
     daten = { body: event.data ? event.data.text() : '' };
   }
   event.waitUntil(
-    self.registration.showNotification(daten.title || 'BLAST', {
+    self.registration.showNotification(daten.title || 'LOGMAN', {
       body: daten.body || '',
       icon: 'icon-192.png',
       badge: 'icon-192.png',
