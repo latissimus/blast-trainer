@@ -4,8 +4,8 @@ import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } f
 import { readProfile, writeProfile } from './localstore.js';
 import { brandSvg } from './brand.js';
 import { getTheme, applyTheme } from './theme.js';
-import { registriereSW } from './push.js';
-import { mountLog } from './log.js';
+import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
+import { mountLog, toast } from './log.js';
 import { mountProfile } from './profile.js';
 import { mountAdmin } from './admin.js';
 
@@ -203,12 +203,30 @@ function renderChrome() {
         </nav>
       </div>
     </header>
+    ${pushHinweisZeigen() ? `
+      <div class="wrap"><div class="pushbar" id="pushbar">
+        <button class="pb-go" id="pb-go">🔔 Benachrichtigungen aktivieren</button>
+        <button class="pb-x" id="pb-x" aria-label="Nicht mehr fragen">×</button>
+      </div></div>` : ''}
     <main id="view"></main>`;
 
   app.querySelectorAll('nav [data-view]').forEach((b) => {
     b.onclick = () => { location.hash = b.dataset.view; };
   });
   app.querySelector('#nav-logout').onclick = async () => { await signOut(); };
+
+  // Einmaliger Hinweis. Eine native App darf beim ersten Start selbst fragen,
+  // eine Web-App nicht – Apple verlangt einen echten Tipp. Nach dem Tippen ist
+  // er fuer immer weg, egal wie die Antwort ausfiel.
+  const pb = app.querySelector('#pushbar');
+  if (pb) {
+    app.querySelector('#pb-x').onclick = () => { pushHinweisWegwischen(); pb.remove(); };
+    app.querySelector('#pb-go').onclick = async () => {
+      const ok = await erlaubnisFragen(session.user.id);
+      pb.remove();
+      if (ok) toast('Benachrichtigungen aktiv');
+    };
+  }
 }
 
 function setNavActive(view) {
@@ -297,6 +315,11 @@ async function render() {
   if (splashFertig) await splashFertig;
   renderChrome();
   await routeView();
+
+  // Push-Abo im Hintergrund auffrischen. Ein Abo stirbt, wenn die App vom
+  // Homescreen geloescht wird – ohne das hier bliebe die Datenbank auf toten
+  // Endpunkten sitzen, die Apple sogar noch mit 201 annimmt.
+  if (navigator.onLine) abonniereStill(session.user.id);
 }
 
 /* ------------------------------------------------------------ boot */

@@ -1,20 +1,99 @@
-// Service-Worker-Registrierung.
+// Service Worker und Push-Anmeldung.
 //
-// Der Worker liefert die App im Funkloch aus (Offline Stufe 2) und bringt die
-// Push-Behandlung mit. Registriert wird er beim App-Start aus main.js, bewusst
-// unabhaengig von jeder Oberflaeche: Frueher haing das am Diagnose-Knopf im
-// Profil, und mit dessen Wegfall waere die Offline-Faehigkeit still gestorben.
-//
-// Das Anmelden fuer Push (subscribe + VAPID) ist hier bewusst NICHT mehr drin.
-// Es diente der einen Frage, ob Web Push in der EU auf iOS funktioniert – die
-// ist mit Ja beantwortet und geprueft. BLAST verschickt derzeit nichts; wenn es
-// das mal soll, kommt es an der Stelle wieder rein, an der es gebraucht wird.
-// Der oeffentliche VAPID-Schluessel und das Sende-Skript liegen weiterhin unter
-// ~/Projects/blast-trainer-backups/.
+// Beides haengt am App-Start und an keiner Oberflaeche. Der Grund steht in der
+// Projektgeschichte: Erst hing die Worker-Registrierung am Diagnose-Knopf im
+// Profil und waere mit dessen Wegfall still gestorben; danach ist mir beim
+// Aufraeumen das Push-Abo mit rausgeflogen, und die App konnte sich nicht mehr
+// anmelden. Was funktionieren soll, darf nicht davon abhaengen, dass jemand
+// irgendwo tippt.
+import { supabase } from './supabase.js';
+
+const VAPID_PUBLIC = 'BEi1duvMCessLiCp4mxksfnoMPI6tXOqziOXyllyLpsr_px2_WhmNwwO3Cb4NxYLeLvUyZ-rDYQUh2Ac3T5z1y8';
+
+const WEG_KEY = 'blast:push-hinweis-weg';
 
 export async function registriereSW() {
   if (!('serviceWorker' in navigator)) throw new Error('Service Worker werden hier nicht unterstützt.');
   // Relativ zur Seite: Unter GitHub Pages liegt die App in einem Unterordner,
   // ein absoluter Pfad wuerde am falschen Ort suchen.
   return navigator.serviceWorker.register('./sw.js');
+}
+
+// iOS liefert Push nur an Web-Apps aus, die vom Homescreen gestartet wurden.
+// Im Safari-Tab zu fragen waere sinnlos – die Erlaubnis brächte dort nichts.
+const istHomescreenApp = () =>
+  window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+// Ob der einmalige Hinweis gezeigt werden soll.
+//
+// Eine native App darf die Abfrage beim ersten Start selbst ausloesen. Eine
+// Web-App darf das nicht – Apple verlangt eine echte Nutzeraktion. Dieser
+// Hinweis ist das Aequivalent dazu: einmal tippen, danach nie wieder.
+export const pushHinweisZeigen = () => {
+  try {
+    if (!istHomescreenApp()) return false;
+    if (!('Notification' in window) || !('PushManager' in window)) return false;
+    if (Notification.permission !== 'default') return false;   // schon erlaubt oder abgelehnt
+    return localStorage.getItem(WEG_KEY) !== '1';
+  } catch (e) {
+    return false;
+  }
+};
+
+export const pushHinweisWegwischen = () => {
+  try { localStorage.setItem(WEG_KEY, '1'); } catch (e) { /* egal */ }
+};
+
+// Muss aus einem echten Tipp heraus laufen – iOS lehnt die Abfrage sonst
+// kommentarlos ab.
+export async function erlaubnisFragen(userId) {
+  const erlaubnis = await Notification.requestPermission();
+  pushHinweisWegwischen();   // gefragt ist gefragt, egal wie die Antwort ausfiel
+  if (erlaubnis !== 'granted') return false;
+  return !!(await abonniereStill(userId));
+}
+
+const base64UrlZuUint8 = (s) => {
+  const pad = '='.repeat((4 - (s.length % 4)) % 4);
+  const roh = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from([...roh].map((c) => c.charCodeAt(0)));
+};
+
+// Meldet das Geraet still fuer Push an – aber nur, wenn die Erlaubnis schon
+// erteilt ist. Von sich aus fragen waere zwecklos (iOS erlaubt die Abfrage nur
+// aus einem echten Tipp heraus) und aufdringlich.
+//
+// Wichtig: Ein Abo gehoert zur Service-Worker-Registrierung. Loescht man die
+// App vom Homescreen, ist beides weg – die alten Endpunkte in der Datenbank
+// zeigen dann ins Leere, und Apple nimmt sie trotzdem noch mit 201 an. Darum
+// wird bei jedem Start geprueft und notfalls neu angelegt.
+export async function abonniereStill(userId) {
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return null;
+    if (!('PushManager' in window)) return null;
+    const reg = await navigator.serviceWorker.ready;
+    let abo = await reg.pushManager.getSubscription();
+    if (!abo) {
+      abo = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: base64UrlZuUint8(VAPID_PUBLIC),
+      });
+    }
+    const j = abo.toJSON();
+    const { error } = await supabase.from('push_subscriptions').upsert(
+      {
+        endpoint: j.endpoint,
+        user_id: userId,
+        p256dh: j.keys.p256dh,
+        auth: j.keys.auth,
+        user_agent: navigator.userAgent.slice(0, 200),
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'endpoint' },
+    );
+    if (error) return null;
+    return abo;
+  } catch (e) {
+    return null;   // Push ist Beiwerk – es darf die App nie aufhalten
+  }
 }
