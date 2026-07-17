@@ -1,7 +1,6 @@
 import { supabase } from './supabase.js';
 import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
-import { diagnose, registriereSW, abonniere, testMitteilung, speichereAbo } from './push.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -196,79 +195,6 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   });
   thCard.appendChild(seg);
   wrap.appendChild(thCard);
-
-  // --- Benachrichtigungen: Diagnose -------------------------------------
-  const pnCard = document.createElement('div');
-  pnCard.className = 'card';
-  pnCard.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 10px">Benachrichtigungen</h2>`;
-  const liste = document.createElement('div');
-  liste.className = 'diag';
-  pnCard.appendChild(liste);
-  const pnMsg = document.createElement('div');
-  pnCard.appendChild(pnMsg);
-
-  const zeile = (label, ok, wert) =>
-    `<div class="diag-row"><span class="diag-k">${label}</span>
-      <span class="diag-v ${ok ? 'ja' : 'nein'}">${wert !== undefined ? wert : (ok ? '✓' : '✗')}</span></div>`;
-
-  function zeigeDiagnose() {
-    const d = diagnose();
-    liste.innerHTML =
-      zeile('Vom Homescreen gestartet', d.homescreen) +
-      zeile('Sicherer Kontext (HTTPS)', d.sichererKontext) +
-      zeile('Service Worker', d.serviceWorker) +
-      zeile('Push-API vorhanden', d.pushManager) +
-      zeile('Mitteilungs-API', d.notification) +
-      zeile('Erlaubnis', d.erlaubnis === 'granted', d.erlaubnis);
-    if (!d.homescreen) {
-      pnMsg.innerHTML = `<div class="msg err" style="margin-top:12px">Du hast die App im Browser-Tab offen. iOS liefert Push nur an Web-Apps, die über <b>Teilen → Zum Home-Bildschirm</b> gespeichert und von dort geöffnet wurden.</div>`;
-    }
-  }
-  zeigeDiagnose();
-
-  const pnBtn = document.createElement('button');
-  pnBtn.className = 'btn btn-block';
-  pnBtn.style.marginTop = '12px';
-  pnBtn.textContent = 'Erlaubnis anfragen & testen';
-  pnBtn.onclick = async () => {
-    pnBtn.disabled = true;
-    pnMsg.innerHTML = '';
-    const sag = (t, k) => { pnMsg.innerHTML = `<div class="msg ${k}" style="margin-top:12px">${t}</div>`; };
-    try {
-      if (!('Notification' in window)) throw new Error('Dieses Gerät kennt keine Mitteilungs-API.');
-      // Muss aus einem echten Tipp heraus passieren – iOS lehnt die Abfrage
-      // sonst kommentarlos ab. Deshalb steckt sie in diesem Klick-Handler.
-      const erlaubnis = await Notification.requestPermission();
-      zeigeDiagnose();
-      if (erlaubnis !== 'granted') { sag('Erlaubnis nicht erteilt — ohne sie geht nichts.', 'err'); pnBtn.disabled = false; return; }
-
-      await registriereSW();
-      await testMitteilung();
-
-      let abo = null, abofehler = null;
-      try { abo = await abonniere(); } catch (e) { abofehler = e.message; }
-
-      if (abo) {
-        const ep = abo.endpoint || '';
-        // Ohne gespeichertes Abo kann niemand senden - der Endpunkt ist die Adresse.
-        let gespeichert = true, speicherfehler = null;
-        try { await speichereAbo(abo, session.user.id); }
-        catch (e) { gespeichert = false; speicherfehler = e.message; }
-        sag(`<b>Push funktioniert auf diesem Gerät.</b><br>Eine Testmitteilung sollte angekommen sein.<br>
-             ${gespeichert ? 'Abo gespeichert — dieses Gerät ist jetzt erreichbar.' : '<b>Abo NICHT gespeichert:</b> ' + speicherfehler}<br>
-             <span style="font-size:11px;color:var(--muted)">Zusteller: ${ep.replace(/^https:\/\/([^/]+).*/, '$1') || '—'}</span>`,
-          gespeichert ? 'ok' : 'err');
-      } else {
-        sag(`Mitteilungen gehen, aber die <b>Push-Anmeldung schlug fehl</b>:<br>
-             <span style="font-size:11px">${abofehler || 'unbekannt'}</span>`, 'err');
-      }
-    } catch (e) {
-      sag('Fehlgeschlagen: ' + e.message, 'err');
-    }
-    pnBtn.disabled = false;
-  };
-  pnCard.appendChild(pnBtn);
-  wrap.appendChild(pnCard);
 
   container.appendChild(wrap);
 }

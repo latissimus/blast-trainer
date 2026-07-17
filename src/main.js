@@ -4,12 +4,19 @@ import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } f
 import { readProfile, writeProfile } from './localstore.js';
 import { brandSvg } from './brand.js';
 import { getTheme, applyTheme } from './theme.js';
+import { registriereSW } from './push.js';
 import { mountLog } from './log.js';
 import { mountProfile } from './profile.js';
 import { mountAdmin } from './admin.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
 applyTheme(getTheme());
+
+// Service Worker gleich beim Start registrieren – er liefert die App im
+// Funkloch aus. Haengt bewusst an keiner Oberflaeche: Frueher hing er am
+// Test-Knopf im Profil, und mit dessen Wegfall waere die Offline-Faehigkeit
+// still gestorben. Fehler hier duerfen die App nicht aufhalten.
+registriereSW().catch(() => {});
 
 const app = document.getElementById('app');
 let session = null;

@@ -1,83 +1,20 @@
-// Benachrichtigungen: Diagnose und Anmeldung.
+// Service-Worker-Registrierung.
 //
-// Zweck ist zunaechst eine einzige Frage: Geht Web Push auf DIESEM Geraet in
-// DIESER Region ueberhaupt? Die Quellenlage zur EU widerspricht sich, und darauf
-// laesst sich nichts bauen. Statt zu recherchieren wird gemessen.
+// Der Worker liefert die App im Funkloch aus (Offline Stufe 2) und bringt die
+// Push-Behandlung mit. Registriert wird er beim App-Start aus main.js, bewusst
+// unabhaengig von jeder Oberflaeche: Frueher haing das am Diagnose-Knopf im
+// Profil, und mit dessen Wegfall waere die Offline-Faehigkeit still gestorben.
 //
-// Der oeffentliche VAPID-Schluessel darf im Code stehen – er ist per Definition
-// oeffentlich. Der private liegt ausserhalb des Repos und wird erst gebraucht,
-// wenn tatsaechlich jemand Pushes verschickt.
-import { supabase } from './supabase.js';
-
-const VAPID_PUBLIC = 'BEi1duvMCessLiCp4mxksfnoMPI6tXOqziOXyllyLpsr_px2_WhmNwwO3Cb4NxYLeLvUyZ-rDYQUh2Ac3T5z1y8';
-
-// iOS liefert Push nur an Web-Apps aus, die vom Homescreen gestartet wurden –
-// im Safari-Tab bleibt alles stumm. Das ist die erste Bedingung ueberhaupt.
-export const istHomescreenApp = () =>
-  window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
-export function diagnose() {
-  return {
-    homescreen: istHomescreenApp(),
-    serviceWorker: 'serviceWorker' in navigator,
-    pushManager: 'PushManager' in window,
-    notification: 'Notification' in window,
-    erlaubnis: 'Notification' in window ? Notification.permission : '—',
-    sichererKontext: window.isSecureContext,
-  };
-}
+// Das Anmelden fuer Push (subscribe + VAPID) ist hier bewusst NICHT mehr drin.
+// Es diente der einen Frage, ob Web Push in der EU auf iOS funktioniert – die
+// ist mit Ja beantwortet und geprueft. BLAST verschickt derzeit nichts; wenn es
+// das mal soll, kommt es an der Stelle wieder rein, an der es gebraucht wird.
+// Der oeffentliche VAPID-Schluessel und das Sende-Skript liegen weiterhin unter
+// ~/Projects/blast-trainer-backups/.
 
 export async function registriereSW() {
   if (!('serviceWorker' in navigator)) throw new Error('Service Worker werden hier nicht unterstützt.');
-  // Relativ zur Seite: unter GitHub Pages liegt die App in einem Unterordner,
+  // Relativ zur Seite: Unter GitHub Pages liegt die App in einem Unterordner,
   // ein absoluter Pfad wuerde am falschen Ort suchen.
   return navigator.serviceWorker.register('./sw.js');
-}
-
-const base64UrlZuUint8 = (s) => {
-  const pad = '='.repeat((4 - (s.length % 4)) % 4);
-  const roh = atob((s + pad).replace(/-/g, '+').replace(/_/g, '/'));
-  return Uint8Array.from([...roh].map((c) => c.charCodeAt(0)));
-};
-
-// Der eigentliche Beweis. Erst dieser Aufruf spricht mit Apples Push-Dienst –
-// vorhandene APIs allein sagen noch nicht, dass die Kette bis zum Ende traegt.
-export async function abonniere() {
-  const reg = await registriereSW();
-  await navigator.serviceWorker.ready;
-  const vorhanden = await reg.pushManager.getSubscription();
-  if (vorhanden) return vorhanden;
-  return reg.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: base64UrlZuUint8(VAPID_PUBLIC),
-  });
-}
-
-// Ohne gespeichertes Abo kann niemand senden: Endpunkt und Schluessel des
-// Geraets sind die Adresse. Eigene Zeile je Geraet – Handy und Rechner haben
-// verschiedene Endpunkte, und iOS wirft das Abo weg, wenn die App geloescht wird.
-export async function speichereAbo(abo, userId) {
-  const j = abo.toJSON();
-  const { error } = await supabase.from('push_subscriptions').upsert(
-    {
-      endpoint: j.endpoint,
-      user_id: userId,
-      p256dh: j.keys.p256dh,
-      auth: j.keys.auth,
-      user_agent: navigator.userAgent.slice(0, 200),
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: 'endpoint' },
-  );
-  if (error) throw error;
-}
-
-export async function testMitteilung() {
-  const reg = await navigator.serviceWorker.ready;
-  // Auf iOS gibt es kein new Notification() – nur ueber den Service Worker.
-  return reg.showNotification('BLAST', {
-    body: 'Benachrichtigungen funktionieren auf diesem Gerät.',
-    icon: 'icon-192.png',
-    tag: 'blast-test',
-  });
 }

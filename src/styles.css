@@ -137,13 +137,6 @@ a{color:var(--navy)}
   text-transform:uppercase;cursor:pointer}
 .themebtn:last-child{border-right:0}
 .themebtn.on{background:var(--navy);color:#fff}
-/* Diagnose-Liste (Benachrichtigungen) */
-.diag-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--faint);font-size:13px}
-.diag-row:last-child{border-bottom:0}
-.diag-k{flex:1;color:var(--muted)}
-.diag-v{font-family:var(--mono);font-weight:900}
-.diag-v.ja{color:var(--up)}
-.diag-v.nein{color:var(--down)}
 .btn{border:3px solid var(--ink);border-radius:var(--r);padding:14px 16px;font-size:15px;
   font-weight:900;font-family:var(--display);font-style:italic;text-transform:uppercase;
   letter-spacing:.02em;box-shadow:var(--shadow);background:var(--surface);color:var(--ink)}
