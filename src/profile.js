@@ -179,8 +179,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   // --- Darstellung -------------------------------------------------------
   const thCard = document.createElement('div');
   thCard.className = 'card';
-  thCard.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 4px">Darstellung</h2>
-    <p style="font-size:12.5px;color:var(--muted);margin:0 0 4px">Gilt nur auf diesem Gerät.</p>`;
+  thCard.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 4px">Darstellung</h2>`;
   const seg = document.createElement('div');
   seg.className = 'themeseg';
   [['retro', 'Retro'], ['dark', 'Dark']].forEach(([wert, label]) => {
