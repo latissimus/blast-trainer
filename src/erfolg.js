@@ -61,10 +61,12 @@ export function mountErfolg(wrap, { session, profile, onProfileUpdated }) {
   sfCard.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">Hautfalten</h2>
     <div class="mess-kopf" id="sf-kopf">lädt…</div>
     <div id="sf-kurve"></div>
-    <p class="mess-hinweis">Nur vergleichbar bei <b>gleicher Person</b>, <b>gleicher Tageszeit</b> und
-      <b>gleichem Zustand</b> (nüchtern, vor dem Training). Sonst misst du Schwankung statt Fortschritt.</p>
     <details class="mess-neu"><summary>Neue Messung</summary><div id="sf-form"></div></details>
-    <div id="sf-einst"></div>`;
+    <details class="mess-neu"><summary>Worauf achten?</summary>
+      <p class="mess-hinweis">Nur vergleichbar bei <b>gleicher Person</b>, <b>gleicher Tageszeit</b> und
+        <b>gleichem Zustand</b> (nüchtern, vor dem Training). Sonst misst du Schwankung statt Fortschritt.</p>
+    </details>
+    <details class="mess-neu"><summary>Erinnerung</summary><div id="sf-einst"></div></details>`;
   wrap.appendChild(sfCard);
 
   // ------------------------------------------------------------------ Gewicht

@@ -424,8 +424,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 
 /* Setzt die Körperwerte von den Profileinstellungen darueber ab. */
 .abschnitt-trenner{border-top:2px dashed var(--ink);opacity:.45;margin:26px 2px 20px}
-.werte-kopf{margin:0 2px 16px}
-.werte-intro{font-size:12.5px;color:var(--muted);line-height:1.55;margin:0}
+.werte-intro{font-size:12.5px;color:var(--muted);line-height:1.55;margin:8px 0 0}
 .werte-intro b{color:var(--ink);font-weight:700}
 
 /* ---------- Erfolgskontrolle (Hautfalten & Gewicht) ---------- */

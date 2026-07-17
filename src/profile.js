@@ -207,10 +207,12 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   wrap.appendChild(trenner);
 
   const werteKopf = document.createElement('div');
-  werteKopf.className = 'werte-kopf';
-  werteKopf.innerHTML = `<h2 class="section-title" style="font-size:22px;margin:0 0 8px">Körperwerte</h2>
-    <p class="werte-intro">Zwei einfache Zahlen über die Zeit — <b>Hautfaltensumme</b> (mm) und <b>Körpergewicht</b>.
-      Der einzelne Tag schwankt; erst die <b>Kurve über Wochen</b> zeigt, ob du Fett verlierst oder deine Form hältst.</p>`;
+  werteKopf.className = 'card';
+  werteKopf.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0">Körperwerte</h2>
+    <details class="mess-neu" style="margin-top:4px"><summary>Wozu ist das gut?</summary>
+      <p class="werte-intro">Zwei einfache Zahlen über die Zeit — <b>Hautfaltensumme</b> (mm) und <b>Körpergewicht</b>.
+        Der einzelne Tag schwankt; erst die <b>Kurve über Wochen</b> zeigt, ob du Fett verlierst oder deine Form hältst.</p>
+    </details>`;
   wrap.appendChild(werteKopf);
 
   mountErfolg(wrap, { session, profile, onProfileUpdated });
