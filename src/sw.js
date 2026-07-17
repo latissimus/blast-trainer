@@ -41,18 +41,30 @@ self.addEventListener('push', (event) => {
       icon: 'icon-192.png',
       badge: 'icon-192.png',
       tag: daten.tag || 'blast',
+      // Ziel mitfuehren: Der Klick-Handler laeuft spaeter und sieht vom Push
+      // sonst nichts mehr. Ohne das waere ein url im Payload eine Attrappe.
+      data: { url: daten.url || '' },
     }),
   );
 });
 
 // Tipp auf die Mitteilung: vorhandenes Fenster nach vorn holen, sonst oeffnen.
+//
+// Nennt die Mitteilung ein Ziel (der Falten-Wecker tut es), dann auch dorthin.
+// Beim schon offenen Fenster per Nachricht statt client.navigate(): Letzteres ist
+// in WebKit nicht verlaesslich – und genau dort laeuft die App.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((fenster) => {
-      for (const f of fenster) if ('focus' in f) return f.focus();
-      if (self.clients.openWindow) return self.clients.openWindow('./');
-      return undefined;
-    }),
-  );
+  const ziel = event.notification.data?.url || '';
+  event.waitUntil((async () => {
+    const fenster = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const f of fenster) {
+      if ('focus' in f) {
+        if (ziel) f.postMessage({ typ: 'gehe-zu', url: ziel });
+        return f.focus();
+      }
+    }
+    if (self.clients.openWindow) return self.clients.openWindow(ziel ? `./${ziel}` : './');
+    return undefined;
+  })());
 });

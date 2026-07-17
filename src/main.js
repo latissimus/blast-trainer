@@ -18,6 +18,15 @@ applyTheme(getTheme());
 // still gestorben. Fehler hier duerfen die App nicht aufhalten.
 registriereSW().catch(() => {});
 
+// Tipp auf eine Mitteilung mit Ziel: Der Worker kann das laufende Fenster nicht
+// selbst umlenken, also sagt er uns nur, wohin. Der Falten-Wecker schickt so ins
+// Profil – direkt zur Eingabe, statt irgendwo zu landen.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data?.typ === 'gehe-zu' && e.data.url) location.hash = e.data.url.replace(/^#/, '');
+  });
+}
+
 const app = document.getElementById('app');
 let session = null;
 let profile = null;
