@@ -639,7 +639,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
           <span class="target" data-tgt="${blk.id}">Sätze <b>${tgt}</b></span>
         </div>
         <div class="cue">${cues.join('')}</div>`;
-      if (!readOnly) el.querySelectorAll('.chip.rest').forEach((b) => (b.onclick = () => startTimer(Number(b.dataset.rest))));
+      // Muskelname mitgeben: Die Mitteilung soll sagen, wovon die Pause war.
+      if (!readOnly) el.querySelectorAll('.chip.rest').forEach((b) => (b.onclick = () => startTimer(Number(b.dataset.rest), blk.mus)));
 
       exOf(blk, tier).forEach((exDef, xi) => {
         const exDiv = document.createElement('div'); exDiv.className = 'ex';
@@ -850,9 +851,27 @@ export async function mountLog(container, { userId, readOnly = false }) {
     } catch (e) { /* egal */ }
   }
 
-  function startTimer(sec) {
+  // Pausenende per Push bestellen.
+  //
+  // Der Ton unten erreicht dich nur, solange die App vorne ist – bist du bei
+  // YouTube, friert iOS das JavaScript ein. Lokal geplante Mitteilungen gibt es
+  // auf iOS nicht, also muss die Erinnerung von aussen kommen. Die Edge Function
+  // schlaeft die Pause ab und schickt dann.
+  //
+  // Fehler hier bleiben still: Der Timer auf dem Bildschirm laeuft ohnehin, der
+  // Push ist die Zugabe.
+  function pushTimer(aktion, sec, label) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    if (!navigator.onLine) return;
+    supabase.functions
+      .invoke('pausentimer', { body: { aktion, sekunden: sec, label } })
+      .catch(() => {});
+  }
+
+  function startTimer(sec, label) {
     if (!saveBar) return;
     primeAudio();
+    pushTimer('start', sec, label);
     clearInterval(timerId);
     tEnd = Date.now() + sec * 1000;
     const box = saveBar.querySelector('#lg-timer'); box.hidden = false; box.classList.remove('done');
@@ -1014,7 +1033,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const ok = await persist();
       if (ok) toast('Wo ' + state.week + ' · ' + state.day + ' gespeichert');
     };
-    saveBar.querySelector('#lg-timerx').onclick = () => { clearInterval(timerId); saveBar.querySelector('#lg-timer').hidden = true; };
+    saveBar.querySelector('#lg-timerx').onclick = () => {
+      clearInterval(timerId);
+      saveBar.querySelector('#lg-timer').hidden = true;
+      // Auch den schlafenden Auftrag abbestellen, sonst meldet er sich spaeter
+      // fuer eine Pause, die du abgebrochen hast.
+      pushTimer('stop');
+    };
   }
 
   return {
