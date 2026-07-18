@@ -1,0 +1,45 @@
+/* Aus LOGMAN uebernommen: Styles fuer Hautfalten-, Gewichts- und Kurven-Box.
+   Setzt die Design-Variablen der Ziel-App voraus (--ink, --pink, --muted,
+   --faint, --surface, --r, --shadow*, --display, --mono, --up, --down). */
+
+/* Setzt die Körperwerte von den Profileinstellungen darueber ab. */
+.abschnitt-trenner{border-top:2px dashed var(--ink);opacity:.45;margin:26px 2px 20px}
+.werte-intro{font-size:12.5px;color:var(--muted);line-height:1.55;margin:8px 0 0}
+.werte-intro b{color:var(--ink);font-weight:700}
+
+/* ---------- Erfolgskontrolle (Hautfalten & Gewicht) ---------- */
+.mess-kopf{margin-bottom:10px}
+.mess-wert{font-family:var(--display);font-style:italic;font-weight:900;font-size:30px;line-height:1}
+.mess-wert span{font-size:16px;opacity:.6}
+.mess-datum{font-size:11.5px;color:var(--muted);margin-top:4px}
+.mess-leer{font-size:13px;color:var(--muted)}
+.mess-hinweis{font-size:11.5px;color:var(--muted);line-height:1.5;margin:10px 0 0;
+  border-left:3px solid var(--faint);padding-left:9px}
+.mess-neu{margin-top:14px}
+.mess-neu summary{font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
+  text-transform:uppercase;cursor:pointer;padding:8px 0}
+.falten-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin:8px 0 4px}
+.falte span{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--muted);margin-bottom:3px}
+.falte .input{margin-bottom:0;padding:9px;text-align:center;font-size:15px}
+.falten-summe{font-family:var(--mono);font-size:13px;margin:12px 0;text-align:center}
+.falten-summe b{font-size:17px}
+.mess-fehlt{color:var(--down);font-size:11.5px}
+.mess-einst{margin-top:14px;border-top:2px dashed var(--faint);padding-top:12px;
+  display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.mess-zeile{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+.gew-eingabe{display:flex;align-items:center;gap:8px;margin-top:12px}
+.gew-eingabe .input{flex:1;text-align:center}
+.gew-einheit{font-family:var(--mono);font-size:13px;color:var(--muted)}
+
+/* Kurve. Der Tageswert ist blass, der Trend kraeftig – das Auge soll dem
+   Signal folgen, nicht dem Rauschen. */
+.kurve{width:100%;height:auto;display:block;margin:6px 0 2px;overflow:visible}
+.k-linie{fill:none;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.k-linie.roh{stroke:var(--faint);stroke-width:1.5;opacity:.55}
+.k-linie.trend{stroke:var(--pink);stroke-width:3}
+.k-pt{fill:var(--pink);stroke:var(--ink);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.k-raster{stroke:var(--faint);stroke-width:1;stroke-dasharray:3 3;opacity:.5;vector-effect:non-scaling-stroke}
+.k-achse{fill:var(--muted);font-family:var(--mono);font-size:9px}
+.kurve-leer{font-size:12px;color:var(--muted);text-align:center;padding:18px 0;line-height:1.6}
+.kurve-leer span{font-size:11px;opacity:.75}

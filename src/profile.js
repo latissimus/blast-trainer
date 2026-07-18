@@ -3,6 +3,7 @@ import { signOut } from './auth.js';
 import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
 import { mountErfolg } from './erfolg.js';
+import { mountFortschritt } from './fortschritt.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -216,6 +217,12 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   // Schalter mehr, sondern ein eigener Bereich. Ueberschrift + Zweck-Satz
   // machen aus den zwei Karten eine allgemeine Funktion statt einer
   // spezifischen Hautfalten-Messung.
+  // Trainings-Marker zuerst: Er gehoert zum Kern der App.
+  const trennerFs = document.createElement('div');
+  trennerFs.className = 'abschnitt-trenner';
+  wrap.appendChild(trennerFs);
+  mountFortschritt(wrap, { session });
+
   const trenner = document.createElement('div');
   trenner.className = 'abschnitt-trenner';
   wrap.appendChild(trenner);
