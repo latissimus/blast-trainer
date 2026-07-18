@@ -64,7 +64,7 @@ function renderAuth() {
     ${MARQUEE}
     <div class="auth-shell">
       <div style="text-align:center;margin-bottom:30px"><span class="brand" style="font-size:46px">${brandSvg()}</span></div>
-      <h1 class="auth-title">${isLogin ? 'Login' : 'Registrieren'}</h1>
+      ${isLogin ? '' : '<h1 class="auth-title">Registrieren</h1>'}
       <p class="auth-sub">${isLogin ? 'Melde dich mit E-Mail und Passwort an.' : 'Erstelle deinen Trainings-Account.'}</p>
       <div id="auth-msg"></div>
       <form id="auth-form" class="card">
@@ -74,11 +74,11 @@ function renderAuth() {
         <input class="input" id="af-email" type="email" autocomplete="email" required placeholder="du@mail.de">
         <label class="fld-l" for="af-pass">Passwort</label>
         <input class="input" id="af-pass" type="password" autocomplete="${isLogin ? 'current-password' : 'new-password'}" required minlength="6" placeholder="••••••••">
-        <button class="btn btn-primary btn-block" type="submit" id="af-submit">${isLogin ? 'Einloggen' : 'Account erstellen'}</button>
+        <button class="btn btn-primary btn-block" type="submit" id="af-submit">${isLogin ? 'Anmelden' : 'Account erstellen'}</button>
       </form>
       <div class="auth-switch">
         ${isLogin ? 'Noch keinen Account?' : 'Schon registriert?'}
-        <button id="auth-toggle">${isLogin ? 'Registrieren' : 'Zum Login'}</button>
+        <button id="auth-toggle">${isLogin ? 'Registrieren' : 'Zur Anmeldung'}</button>
       </div>
       ${isLogin ? '<div class="auth-switch"><button id="auth-forgot">Passwort vergessen?</button></div>' : ''}
     </div>`;
@@ -207,7 +207,7 @@ function renderChrome() {
         <nav class="nav">
           <button class="nav-btn" data-view="log">Log</button>
           ${isAdmin ? '<button class="nav-btn pink" data-view="admin">Admin</button>' : ''}
-          <button class="nav-btn" id="nav-logout">Logout</button>
+          <button class="nav-btn" id="nav-logout">Abmelden</button>
           ${navAvatar()}
         </nav>
       </div>
@@ -307,13 +307,13 @@ async function render() {
       // im Studio nie bis zum Log – obwohl die Trainingsdaten dort lokal liegen.
       profile = zwischengespeichert;
       if (!profile) {
-        app.innerHTML = `${MARQUEE}<div class="auth-shell"><div class="msg err">Profil konnte nicht geladen werden: ${e.message}</div><button class="btn btn-block" id="lo">Logout</button></div>`;
+        app.innerHTML = `${MARQUEE}<div class="auth-shell"><div class="msg err">Profil konnte nicht geladen werden: ${e.message}</div><button class="btn btn-block" id="lo">Abmelden</button></div>`;
         app.querySelector('#lo').onclick = () => signOut();
         return;
       }
     }
     if (!profile) {
-      app.innerHTML = `${MARQUEE}<div class="auth-shell"><div class="msg err">Kein Profil gefunden. Bitte neu einloggen.</div><button class="btn btn-block" id="lo">Logout</button></div>`;
+      app.innerHTML = `${MARQUEE}<div class="auth-shell"><div class="msg err">Kein Profil gefunden. Bitte neu einloggen.</div><button class="btn btn-block" id="lo">Abmelden</button></div>`;
       app.querySelector('#lo').onclick = () => signOut();
       return;
     }
