@@ -107,6 +107,11 @@ a{color:var(--navy)}
 .nav-btn:active{transform:translate(2px,2px);box-shadow:none}
 .nav-btn.active{background:var(--navy);color:#fff}
 .nav-btn.pink{background:var(--pink)}
+/* FAQ-Knopf, solange das Sheet offen ist. Gelb passt auf den hellblauen Grund
+   des Retro-Themes; im Dark-Mode traegt Pink besser – jeweils mit dunkler
+   Schrift, damit es lesbar bleibt. */
+.nav-btn.faq-on{background:var(--mr);color:var(--ink)}
+:root[data-theme="dark"] .nav-btn.faq-on{background:var(--pink);color:#0B1B44}
 .nav-av{width:38px;height:38px;padding:0;border:2px solid var(--ink);border-radius:50%;overflow:hidden;
   background:var(--surface2);box-shadow:var(--shadow-xs);flex:0 0 auto;display:flex;align-items:center;justify-content:center}
 .nav-av:active{transform:translate(2px,2px);box-shadow:none}
@@ -168,7 +173,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .marquee{display:flex;overflow:hidden;height:var(--mq-h);align-items:center;
   background:var(--navy);color:#fff;border-bottom:3px solid var(--ink);
   font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.09em;white-space:nowrap}
-.marquee span{flex:0 0 auto;animation:mq 38s linear infinite}
+.marquee span{flex:0 0 auto;animation:mq 26s linear infinite}
 @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-100%)}}
 /* Dauerbewegung ist fuer manche unertraeglich – Systemwunsch respektieren. */
 @media (prefers-reduced-motion:reduce){.marquee span{animation:none}}

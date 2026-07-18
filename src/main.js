@@ -7,6 +7,7 @@ import { getTheme, applyTheme } from './theme.js';
 import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
 import { mountLog, toast } from './log.js';
 import { mountProfile } from './profile.js';
+import { openFaq } from './faq.js';
 import { mountAdmin } from './admin.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
@@ -206,8 +207,8 @@ function renderChrome() {
         <span class="brand">${brandSvg()}</span>
         <nav class="nav">
           <button class="nav-btn" data-view="log">Log</button>
+          <button class="nav-btn" id="nav-faq">FAQ</button>
           ${isAdmin ? '<button class="nav-btn pink" data-view="admin">Admin</button>' : ''}
-          <button class="nav-btn" id="nav-logout">Abmelden</button>
           ${navAvatar()}
         </nav>
       </div>
@@ -222,7 +223,13 @@ function renderChrome() {
   app.querySelectorAll('nav [data-view]').forEach((b) => {
     b.onclick = () => { location.hash = b.dataset.view; };
   });
-  app.querySelector('#nav-logout').onclick = async () => { await signOut(); };
+  // FAQ liegt in einem eigenen Modul, damit es aus jeder Ansicht aufgeht.
+  // Solange das Sheet offen ist, bleibt der Knopf markiert.
+  const faqBtn = app.querySelector('#nav-faq');
+  faqBtn.onclick = () => {
+    faqBtn.classList.add('faq-on');
+    openFaq(() => faqBtn.classList.remove('faq-on'));
+  };
 
   // Einmaliger Hinweis. Eine native App darf beim ersten Start selbst fragen,
   // eine Web-App nicht – Apple verlangt einen echten Tipp. Nach dem Tippen ist

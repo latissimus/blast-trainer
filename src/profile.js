@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { signOut } from './auth.js';
 import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
 import { mountErfolg } from './erfolg.js';
@@ -196,6 +197,19 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   });
   thCard.appendChild(seg);
   wrap.appendChild(thCard);
+
+  // --- Abmelden ----------------------------------------------------------
+  // Frueher stand der Knopf dauerhaft in der Kopfleiste. Dort war er staendig
+  // sichtbar, obwohl man ihn selten braucht – im Profil liegt er naeher an den
+  // uebrigen Kontoeinstellungen.
+  const outCard = document.createElement('div');
+  outCard.className = 'card';
+  const outBtn = document.createElement('button');
+  outBtn.className = 'btn btn-block';
+  outBtn.textContent = 'Abmelden';
+  outBtn.onclick = () => signOut();
+  outCard.appendChild(outBtn);
+  wrap.appendChild(outCard);
 
   // --- Körperwerte: Hautfalten und Gewicht -------------------------------
   // Sichtbar von den Einstellungen darueber abgesetzt: Das hier ist kein
