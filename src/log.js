@@ -253,7 +253,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
         <button id="lg-wkup" aria-label="Woche vor">→</button>
       </div>
       <span class="rotchip" id="lg-rot">A-Woche</span>
-      ${readOnly ? '' : '<span class="save-dot ok" id="lg-save" title="gespeichert">✓</span>'}
       <span class="phasechip" id="lg-phase"></span>
     </div>
     <div class="tabs" id="lg-tabs"></div>
@@ -271,7 +270,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
     <div id="lg-pool" hidden></div>`;
   container.appendChild(wrap);
 
-  saveStateEl = wrap.querySelector('#lg-save');
+  // Der Sync-Punkt sitzt in der Kopfleiste: Dort ist Platz, er ist immer im Blick,
+  // und die Wochen-Leiste bleibt frei fuer Woche, A/B und Phase. Die Kopfleiste
+  // haelt den Platz bereit, das Log fuellt ihn – und raeumt ihn beim Verlassen.
+  saveStateEl = readOnly ? null : document.querySelector('#app-save');
+  if (saveStateEl) saveStateEl.hidden = false;
   const tabsEl = wrap.querySelector('#lg-tabs');
   const contentEl = wrap.querySelector('#lg-content');
   const volEl = wrap.querySelector('#lg-vol');
@@ -859,6 +862,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
       clearInterval(retryId);
       window.removeEventListener('online', retrySync);
       if (saveBar) saveBar.remove();
+      // Der Punkt gehoert dem Log – ausserhalb gibt es nichts zu synchronisieren.
+      if (saveStateEl) saveStateEl.hidden = true;
     },
   };
 }

@@ -206,6 +206,7 @@ function renderChrome() {
       <div class="wrap">
         <span class="brand">${brandSvg()}</span>
         <nav class="nav">
+          <span class="save-dot ok" id="app-save" title="gespeichert" hidden>✓</span>
           <button class="nav-btn" data-view="log">Log</button>
           <button class="nav-btn" id="nav-faq">FAQ</button>
           ${isAdmin ? '<button class="nav-btn pink" data-view="admin">Admin</button>' : ''}

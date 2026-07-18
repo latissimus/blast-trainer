@@ -196,7 +196,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   width:30px;height:30px;border-radius:var(--r);font-size:14px;font-weight:900;
   box-shadow:var(--shadow-xs);font-family:var(--display);font-style:italic}
 .ibtn:active{transform:translate(2px,2px);box-shadow:none}
-.save-dot{margin-left:auto;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+.save-dot{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
   width:26px;height:26px;font-size:18px;font-weight:900;font-family:var(--mono);color:var(--muted)}
 .save-dot.ok{color:var(--up)}
 .save-dot.saving{color:var(--faint)}
@@ -206,11 +206,14 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 
 /* ---------- Log: week / rotation ---------- */
 .blastbar{display:flex;align-items:center;gap:8px;padding:18px 0 10px}
-.wk{display:flex;align-items:center;background:var(--surface);border:3px solid var(--ink);
+/* Genau eine Tab-Spalte breit (die Tabs darunter sind drei gleiche Spalten mit
+   8px Abstand). So steht die Wochen-Box buendig ueber "Tag 1" und laesst der
+   Zeile genug Platz fuer A/B-Woche und Phase. */
+.wk{flex:0 0 calc((100% - 16px) / 3);display:flex;align-items:center;background:var(--surface);border:3px solid var(--ink);
   border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
-.wk button{background:none;border:0;color:var(--ink);width:38px;height:40px;font-size:20px;font-family:var(--mono);font-weight:700}
+.wk button{flex:0 0 30px;background:none;border:0;color:var(--ink);height:40px;font-size:19px;font-family:var(--mono);font-weight:700}
 .wk button:active{background:var(--surface2)}
-.wk .num{font-family:var(--display);font-style:italic;font-size:16px;min-width:58px;text-align:center;font-weight:900}
+.wk .num{flex:1;min-width:0;font-family:var(--display);font-style:italic;font-size:15px;text-align:center;font-weight:900}
 .rotchip{display:inline-flex;align-items:center;background:var(--surface);border:3px solid var(--ink);color:var(--ink);
   height:40px;padding:0 13px;border-radius:var(--r);font-size:12.5px;font-weight:900;font-family:var(--display);
   font-style:italic;text-transform:uppercase;box-shadow:var(--shadow-sm);cursor:default;user-select:none}
