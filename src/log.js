@@ -1,6 +1,8 @@
 import { supabase } from './supabase.js';
 import { readLog, writeLog, mergePayload } from './localstore.js';
 import { TPL, LEGACY, TIER_NAMES } from './template.js';
+import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
+import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
 // ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
@@ -198,24 +200,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const t = state.tier[day + '|' + week]; return (t === 0 || t === 1 || t === 2) ? t : 2;
   };
   const setTier = (day, week, t) => { state.tier[day + '|' + week] = t; };
-  function targetSets(blk, tier) {
-    return blk.sets[tier];   // sets = [Level I, II, III], feste Werte
-  }
-  // Effektiver Set-Typ je Level (Cluster-Tag: Tris/Bis & Abs sind bei niedrigen Leveln Pump)
-  function effTypeOf(blk, tier) {
-    return (blk.typeByTier && blk.typeByTier[tier]) || blk.type;
-  }
-  // Übungsfelder je Tier (Quads+Hams-Pump hat bei Tier I nur ein Feld, sonst zwei)
-  function exOf(blk, tier) {
-    return (blk.exByTier && blk.exByTier[tier]) || blk.ex;
-  }
-  // Wechsel-Verteilung (nur Heavy-Blöcke): die N Gesamtsätze des Muskels auf Comp/Iso aufteilen.
-  // 1. Übung (Comp) aufgerundet N/2, 2. Übung (Iso) abgerundet N/2. Eine Übung = alle N.
-  function setsForExercise(blk, tier, xi) {
-    const N = targetSets(blk, tier);
-    const E = exOf(blk, tier).length || 1;
-    return Math.floor(N / E) + (xi < (N % E) ? 1 : 0);
-  }
+  // Duenner Aufsatz: der Pool ist zustandslos, den Zustand geben wir hier rein.
+  const recentNames = (kind, blockId) => poolNames(kind, blockId, state.data, state.mem);
+
   function ensureCell() {
     state.data[state.day] = state.data[state.day] || {};
     state.data[state.day][state.week] = state.data[state.day][state.week] || {};
@@ -413,85 +400,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // Gelesen wird er nur als Rueckfalloption: solange die laufende Phase Daten
   // zur Übung hat, gewinnen die – das Verhalten innerhalb einer Phase bleibt
   // dadurch unveraendert.
-  const memKey = (name, kind) => {
-    const k = (name || '').trim().toLowerCase();
-    return k ? kind + '|' + k : null;
-  };
-  const numOf = (v) => parseFloat(String(v).replace(',', '.'));
-
-  function harvestMem(data) {
-    const out = {};
-    Object.keys(data || {}).forEach((day) => {
-      const tplDay = TPL[day]; if (!tplDay) return;
-      Object.keys(data[day] || {}).forEach((wkStr) => {
-        const wk = Number(wkStr);
-        const cell = data[day][wkStr] || {};
-        Object.keys(cell).forEach((bid) => {
-          const blk = tplDay.blocks.find((b) => b.id === bid);
-          if (!blk || (blk.type !== 'pump' && blk.type !== 'mr')) return;
-          const e = cell[bid]; if (!e) return;
-          const nms = e.names || (e.name != null ? [e.name] : []);
-          nms.forEach((nm, xi) => {
-            const key = memKey(nm, blk.type); if (!key) return;
-            ((e.sets && e.sets[xi]) || []).forEach((s) => {
-              const w = numOf(s && s.w); if (!w) return;
-              const old = out[key];
-              const ow = old ? numOf(old.w) : -1;
-              // n = Originalschreibweise (der Schluessel ist kleingeschrieben,
-              // damit der Abgleich tolerant bleibt – im Vorschlag will man aber
-              // "Latzug Maschine" lesen).
-              // b = Block, in dem sie zuletzt lief. Nur fuer die Vorschlaege:
-              // Bei "Ruecken Dicke" sollen keine Wadenuebungen stehen. Das
-              // Gedaechtnis selbst bleibt blockunabhaengig – ein Gewicht ist
-              // ein Gewicht, egal wo die Uebung eingetragen wurde.
-              if (!old || wk > old.week || (wk === old.week && w > ow)) out[key] = { w: s.w, r: s.r, week: wk, n: String(nm).trim(), b: bid };
-            });
-          });
-        });
-      });
-    });
-    return out;
-  }
-
-  // Zuletzt benutzte Uebungen fuer GENAU DIESEN Block, neueste zuerst.
-  // Bewusst streng: Bei "Ruecken Dicke" gehoeren nur Ruecken-Dicke-Uebungen hin.
-  // Das haelt die Liste von selbst kurz – niemand hat 30 davon – und macht sie
-  // als Anregung erst brauchbar.
-  //
-  // Ueber Rotationen und Deload-Slots hinweg sammelt sich die Historie
-  // automatisch, weil die Block-IDs geteilt sind: m_bkth ist in MRs, MRs-2 und
-  // MRs-3 derselbe Block, p_quad in OK-A und OK-B.
-  function recentNames(kind, blockId) {
-    const seen = new Map();
-    const add = (nm, wk) => {
-      const t = String(nm || '').trim(); if (!t) return;
-      const k = t.toLowerCase();
-      const cur = seen.get(k);
-      if (!cur || wk > cur.week) seen.set(k, { n: t, week: wk });
-    };
-    Object.keys(state.data).forEach((day) => {
-      const tplDay = TPL[day]; if (!tplDay) return;
-      const blk = tplDay.blocks.find((b) => b.id === blockId);
-      if (!blk || blk.type !== kind) return;
-      Object.keys(state.data[day] || {}).forEach((wkStr) => {
-        const entry = (state.data[day][wkStr] || {})[blockId];
-        if (entry) (entry.names || []).forEach((nm) => add(nm, Number(wkStr)));
-      });
-    });
-    // Pool aus frueheren Phasen ans Ende – Wochennummern starten je Phase neu.
-    // Alt-Eintraege ohne b kennen ihren Block nicht und bleiben aussen vor;
-    // fuer die Gewichts-Anzeige zaehlen sie weiterhin.
-    Object.keys(state.mem).forEach((key) => {
-      const i = key.indexOf('|');
-      if (i < 0 || key.slice(0, i) !== kind) return;
-      const e = state.mem[key];
-      if (!e || e.b !== blockId) return;
-      const k = key.slice(i + 1);
-      if (!seen.has(k)) seen.set(k, { n: e.n || k, week: -1 });
-    });
-    return [...seen.values()].sort((a, b) => b.week - a.week || a.n.localeCompare(b.n, 'de'));
-  }
-
   function lastLogFor(name, kind) {
     const k = (name || '').trim().toLowerCase(); if (!k) return null;
     let best = null;
