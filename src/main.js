@@ -47,7 +47,7 @@ let splash = false;         // frisch eingeloggt: einmal das Logo zeigen
 const MQ_TEXT = [
   'SCHLAG DEIN LETZTES MAL',
   'HEAVY · PUMP · CLUSTERS',
-  '6 WOCHEN SMASH · 2 WOCHEN DELOAD',
+  '6 WOCHEN OVERREACH · 2 WOCHEN DELOAD',
   'LEVEL NACH TAGESFORM, NICHT NACH EHRGEIZ',
 ].join(' ◆ ') + ' ◆ ';
 const MARQUEE = `<div class="marquee" aria-hidden="true"><span>${MQ_TEXT.repeat(2)}</span><span>${MQ_TEXT.repeat(2)}</span></div>`;

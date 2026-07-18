@@ -45,8 +45,11 @@ function build() {
         <details class="faq"><summary>Wie steigere ich mich (Progression)?</summary>
           <div class="faq-a"><p>Doppelte Progression: erst Wdh. ans obere Ende, dann Last hoch (2,5–5 kg), Wdh. zurück. <b>2 Einheiten ohne Fortschritt</b> → Übung tauschen.</p></div>
         </details>
-        <details class="faq"><summary>Was ist SMASH und Deload?</summary>
-          <div class="faq-a"><p>SMASH = 6 Wochen progressiv (Level steigend). Danach Deload (2 Wochen): Volumen und Frequenz runter, nur Clusters — zum Erholen, bevor die nächste Phase startet.</p></div>
+        <details class="faq"><summary>Was ist Overreach und Deload?</summary>
+          <div class="faq-a">
+            <p><b>Overreach</b> = 6 Wochen progressiv (Level steigend): bewusst etwas mehr, als du dauerhaft wegstecken würdest. Am Ende fühlst du dich platt — das ist kein Fehler, sondern der Plan.</p>
+            <p><b>Deload</b> = 2 Wochen danach: Volumen und Frequenz runter, nur Clusters. <b>Erst hier kommt der Zugewinn an</b> — der Körper holt nicht nur auf, sondern legt drauf. Ohne diese zwei Wochen wäre der Overreach nur Erschöpfung.</p>
+          </div>
         </details>
         <details class="faq"><summary>Wie merkt sich die App meine Übungen und Gewichte?</summary>
           <div class="faq-a">
@@ -83,13 +86,13 @@ function build() {
         </details>
         <details class="faq"><summary>Was macht der Button in Woche 8?</summary>
           <div class="faq-a">
-            <p>„🔄 Neue Phase starten" leert alle eingetragenen Daten und setzt dich zurück auf Woche 1: Übungen, Gewichte, Wdh., RIR und Notizen. Gedacht für den Start einer komplett neuen SMASH-Phase.</p>
+            <p>„🔄 Neue Phase starten" leert alle eingetragenen Daten und setzt dich zurück auf Woche 1: Übungen, Gewichte, Wdh., RIR und Notizen. Gedacht für den Start einer komplett neuen Overreach-Phase.</p>
             <p><b>Dein Pump- und Cluster-Übungspool bleibt aber erhalten</b> — siehe unten.</p>
           </div>
         </details>
         <details class="faq"><summary>Was ist der Übungs-Pool?</summary>
           <div class="faq-a">
-            <p>Deine Pump- und Cluster-Übungen sammeln sich dauerhaft an — über Phasen hinweg. Wählst du in der nächsten SMASH-Phase wieder eine Übung, die du früher schon mal gemacht hast, siehst du sofort, was du damals geschafft hast: <i>„zuletzt: 40 kg · 3 Wdh. im letzten Cluster"</i>, markiert mit <b>Pool</b>.</p>
+            <p>Deine Pump- und Cluster-Übungen sammeln sich dauerhaft an — über Phasen hinweg. Wählst du in der nächsten Overreach-Phase wieder eine Übung, die du früher schon mal gemacht hast, siehst du sofort, was du damals geschafft hast: <i>„zuletzt: 40 kg · 3 Wdh. im letzten Cluster"</i>, markiert mit <b>Pool</b>.</p>
             <p>Der Pool überlebt „Neue Phase starten" bewusst — genau dafür ist er da. Gelöscht wird er nie.</p>
             <p>Solange die <b>laufende</b> Phase schon Werte zu der Übung hat, gewinnen die: dann steht dort <b>Wo 3</b> statt <b>Pool</b>. Die Wochennummer wäre bei Pool-Werten auch irreführend, weil sie mit jeder Phase wieder bei 1 startet.</p>
           </div>

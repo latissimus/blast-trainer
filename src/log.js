@@ -254,7 +254,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       </div>
       <span class="rotchip" id="lg-rot">A-Woche</span>
       ${readOnly ? '' : '<span class="save-dot ok" id="lg-save" title="gespeichert">✓</span>'}
-      <span class="cruise" id="lg-cruise" hidden>Deload</span>
+      <span class="phasechip" id="lg-phase"></span>
     </div>
     <div class="tabs" id="lg-tabs"></div>
     <div class="tierbar">
@@ -280,12 +280,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const wkDownEl = wrap.querySelector('#lg-wkdn');
   const wkUpEl = wrap.querySelector('#lg-wkup');
   const rotEl = wrap.querySelector('#lg-rot');
-  const cruiseEl = wrap.querySelector('#lg-cruise');
+  const phaseEl = wrap.querySelector('#lg-phase');
   const tierSeg = wrap.querySelector('#lg-tier');
   const tierHintEl = wrap.querySelector('#lg-tierhint');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
 
-  wrap.querySelector('#lg-wkup').onclick = () => { if (state.week < 8) { state.week++; queuePersist(); renderAll(); } }; // SMASH 1-6 + Deload 7-8
+  wrap.querySelector('#lg-wkup').onclick = () => { if (state.week < 8) { state.week++; queuePersist(); renderAll(); } }; // Overreach 1-6 + Deload 7-8
   wrap.querySelector('#lg-wkdn').onclick = () => { if (state.week > 1) { state.week--; queuePersist(); renderAll(); } };
   // Das A/B-Feld ist nur Anzeige (folgt der Woche), nicht klickbar.
   tierSeg.querySelectorAll('button').forEach((b) => {
@@ -300,9 +300,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
     wkDownEl.style.visibility = state.week > 1 ? 'visible' : 'hidden';
     wkUpEl.style.visibility = state.week < 8 ? 'visible' : 'hidden';
     rotEl.textContent = rotOf(state.week) + '-Woche';
-    // Deload-Chip nur in den Deload-Wochen (7-8)
-    if (state.week >= 7) { cruiseEl.hidden = false; cruiseEl.textContent = 'Deload'; }
-    else { cruiseEl.hidden = true; }
+    // Phase immer ablesbar, aber unterschiedlich laut: Der Overreach ist der
+    // Normalzustand und bleibt eine Beschriftung; der Deload ist die Ausnahme,
+    // in der sich wirklich etwas aendert – der darf auffallen.
+    const imDeload = isCruise(state.week);
+    phaseEl.textContent = imDeload ? 'Deload' : 'Overreach';
+    phaseEl.classList.toggle('laut', imDeload);
 
     tabsEl.innerHTML = '';
     const days = daysOfWeek(state.week);
@@ -312,7 +315,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const tpl = TPL[d];
       const b = document.createElement('button');
       b.className = 'tab' + (d === state.day ? ' active' : '');
-      // Tag-Nummer aus der Position: SMASH = Tag 1-3, Deload = drei Cluster-Einheiten,
+      // Tag-Nummer aus der Position: Overreach = Tag 1-3, Deload = drei Cluster-Einheiten,
       // die dritte optional (2-3x pro Woche).
       const opt = cruiseWk && i === 2 ? ' <span class="opt">(opt.)</span>' : '';
       b.innerHTML = `<span>Tag ${i + 1}${opt}</span><span class="t2">${tpl.short}</span>`;
@@ -395,7 +398,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // zeigen, welche Last/Wdh man zuletzt bei dieser Übung genommen hat.
   // ---- Übungs-Pool (Pump/Cluster) ---------------------------------------
   // Pump- und Cluster-Übungen rotieren frei und haengen am Namen. Damit man in der
-  // naechsten SMASH-Phase nachschauen kann, was man zuletzt geschafft hat, wird beim
+  // naechsten Overreach-Phase nachschauen kann, was man zuletzt geschafft hat, wird beim
   // Phasen-Reset aus den Wochendaten ein Pool geerntet, der bestehen bleibt.
   // Gelesen wird er nur als Rueckfalloption: solange die laufende Phase Daten
   // zur Übung hat, gewinnen die – das Verhalten innerhalb einer Phase bleibt
