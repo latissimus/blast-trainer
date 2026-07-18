@@ -49,6 +49,7 @@ function build() {
           <div class="faq-a">
             <p><b>Overreach</b> = 6 Wochen progressiv (Level steigend): bewusst etwas mehr, als du dauerhaft wegstecken würdest. Am Ende fühlst du dich platt — das ist kein Fehler, sondern der Plan.</p>
             <p><b>Deload</b> = 2 Wochen danach: Volumen und Frequenz runter, nur Clusters. <b>Erst hier kommt der Zugewinn an</b> — der Körper holt nicht nur auf, sondern legt drauf. Ohne diese zwei Wochen wäre der Overreach nur Erschöpfung.</p>
+            <p><b>Warum dann ausgerechnet Clusters?</b> Weil im Deload das <b>Volumen</b> fallen soll, der <b>Reiz</b> aber nicht. Genau das ist der Befund der Deload-Forschung: Volumen und Frequenz darf man deutlich senken — solange die Intensität oben bleibt, bleibt die Anpassung erhalten, statt abzubauen. Ein Cluster liefert genau das in kompakter Form: wenig Gesamtvolumen, aber ein echter Versagenspunkt im letzten Minisatz. Du erholst dich, ohne den Faden zu verlieren.</p>
           </div>
         </details>
         <details class="faq"><summary>Wie merkt sich die App meine Übungen und Gewichte?</summary>
@@ -107,7 +108,7 @@ function build() {
             <p><b>Wann Dehnen trotzdem sinnvoll ist:</b> gezielt gegen eine konkrete Einschränkung, die deine Technik verschlechtert — verkürzte Hüftbeuger oder Brust vom Sitzen etwa. Das ist ein Technik-Argument, kein Gelenk-Argument, und es ist das stärkste Argument fürs Dehnen. Vor dem Heben kurz und dynamisch halten; langes statisches Dehnen (über 60 s) senkt die Kraft kurzfristig.</p>
           </div>
         </details>
-        <p class="src">Evidenz: Pelland et al. 2025 · Baz-Valle et al. 2022 · Schoenfeld et al. 2021 · Wolf/Schoenfeld 2025.</p>
+        <p class="src">Evidenz: Pelland et al. 2025 · Baz-Valle et al. 2022 · Schoenfeld et al. 2021 · Wolf/Schoenfeld 2025 · Bell et al. 2023 (Deload).</p>
       </div>`;
   document.body.appendChild(sheet);
   sheet.querySelector('#faq-x').onclick = hide;

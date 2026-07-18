@@ -196,7 +196,9 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   width:30px;height:30px;border-radius:var(--r);font-size:14px;font-weight:900;
   box-shadow:var(--shadow-xs);font-family:var(--display);font-style:italic}
 .ibtn:active{transform:translate(2px,2px);box-shadow:none}
-.save-dot{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+/* align-self, weil die Nav ihre Kinder streckt: Der Punkt hat eine feste Hoehe
+   und saesse sonst oben statt auf einer Linie mit "Log". */
+.save-dot{flex:0 0 auto;align-self:center;display:inline-flex;align-items:center;justify-content:center;
   width:26px;height:26px;font-size:18px;font-weight:900;font-family:var(--mono);color:var(--muted)}
 .save-dot.ok{color:var(--up)}
 .save-dot.saving{color:var(--faint)}
