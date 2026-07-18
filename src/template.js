@@ -36,7 +36,7 @@ export const TPL = {
     { id: 'p_bk', mus: 'Brust + Rücken',  type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, stretch: 1, ex: [{ n: '' }, { n: '' }] },
     { id: 'p_da', mus: 'Schultern + Abs', type: 'pump', sets: [1, 2, 3], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }, { n: '' }] },
     { id: 'p_arm', mus: 'Bi + Tri',   type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, stretch: 1, ex: [{ n: '' }, { n: '' }] },  ] },
-  'MRs': { short: 'Clusters', sub: 'Ganzkörper · 6×4 · ~15RM · 10 s zwischen Minisätzen', rot: '*', blocks: [
+  'MRs': { short: 'Clusters', sub: '6×4 · ~15RM · 10 s zwischen Minisätzen', rot: '*', blocks: [
     { id: 'm_bkth', mus: 'Rücken Dicke',  type: 'mr', sets: [1, 2, 2], rest: 10, reps: '6×4', free: 1, ex: [{ n: '' }] },
     { id: 'm_bkwi', mus: 'Rücken Breite', type: 'mr', sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1, stretch: 1, ex: [{ n: '' }] },
     { id: 'm_ch',   mus: 'Brust',         type: 'mr', sets: [1, 2, 2], rest: 10, reps: '6×4', free: 1, stretch: 1, ex: [{ n: '' }] },
