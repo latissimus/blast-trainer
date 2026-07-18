@@ -2,7 +2,6 @@ import { supabase } from './supabase.js';
 import { signOut } from './auth.js';
 import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
-import { mountErfolg } from './erfolg.js';
 import { mountFortschritt } from './fortschritt.js';
 
 const initials = (name, email) => {
@@ -212,31 +211,15 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   outCard.appendChild(outBtn);
   wrap.appendChild(outCard);
 
-  // --- Körperwerte: Hautfalten und Gewicht -------------------------------
-  // Sichtbar von den Einstellungen darueber abgesetzt: Das hier ist kein
-  // Schalter mehr, sondern ein eigener Bereich. Ueberschrift + Zweck-Satz
-  // machen aus den zwei Karten eine allgemeine Funktion statt einer
-  // spezifischen Hautfalten-Messung.
-  // Trainings-Marker zuerst: Er gehoert zum Kern der App.
+  // --- Heavy-Progression -------------------------------------------------
+  // Sichtbar von den Einstellungen darueber abgesetzt: kein Schalter mehr,
+  // sondern die Auswertung. Hautfalten und Gewicht sind bewusst nicht mehr hier
+  // – das sind Koerperdaten, kein Trainings-Log. Sie liegen als mitnehmbare
+  // Kopie unter templates/koerperwerte/ fuer die spaetere Ernaehrungs-App.
   const trennerFs = document.createElement('div');
   trennerFs.className = 'abschnitt-trenner';
   wrap.appendChild(trennerFs);
   mountFortschritt(wrap, { session });
-
-  const trenner = document.createElement('div');
-  trenner.className = 'abschnitt-trenner';
-  wrap.appendChild(trenner);
-
-  const werteKopf = document.createElement('div');
-  werteKopf.className = 'card';
-  werteKopf.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0">Körperwerte</h2>
-    <details class="mess-neu" style="margin-top:4px"><summary>Wozu ist das gut?</summary>
-      <p class="werte-intro">Zwei einfache Zahlen über die Zeit — <b>Hautfaltensumme</b> (mm) und <b>Körpergewicht</b>.
-        Der einzelne Tag schwankt; erst die <b>Kurve über Wochen</b> zeigt, ob du Fett verlierst oder deine Form hältst.</p>
-    </details>`;
-  wrap.appendChild(werteKopf);
-
-  mountErfolg(wrap, { session, profile, onProfileUpdated });
 
   // --- Version ----------------------------------------------------------
   // Zur Bauzeit eingebrannt. Der Service Worker liefert die App aus dem Cache:
