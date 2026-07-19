@@ -620,7 +620,9 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
    volle Karten-Gewicht der App (3px Rand, Schatten, 18px Polster, 21px Titel) –
    dieselbe Lautstaerke, mit der im Log ein ganzer Trainingsblock gerahmt wird,
    bei einem Zehntel Inhalt. */
-.nb-raster{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+/* Luft nach dem "+ Neue Notiz"-Chip: Der Chip ist eine Handlung, die Kacheln
+   sind Inhalt. Ohne Abstand lasen sich beide wie eine zusammenhaengende Gruppe. */
+.nb-raster{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:22px}
 .nb-kachel{display:flex;flex-direction:column;gap:4px;text-align:left;
   background:var(--surface);border:2px solid var(--ink);border-radius:var(--r);
   padding:10px;box-shadow:var(--shadow-xs);min-height:76px;overflow:hidden}
