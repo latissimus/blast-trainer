@@ -215,6 +215,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 /* Phase. Der Overreach ist der Normalzustand und bleibt eine ruhige
    Beschriftung; der Deload ist die Ausnahme, in der sich wirklich etwas
    aendert – der darf auffallen. */
+.phasechip[hidden]{display:none}
 .phasechip{flex:0 0 auto;font-family:var(--display);font-style:italic;font-weight:900;
   font-size:10px;letter-spacing:.06em;text-transform:uppercase;
   padding:5px 10px;border-radius:20px;border:2px solid var(--faint);
@@ -327,12 +328,17 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   background:var(--surface);border:3px solid var(--ink);border-radius:16px;
   box-shadow:var(--shadow);padding:5px;overflow:hidden}
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:2px;padding:10px 2px;
+  align-items:center;justify-content:center;gap:2px;padding:8px 2px;
   border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
 .ci .wert{font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ci .wert.leer{color:var(--faint)}
-.ci .lbl{font-family:var(--mono);font-size:8.5px;font-weight:700;color:var(--muted);
+/* Beschriftungen in Versalien: Die App setzt jede andere Kleinbeschriftung
+   ebenso (Badges, Chips, Blocktitel). Die WERTE bleiben gemischt – "WO 3" und
+   "TAG 3" in Versalkursive wirken laut, und beim Datum aendert sich ohnehin
+   nichts. */
+.ci .lbl{font-family:var(--mono);font-size:8px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.06em;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Das native Element liegt unsichtbar ueber dem Feld: <select> und
    type="date" oeffnen so die Systemauswahl von iOS, ohne dass wir sie
@@ -355,18 +361,22 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .ci.menue .wert{font-family:var(--ui);font-style:normal;font-size:17px;line-height:1}
 .ci.menue .lbl{color:var(--lila-ink);opacity:.8}
 
-/* Pausentimer schwebt UEBER der Leiste statt in ihr: In der Reihe waere kein
-   Feld mehr breit genug, und der Timer ist ohnehin nur voruebergehend da. */
-.timerpille{position:absolute;right:12px;bottom:calc(100% - 4px);
-  display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;
-  border:3px solid var(--ink);border-radius:20px;padding:6px 8px 6px 14px;
-  font-family:var(--mono);font-size:16px;font-weight:800;box-shadow:var(--shadow-sm)}
-.timerpille.done{background:var(--green)}
-.timerpille[hidden]{display:none}
-.timerpille .x{background:none;border:0;color:inherit;font-size:15px;padding:0 4px;opacity:.75}
+/* Pausentimer. Er uebernimmt die GANZE Leiste, statt sich ein Feld zu teilen:
+   Waehrend der Pause waehlt man ohnehin nichts aus, und jede Auswahl wuerde den
+   Timer abbrechen. So ist die Zahl gross genug, um sie zwischen zwei Saetzen
+   aus zwei Metern Entfernung abzulesen. */
+.ctrlbar.timer-an .inner{background:var(--navy);border-color:var(--ink)}
+.ctrlbar.timer-an .slots,.ctrlbar.timer-an .menue{display:none}
+.timerfeld{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;
+  color:#fff;font-family:var(--mono);font-size:26px;font-weight:800;letter-spacing:-.02em;
+  padding:6px 0}
+.timerfeld[hidden]{display:none}
+.timerfeld .x{background:none;border:0;color:#fff;font-size:20px;opacity:.7;padding:0 6px}
+.ctrlbar.timer-an .timerfeld.done{color:#8FE9B4}
 
 /* Kopfzeile ueber dem ersten Block: nur noch Phase und Tagesbeschreibung. */
-.tagkopf{display:flex;align-items:center;gap:9px;padding:14px 0 12px}
+/* Nur noch die Tagesbeschreibung – die Phase steht jetzt oben neben dem Logo. */
+.tagkopf{padding:14px 0 10px}
 
 /* Kopf der Unterseiten: Titel links, Rueckweg rechts. Der Chip ist der
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
@@ -376,6 +386,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);
   box-shadow:var(--shadow-xs);color:var(--ink);padding:8px 12px;
   font-family:var(--display);font-style:italic;font-weight:900;font-size:12px;text-transform:uppercase}
+.zurueck .pf{font-family:var(--mono);font-style:normal;font-size:15px;margin-right:3px;line-height:1}
 .zurueck:active{transform:translate(2px,2px);box-shadow:none}
 
 /* ---------- Set-O-Meter ----------
@@ -437,7 +448,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 /* Platz fuer die feste Bedienleiste unten. Zwei Zeilen je Feld machen sie
    hoeher als die fruehere Speicherleiste – ohne das verdeckt sie den
    letzten Block. */
-.pad-bottom{padding-bottom:124px}
+.pad-bottom{padding-bottom:118px}
 
 .toast{position:fixed;left:50%;bottom:112px;transform:translateX(-50%) translateY(18px);opacity:0;
   background:var(--navy);color:#fff;font-size:12.5px;font-weight:800;padding:11px 18px;border-radius:var(--r);

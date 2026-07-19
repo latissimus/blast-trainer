@@ -13,8 +13,11 @@ import { mountFortschritt } from './fortschritt.js';
 // ihn bei jeder Eingabe, er ist also immer aktuell und auch im Funkloch da.
 // Der Server ist nur der Rueckfall fuer das erste Oeffnen auf einem neuen Geraet.
 
+// Der Pfeil steht aufrecht in Monospace – wie frueher im Wochenfeld. In der
+// kursiven Display-Schrift wirkte er duenn und kippte nach rechts, also gegen
+// die Richtung, in die er zeigt.
 export function zurueckChip() {
-  return `<a class="zurueck" href="#log">← Log</a>`;
+  return `<a class="zurueck" href="#log"><span class="pf">←</span> Log</a>`;
 }
 
 export async function mountMeter(container, { userId }) {

@@ -52,9 +52,12 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   container.innerHTML = '';
   const wrap = document.createElement('div');
   wrap.className = 'wrap';
-  wrap.style.paddingTop = '18px';
   wrap.style.paddingBottom = '40px';
-  wrap.innerHTML = `<h1 class="section-title">Mein Profil</h1>`;
+  wrap.innerHTML = `
+    <div class="seitenkopf">
+      <h1 class="section-title">Mein Profil</h1>
+      <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
+    </div>`;
 
   const card = document.createElement('div');
   card.className = 'card';

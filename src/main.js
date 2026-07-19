@@ -206,6 +206,7 @@ function renderChrome() {
     <header class="topbar">
       <div class="wrap">
         <span class="brand">${brandSvg()}</span>
+        <span class="phasechip" id="app-phase" hidden></span>
         <nav class="nav">
           <span class="save-dot ok" id="app-save" title="gespeichert" hidden>✓</span>
           ${navAvatar()}
@@ -219,8 +220,11 @@ function renderChrome() {
       </div></div>` : ''}
     <main id="view"></main>
     <div class="ctrlbar">
-      <div class="timerpille" id="app-timer" hidden><span id="app-timertxt">0:00</span><button class="x" id="app-timerx" aria-label="Timer abbrechen">×</button></div>
       <div class="inner">
+        <div class="timerfeld" id="app-timer" hidden>
+          <span id="app-timertxt">0:00</span>
+          <button class="x" id="app-timerx" aria-label="Timer abbrechen">×</button>
+        </div>
         <div class="slots" id="app-slots">
           <label class="ci"><span class="wert" id="ci-wo-w">Wo 1</span><span class="lbl" id="ci-wo-l">Woche</span>
             <select id="lg-woche" aria-label="Woche" disabled></select></label>

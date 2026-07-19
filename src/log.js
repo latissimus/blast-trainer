@@ -251,10 +251,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // die Beschreibung des Tages. Dadurch faengt der erste Trainingsblock
   // unmittelbar unter der Kopfleiste an, statt nach drei Reihen Bedienelementen.
   wrap.innerHTML = `
-    <div class="tagkopf">
-      <span class="phasechip" id="lg-phase"></span>
-      <span class="daymeta" id="lg-daymeta"></span>
-    </div>
+    <div class="tagkopf"><span class="daymeta" id="lg-daymeta"></span></div>
     <div id="lg-content"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
@@ -269,7 +266,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const contentEl = wrap.querySelector('#lg-content');
   const volEl = wrap.querySelector('#lg-vol');
   const dayMetaEl = wrap.querySelector('#lg-daymeta');
-  const phaseEl = wrap.querySelector('#lg-phase');
+  const phaseEl = document.querySelector('#app-phase');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
 
   // ---- untere Bedienleiste -----------------------------------------
@@ -335,6 +332,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     // Normalzustand und bleibt eine Beschriftung; der Deload ist die Ausnahme,
     // in der sich wirklich etwas aendert – der darf auffallen.
     const imDeload = isCruise(state.week);
+    phaseEl.hidden = false;
     phaseEl.textContent = imDeload ? 'Deload' : 'Overreach';
     phaseEl.classList.toggle('laut', imDeload);
     renderControls();
@@ -856,6 +854,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
     clearInterval(timerId);
     tEnd = Date.now() + sec * 1000;
     const box = document.querySelector('#app-timer'); box.hidden = false; box.classList.remove('done');
+    // Die ganze Leiste wird zur Uhr. Waehrend der Pause waehlt man ohnehin
+    // nichts aus – und wenn doch, bricht der Timer ab. Also darf der Platz
+    // solange ihm gehoeren, statt sich mit fuenf Feldern zu draengeln.
+    document.querySelector('.ctrlbar').classList.add('timer-an');
     tick();
     timerId = setInterval(tick, 250);
   }
@@ -867,7 +869,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       clearInterval(timerId);
       box.classList.add('done');
       alertDone();
-      setTimeout(() => { box.hidden = true; }, 4000);
+      setTimeout(() => { box.hidden = true; document.querySelector('.ctrlbar')?.classList.remove('timer-an'); }, 4000);
     }
   }
 
@@ -895,6 +897,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   document.querySelector('#app-timerx').onclick = () => {
     clearInterval(timerId);
     document.querySelector('#app-timer').hidden = true;
+    document.querySelector('.ctrlbar').classList.remove('timer-an');
     // Auch den schlafenden Auftrag abbestellen, sonst meldet er sich spaeter
     // fuer eine Pause, die du abgebrochen hast.
     pushTimer('stop');
@@ -912,6 +915,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (slots) slots.querySelectorAll('select,input').forEach((el) => { el.disabled = true; });
       const t = document.querySelector('#app-timer');
       if (t) t.hidden = true;
+      document.querySelector('.ctrlbar')?.classList.remove('timer-an');
+      // Der Phasen-Chip gehoert dem Log – ausserhalb gibt es keine Phase.
+      const ph = document.querySelector('#app-phase');
+      if (ph) ph.hidden = true;
       // Der Punkt gehoert dem Log – ausserhalb gibt es nichts zu synchronisieren.
       if (saveStateEl) saveStateEl.hidden = true;
     },
