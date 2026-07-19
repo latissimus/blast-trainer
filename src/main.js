@@ -239,7 +239,7 @@ function renderChrome() {
           <label class="ci"><span class="wert" id="ci-dat-w">—</span><span class="lbl">Datum</span>
             <input id="lg-datum" type="date" aria-label="Datum der Einheit" disabled></label>
         </div>
-        <label class="ci menue"><span class="wert" id="app-menue-i">☰</span><span class="lbl" id="app-menue-l">Log</span>
+        <label class="ci menue"><span class="wert" id="app-menue-i"><svg viewBox="0 0 22 16" width="21" height="15" aria-hidden="true"><rect x="0" y="0" width="22" height="3.6" rx="1.8"/><rect x="0" y="6.2" width="22" height="3.6" rx="1.8"/><rect x="0" y="12.4" width="22" height="3.6" rx="1.8"/></svg></span><span class="lbl" id="app-menue-l">Log</span>
           <select id="app-menue" aria-label="Ansicht"></select></label>
       </div>
     </div>`;

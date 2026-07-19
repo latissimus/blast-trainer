@@ -251,7 +251,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // die Beschreibung des Tages. Dadurch faengt der erste Trainingsblock
   // unmittelbar unter der Kopfleiste an, statt nach drei Reihen Bedienelementen.
   wrap.innerHTML = `
-    <div id="lg-content"></div>
+    <div id="lg-content" class="erstblock"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
     <div id="lg-pool" hidden></div>`;
@@ -342,13 +342,33 @@ export async function mountLog(container, { userId, readOnly = false }) {
     // Der Fortschritt der ANDEREN Tage war frueher als Punkt auf den drei
     // Reitern sichtbar. In einer Klappliste faellt das weg, also steht er jetzt
     // im Eintrag: ✓ Soll erreicht, ◦ angefangen, sonst nichts.
-    tagSel.innerHTML = days.map((d, i) => {
+    // Die Optionen werden AN ORT UND STELLE geaendert, nicht neu gebaut.
+    //
+    // Mit innerHTML zerstoerte der Browser die Kindknoten des nativen <select>
+    // und baute sie neu – dabei zeichnete er kurz das Systemsteuerelement mit,
+    // und es blieben weisse, eckige Reste ueber der Rundung der Leiste stehen.
+    // Sichtbar wurde das beim Wechsel von Tag und Level, weil sich dort die
+    // Fortschrittsmarke (✓/◦) aendert: Ein anderes Level heisst ein anderes
+    // Satz-Soll und damit ein anderer Stand. Die Wochenliste hatte das Problem
+    // nie – sie wird einmalig beim Start gefuellt und danach nur ausgewaehlt.
+    const beschriftung = (d, i) => {
       const pr = dayProgress(d, state.week);
       const mark = pr.any ? (pr.met ? '✓ ' : '◦ ') : '';
       const opt = cruise && i === 2 ? ' (opt.)' : '';
-      return `<option value="${d}">${mark}Tag ${i + 1}${opt} · ${TPL[d].short}</option>`;
-    }).join('');
-    tagSel.value = state.day;
+      return `${mark}Tag ${i + 1}${opt} · ${TPL[d].short}`;
+    };
+    if (tagSel.options.length !== days.length) {
+      // Nur wenn sich die ANZAHL aendert (Overreach <-> Deload) bleibt nichts
+      // anderes uebrig, als die Liste neu aufzubauen.
+      tagSel.innerHTML = days.map((d) => `<option value="${d}"></option>`).join('');
+    }
+    days.forEach((d, i) => {
+      const o = tagSel.options[i];
+      if (o.value !== d) o.value = d;
+      const txt = beschriftung(d, i);
+      if (o.textContent !== txt) o.textContent = txt;
+    });
+    if (tagSel.value !== state.day) tagSel.value = state.day;
     const idx = days.indexOf(state.day);
     tagWert.textContent = 'Tag ' + (idx + 1);
     // Kurzform ohne "· Heavy": In 60px passt nur der Koerperteil, und die volle
