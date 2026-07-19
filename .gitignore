@@ -12,3 +12,7 @@ FortitudeTraining.pdf
 # Chat-Protokolle. 47 MB, und das Repo ist oeffentlich – einmal eingecheckt
 # bleiben sie in der Historie, auch nach dem Loeschen.
 LOGMAN Gesprächsverlauf/
+
+# Sperrdatei, die Excel neben einer geoeffneten Mappe anlegt. Waere sie im Repo,
+# wuerde der Build auf GitHub abbrechen.
+~$*

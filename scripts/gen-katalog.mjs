@@ -150,7 +150,11 @@ function leseTabelle(dateien) {
 // und normalisiert verglichen.
 function findeExcel() {
   const treffer = fs.readdirSync(WURZEL)
-    .filter((f) => /bungskatalog\.xlsx$/i.test(f.normalize('NFC')));
+    .filter((f) => /bungskatalog\.xlsx$/i.test(f.normalize('NFC')))
+    // Excel legt neben der geoeffneten Datei eine Sperrdatei "~$Name.xlsx" an.
+    // Ohne diese Zeile bricht jeder Build ab, solange die Mappe offen ist –
+    // also genau dann, wenn man gerade Uebungen ergaenzt hat.
+    .filter((f) => !f.startsWith('~$'));
   if (!treffer.length) {
     throw new Error(`Übungskatalog.xlsx nicht gefunden in ${WURZEL}`);
   }

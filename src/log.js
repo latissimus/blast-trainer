@@ -770,7 +770,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   somSheet.className = 'sheet'; somSheet.hidden = true;
   somSheet.innerHTML = `
     <div class="sheet-in">
-      <div class="sheet-hd"><h2>Set-O-Meter</h2><button class="sp-x" id="som-x" aria-label="schließen">×</button></div>
+      <div class="sheet-hd"><h2>💪 Set-O-Meter</h2><button class="sp-x" id="som-x" aria-label="schließen">×</button></div>
       <p class="som-lage" id="som-lage" style="margin:0 0 10px"></p>
       <div class="som-body" id="som-body"></div>
     </div>`;
