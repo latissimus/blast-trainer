@@ -74,105 +74,144 @@ export function verlinke(text) {
 
 // ---- Seite -----------------------------------------------------------------
 
+
 export async function mountNotizbuch(container, { userId }) {
   container.innerHTML = '';
   const wrap = document.createElement('div');
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
     <div class="seitenkopf">
-      <h1 class="section-title">📒 Notizbuch</h1>
+      <h1 class="section-title">📄 Notizbuch</h1>
       ${zurueckChip()}
     </div>
-    <button class="btn btn-primary btn-block" id="nb-neu">+ Neue Notiz</button>
-    <div id="nb-liste"><p class="som-hinweis">lädt…</p></div>`;
+    <div id="nb-inhalt"><p class="som-hinweis">lädt…</p></div>`;
   container.appendChild(wrap);
 
-  const liste = wrap.querySelector('#nb-liste');
+  const inhalt = wrap.querySelector('#nb-inhalt');
   let notizen = [];
+  // Die Seite hat drei Zustaende: Raster, eine offene Notiz zum Lesen, oder
+  // deren Formular. Frueher wurde im Raster selbst bearbeitet – in einer
+  // zweispaltigen Kachel ist dafuer kein Platz.
+  //
+  // Die Leseansicht ist nicht blosse Zierde: Nur dort sind Links anklickbar.
+  // Im Formular steht der Text roh in einem Eingabefeld – ein Notizbuch, dessen
+  // Links man nicht antippen kann, verfehlt den halben Zweck.
+  let offen = null;
+  let bearbeitet = false;
 
   async function laden() {
     const { data, error } = await supabase
       .from('notizen').select('*').order('updated_at', { ascending: false });
-    if (error) { liste.innerHTML = `<div class="msg err">${escape(error.message)}</div>`; return; }
+    if (error) { inhalt.innerHTML = `<div class="msg err">${escape(error.message)}</div>`; return; }
     notizen = data || [];
+    offen = null;
+    bearbeitet = false;
     await zeichne();
   }
 
   async function zeichne() {
-    if (!notizen.length) {
-      liste.innerHTML = `<p class="som-hinweis">Noch nichts notiert. Platz für Links, Screenshots,
-        Gedanken zur Technik — bleibt beim Start einer neuen Phase erhalten.</p>`;
-      return;
-    }
-    const alle = notizen.flatMap((n) => n.bilder || []);
-    const urls = await signiere(alle);
-    liste.innerHTML = notizen.map((n) => karte(n, urls)).join('');
-    notizen.forEach((n) => verdrahte(n));
+    if (offen && bearbeitet) return zeigeEditor(offen);
+    if (offen) return zeigeAnsicht(offen);
+    zeigeRaster();
   }
 
-  function karte(n, urls) {
+  // ---- Raster --------------------------------------------------------------
+
+  // Vorschau: erste Zeile mit Inhalt, hart gekuerzt. Auf einer Kachel ist Platz
+  // fuer zwei Zeilen – mehr waere Fliesstext in Briefmarkengroesse.
+  const vorschau = (n) => {
+    const roh = (n.text || '').split('\n').find((z) => z.trim()) || '';
+    return escape(roh.slice(0, 90));
+  };
+
+  function zeigeRaster() {
+    const kacheln = notizen.map((n) => `
+      <button class="nb-kachel" data-id="${n.id}">
+        <span class="nb-k-titel">${escape(n.titel) || 'Ohne Titel'}</span>
+        <span class="nb-k-text">${vorschau(n)}</span>
+        ${(n.bilder || []).length ? `<span class="nb-k-bilder">${n.bilder.length} Bild${n.bilder.length > 1 ? 'er' : ''}</span>` : ''}
+      </button>`).join('');
+
+    inhalt.innerHTML = `
+      <div class="nb-leiste"><button class="nb-chip pink" id="nb-neu">+ Neue Notiz</button></div>
+      ${notizen.length
+        ? `<div class="nb-raster">${kacheln}</div>`
+        : `<p class="som-hinweis">Noch nichts notiert. Platz für Links, Screenshots,
+             Gedanken zur Technik — bleibt beim Start einer neuen Phase erhalten.</p>`}`;
+
+    inhalt.querySelector('#nb-neu').onclick = () => {
+      offen = { id: 'entwurf', neu: true, titel: '', text: '', bilder: [] };
+      bearbeitet = true;                       // ein Entwurf hat nichts zu lesen
+      zeichne();
+    };
+    inhalt.querySelectorAll('.nb-kachel').forEach((k) => {
+      k.onclick = () => {
+        offen = notizen.find((n) => String(n.id) === k.dataset.id);
+        bearbeitet = false;
+        zeichne();
+      };
+    });
+  }
+
+  // ---- Lesen ---------------------------------------------------------------
+
+  async function zeigeAnsicht(n) {
+    const urls = await signiere(n.bilder || []);
     const bilder = (n.bilder || [])
-      .map((p) => (urls[p] ? `<img class="nb-bild" src="${urls[p]}" alt="" data-pfad="${p}">` : ''))
-      .join('');
-    return `
-      <div class="card nb-karte" data-id="${n.id}">
-        <div class="nb-kopf">
-          <b class="nb-titel">${escape(n.titel) || '<i>Ohne Titel</i>'}</b>
-          <span class="nb-akt">
-            <button class="chip nb-edit">Bearbeiten</button>
-            <button class="chip nb-weg">Löschen</button>
-          </span>
-        </div>
+      .map((p) => (urls[p] ? `<img class="nb-bild" src="${urls[p]}" alt="">` : '')).join('');
+    inhalt.innerHTML = `
+      <div class="card nb-karte">
+        <h2 class="nb-titel">${escape(n.titel) || '<i>Ohne Titel</i>'}</h2>
         ${n.text ? `<p class="nb-text">${verlinke(n.text)}</p>` : ''}
         ${bilder ? `<div class="nb-bilder">${bilder}</div>` : ''}
+        <div class="nb-leiste">
+          <button class="nb-chip pink nb-edit">Bearbeiten</button>
+          <button class="nb-chip nb-zu">Zurück</button>
+        </div>
       </div>`;
+    inhalt.querySelector('.nb-edit').onclick = () => { bearbeitet = true; zeichne(); };
+    inhalt.querySelector('.nb-zu').onclick = () => { offen = null; zeichne(); };
   }
 
-  function verdrahte(n) {
-    const el = liste.querySelector(`[data-id="${n.id}"]`);
-    if (!el) return;
-    el.querySelector('.nb-edit').onclick = () => bearbeiten(n);
-    el.querySelector('.nb-weg').onclick = () => loeschen(n);
-  }
+  // ---- Bearbeiten ----------------------------------------------------------
 
-  // Bearbeiten ersetzt die Karte an Ort und Stelle. Kein Dialog: Das Notizbuch
-  // ist die einzige Seite, auf der man laengeren Text tippt – dafuer will man
-  // den ganzen Bildschirm, nicht ein Fenster darin.
-  async function bearbeiten(n) {
-    const el = liste.querySelector(`[data-id="${n.id}"]`);
+  async function zeigeEditor(n) {
     const urls = await signiere(n.bilder || []);
-    // Felder in der Hausform (.fld-l + .input) statt eigener: Das Profil sieht
-    // schon so aus, und ein zweites Formular-Aussehen in derselben App waere
-    // eine Erfindung ohne Anlass.
-    el.innerHTML = `
-      <label class="fld-l">Titel</label>
-      <input class="input nb-in-titel" value="${escape(n.titel)}" placeholder="Worum geht es?" maxlength="120">
-      <label class="fld-l">Text</label>
-      <textarea class="input nb-in-text" rows="10" placeholder="Gedanken, Links, Cues…">${escape(n.text)}</textarea>
-      <div class="nb-bilder nb-bilder-edit">
-        ${(n.bilder || []).map((p) => `
-          <span class="nb-slot">
-            <img class="nb-bild" src="${urls[p] || ''}" alt="">
-            <button class="nb-bildweg" data-pfad="${p}" aria-label="Bild entfernen">×</button>
-          </span>`).join('')}
-      </div>
-      <label class="chip nb-upload">+ Bild
-        <input type="file" accept="image/*" hidden multiple></label>
-      <button class="btn btn-primary btn-block nb-ok">Sichern</button>
-      <button class="btn btn-block nb-ab">Abbrechen</button>`;
+    inhalt.innerHTML = `
+      <div class="card nb-karte">
+        <label class="fld-l">Titel</label>
+        <input class="input nb-in-titel" value="${escape(n.titel)}" placeholder="Worum geht es?" maxlength="120">
+        <label class="fld-l">Text</label>
+        <textarea class="input nb-in-text" rows="9" placeholder="Gedanken, Links, Cues…">${escape(n.text)}</textarea>
+        <div class="nb-bilder nb-bilder-edit">
+          ${(n.bilder || []).map((p) => `
+            <span class="nb-slot">
+              <img class="nb-bild" src="${urls[p] || ''}" alt="">
+              <button class="nb-bildweg" data-pfad="${p}" aria-label="Bild entfernen">×</button>
+            </span>`).join('')}
+        </div>
+        <div class="nb-leiste">
+          <label class="nb-chip nb-upload">+ Bild<input type="file" accept="image/*" hidden multiple></label>
+          <button class="nb-chip pink nb-ok">Sichern</button>
+          <button class="nb-chip nb-ab">Abbrechen</button>
+          ${n.neu ? '' : '<button class="nb-chip nb-weg">Löschen</button>'}
+        </div>
+      </div>`;
 
+    const el = inhalt.querySelector('.nb-karte');
     const titelIn = el.querySelector('.nb-in-titel');
     const textIn = el.querySelector('.nb-in-text');
     let bilder = [...(n.bilder || [])];
 
-    el.querySelectorAll('.nb-bildweg').forEach((b) => {
+    const bildWegBinden = (b) => {
       b.onclick = () => {
         bilder = bilder.filter((p) => p !== b.dataset.pfad);
         b.closest('.nb-slot').remove();
         // Aus dem Bucket erst beim Sichern – sonst ist das Bild weg, wenn du
         // den Vorgang abbrichst.
       };
-    });
+    };
+    el.querySelectorAll('.nb-bildweg').forEach(bildWegBinden);
 
     el.querySelector('.nb-upload input').onchange = async (ev) => {
       const dateien = [...ev.target.files];
@@ -192,8 +231,7 @@ export async function mountNotizbuch(container, { userId }) {
               <img class="nb-bild" src="${data?.signedUrl || ''}" alt="">
               <button class="nb-bildweg" data-pfad="${pfad}" aria-label="Bild entfernen">×</button>
             </span>`);
-          const neu = el.querySelector(`.nb-bildweg[data-pfad="${pfad}"]`);
-          neu.onclick = () => { bilder = bilder.filter((p) => p !== pfad); neu.closest('.nb-slot').remove(); };
+          bildWegBinden(el.querySelector(`.nb-bildweg[data-pfad="${pfad}"]`));
         } catch (e) {
           alert('Bild konnte nicht hochgeladen werden: ' + e.message);
         }
@@ -208,25 +246,24 @@ export async function mountNotizbuch(container, { userId }) {
     //
     // Bilder wandern beim Hochladen sofort in den Bucket (anders geht es nicht,
     // die Vorschau braucht eine Adresse). Beim Abbrechen muessen die in dieser
-    // Sitzung hochgeladenen also wieder weg, sonst bleiben Waisen liegen, auf
-    // die keine Notiz mehr zeigt.
+    // Sitzung hochgeladenen also wieder weg, sonst bleiben Waisen liegen.
     el.querySelector('.nb-ab').onclick = async () => {
       const waisen = bilder.filter((p) => !(n.bilder || []).includes(p));
       if (waisen.length) await supabase.storage.from(BUCKET).remove(waisen);
-      if (n.neu) notizen = notizen.filter((x) => x !== n);
+      // Ein verworfener Entwurf fuehrt zurueck ins Raster, eine bestehende
+      // Notiz zurueck in ihre Leseansicht – dorthin, wo man hergekommen ist.
+      if (n.neu) offen = null; else bearbeitet = false;
       await zeichne();
     };
 
     el.querySelector('.nb-ok').onclick = async () => {
       const felder = { titel: titelIn.value.trim(), text: textIn.value, bilder };
-
       if (n.neu) {
         const { error } = await supabase.from('notizen').insert({ user_id: userId, ...felder });
         if (error) { alert('Nicht gesichert: ' + error.message); return; }
         await laden();
         return;
       }
-
       // Beim Sichern die tatsaechlich entfernten Bilder aus dem Bucket werfen,
       // sonst waechst er mit Karteileichen voll.
       const weg = (n.bilder || []).filter((p) => !bilder.includes(p));
@@ -237,25 +274,16 @@ export async function mountNotizbuch(container, { userId }) {
       if (error) { alert('Nicht gesichert: ' + error.message); return; }
       await laden();
     };
-  }
 
-  async function loeschen(n) {
-    if (!confirm(`Notiz „${n.titel || 'Ohne Titel'}" löschen?`)) return;
-    if ((n.bilder || []).length) await supabase.storage.from(BUCKET).remove(n.bilder);
-    const { error } = await supabase.from('notizen').delete().eq('id', n.id);
-    if (error) { alert('Nicht gelöscht: ' + error.message); return; }
-    await laden();
+    const weg = el.querySelector('.nb-weg');
+    if (weg) weg.onclick = async () => {
+      if (!confirm(`Notiz „${n.titel || 'Ohne Titel'}" löschen?`)) return;
+      if ((n.bilder || []).length) await supabase.storage.from(BUCKET).remove(n.bilder);
+      const { error } = await supabase.from('notizen').delete().eq('id', n.id);
+      if (error) { alert('Nicht gelöscht: ' + error.message); return; }
+      await laden();
+    };
   }
-
-  // Entwurf, keine Zeile: Angelegt wird erst beim Sichern. Sonst hinterlaesst
-  // jedes versehentliche Antippen eine leere Notiz.
-  wrap.querySelector('#nb-neu').onclick = async () => {
-    if (notizen.some((n) => n.neu)) return;      // nur ein Entwurf gleichzeitig
-    const entwurf = { id: 'entwurf', neu: true, titel: '', text: '', bilder: [] };
-    notizen = [entwurf, ...notizen];
-    await zeichne();
-    bearbeiten(entwurf);
-  };
 
   await laden();
 }

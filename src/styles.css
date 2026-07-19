@@ -616,33 +616,46 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 .kurve-leer span{font-size:11px;opacity:.75}
 
 /* ---------- Notizbuch ---------- */
-.nb-karte{margin-top:12px}
-.nb-kopf{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
-.nb-titel{flex:1 1 auto;min-width:0;font-family:var(--display);font-style:italic;
-  font-weight:900;font-size:21px;overflow-wrap:anywhere}
-.nb-akt{display:flex;gap:5px;flex:0 0 auto}
-.nb-text{margin:0;font-size:16px;line-height:1.65;overflow-wrap:anywhere}
-/* Links muessen sich vom Fliesstext abheben, ohne die Akzentfarben zu kapern. */
+/* Zweispaltiges Raster statt gestapelter Karten: Frueher trug jede Notiz das
+   volle Karten-Gewicht der App (3px Rand, Schatten, 18px Polster, 21px Titel) –
+   dieselbe Lautstaerke, mit der im Log ein ganzer Trainingsblock gerahmt wird,
+   bei einem Zehntel Inhalt. */
+.nb-raster{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.nb-kachel{display:flex;flex-direction:column;gap:4px;text-align:left;
+  background:var(--surface);border:2px solid var(--ink);border-radius:var(--r);
+  padding:10px;box-shadow:var(--shadow-xs);min-height:76px;overflow:hidden}
+.nb-kachel:active{transform:translate(2px,2px);box-shadow:none}
+.nb-k-titel{font-family:var(--display);font-style:italic;font-weight:900;
+  font-size:14px;line-height:1.15;color:var(--ink);overflow-wrap:anywhere}
+/* Zwei Zeilen Vorschau, dann Schluss – mehr waere Fliesstext in Briefmarken. */
+.nb-k-text{font-size:11px;line-height:1.4;color:var(--muted);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nb-k-bilder{font-size:10px;color:var(--faint);margin-top:auto}
+
+/* Chips statt Knoepfe, Groesse an .exname im Log angelehnt (2px Rand, ~14px
+   Schrift, ~9px Polster). Damit fasst sich die Seite an wie das Log. */
+.nb-leiste{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.nb-chip{font-size:13.5px;font-weight:700;color:var(--ink);background:var(--surface);
+  border:2px solid var(--ink);border-radius:20px;padding:8px 15px;
+  box-shadow:var(--shadow-xs);white-space:nowrap;cursor:pointer}
+.nb-chip:active{transform:translate(2px,2px);box-shadow:none}
+.nb-chip.pink{background:var(--pink)}
+
+/* Leseansicht – der einzige Ort, an dem Links anklickbar sind. */
+.nb-titel{font-size:20px;margin:0 0 8px;overflow-wrap:anywhere}
+.nb-text{margin:0;font-size:15px;line-height:1.65;overflow-wrap:anywhere}
 .nb-text a{color:var(--navy);text-decoration:underline;text-underline-offset:2px}
 :root[data-theme="dark"] .nb-text a{color:var(--pink)}
 
 .nb-bilder{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.nb-bild{max-width:100%;width:132px;height:132px;object-fit:cover;
-  border:3px solid var(--ink);border-radius:12px;background:var(--surface2);display:block}
+.nb-bild{max-width:100%;width:120px;height:120px;object-fit:cover;
+  border:2px solid var(--ink);border-radius:10px;background:var(--surface2);display:block}
 .nb-slot{position:relative;display:inline-block}
 .nb-bildweg{position:absolute;top:-7px;right:-7px;width:24px;height:24px;padding:0;
   border:2px solid var(--ink);border-radius:50%;background:var(--surface);
   font-weight:900;line-height:1;font-size:14px;color:var(--ink)}
 
-/* Groesser als die uebrigen .input-Felder: Hier tippt man Absaetze, nicht einen
-   Namen. Der Titel traegt die Display-Schrift wie in der fertigen Karte, damit
-   das Feld schon beim Tippen aussieht wie das Ergebnis. */
-.nb-in-titel{font-family:var(--display);font-style:italic;font-weight:900;font-size:20px}
-.nb-in-text{font-size:16px;line-height:1.65;resize:vertical}
+.nb-in-titel{font-family:var(--display);font-style:italic;font-weight:900;font-size:18px}
+.nb-in-text{font-size:15px;line-height:1.6;resize:vertical}
 /* Die Dateiauswahl liegt versteckt im Label – der Chip IST das Label. */
-.nb-upload{display:inline-block;cursor:pointer;margin-bottom:14px}
-/* Kleiner als die Knoepfe im Profil: Dort ist "Speichern" die Handlung der
-   Seite, hier steht sie unter jeder einzelnen Notiz und soll den Text nicht
-   erschlagen. */
-body[data-seite="notizbuch"] .btn{padding:10px 14px;font-size:14px}
-.nb-karte .btn + .btn{margin-top:7px}
+.nb-upload{display:inline-block}
