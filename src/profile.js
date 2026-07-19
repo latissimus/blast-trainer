@@ -299,6 +299,37 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   };
   diagCard.appendChild(tonBtn);
 
+  // Mitteilung OHNE Push: laesst den Service Worker direkt eine anzeigen.
+  //
+  // Das ist der entscheidende Trennschnitt. Der Weg einer Pausen-Erinnerung hat
+  // zwei Haelften – Versand (wir -> Apple -> Geraet) und Anzeige (Service
+  // Worker -> showNotification). Bisher liess sich nur feststellen, dass am
+  // Ende nichts erscheint, aber nicht, welche Haelfte schweigt.
+  //
+  // Dieser Knopf ueberspringt die erste Haelfte vollstaendig. Erscheint hier
+  // nichts, liegt es NICHT am Push.
+  const lokalBtn = document.createElement('button');
+  lokalBtn.className = 'btn btn-block';
+  lokalBtn.style.marginTop = '8px';
+  lokalBtn.textContent = '📣 Mitteilung direkt anzeigen';
+  lokalBtn.onclick = async () => {
+    if (!('Notification' in window)) { toast('Keine Mitteilungen auf diesem Gerät'); return; }
+    if (Notification.permission !== 'granted') { toast('Erlaubnis fehlt: ' + Notification.permission); return; }
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification('📣 Direkttest', {
+        body: 'Ohne Push – direkt vom Service Worker.',
+        icon: 'icon-192.png',
+        badge: 'icon-192.png',
+        tag: 'direkttest',
+      });
+      toast('Angezeigt – erscheint sie oben?');
+    } catch (e) {
+      toast('Anzeige-Fehler: ' + e.message);
+    }
+  };
+  diagCard.appendChild(lokalBtn);
+
   // Push: bestellt einen echten Pausentimer ueber 5 Sekunden. Derselbe Weg wie
   // im Training, nur ohne zwei Minuten zu warten.
   const pushBtn = document.createElement('button');
