@@ -502,15 +502,15 @@ body[data-seite="meter"]{--bg:#D9BBF7}
 body[data-seite="prog"]{--bg:#F7C9DE}
 body[data-seite="faq"]{--bg:#FBE7A4}
 body[data-seite="profile"]{--bg:#BFE7D2}
-/* Pinker Grund, hellblaue Flaechen. Anders als die uebrigen Seiten setzt diese
-   auch --surface um: Damit werden Karte UND Felder hellblau, ohne dass eine
-   einzelne Regel sie einzeln einfaerben muesste.
-   ACHTUNG: Progression ist ebenfalls pink (#F7C9DE). Dieses hier ist satter,
-   damit die beiden Seiten sich noch unterscheiden. */
-body[data-seite="notizbuch"]{--bg:#F9B8D6;--surface:#AEDCF6;--surface2:#C9E7FA}
+/* Hellblauer Grund, weisse Flaechen. Anders als die uebrigen Seiten setzt diese
+   auch --surface und --surface2 um: Damit werden Karte, Notizfeld UND der
+   "+ Bild"-Chip von selbst weiss, statt jede Flaeche einzeln einzufaerben.
+   (--surface2 traegt sonst einen Blaustich, den der Chip sichtbar machen wuerde.) */
+body[data-seite="notizbuch"]{--bg:#AEDCF6;--surface:#FFFFFF;--surface2:#FFFFFF}
 
 :root[data-theme="dark"] body[data-seite="meter"]{--bg:#2A1B45}
-:root[data-theme="dark"] body[data-seite="notizbuch"]{--bg:#45162E;--surface:#16283A;--surface2:#1D3346}
+/* Dunkel: derselbe Aufbau, nur umgekehrt – blaeulicher Grund, hellere Flaechen. */
+:root[data-theme="dark"] body[data-seite="notizbuch"]{--bg:#101A2B;--surface:#1C2637;--surface2:#1C2637}
 :root[data-theme="dark"] body[data-seite="prog"]{--bg:#3A1B2B}
 :root[data-theme="dark"] body[data-seite="faq"]{--bg:#332B14}
 :root[data-theme="dark"] body[data-seite="profile"]{--bg:#143024}
@@ -641,13 +641,8 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 .nb-in-text{font-size:16px;line-height:1.65;resize:vertical}
 /* Die Dateiauswahl liegt versteckt im Label – der Chip IST das Label. */
 .nb-upload{display:inline-block;cursor:pointer;margin-bottom:14px}
-.nb-karte .btn + .btn{margin-top:8px}
-
-/* ---------- Diagnose im Profil ---------- */
-.diag{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:0 0 14px;
-  font-family:var(--mono);font-size:12px}
-.diag dt{color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-size:10px;
-  align-self:center}
-.diag dd{margin:0;font-weight:700}
-.diag dd.gut{color:var(--up)}
-.diag dd.schlecht{color:var(--down)}
+/* Kleiner als die Knoepfe im Profil: Dort ist "Speichern" die Handlung der
+   Seite, hier steht sie unter jeder einzelnen Notiz und soll den Text nicht
+   erschlagen. */
+body[data-seite="notizbuch"] .btn{padding:10px 14px;font-size:14px}
+.nb-karte .btn + .btn{margin-top:7px}

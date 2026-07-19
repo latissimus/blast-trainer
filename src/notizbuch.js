@@ -200,18 +200,40 @@ export async function mountNotizbuch(container, { userId }) {
       }
     };
 
-    el.querySelector('.nb-ab').onclick = () => zeichne();
+    // Abbrechen laesst nichts zurueck.
+    //
+    // Frueher legte "+ Neue Notiz" die Zeile sofort an und Abbrechen zeichnete
+    // nur neu – die leere Notiz blieb stehen. Jetzt entsteht ein Entwurf, der
+    // erst beim Sichern in die Datenbank geht.
+    //
+    // Bilder wandern beim Hochladen sofort in den Bucket (anders geht es nicht,
+    // die Vorschau braucht eine Adresse). Beim Abbrechen muessen die in dieser
+    // Sitzung hochgeladenen also wieder weg, sonst bleiben Waisen liegen, auf
+    // die keine Notiz mehr zeigt.
+    el.querySelector('.nb-ab').onclick = async () => {
+      const waisen = bilder.filter((p) => !(n.bilder || []).includes(p));
+      if (waisen.length) await supabase.storage.from(BUCKET).remove(waisen);
+      if (n.neu) notizen = notizen.filter((x) => x !== n);
+      await zeichne();
+    };
+
     el.querySelector('.nb-ok').onclick = async () => {
+      const felder = { titel: titelIn.value.trim(), text: textIn.value, bilder };
+
+      if (n.neu) {
+        const { error } = await supabase.from('notizen').insert({ user_id: userId, ...felder });
+        if (error) { alert('Nicht gesichert: ' + error.message); return; }
+        await laden();
+        return;
+      }
+
       // Beim Sichern die tatsaechlich entfernten Bilder aus dem Bucket werfen,
       // sonst waechst er mit Karteileichen voll.
       const weg = (n.bilder || []).filter((p) => !bilder.includes(p));
       if (weg.length) await supabase.storage.from(BUCKET).remove(weg);
-      const { error } = await supabase.from('notizen').update({
-        titel: titelIn.value.trim(),
-        text: textIn.value,
-        bilder,
-        updated_at: new Date().toISOString(),
-      }).eq('id', n.id);
+      const { error } = await supabase.from('notizen')
+        .update({ ...felder, updated_at: new Date().toISOString() })
+        .eq('id', n.id);
       if (error) { alert('Nicht gesichert: ' + error.message); return; }
       await laden();
     };
@@ -225,13 +247,14 @@ export async function mountNotizbuch(container, { userId }) {
     await laden();
   }
 
+  // Entwurf, keine Zeile: Angelegt wird erst beim Sichern. Sonst hinterlaesst
+  // jedes versehentliche Antippen eine leere Notiz.
   wrap.querySelector('#nb-neu').onclick = async () => {
-    const { data, error } = await supabase.from('notizen')
-      .insert({ user_id: userId, titel: '', text: '' }).select().single();
-    if (error) { alert('Nicht angelegt: ' + error.message); return; }
-    notizen = [data, ...notizen];
+    if (notizen.some((n) => n.neu)) return;      // nur ein Entwurf gleichzeitig
+    const entwurf = { id: 'entwurf', neu: true, titel: '', text: '', bilder: [] };
+    notizen = [entwurf, ...notizen];
     await zeichne();
-    bearbeiten(data);
+    bearbeiten(entwurf);
   };
 
   await laden();
