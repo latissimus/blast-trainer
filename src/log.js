@@ -818,9 +818,18 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
     } catch (e) { /* kein Audio – der Timer laeuft trotzdem */ }
   }
-  function alertDone() {
+  async function alertDone() {
     try { navigator.vibrate?.([180, 90, 180]); } catch (e) { /* egal */ }
-    if (!audioCtx || audioCtx.state !== 'running') return;
+    if (!audioCtx) return;
+    // iOS legt den AudioContext still, sobald die App kurz in den Hintergrund
+    // geht oder der Bildschirm zugeht – der Zustand heisst dann "suspended"
+    // oder "interrupted". Vorher stieg die Funktion hier einfach aus, und der
+    // Ton blieb fuer den Rest der Einheit weg, auch wenn die App wieder vorne
+    // war. Jetzt wird er stattdessen geweckt.
+    if (audioCtx.state !== 'running') {
+      try { await audioCtx.resume(); } catch (e) { return; }
+      if (audioCtx.state !== 'running') return;
+    }
     try {
       // Zwei kurze Toene: hoerbar, aber kein Alarm.
       [0, 0.22].forEach((offset) => {

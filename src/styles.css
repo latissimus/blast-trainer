@@ -642,3 +642,12 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 /* Die Dateiauswahl liegt versteckt im Label – der Chip IST das Label. */
 .nb-upload{display:inline-block;cursor:pointer;margin-bottom:14px}
 .nb-karte .btn + .btn{margin-top:8px}
+
+/* ---------- Diagnose im Profil ---------- */
+.diag{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:0 0 14px;
+  font-family:var(--mono);font-size:12px}
+.diag dt{color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-size:10px;
+  align-self:center}
+.diag dd{margin:0;font-weight:700}
+.diag dd.gut{color:var(--up)}
+.diag dd.schlecht{color:var(--down)}

@@ -92,6 +92,22 @@ export async function abonniereStill(userId) {
       { onConflict: 'endpoint' },
     );
     if (error) return null;
+
+    // Leichen desselben Geraets wegraeumen.
+    //
+    // iOS gibt beim Neuanlegen eines Abos einen NEUEN Endpunkt aus; der alte
+    // bleibt als Zeile stehen. Das Aufraeumen per 404/410 in der Edge Function
+    // greift hier nicht, weil Apple tote Endpunkte mit 201 annimmt (siehe
+    // oben). Beobachtet: zwei Abos fuer ein Telefon, 10 Minuten auseinander.
+    //
+    // Abgrenzung ueber user_agent statt nur user_id: Wer die App auf iPhone
+    // UND iPad benutzt, soll beide behalten.
+    await supabase.from('push_subscriptions')
+      .delete()
+      .eq('user_id', userId)
+      .eq('user_agent', navigator.userAgent.slice(0, 200))
+      .neq('endpoint', j.endpoint);
+
     return abo;
   } catch (e) {
     return null;   // Push ist Beiwerk – es darf die App nie aufhalten
