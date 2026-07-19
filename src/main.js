@@ -9,6 +9,7 @@ import { mountLog, toast } from './log.js';
 import { mountProfile } from './profile.js';
 import { mountFaq } from './faq.js';
 import { mountMeter } from './meter.js';
+import { mountProg } from './prog.js';
 import { mountAdmin } from './admin.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
@@ -262,6 +263,7 @@ function renderChrome() {
   menue.innerHTML = `
     <option value="log">Log</option>
     <option value="meter">Set-O-Meter</option>
+    <option value="prog">Progression</option>
     <option value="faq">FAQ</option>
     ${isAdmin ? '<option value="admin">Admin</option>' : ''}`;
   menue.onchange = () => {
@@ -290,7 +292,11 @@ function setNavActive(view) {
   const m = app.querySelector('#app-menue');
   if (!m) return;
   m.value = view;
-  const namen = { log: 'Log', faq: 'FAQ', meter: 'Meter', admin: 'Admin', profile: 'Profil' };
+  // Traegt die Seitenfarbe: Jede Unterseite hat ihren eigenen Grundton, das Log
+  // bleibt hellblau. Setzt --bg um, damit Kopfleiste und Bedienleiste von selbst
+  // mitgehen, statt jede Flaeche einzeln umfaerben zu muessen.
+  document.body.dataset.seite = view;
+  const namen = { log: 'Log', faq: 'FAQ', meter: 'Meter', prog: 'Prog', admin: 'Admin', profile: 'Profil' };
   app.querySelector('#app-menue-l').textContent = namen[view] || 'Log';
   // Die vier Log-Felder bleiben auf jeder Seite sichtbar, damit die Leiste
   // ueberall gleich aussieht. Ohne gemountetes Log sind sie stillgelegt (siehe
@@ -303,7 +309,7 @@ async function routeView() {
   if (!view) return;
   let hash = (location.hash.replace('#', '') || 'log');
   if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
-  if (!['log', 'profile', 'admin', 'faq', 'meter'].includes(hash)) hash = 'log';
+  if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog'].includes(hash)) hash = 'log';
   setNavActive(hash);
 
   const token = ++routeToken;
@@ -320,6 +326,8 @@ async function routeView() {
       mountFaq(view);
     } else if (hash === 'meter') {
       await mountMeter(view, { userId: session.user.id });
+    } else if (hash === 'prog') {
+      await mountProg(view, { userId: session.user.id });
     } else if (hash === 'admin') {
       const v = await mountAdmin(view, { session });
       guard(v);

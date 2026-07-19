@@ -24,7 +24,7 @@ export function mountFaq(container) {
         <details class="faq"><summary>Was ist LOGMAN?</summary>
           <div class="faq-a">
             <p>Ein <b>Trainingstagebuch für ein System zum Muskelaufbau</b> — keine allgemeine Fitness-App. Das Ziel ist <b>Hypertrophie</b>, also mehr Muskelmasse. Nicht Maximalkraft, nicht Ausdauer.</p>
-            <p><b>Stärker werden ist dabei das Mittel, nicht der Zweck.</b> Muskeln wachsen, wenn sie regelmäßig mehr leisten müssen als zuletzt — das ist die progressive Überlastung. Du kannst von Woche zu Woche nicht sehen, ob ein Muskel gewachsen ist, aber du kannst sehen, ob die Last steigt. Deshalb misst die App das: Über jeder Heavy-Übung steht, was du beim letzten Mal geschafft hast, und im Set-O-Meter-Blatt liegt eine Kurve deiner Entwicklung.</p>
+            <p><b>Stärker werden ist dabei das Mittel, nicht der Zweck.</b> Muskeln wachsen, wenn sie regelmäßig mehr leisten müssen als zuletzt — das ist die progressive Überlastung. Du kannst von Woche zu Woche nicht sehen, ob ein Muskel gewachsen ist, aber du kannst sehen, ob die Last steigt. Deshalb misst die App das: Über jeder Heavy-Übung steht, was du beim letzten Mal geschafft hast, und auf der Seite „Progression" liegt eine Kurve deiner Entwicklung.</p>
             <p>LOGMAN kennt den Plan bereits: welche Tage es gibt, welche Muskelgruppen wann drankommen und wie viele Sätze bei welchem Level fällig sind. Du trägst nur Gewicht und Wiederholungen ein und wählst die Übungen.</p>
             <p>Die App läuft auch <b>ohne Empfang</b>. Was du eintippst, liegt sofort auf dem Gerät; hochgeladen wird, sobald wieder Netz da ist. Im Keller-Studio kannst du also normal weiterarbeiten.</p>
           </div>
@@ -62,14 +62,28 @@ export function mountFaq(container) {
 
         <p class="faq-sektion">Die App bedienen</p>
 
+        <details class="faq"><summary>Wie finde ich mich zurecht?</summary>
+          <div class="faq-a">
+            <p>Die App hat <b>eine Leiste am unteren Rand</b>, und die ist überall gleich. Links die vier Einstellungen deiner Einheit — <b>Woche, Tag, Level, Datum</b> — rechts das fliederfarbene <b>Menü</b>. Unter dem Menü-Symbol steht immer, wo du gerade bist.</p>
+            <p>Über das Menü erreichst du:</p>
+            <p><b>Log</b> — das Trainingstagebuch. Hier bist du fast immer.<br>
+            <b>Set-O-Meter</b> — welcher Muskel diese Woche wie viel Arbeit bekommt.<br>
+            <b>Progression</b> — die Kurve deiner Leistung über die Wochen.<br>
+            <b>Profil</b> — über dein Bild oben rechts.</p>
+            <p>Auf jeder Unterseite steht oben rechts <b>← Log</b>. Das ist der kürzeste Weg zurück; über das Menü wären es zwei Tipps.</p>
+            <p>Jede Seite hat ihre eigene Farbe, damit du auf einen Blick siehst, wo du bist: Das Log ist hellblau, das Set-O-Meter flieder, die Progression rosa, das FAQ gelb, das Profil grün.</p>
+            <p><b>Die vier Einstellfelder wirken nur im Log.</b> Auf den anderen Seiten stehen sie weiter da — damit die Leiste überall gleich aussieht — sind dort aber ohne Funktion und zeigen den zuletzt gesehenen Stand.</p>
+          </div>
+        </details>
+
         <details class="faq"><summary>Wie benutze ich die App?</summary>
           <div class="faq-a">
-            <p><b>1. Woche und Tag wählen.</b> In der Leiste ganz unten. Jedes Feld zeigt oben den Wert und darunter, wofür er steht — die Woche also mit A- oder B-Rotation. Ob Overreach oder Deload steht als Chip über dem ersten Block.</p>
+            <p><b>1. Woche und Tag wählen.</b> In der Leiste ganz unten. Jedes Feld zeigt oben den Wert und darunter, wofür er steht — die Woche also mit A- oder B-Rotation. Ob Overreach oder Deload steht als Chip oben neben dem Logo.</p>
             <p><b>2. Level nach Tagesform wählen.</b> Ebenfalls unten, I, II oder III. Danach richtet sich, wie viele Sätze heute fällig sind — nicht nach Ehrgeiz, sondern danach, wie du dich fühlst.</p>
             <p><b>3. Übungen auswählen.</b> Jedes Feld bietet dir nur Übungen an, die zu diesem Block passen. Die <b>Heavy-Übungen wählst du einmalig in Woche 1 und Woche 2</b> — ab Woche 3 stehen sie von selbst da (siehe unten). Pump und Cluster wählst du jede Woche neu.</p>
             <p><b>4. Eintragen.</b> Gewicht und Wiederholungen je Satz. Über der Übung siehst du die Werte vom letzten Mal, damit du weißt, was du schlagen musst. Der Pausentimer startet über den Chip mit der Uhr.</p>
-            <p><b>5. Zwischendurch ins Set-O-Meter schauen</b> (der fliederfarbene Knopf rechts in derselben Leiste), um zu sehen, welche Muskeln diese Woche zu kurz kommen — und die freien Pump- und Cluster-Übungen danach auszuwählen.</p>
-            <p><b>Einen Speichern-Knopf gibt es nicht.</b> Die App sichert nach jeder Eingabe von selbst — zuerst auf dem Gerät, dann auf dem Server. Ob das geklappt hat, sagt das kleine Zeichen neben „Log" in der Kopfleiste.</p>
+            <p><b>5. Zwischendurch ins Set-O-Meter schauen</b> — über das fliederfarbene Menü rechts in derselben Leiste. Dort siehst du, welche Muskeln diese Woche zu kurz kommen, und wählst die freien Pump- und Cluster-Übungen danach aus.</p>
+            <p><b>Einen Speichern-Knopf gibt es nicht.</b> Die App sichert nach jeder Eingabe von selbst — zuerst auf dem Gerät, dann auf dem Server. Ob das geklappt hat, sagt das kleine Zeichen links neben deinem Profilbild.</p>
           </div>
         </details>
 
@@ -83,7 +97,7 @@ export function mountFaq(container) {
 
         <details class="faq"><summary>Was zeigt das Set-O-Meter?</summary>
           <div class="faq-a">
-            <p>Wie viel Arbeit jeder Muskel <b>in dieser Woche</b> abbekommt — als Balken, absteigend sortiert. Zu öffnen über den fliederfarbenen Knopf rechts in der unteren Leiste, aus jeder Scroll-Position.</p>
+            <p>Wie viel Arbeit jeder Muskel <b>in dieser Woche</b> abbekommt — als Balken, absteigend sortiert. Zu öffnen über das Menü rechts in der unteren Leiste.</p>
             <p><b>Gezählt wird der Plan, nicht das Eingetragene.</b> Sobald eine Übung gewählt ist, zählen die Sätze, die Level und Vorlage dafür vorsehen. Deshalb steht das Bild schon, <i>bevor</i> du trainiert hast — und genau dann nützt es: Du siehst, was deine Heavy-Wahl liefert, und wählst Pump und Cluster gegen die Lücken.</p>
             <p><b>Ein Satz zählt für den Hauptspieler ganz, für die Nebenspieler halb.</b> Ein Satz Rudern ist ein voller Satz für den oberen Rücken und ein halber für Bizeps und Lat. Zwei halbe ergeben einen — deshalb wird das nicht getrennt ausgewiesen.</p>
             <p><b>Es gibt keinen Zielwert und keine Warnung</b>, und das ist Absicht. Das Meter vergleicht die Muskeln nur untereinander. Ob dir auffällt, dass die Waden einen längeren Balken haben als die Brust, und ob dich das stört, ist deine Entscheidung — nicht die der App.</p>
@@ -93,7 +107,7 @@ export function mountFaq(container) {
 
         <details class="faq"><summary>Was zeigt die Heavy-Progression?</summary>
           <div class="faq-a">
-            <p>Die Kurve deiner Leistung über die Wochen — <b>der wichtigste Wert, den die App hat</b>. Sie steht im selben Blatt wie das Set-O-Meter, unter der Wochenverteilung und durch eine gestrichelte Linie abgetrennt.</p>
+            <p>Die Kurve deiner Leistung über die Wochen — <b>der wichtigste Wert, den die App hat</b>. Sie hat eine eigene Seite: im Menü unter „Progression".</p>
             <p><b>Warum ausgerechnet die?</b> Muskelaufbau folgt der progressiven Überlastung: Wächst deine Leistung über die Wochen nicht, fehlt dem Körper der Grund, sich anzupassen. Alles andere — Volumen, Übungswahl, Ernährung — zahlt erst darauf ein. Ob ein Muskel gewachsen ist, siehst du im Spiegel frühestens nach Monaten; ob die Leistung steigt, siehst du hier nach zwei Wochen.</p>
             <p><b>Was genau aufgetragen wird:</b> das <b>geschätzte 1RM</b> deines besten Satzes je Woche — also die Last, die du rechnerisch genau einmal schaffen würdest. Berechnet nach der Epley-Formel aus Gewicht und Wiederholungen.</p>
             <p><b>Wozu die Umrechnung?</b> Damit beide Wege zählen. Sind 85 kg × 6 besser als 80 kg × 8? Am reinen Gewicht kannst du das nicht ablesen, am geschätzten 1RM schon: <b>102 kg gegen 101,3 kg</b> — also ja, aber denkbar knapp. Ohne diese Umrechnung müsstest du Gewicht und Wiederholungen im Kopf gegeneinander abwägen.</p>
@@ -131,8 +145,8 @@ export function mountFaq(container) {
           </div>
         </details>
 
-        <details class="faq"><summary>Was heißt das kleine Zeichen neben „Log"?</summary>
-          <div class="faq-a"><p>In der Kopfleiste, links vom Log-Knopf, steht der Sync-Status: <b>✓</b> gespeichert · <b>↻</b> speichert gerade oder noch nicht gesichert · <b>↑</b> auf dem Gerät gesichert, wartet auf Verbindung · <b>⚠</b> Upload fehlgeschlagen. In den letzten beiden Fällen sind deine Daten trotzdem sicher — sie liegen lokal und werden automatisch nachgereicht, sobald wieder Netz da ist.</p></div>
+        <details class="faq"><summary>Was heißt das kleine Zeichen neben meinem Profilbild?</summary>
+          <div class="faq-a"><p>Oben rechts, links neben deinem Profilbild, steht der Sync-Status: <b>✓</b> gespeichert · <b>↻</b> speichert gerade oder noch nicht gesichert · <b>↑</b> auf dem Gerät gesichert, wartet auf Verbindung · <b>⚠</b> Upload fehlgeschlagen. In den letzten beiden Fällen sind deine Daten trotzdem sicher — sie liegen lokal und werden automatisch nachgereicht, sobald wieder Netz da ist.</p></div>
         </details>
 
         <details class="faq"><summary>Wofür ist das Notizfeld?</summary>

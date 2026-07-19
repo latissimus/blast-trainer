@@ -13,7 +13,7 @@ const fmt = (n) => (Math.round(n * 10) / 10).toString().replace('.', ',');
 export function mountFortschritt(wrap, { session, payload: fertig = null, titel = 'Heavy-Progression' }) {
   const karte = document.createElement('div');
   karte.className = 'card';
-  karte.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">${titel}</h2>
+  karte.innerHTML = `${titel ? `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">${titel}</h2>` : ''}
     <div id="fs-inhalt"><div class="mess-leer">lädt…</div></div>
     <details class="mess-neu"><summary>Warum das der wichtigste Wert ist</summary>
       <p class="mess-hinweis">Muskelaufbau folgt der <b>progressiven Überlastung</b>: Wächst die Leistung über die Wochen nicht,

@@ -1,7 +1,6 @@
 import { supabase } from './supabase.js';
 import { readLog } from './localstore.js';
 import { zaehleWoche, sortiert, zeigName } from './setometer.js';
-import { mountFortschritt } from './fortschritt.js';
 
 // Set-O-Meter als eigene Seite.
 //
@@ -30,9 +29,7 @@ export async function mountMeter(container, { userId }) {
       ${zurueckChip()}
     </div>
     <p class="som-lage" id="som-lage"></p>
-    <div class="som-karte"><div class="som-body" id="som-body">lädt…</div></div>
-    <div class="abschnitt-trenner"></div>
-    <div id="som-fortschritt"></div>`;
+    <div class="som-karte"><div class="som-body" id="som-body">lädt…</div></div>`;
   container.appendChild(wrap);
 
   let payload = null;
@@ -75,6 +72,4 @@ export async function mountMeter(container, { userId }) {
            (${unbekannte.map((u) => `<b>${u}</b>`).join(', ') || 'ohne Namen'}).</p>`
         : '');
   }
-
-  mountFortschritt(wrap.querySelector('#som-fortschritt'), { session: null, payload });
 }

@@ -473,6 +473,34 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;font-family:var(--display);font-style:italic;text-transform:uppercase}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+
+/* ---------- Seitenfarben ----------
+   Jede Unterseite hat ihren eigenen Grundton, das Log bleibt hellblau. Gesetzt
+   wird nur --bg: Kopfleiste, Bedienleiste und Karten lesen die Variable
+   ohnehin, also faerbt sich alles von selbst mit.
+
+   Im Dark-Mode werden daraus tiefe Toene derselben Familie – ein flaechiges
+   Flieder oder Gelb waere dort eine Leuchtreklame. Die Akzente (Pink, Navy,
+   Flieder auf dem Menue) bleiben in beiden Themes gleich, sie sind die Marke.
+
+   Das Dreiecksmuster ist dasselbe wie auf dem Menue-Feld und haelt die
+   grossen Flaechen davon ab, leer zu wirken. */
+body[data-seite="meter"]{--bg:#D9BBF7}
+body[data-seite="prog"]{--bg:#F7C9DE}
+body[data-seite="faq"]{--bg:#FBE7A4}
+body[data-seite="profile"]{--bg:#BFE7D2}
+
+:root[data-theme="dark"] body[data-seite="meter"]{--bg:#2A1B45}
+:root[data-theme="dark"] body[data-seite="prog"]{--bg:#3A1B2B}
+:root[data-theme="dark"] body[data-seite="faq"]{--bg:#332B14}
+:root[data-theme="dark"] body[data-seite="profile"]{--bg:#143024}
+
+body[data-seite="meter"],body[data-seite="prog"],
+body[data-seite="faq"],body[data-seite="profile"]{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 9l4.2 7h-8.4z' fill='%230B1B44' fill-opacity='.07'/%3E%3C/svg%3E")}
+:root[data-theme="dark"] body[data-seite]{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 9l4.2 7h-8.4z' fill='%23EDF0F6' fill-opacity='.05'/%3E%3C/svg%3E")}
+
 /* ---------- FAQ- und Meter-Seite ---------- */
 .src{font-size:10px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:2px solid var(--ink);padding-top:10px}
 /* FAQ-Accordion */
