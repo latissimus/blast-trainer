@@ -334,6 +334,37 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .exnote:focus{outline:none;border-style:solid;border-color:var(--pink)}
 
 /* ---------- Volume ---------- */
+/* ---------- Set-O-Meter ----------
+   Zugeklappt eine Zeile, aufgeklappt die volle Tabelle. Bewusst flacher
+   gehalten als ein Block: Es ist eine Auskunft, kein Eingabefeld, und soll
+   den Bloecken darunter nicht die Aufmerksamkeit wegnehmen. */
+.som{background:var(--surface2);border:2px solid var(--ink);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.som>summary{display:flex;align-items:center;gap:9px;padding:10px 13px;cursor:pointer;list-style:none}
+.som>summary::-webkit-details-marker{display:none}
+/* Eigenes Dreieck, damit es in beiden Themes sitzt und sich beim Aufklappen dreht. */
+.som>summary::before{content:'';flex:0 0 auto;width:0;height:0;
+  border-left:6px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;
+  transition:transform .15s}
+.som[open]>summary::before{transform:rotate(90deg)}
+.som-titel{font-family:var(--display);font-style:italic;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:.02em}
+.som-lage{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700}
+.som-lage.ok{color:var(--up)}
+.som-lage.warn{color:var(--down)}
+.som-lage.ruhig{color:var(--muted)}
+.som-body{padding:4px 13px 12px;border-top:2px dashed var(--ink)}
+.som-zeile{display:flex;align-items:center;gap:9px;padding:3px 0;font-size:12.5px}
+/* 122px ist gemessen, nicht geschaetzt: "Seitl. Schulter" braucht 113px und
+   stiess bei 112 an. Der Rest der Zeile gibt entsprechend nach. */
+.som-name{flex:0 0 122px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-weight:600}
+.som-zeile.unter .som-name{color:var(--ink);font-weight:800}
+.som-track{flex:1;height:7px;background:var(--surface);border:1px solid var(--ink);border-radius:4px;overflow:hidden}
+.som-fill{display:block;height:100%;background:var(--down);transition:width .18s}
+.som-fill.met{background:var(--up)}
+.som-zahl{flex:0 0 46px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.som-zahl b{color:var(--ink);font-weight:800}
+.som-hinweis{margin:10px 0 0;font-size:11px;line-height:1.45;color:var(--muted)}
+.som-hinweis.warn{color:var(--down)}
+
 .volbar{background:var(--navy);color:#fff;border:3px solid var(--ink);border-radius:var(--r);padding:14px 15px;margin-bottom:14px;box-shadow:var(--shadow)}
 .volbar h3{margin:0 0 4px;font-size:12px;color:#fff}
 .voltot{font-family:var(--mono);font-size:24px;font-weight:800;margin-bottom:12px;letter-spacing:-.02em;color:var(--pink)}

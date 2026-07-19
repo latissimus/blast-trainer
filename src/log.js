@@ -4,6 +4,8 @@ import { TPL, LEGACY, TIER_NAMES } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
 import { auswahlGruppen, imKatalog } from './auswahl.js';
+import { zaehleWoche, defizite, istDeload, zeigZahl, zeigName, ZIELE } from './setometer.js';
+import { KONTEN } from './katalog.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
 // ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
@@ -265,6 +267,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       <span class="tierhint" id="lg-tierhint"></span>
     </div>
     <div class="daymeta" id="lg-daymeta"></div>
+    <details class="som" id="lg-som"><summary></summary><div class="som-body"></div></details>
     <div id="lg-content"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
@@ -609,6 +612,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
           if (freeEx) { entry.names[xi] = nameIn.value; renderMem(prevLine, entry.names[xi], memKind); }
           else { names[xi] = nameIn.value; }
           tonAnpassen();
+          // Eine andere Uebung heisst andere Konten – das Set-O-Meter muss mit.
+          renderSom();
           queuePersist();
         };
 
@@ -712,9 +717,55 @@ export async function mountLog(container, { userId, readOnly = false }) {
       el.innerHTML = 'Sätze <b>' + tgt + '</b>';
     });
   }
-  function refreshVolume() { renderVolume(ensureCell(), TPL[state.day], tierOf(state.day, state.week)); }
+  // Das Set-O-Meter haengt mit dran: Jeder eingetragene Satz aendert es, und ein
+  // Konto, das erst beim naechsten Wochenwechsel nachzieht, waere schlimmer als
+  // keins – man wuerde ihm glauben.
+  function refreshVolume() {
+    renderVolume(ensureCell(), TPL[state.day], tierOf(state.day, state.week));
+    renderSom();
+  }
 
-  function renderAll() { renderHeader(); renderDay(); }
+  // ---- Set-O-Meter --------------------------------------------------
+  // Sitzt bewusst hier und nicht im Profil: Die Zahl beantwortet "was fehlt
+  // dieser Woche noch?", und die Antwort darauf ist die naechste Uebungswahl –
+  // zwei Zentimeter weiter unten. Im Profil waere es eine Rueckschau.
+  //
+  // Zugeklappt steht dort nur, wo etwas fehlt. Fuenfzehn Zahlen zu lesen ist
+  // Arbeit; "drei Konten unter Ziel" ist eine Entscheidung.
+  const somEl = wrap.querySelector('#lg-som');
+  const somKopf = somEl.querySelector('summary');
+  const somBody = somEl.querySelector('.som-body');
+
+  function renderSom() {
+    const { konten, ohneZuordnung, unbekannte, gesamt } = zaehleWoche(payloadOut(), state.week);
+    const fehlt = defizite(konten, state.week);
+    const deload = istDeload(state.week);
+    const leereWoche = gesamt === 0;
+
+    somKopf.innerHTML = `<span class="som-titel">Set-O-Meter</span>` + (
+      leereWoche ? `<span class="som-lage ruhig">noch nichts eingetragen</span>`
+        : deload ? `<span class="som-lage ruhig">Deload · Volumen bewusst niedrig</span>`
+          : fehlt.length ? `<span class="som-lage warn">${fehlt.length} ${fehlt.length === 1 ? 'Konto' : 'Konten'} unter Ziel</span>`
+            : `<span class="som-lage ok">alle Konten im Soll</span>`);
+
+    somBody.innerHTML = KONTEN.map((k) => {
+      const ist = konten[k] || 0;
+      const ziel = ZIELE[k];
+      const pct = Math.max(0, Math.min(100, (ist / ziel) * 100));
+      const unter = !deload && !leereWoche && ist < ziel;
+      return `<div class="som-zeile${unter ? ' unter' : ''}">
+        <span class="som-name">${zeigName(k)}</span>
+        <span class="som-track"><span class="som-fill${unter ? '' : ' met'}" style="width:${pct}%"></span></span>
+        <span class="som-zahl"><b>${zeigZahl(ist)}</b>/${ziel}</span></div>`;
+    }).join('') + (ohneZuordnung
+      ? `<p class="som-hinweis warn">${zeigZahl(ohneZuordnung)} Sätze zählen nicht mit – die Übung steht nicht im Katalog:
+         ${unbekannte.map((u) => `<b>${u}</b>`).join(', ') || '(ohne Namen)'}</p>`
+      : '')
+      + `<p class="som-hinweis">Gezählt wird je Satz: Hauptspieler <b>1</b>, Nebenspieler <b>½</b>.
+         Ein Cluster gilt als ein Satz. Die Ziele sind Richtwerte, keine Naturgesetze.</p>`;
+  }
+
+  function renderAll() { renderHeader(); renderDay(); renderSom(); }
   renderAll();
 
   // ---- pause timer (editable only) ---------------------------------

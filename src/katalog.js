@@ -59,7 +59,7 @@ export const KATALOG = [
   { n: "Kabel Dips (Brustbetont)", haupt: "Brust", neben: ["Trizeps", "Vordere Schulter"], typ: "Comp" },
   { n: "Klimmzug, supiniert, schulterbreit", haupt: "Lat", neben: ["Bizeps", "Oberer Rücken"], typ: "Comp" },
   { n: "Klimmzug, eng, neutral", haupt: "Lat", neben: ["Bizeps", "Oberer Rücken"], typ: "Comp" },
-  { n: "Klimmzug, pronierter Obergriff, weit", haupt: "Lat", neben: ["Oberer Rücken", "Bizeps"], typ: "Comp" },
+  { n: "Klimmzug, Obergriff, weit", haupt: "Lat", neben: ["Oberer Rücken", "Bizeps"], typ: "Comp" },
   { n: "Kabel Latziehen zur Brust, Obergriff", haupt: "Lat", neben: ["Bizeps", "Hintere Schulter", "Oberer Rücken"], typ: "Comp" },
   { n: "Kabel Latziehen in den Nacken, Obergriff, weit", haupt: "Lat", neben: ["Oberer Rücken", "Bizeps"], typ: "Comp" },
   { n: "Kabel Latziehen, eng, neutral", haupt: "Lat", neben: ["Bizeps"], typ: "Comp" },
