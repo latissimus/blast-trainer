@@ -2,7 +2,6 @@ import { supabase } from './supabase.js';
 import { signOut } from './auth.js';
 import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
-import { mountFortschritt } from './fortschritt.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -211,15 +210,10 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   outCard.appendChild(outBtn);
   wrap.appendChild(outCard);
 
-  // --- Heavy-Progression -------------------------------------------------
-  // Sichtbar von den Einstellungen darueber abgesetzt: kein Schalter mehr,
-  // sondern die Auswertung. Hautfalten und Gewicht sind bewusst nicht mehr hier
-  // – das sind Koerperdaten, kein Trainings-Log. Sie liegen als mitnehmbare
-  // Kopie unter templates/koerperwerte/ fuer die spaetere Ernaehrungs-App.
-  const trennerFs = document.createElement('div');
-  trennerFs.className = 'abschnitt-trenner';
-  wrap.appendChild(trennerFs);
-  mountFortschritt(wrap, { session });
+  // Die Heavy-Progression stand frueher hier. Sie liegt jetzt im Set-O-Meter-
+  // Blatt, direkt unter der Wochenverteilung: Beide beantworten Fragen zum
+  // Training, und dort ist sie waehrend der Einheit mit einem Tipp erreichbar –
+  // statt zwei Ansichten weit weg.
 
   // --- Version ----------------------------------------------------------
   // Zur Bauzeit eingebrannt. Der Service Worker liefert die App aus dem Cache:

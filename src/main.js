@@ -7,7 +7,7 @@ import { getTheme, applyTheme } from './theme.js';
 import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
 import { mountLog, toast } from './log.js';
 import { mountProfile } from './profile.js';
-import { openFaq } from './faq.js';
+import { mountFaq } from './faq.js';
 import { mountAdmin } from './admin.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
@@ -207,9 +207,6 @@ function renderChrome() {
         <span class="brand">${brandSvg()}</span>
         <nav class="nav">
           <span class="save-dot ok" id="app-save" title="gespeichert" hidden>✓</span>
-          <button class="nav-btn" data-view="log">Log</button>
-          <button class="nav-btn" id="nav-faq">FAQ</button>
-          ${isAdmin ? '<button class="nav-btn pink" data-view="admin">Admin</button>' : ''}
           ${navAvatar()}
         </nav>
       </div>
@@ -219,17 +216,46 @@ function renderChrome() {
         <button class="pb-go" id="pb-go">🔔 Benachrichtigungen aktivieren</button>
         <button class="pb-x" id="pb-x" aria-label="Nicht mehr fragen">×</button>
       </div></div>` : ''}
-    <main id="view"></main>`;
+    <main id="view"></main>
+    <div class="ctrlbar">
+      <div class="timerpille" id="app-timer" hidden><span id="app-timertxt">0:00</span><button class="x" id="app-timerx" aria-label="Timer abbrechen">×</button></div>
+      <div class="inner">
+        <div class="slots" id="app-slots"></div>
+        <label class="ci menue"><span class="wert" id="app-menue-i">☰</span><span class="lbl" id="app-menue-l">Log</span>
+          <select id="app-menue" aria-label="Ansicht"></select></label>
+      </div>
+    </div>`;
 
   app.querySelectorAll('nav [data-view]').forEach((b) => {
     b.onclick = () => { location.hash = b.dataset.view; };
   });
-  // FAQ liegt in einem eigenen Modul, damit es aus jeder Ansicht aufgeht.
-  // Solange das Sheet offen ist, bleibt der Knopf markiert.
-  const faqBtn = app.querySelector('#nav-faq');
-  faqBtn.onclick = () => {
-    faqBtn.classList.add('faq-on');
-    openFaq(() => faqBtn.classList.remove('faq-on'));
+
+  // Das Menue unten rechts. Log und FAQ sind eigene Seiten; das Set-O-Meter ist
+  // ein Fenster ueber dem Log, weil man es MITTEN in der Einheit aufmacht –
+  // dafuer die Seite zu verlassen waere ein Umweg. Nach dem Schliessen springt
+  // die Auswahl darum von selbst auf "Log" zurueck.
+  const menue = app.querySelector('#app-menue');
+  menue.innerHTML = `
+    <option value="log">Log</option>
+    <option value="meter">Set-O-Meter</option>
+    <option value="faq">FAQ</option>
+    ${isAdmin ? '<option value="admin">Admin</option>' : ''}`;
+  menue.onchange = () => {
+    const w = menue.value;
+    if (w === 'meter') {
+      // Nur ueber dem Log sinnvoll – dort liegen die Daten, die es zeigt.
+      if (active && active.openMeter) {
+        active.openMeter();
+        // Solange das Fenster offen ist, steht es auch im Menue. Zurueck auf
+        // "Log" springt es erst beim Schliessen (onMeterZu).
+        app.querySelector('#app-menue-l').textContent = 'Meter';
+      } else {
+        location.hash = 'log';
+        menueZuruecksetzen();
+      }
+      return;
+    }
+    location.hash = w;
   };
 
   // Einmaliger Hinweis. Eine native App darf beim ersten Start selbst fragen,
@@ -250,6 +276,20 @@ function setNavActive(view) {
   app.querySelectorAll('nav [data-view]').forEach((b) => {
     b.classList.toggle('active', b.dataset.view === view);
   });
+  const m = app.querySelector('#app-menue');
+  if (!m) return;
+  m.value = view;
+  const namen = { log: 'Log', faq: 'FAQ', admin: 'Admin', profile: 'Profil' };
+  app.querySelector('#app-menue-l').textContent = namen[view] || 'Log';
+  // Die vier Log-Felder gibt es nur ueber dem Log. Auf anderen Seiten bleibt
+  // die Leiste mit dem Menue allein stehen – sonst kaeme man von dort nicht weg.
+  app.querySelector('#app-slots').hidden = view !== 'log';
+}
+
+// Nach dem Schliessen des Set-O-Meters zeigt das Menue wieder "Log".
+function menueZuruecksetzen() {
+  const m = app.querySelector('#app-menue');
+  if (m) { m.value = 'log'; app.querySelector('#app-menue-l').textContent = 'Log'; }
 }
 
 async function routeView() {
@@ -258,7 +298,7 @@ async function routeView() {
   if (!view) return;
   let hash = (location.hash.replace('#', '') || 'log');
   if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
-  if (!['log', 'profile', 'admin'].includes(hash)) hash = 'log';
+  if (!['log', 'profile', 'admin', 'faq'].includes(hash)) hash = 'log';
   setNavActive(hash);
 
   const token = ++routeToken;
@@ -267,10 +307,12 @@ async function routeView() {
   view.innerHTML = '';
   try {
     if (hash === 'log') {
-      const v = await mountLog(view, { userId: session.user.id, readOnly: false });
+      const v = await mountLog(view, { userId: session.user.id, readOnly: false, onMeterZu: menueZuruecksetzen });
       guard(v);
     } else if (hash === 'profile') {
       mountProfile(view, { session, profile, onProfileUpdated: (p) => { profile = p; } });
+    } else if (hash === 'faq') {
+      mountFaq(view);
     } else if (hash === 'admin') {
       const v = await mountAdmin(view, { session });
       guard(v);

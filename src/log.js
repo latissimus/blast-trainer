@@ -5,6 +5,7 @@ import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
 import { auswahlGruppen, imKatalog } from './auswahl.js';
 import { zaehleWoche, sortiert, zeigName } from './setometer.js';
+import { mountFortschritt } from './fortschritt.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
 // ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
@@ -21,7 +22,10 @@ const TYPE_LABEL = { load: 'HEAVY', pump: 'PUMP', mr: 'CLUSTER' };
      readOnly  – true for the admin viewing a customer (no editing/saving)
    Returns { destroy } to remove the sticky save bar on nav.
    ------------------------------------------------------------------ */
-export async function mountLog(container, { userId, readOnly = false }) {
+// onMeterZu: laeuft, wenn das Set-O-Meter-Fenster zugeht. Die Huelle setzt
+// damit ihr Menue zurueck auf "Log". Als Rueckruf statt als Import, weil
+// main.js dieses Modul bereits importiert – ein Zirkelbezug waere fragil.
+export async function mountLog(container, { userId, readOnly = false, onMeterZu = null }) {
   // Local-first laden: Der Server ist die Sicherungskopie, nicht die Voraussetzung.
   // Nur wenn lokal ungespeicherte Aenderungen liegen, wird zusammengefuehrt –
   // sonst gewinnt der Server (sein Stand ist dann identisch mit dem lokalen).
@@ -73,7 +77,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   let saveTimer = null;
   let saveStateEl = null;
-  let saveBar = null;
   let timerId = null;
 
   // ---- persistence -------------------------------------------------
@@ -287,32 +290,23 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // Je Feld liegt ein durchsichtiges natives Element ueber der Beschriftung:
   // <select> und <input type="date"> oeffnen auf iOS die Systemauswahl, die
   // sich mit einer eigenen Nachbildung nur verschlechtern liesse.
-  const ctrl = document.createElement('div');
-  ctrl.className = 'ctrlbar';
+  // Die Leiste selbst gehoert der App-Huelle (main.js) und ueberlebt den
+  // Ansichtswechsel – sonst gaebe es auf der FAQ-Seite keinen Weg zurueck.
+  // Das Log fuellt nur seine vier Felder ein und raeumt sie beim Verlassen.
+  const ctrl = document.querySelector('#app-slots');
   ctrl.innerHTML = `
-    <div class="timerpille" id="lg-timer" hidden><span id="lg-timertxt">0:00</span><button class="x" id="lg-timerx" aria-label="Timer abbrechen">×</button></div>
-    <div class="inner">
-      <label class="ci"><span class="wert" id="ci-wo-w">Wo 1</span><span class="lbl" id="ci-wo-l">Woche</span>
-        <select id="lg-woche" aria-label="Woche"></select></label>
-      <label class="ci"><span class="wert" id="ci-tag-w">Tag 1</span><span class="lbl" id="ci-tag-l">—</span>
-        <select id="lg-tag" aria-label="Tag"></select></label>
-      <label class="ci"><span class="wert" id="ci-lvl-w">III</span><span class="lbl" id="ci-lvl-l">Level</span>
-        <select id="lg-tier" aria-label="Level">
-          <option value="0">Level I · wenig</option>
-          <option value="1">Level II · mittel</option>
-          <option value="2">Level III · voll</option>
-        </select></label>
-      <label class="ci"><span class="wert" id="ci-dat-w">—</span><span class="lbl">Datum</span>
-        <input id="lg-datum" type="date" aria-label="Datum der Einheit"></label>
-      <button class="ci som" id="lg-sombtn" aria-label="Set-O-Meter öffnen">
-        <svg viewBox="0 0 20 20" width="19" height="19" aria-hidden="true">
-          <rect x="2" y="3.4" width="16" height="3.2" rx="1.2"/>
-          <rect x="2" y="8.4" width="11" height="3.2" rx="1.2"/>
-          <rect x="2" y="13.4" width="6" height="3.2" rx="1.2"/>
-        </svg><span class="lbl">Meter</span></button>
-    </div>`;
-  document.body.appendChild(ctrl);
-  saveBar = ctrl;   // destroy() raeumt sie ueber diesen Namen wieder ab
+    <label class="ci"><span class="wert" id="ci-wo-w">Wo 1</span><span class="lbl" id="ci-wo-l">Woche</span>
+      <select id="lg-woche" aria-label="Woche"></select></label>
+    <label class="ci"><span class="wert" id="ci-tag-w">Tag 1</span><span class="lbl" id="ci-tag-l">—</span>
+      <select id="lg-tag" aria-label="Tag"></select></label>
+    <label class="ci"><span class="wert" id="ci-lvl-w">III</span><span class="lbl" id="ci-lvl-l">Level</span>
+      <select id="lg-tier" aria-label="Level">
+        <option value="0">Level I · wenig</option>
+        <option value="1">Level II · mittel</option>
+        <option value="2">Level III · voll</option>
+      </select></label>
+    <label class="ci"><span class="wert" id="ci-dat-w">—</span><span class="lbl">Datum</span>
+      <input id="lg-datum" type="date" aria-label="Datum der Einheit"></label>`;
 
   const wocheSel = ctrl.querySelector('#lg-woche');
   const tagSel = ctrl.querySelector('#lg-tag');
@@ -325,14 +319,23 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   wocheSel.innerHTML = Array.from({ length: 8 }, (_, i) =>
     `<option value="${i + 1}">Woche ${i + 1}${i + 1 >= 7 ? ' · Deload' : ''}</option>`).join('');
-  wocheSel.onchange = () => { state.week = Number(wocheSel.value); queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
-  tagSel.onchange = () => { state.day = tagSel.value; queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
-  tierSeg.onchange = () => { setTier(state.day, state.week, Number(tierSeg.value)); queuePersist(); renderAll(); };
+  // Zuletzt benutztes Feld einfaerben. Rein visuell – es macht die sonst sehr
+  // weisse Leiste ruhiger und zeigt, woran zuletzt gedreht wurde.
+  let zuletztFeld = null;
+  function merkeFeld(el) {
+    zuletztFeld = el.closest('.ci');
+    ctrl.querySelectorAll('.ci').forEach((c) => c.classList.toggle('zuletzt', c === zuletztFeld));
+  }
+
+  wocheSel.onchange = () => { merkeFeld(wocheSel); state.week = Number(wocheSel.value); queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
+  tagSel.onchange = () => { merkeFeld(tagSel); state.day = tagSel.value; queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
+  tierSeg.onchange = () => { merkeFeld(tierSeg); setTier(state.day, state.week, Number(tierSeg.value)); queuePersist(); renderAll(); };
 
   // Datum der Einheit. Ohne das weiss man beim Blick auf Woche 3 nie, wann sie
   // tatsaechlich stattgefunden hat – und ob zwischen zwei Einheiten zwei Tage
   // lagen oder zwei Wochen.
   datumEl.onchange = () => {
+    merkeFeld(datumEl);
     const w = datumEl.value;
     if (w) state.datum[state.day + '|' + state.week] = w;
     else delete state.datum[state.day + '|' + state.week];
@@ -354,6 +357,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // Beschriftung der unteren Leiste. Steht getrennt, weil sie auch nach einer
   // Datumsaenderung allein nachgezogen wird.
   function renderControls() {
+    if (zuletztFeld) ctrl.querySelectorAll('.ci').forEach((c) => c.classList.toggle('zuletzt', c === zuletztFeld));
     const days = daysOfWeek(state.week);
     if (!days.includes(state.day)) state.day = days[0];
     const cruise = isCruise(state.week);
@@ -813,21 +817,35 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // unten, in den Pump- und Cluster-Feldern – dort will man nachsehen koennen,
   // ohne jedes Mal hochzuscrollen.
   const somSheet = document.createElement('div');
-  somSheet.className = 'sheet'; somSheet.hidden = true;
+  somSheet.className = 'sheet mitte'; somSheet.hidden = true;
   somSheet.innerHTML = `
     <div class="sheet-in sheet-som">
       <div class="sheet-hd"><h2>🎯 Set-O-Meter</h2><button class="sp-x" id="som-x" aria-label="schließen">×</button></div>
       <p class="som-lage" id="som-lage"></p>
       <div class="som-karte"><div class="som-body" id="som-body"></div></div>
+      <div class="abschnitt-trenner"></div>
+      <div id="som-fortschritt"></div>
     </div>`;
   document.body.appendChild(somSheet);
   const somKopf = somSheet.querySelector('#som-lage');
   const somBody = somSheet.querySelector('#som-body');
-  const somZu = () => { somSheet.hidden = true; };
+  const somZu = () => { somSheet.hidden = true; if (onMeterZu) onMeterZu(); };
   somSheet.querySelector('#som-x').onclick = somZu;
   // Tipp neben das Blatt schliesst es – wie beim FAQ.
   somSheet.onclick = (e) => { if (e.target === somSheet) somZu(); };
-  const somAuf = () => { renderSom(); somSheet.hidden = false; };
+  // Die beiden Messflaechen der App liegen im selben Blatt: Das Set-O-Meter
+  // sagt, wohin die Arbeit dieser Woche geht, die Heavy-Progression, ob sie
+  // wirkt. Getrennt durch eine gestrichelte Linie.
+  //
+  // Neu gebaut bei jedem Oeffnen, damit frisch eingetragene Saetze sofort in
+  // der Kurve stehen.
+  const somFs = somSheet.querySelector('#som-fortschritt');
+  const somAuf = () => {
+    renderSom();
+    somFs.innerHTML = '';
+    mountFortschritt(somFs, { session: null, payload: payloadOut(), titel: 'Heavy-Progression' });
+    somSheet.hidden = false;
+  };
 
   function renderSom() {
     const { konten, ohneZuordnung, unbekannte, gesamt } = zaehleWoche(payloadOut(), state.week);
@@ -919,19 +937,19 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   function startTimer(sec, label) {
-    if (!saveBar) return;
+    if (readOnly) return;
     primeAudio();
     pushTimer('start', sec, label);
     clearInterval(timerId);
     tEnd = Date.now() + sec * 1000;
-    const box = saveBar.querySelector('#lg-timer'); box.hidden = false; box.classList.remove('done');
+    const box = document.querySelector('#app-timer'); box.hidden = false; box.classList.remove('done');
     tick();
     timerId = setInterval(tick, 250);
   }
   function tick() {
-    const box = saveBar && saveBar.querySelector('#lg-timer'); if (!box) return;
+    const box = document.querySelector('#app-timer'); if (!box) return;
     const left = Math.max(0, Math.round((tEnd - Date.now()) / 1000));
-    box.querySelector('#lg-timertxt').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
+    box.querySelector('#app-timertxt').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
     if (left <= 0) {
       clearInterval(timerId);
       box.classList.add('done');
@@ -961,25 +979,31 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // speichert nach jeder Eingabe von selbst, und ob das geklappt hat, sagt der
   // Sync-Punkt in der Kopfleiste. Ein Knopf, der nur das ausloest, was ohnehin
   // laeuft, verspricht eine Notwendigkeit, die es nicht gibt.
-  ctrl.querySelector('#lg-sombtn').onclick = somAuf;
-  ctrl.querySelector('#lg-timerx').onclick = () => {
+  document.querySelector('#app-timerx').onclick = () => {
     clearInterval(timerId);
-    ctrl.querySelector('#lg-timer').hidden = true;
+    document.querySelector('#app-timer').hidden = true;
     // Auch den schlafenden Auftrag abbestellen, sonst meldet er sich spaeter
     // fuer eine Pause, die du abgebrochen hast.
     pushTimer('stop');
   };
 
   return {
+    // main.js ruft das aus dem Menue auf – das Log haelt die Daten, die das
+    // Set-O-Meter zeigt.
+    openMeter: somAuf,
     destroy() {
       clearTimeout(saveTimer);
       clearInterval(timerId);
       clearInterval(retryId);
       window.removeEventListener('online', retrySync);
-      if (saveBar) saveBar.remove();
       // Haengt am body, nicht am View – muss also von Hand mit weg, sonst bleibt
       // beim Wechsel ins Profil ein unsichtbares Blatt ueber der App liegen.
       somSheet.remove();
+      // Die Leiste gehoert der Huelle: nur den eigenen Inhalt raeumen.
+      const slots = document.querySelector('#app-slots');
+      if (slots) slots.innerHTML = '';
+      const t = document.querySelector('#app-timer');
+      if (t) t.hidden = true;
       // Der Punkt gehoert dem Log – ausserhalb gibt es nichts zu synchronisieren.
       if (saveStateEl) saveStateEl.hidden = true;
     },

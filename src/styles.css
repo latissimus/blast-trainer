@@ -318,9 +318,14 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .ctrlbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
   padding:8px 10px max(6px, calc(env(safe-area-inset-bottom) - 6px));
   background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 42%)}
+/* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
+   ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
+   auf. Der Schatten liegt ausserhalb und wird davon nicht beschnitten. */
+.ctrlbar .slots{display:contents}
+.ctrlbar .slots[hidden]{display:none}
 .ctrlbar .inner{max-width:580px;margin:0 auto;display:flex;gap:4px;
   background:var(--surface);border:3px solid var(--ink);border-radius:16px;
-  box-shadow:var(--shadow);padding:5px}
+  box-shadow:var(--shadow);padding:5px;overflow:hidden}
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:1px;padding:6px 2px;
   border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
@@ -333,13 +338,20 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    type="date" oeffnen so die Systemauswahl von iOS, ohne dass wir sie
    nachbauen – nachgebaut waere sie in jedem Punkt schlechter. */
 .ci select,.ci input{position:absolute;inset:0;width:100%;height:100%;
-  opacity:0;border:0;background:none;-webkit-appearance:none;appearance:none}
+  opacity:0;border:0;border-radius:11px;background:none;
+  -webkit-appearance:none;appearance:none}
 .ci select:disabled{cursor:default}
 .ci:has(select:disabled) .wert{opacity:.55}
-.ci.som{background:var(--lila);color:var(--lila-ink);flex:0 0 54px}
-.ci.som svg{display:block;fill:currentColor}
-.ci.som .lbl{color:var(--lila-ink);opacity:.72}
-.ci.som:active{transform:translateY(1px)}
+/* Das zuletzt benutzte Feld bleibt flieder hinterlegt – die Leiste wirkt sonst
+   sehr weiss, und man sieht auf einen Blick, woran man zuletzt gedreht hat. */
+.ci.zuletzt{background:var(--lila)}
+.ci.zuletzt .lbl{color:var(--lila-ink);opacity:.75}
+.ci.zuletzt .wert{color:var(--lila-ink)}
+/* Das Menue rechts. Flieder, damit es sich von den vier Einstellfeldern
+   abhebt: Die aendern den Inhalt der Seite, dieses wechselt die Seite. */
+.ci.menue{background:var(--lila);color:var(--lila-ink);flex:0 0 60px}
+.ci.menue .wert{font-family:var(--ui);font-style:normal;font-size:17px;line-height:1}
+.ci.menue .lbl{color:var(--lila-ink);opacity:.8}
 
 /* Pausentimer schwebt UEBER der Leiste statt in ihr: In der Reihe waere kein
    Feld mehr breit genug, und der Timer ist ohnehin nur voruebergehend da. */
@@ -433,10 +445,25 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* ---------- Principles sheet ---------- */
-.sheet{position:fixed;inset:0;z-index:50;background:rgba(11,27,68,.5);
-  display:flex;align-items:flex-end;justify-content:center}
+/* Keine Abdunklung des Hintergrunds. In der Homescreen-App malt iOS den
+   Streifen mit Uhrzeit und Akku selbst (theme-color) – die Seite kommt dort
+   nicht hin, und ein Schleier, der kurz vor der Statusleiste endet, sieht aus
+   wie ein Fehler. Die Alternative waere status-bar-style "black-translucent",
+   das faerbt aber die Systemschrift weiss und macht sie auf dem hellblauen
+   Grund unlesbar. Das Blatt hebt sich stattdessen ueber Rand und Schatten ab. */
+/* Blatt von unten (Standard) bzw. mittiges Fenster (.mitte). Das Set-O-Meter
+   ist mittig, weil es ueber dem Log schwebt und nicht dessen Fortsetzung ist. */
+.sheet{position:fixed;inset:0;z-index:50;background:transparent;
+  display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
+/* Unten Platz fuer die Bedienleiste lassen – sie liegt fest ueber allem und
+   wuerde das Fensterende sonst verdecken. */
+.sheet.mitte{align-items:center;padding:14px 14px 92px}
+.sheet.mitte .sheet-in{border-radius:16px;border-bottom:3px solid var(--ink);
+  max-height:82vh;padding-bottom:18px}
+.sheet .sheet-in{pointer-events:auto}
 .sheet[hidden]{display:none}
 .sheet-in{background:var(--surface);border:3px solid var(--ink);border-bottom:0;border-radius:16px 16px 0 0;
+  box-shadow:0 -6px 0 rgba(0,0,0,.06), 0 -22px 40px rgba(11,27,68,.28);
   width:100%;max-width:580px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:16px 15px calc(env(safe-area-inset-bottom) + 22px)}
 .sheet-hd{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px}

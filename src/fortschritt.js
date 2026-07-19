@@ -10,10 +10,10 @@ import { heavyReihen, verlauf } from './progression.js';
 
 const fmt = (n) => (Math.round(n * 10) / 10).toString().replace('.', ',');
 
-export function mountFortschritt(wrap, { session }) {
+export function mountFortschritt(wrap, { session, payload: fertig = null, titel = 'Heavy-Progression' }) {
   const karte = document.createElement('div');
   karte.className = 'card';
-  karte.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">Heavy-Progression</h2>
+  karte.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">${titel}</h2>
     <div id="fs-inhalt"><div class="mess-leer">lädt…</div></div>
     <details class="mess-neu"><summary>Warum das der wichtigste Wert ist</summary>
       <p class="mess-hinweis">Muskelaufbau folgt der <b>progressiven Überlastung</b>: Wächst die Leistung über die Wochen nicht,
@@ -28,7 +28,11 @@ export function mountFortschritt(wrap, { session }) {
   const inhalt = karte.querySelector('#fs-inhalt');
 
   (async () => {
-    let payload = null;
+    // Im Log liegt das Payload schon im Speicher – dann wird es durchgereicht,
+    // statt es ein zweites Mal vom Server zu holen. Das Blatt geht so ohne
+    // Ladezeit auf und funktioniert auch ohne Netz.
+    let payload = fertig;
+    if (payload) { zeichneAlles(payload); return; }
     try {
       const { data, error } = await supabase
         .from('training_logs').select('payload').eq('user_id', session.user.id).maybeSingle();
@@ -39,6 +43,10 @@ export function mountFortschritt(wrap, { session }) {
       return;
     }
 
+    zeichneAlles(payload);
+  })();
+
+  function zeichneAlles(payload) {
     const reihen = heavyReihen(payload);
     if (!reihen.length) {
       inhalt.innerHTML = `<div class="mess-leer">Noch keine Heavy-Übung mit zwei erfassten Wochen.<br>
@@ -73,5 +81,5 @@ export function mountFortschritt(wrap, { session }) {
     const wahl = karte.querySelector('#fs-wahl');
     if (wahl) wahl.onchange = () => zeichne(Number(wahl.value));
     zeichne(0);
-  })();
+  }
 }
