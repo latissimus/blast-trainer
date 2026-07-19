@@ -344,6 +344,24 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    der Speicherleiste. Frueher stand es oben im Log – dann musste man beim
    Eintragen der Pump-Saetze jedes Mal hochscrollen, um nachzusehen, wofuer man
    sie ueberhaupt waehlt. */
+/* Das Blatt traegt die Farbe seines Knopfes: Flieder aussen, hellblauer Kasten
+   innen. So gehoert der schwebende Knopf sichtbar zu dem, was er oeffnet. */
+/* Doppelte Klasse mit Absicht: .sheet-in setzt weiter unten in der Datei
+   ebenfalls einen Hintergrund und gewaenne sonst bei gleicher Spezifitaet. */
+.sheet-in.sheet-som{background:var(--lila);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 8.5l4.5 7.5h-9z' fill='%230B1B44' fill-opacity='.09'/%3E%3C/svg%3E")}
+.sheet-som .sheet-hd h2,.sheet-som .sp-x{color:var(--lila-ink)}
+.sheet-som .som-lage{color:var(--lila-ink);opacity:.72;margin:0 0 12px;font-family:var(--mono);
+  font-size:11px;font-weight:700}
+.som-karte{background:var(--bg);border:3px solid var(--ink);border-radius:12px;
+  padding:13px 14px;box-shadow:var(--shadow)}
+/* Im Dark-Mode waere ein vollflaechiges Flieder eine Leuchtreklame. Derselbe
+   Farbton, nur tief – die Zuordnung zum Knopf bleibt, das Auge auch. */
+:root[data-theme="dark"] .sheet-in.sheet-som{background:#2A1B45}
+:root[data-theme="dark"] .sheet-som .sheet-hd h2,
+:root[data-theme="dark"] .sheet-som .sp-x,
+:root[data-theme="dark"] .sheet-som .som-lage{color:var(--lila)}
+:root[data-theme="dark"] .som-karte{background:var(--surface)}
 .som-lage{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted)}
 .som-zeile{display:flex;align-items:center;gap:9px;padding:3px 0;font-size:12.5px}
 /* 122px ist gemessen, nicht geschaetzt: "Seitl. Schulter" braucht 113px und
