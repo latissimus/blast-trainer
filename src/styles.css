@@ -327,7 +327,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   background:var(--surface);border:3px solid var(--ink);border-radius:16px;
   box-shadow:var(--shadow);padding:5px;overflow:hidden}
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:1px;padding:6px 2px;
+  align-items:center;justify-content:center;gap:2px;padding:10px 2px;
   border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
 .ci .wert{font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -342,14 +342,16 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   -webkit-appearance:none;appearance:none}
 .ci select:disabled{cursor:default}
 .ci:has(select:disabled) .wert{opacity:.55}
-/* Das zuletzt benutzte Feld bleibt flieder hinterlegt – die Leiste wirkt sonst
-   sehr weiss, und man sieht auf einen Blick, woran man zuletzt gedreht hat. */
-.ci.zuletzt{background:var(--lila)}
-.ci.zuletzt .lbl{color:var(--lila-ink);opacity:.75}
-.ci.zuletzt .wert{color:var(--lila-ink)}
-/* Das Menue rechts. Flieder, damit es sich von den vier Einstellfeldern
-   abhebt: Die aendern den Inhalt der Seite, dieses wechselt die Seite. */
-.ci.menue{background:var(--lila);color:var(--lila-ink);flex:0 0 60px}
+/* Das zuletzt benutzte Feld bleibt hellblau hinterlegt – die Leiste wirkt sonst
+   sehr weiss, und man sieht auf einen Blick, woran man zuletzt gedreht hat.
+   Hellblau, damit es sich vom fliederfarbenen Menue klar unterscheidet: Das
+   eine markiert eine Einstellung, das andere wechselt die Seite. */
+.ci.zuletzt{background:var(--bg)}
+/* Das Menue rechts. Flieder mit demselben Dreiecksmuster wie die
+   Set-O-Meter-Seite – es hebt sich damit von den vier Einstellfeldern ab:
+   Die aendern den Inhalt der Seite, dieses wechselt die Seite. */
+.ci.menue{background:var(--lila);color:var(--lila-ink);flex:0 0 62px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 8.5l4.5 7.5h-9z' fill='%230B1B44' fill-opacity='.09'/%3E%3C/svg%3E")}
 .ci.menue .wert{font-family:var(--ui);font-style:normal;font-size:17px;line-height:1}
 .ci.menue .lbl{color:var(--lila-ink);opacity:.8}
 
@@ -366,28 +368,27 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 /* Kopfzeile ueber dem ersten Block: nur noch Phase und Tagesbeschreibung. */
 .tagkopf{display:flex;align-items:center;gap:9px;padding:14px 0 12px}
 
+/* Kopf der Unterseiten: Titel links, Rueckweg rechts. Der Chip ist der
+   kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
+.seitenkopf{display:flex;align-items:center;gap:10px;padding:18px 0 10px}
+.seitenkopf .section-title{margin:0;flex:1;min-width:0}
+.zurueck{flex:0 0 auto;display:inline-flex;align-items:center;text-decoration:none;
+  background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);
+  box-shadow:var(--shadow-xs);color:var(--ink);padding:8px 12px;
+  font-family:var(--display);font-style:italic;font-weight:900;font-size:12px;text-transform:uppercase}
+.zurueck:active{transform:translate(2px,2px);box-shadow:none}
+
 /* ---------- Set-O-Meter ----------
    Liegt in einem Overlay wie die FAQ, geoeffnet ueber den schwebenden Knopf in
    der Speicherleiste. Frueher stand es oben im Log – dann musste man beim
    Eintragen der Pump-Saetze jedes Mal hochscrollen, um nachzusehen, wofuer man
    sie ueberhaupt waehlt. */
-/* Das Blatt traegt die Farbe seines Knopfes: Flieder aussen, hellblauer Kasten
-   innen. So gehoert der schwebende Knopf sichtbar zu dem, was er oeffnet. */
-/* Doppelte Klasse mit Absicht: .sheet-in setzt weiter unten in der Datei
-   ebenfalls einen Hintergrund und gewaenne sonst bei gleicher Spezifitaet. */
-.sheet-in.sheet-som{background:var(--lila);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 8.5l4.5 7.5h-9z' fill='%230B1B44' fill-opacity='.09'/%3E%3C/svg%3E")}
-.sheet-som .sheet-hd h2,.sheet-som .sp-x{color:var(--lila-ink)}
-.sheet-som .som-lage{color:var(--lila-ink);opacity:.72;margin:0 0 12px;font-family:var(--mono);
-  font-size:11px;font-weight:700}
-.som-karte{background:var(--bg);border:3px solid var(--ink);border-radius:12px;
+/* Weiss wie jede andere Karte der App. Frueher hellblau, weil sie auf dem
+   fliederfarbenen Blatt lag – auf der hellblauen Seite waere sie unsichtbar. */
+.som-karte{background:var(--surface);border:3px solid var(--ink);border-radius:12px;
   padding:13px 14px;box-shadow:var(--shadow)}
 /* Im Dark-Mode waere ein vollflaechiges Flieder eine Leuchtreklame. Derselbe
    Farbton, nur tief – die Zuordnung zum Knopf bleibt, das Auge auch. */
-:root[data-theme="dark"] .sheet-in.sheet-som{background:#2A1B45}
-:root[data-theme="dark"] .sheet-som .sheet-hd h2,
-:root[data-theme="dark"] .sheet-som .sp-x,
-:root[data-theme="dark"] .sheet-som .som-lage{color:var(--lila)}
 :root[data-theme="dark"] .som-karte{background:var(--surface)}
 .som-lage{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted)}
 .som-zeile{display:flex;align-items:center;gap:9px;padding:3px 0;font-size:12.5px}
@@ -436,7 +437,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 /* Platz fuer die feste Bedienleiste unten. Zwei Zeilen je Feld machen sie
    hoeher als die fruehere Speicherleiste – ohne das verdeckt sie den
    letzten Block. */
-.pad-bottom{padding-bottom:112px}
+.pad-bottom{padding-bottom:124px}
 
 .toast{position:fixed;left:50%;bottom:112px;transform:translateX(-50%) translateY(18px);opacity:0;
   background:var(--navy);color:#fff;font-size:12.5px;font-weight:800;padding:11px 18px;border-radius:var(--r);
@@ -444,35 +445,8 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;font-family:var(--display);font-style:italic;text-transform:uppercase}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-/* ---------- Principles sheet ---------- */
-/* Keine Abdunklung des Hintergrunds. In der Homescreen-App malt iOS den
-   Streifen mit Uhrzeit und Akku selbst (theme-color) – die Seite kommt dort
-   nicht hin, und ein Schleier, der kurz vor der Statusleiste endet, sieht aus
-   wie ein Fehler. Die Alternative waere status-bar-style "black-translucent",
-   das faerbt aber die Systemschrift weiss und macht sie auf dem hellblauen
-   Grund unlesbar. Das Blatt hebt sich stattdessen ueber Rand und Schatten ab. */
-/* Blatt von unten (Standard) bzw. mittiges Fenster (.mitte). Das Set-O-Meter
-   ist mittig, weil es ueber dem Log schwebt und nicht dessen Fortsetzung ist. */
-.sheet{position:fixed;inset:0;z-index:50;background:transparent;
-  display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
-/* Unten Platz fuer die Bedienleiste lassen – sie liegt fest ueber allem und
-   wuerde das Fensterende sonst verdecken. */
-.sheet.mitte{align-items:center;padding:14px 14px 92px}
-.sheet.mitte .sheet-in{border-radius:16px;border-bottom:3px solid var(--ink);
-  max-height:82vh;padding-bottom:18px}
-.sheet .sheet-in{pointer-events:auto}
-.sheet[hidden]{display:none}
-.sheet-in{background:var(--surface);border:3px solid var(--ink);border-bottom:0;border-radius:16px 16px 0 0;
-  box-shadow:0 -6px 0 rgba(0,0,0,.06), 0 -22px 40px rgba(11,27,68,.28);
-  width:100%;max-width:580px;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:16px 15px calc(env(safe-area-inset-bottom) + 22px)}
-.sheet-hd{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px}
-.sheet-hd h2{margin:0;font-size:20px;font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase}
-.sheet h4{margin:16px 0 6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--navy);font-weight:900;font-family:var(--display);font-style:italic}
-.sheet h4.p{color:var(--pink-press)} .sheet h4.m{color:#8A6D00} .sheet h4.g{color:var(--navy)}
-.sheet p{margin:0 0 6px;font-size:12.5px;color:var(--muted);line-height:1.55}
-.sheet p b{color:var(--ink);font-weight:700}
-.sheet .src{font-size:10px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:2px solid var(--ink);padding-top:10px}
+/* ---------- FAQ- und Meter-Seite ---------- */
+.src{font-size:10px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:2px solid var(--ink);padding-top:10px}
 /* FAQ-Accordion */
 /* Abschnittsueberschrift im FAQ. Die Liste ist lang genug, dass man sonst nicht
    mehr weiss, auf welcher Ebene man liest – vom Prinzip bis zur Bedienung. */
@@ -491,7 +465,6 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .faq-a p{margin:0 0 6px;font-size:12.5px;color:var(--muted);line-height:1.55}
 .faq-a p:last-child{margin-bottom:0}
 .faq-a p b{color:var(--ink);font-weight:700}
-.sp-x{background:none;border:0;color:var(--ink);font-size:24px;padding:0 4px;font-weight:700}
 
 /* ---------- Profile ---------- */
 .profile-top{display:flex;align-items:center;gap:16px;margin-bottom:20px}

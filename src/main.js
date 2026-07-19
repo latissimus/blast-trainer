@@ -8,6 +8,7 @@ import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen
 import { mountLog, toast } from './log.js';
 import { mountProfile } from './profile.js';
 import { mountFaq } from './faq.js';
+import { mountMeter } from './meter.js';
 import { mountAdmin } from './admin.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
@@ -220,7 +221,20 @@ function renderChrome() {
     <div class="ctrlbar">
       <div class="timerpille" id="app-timer" hidden><span id="app-timertxt">0:00</span><button class="x" id="app-timerx" aria-label="Timer abbrechen">×</button></div>
       <div class="inner">
-        <div class="slots" id="app-slots"></div>
+        <div class="slots" id="app-slots">
+          <label class="ci"><span class="wert" id="ci-wo-w">Wo 1</span><span class="lbl" id="ci-wo-l">Woche</span>
+            <select id="lg-woche" aria-label="Woche" disabled></select></label>
+          <label class="ci"><span class="wert" id="ci-tag-w">Tag 1</span><span class="lbl" id="ci-tag-l">—</span>
+            <select id="lg-tag" aria-label="Tag" disabled></select></label>
+          <label class="ci"><span class="wert" id="ci-lvl-w">III</span><span class="lbl" id="ci-lvl-l">Level</span>
+            <select id="lg-tier" aria-label="Level" disabled>
+              <option value="0">Level I · wenig</option>
+              <option value="1">Level II · mittel</option>
+              <option value="2">Level III · voll</option>
+            </select></label>
+          <label class="ci"><span class="wert" id="ci-dat-w">—</span><span class="lbl">Datum</span>
+            <input id="lg-datum" type="date" aria-label="Datum der Einheit" disabled></label>
+        </div>
         <label class="ci menue"><span class="wert" id="app-menue-i">☰</span><span class="lbl" id="app-menue-l">Log</span>
           <select id="app-menue" aria-label="Ansicht"></select></label>
       </div>
@@ -242,19 +256,6 @@ function renderChrome() {
     ${isAdmin ? '<option value="admin">Admin</option>' : ''}`;
   menue.onchange = () => {
     const w = menue.value;
-    if (w === 'meter') {
-      // Nur ueber dem Log sinnvoll – dort liegen die Daten, die es zeigt.
-      if (active && active.openMeter) {
-        active.openMeter();
-        // Solange das Fenster offen ist, steht es auch im Menue. Zurueck auf
-        // "Log" springt es erst beim Schliessen (onMeterZu).
-        app.querySelector('#app-menue-l').textContent = 'Meter';
-      } else {
-        location.hash = 'log';
-        menueZuruecksetzen();
-      }
-      return;
-    }
     location.hash = w;
   };
 
@@ -279,17 +280,11 @@ function setNavActive(view) {
   const m = app.querySelector('#app-menue');
   if (!m) return;
   m.value = view;
-  const namen = { log: 'Log', faq: 'FAQ', admin: 'Admin', profile: 'Profil' };
+  const namen = { log: 'Log', faq: 'FAQ', meter: 'Meter', admin: 'Admin', profile: 'Profil' };
   app.querySelector('#app-menue-l').textContent = namen[view] || 'Log';
-  // Die vier Log-Felder gibt es nur ueber dem Log. Auf anderen Seiten bleibt
-  // die Leiste mit dem Menue allein stehen – sonst kaeme man von dort nicht weg.
-  app.querySelector('#app-slots').hidden = view !== 'log';
-}
-
-// Nach dem Schliessen des Set-O-Meters zeigt das Menue wieder "Log".
-function menueZuruecksetzen() {
-  const m = app.querySelector('#app-menue');
-  if (m) { m.value = 'log'; app.querySelector('#app-menue-l').textContent = 'Log'; }
+  // Die vier Log-Felder bleiben auf jeder Seite sichtbar, damit die Leiste
+  // ueberall gleich aussieht. Ohne gemountetes Log sind sie stillgelegt (siehe
+  // destroy() in log.js) – sie zeigen dann den zuletzt gesehenen Stand.
 }
 
 async function routeView() {
@@ -298,7 +293,7 @@ async function routeView() {
   if (!view) return;
   let hash = (location.hash.replace('#', '') || 'log');
   if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
-  if (!['log', 'profile', 'admin', 'faq'].includes(hash)) hash = 'log';
+  if (!['log', 'profile', 'admin', 'faq', 'meter'].includes(hash)) hash = 'log';
   setNavActive(hash);
 
   const token = ++routeToken;
@@ -307,12 +302,14 @@ async function routeView() {
   view.innerHTML = '';
   try {
     if (hash === 'log') {
-      const v = await mountLog(view, { userId: session.user.id, readOnly: false, onMeterZu: menueZuruecksetzen });
+      const v = await mountLog(view, { userId: session.user.id, readOnly: false });
       guard(v);
     } else if (hash === 'profile') {
       mountProfile(view, { session, profile, onProfileUpdated: (p) => { profile = p; } });
     } else if (hash === 'faq') {
       mountFaq(view);
+    } else if (hash === 'meter') {
+      await mountMeter(view, { userId: session.user.id });
     } else if (hash === 'admin') {
       const v = await mountAdmin(view, { session });
       guard(v);

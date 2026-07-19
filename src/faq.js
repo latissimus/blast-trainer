@@ -15,7 +15,10 @@ export function mountFaq(container) {
   const wrap = document.createElement('div');
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
-      <h1 class="section-title" style="padding:18px 0 4px">FAQ</h1>
+      <div class="seitenkopf">
+        <h1 class="section-title">FAQ</h1>
+        <a class="zurueck" href="#log">← Log</a>
+      </div>
         <p class="faq-sektion">LOGMAN und das Prinzip</p>
 
         <details class="faq"><summary>Was ist LOGMAN?</summary>
