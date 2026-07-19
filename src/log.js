@@ -854,14 +854,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
       .catch(() => {});
   }
 
-  // Merkt sich, ob der schlafende Auftrag fuer diese Pause schon abbestellt ist.
-  // Sonst feuert tick() alle 250ms denselben stop-Aufruf.
-  let pushAbbestellt = false;
-
   function startTimer(sec, label) {
     if (readOnly) return;
     primeAudio();
-    pushAbbestellt = false;
     pushTimer('start', sec, label);
     clearInterval(timerId);
     tEnd = Date.now() + sec * 1000;
@@ -877,23 +872,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const box = document.querySelector('#app-timer'); if (!box) return;
     const left = Math.max(0, Math.round((tEnd - Date.now()) / 1000));
     box.querySelector('#app-timertxt').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
-    // Laeuft die Pause aus, waehrend die App sichtbar ist, braucht niemand ein
-    // Banner: Countdown, done-Zustand und Ton sagen es bereits.
-    //
-    // Wichtig, warum das HIER passiert und nicht im Service Worker: Dort die
-    // Mitteilung zu unterdruecken verletzt userVisibleOnly – Web Push verlangt
-    // pro Push eine sichtbare Mitteilung. Der Browser schiebt sonst ein
-    // generisches "im Hintergrund aktualisiert" unter oder entzieht die
-    // Erlaubnis. Auf iOS waere das der Tod des Timers, denn er IST der Push.
-    // Also senden wir gar nicht erst: Marke weg -> der Worker schweigt.
-    //
-    // Drei Sekunden Vorlauf, damit es kein Rennen mit dem aufwachenden Worker
-    // gibt. Preis: Wer genau in diesen drei Sekunden das Handy sperrt, bekommt
-    // nichts – der schaut dann aber gerade auf den Countdown.
-    if (left <= 3 && !pushAbbestellt && document.visibilityState === 'visible') {
-      pushAbbestellt = true;
-      pushTimer('stop');
-    }
     if (left <= 0) {
       clearInterval(timerId);
       box.classList.add('done');

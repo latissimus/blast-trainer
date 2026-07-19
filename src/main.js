@@ -10,6 +10,7 @@ import { mountProfile } from './profile.js';
 import { mountFaq } from './faq.js';
 import { mountMeter } from './meter.js';
 import { mountProg } from './prog.js';
+import { mountNotizbuch } from './notizbuch.js';
 import { mountAdmin } from './admin.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
@@ -255,17 +256,19 @@ function renderChrome() {
     b.onclick = () => { location.hash = b.dataset.view; };
   });
 
-  // Das Menue unten rechts. Log und FAQ sind eigene Seiten; das Set-O-Meter ist
-  // ein Fenster ueber dem Log, weil man es MITTEN in der Einheit aufmacht –
-  // dafuer die Seite zu verlassen waere ein Umweg. Nach dem Schliessen springt
-  // die Auswahl darum von selbst auf "Log" zurueck.
+  // Das Menue unten rechts. Inzwischen sind alle Ziele eigene Seiten – auch das
+  // Set-O-Meter, das frueher ein Fenster ueber dem Log war.
+  //
+  // Grossbuchstaben stehen hier ausgeschrieben statt per text-transform: In
+  // nativen <option>-Elementen setzt iOS die CSS-Auszeichnung nicht um.
   const menue = app.querySelector('#app-menue');
   menue.innerHTML = `
-    <option value="log">Log</option>
-    <option value="meter">Set-O-Meter</option>
-    <option value="prog">Progression</option>
-    <option value="faq">FAQ</option>
-    ${isAdmin ? '<option value="admin">Admin</option>' : ''}`;
+    <option value="log">LOG</option>
+    <option value="notizbuch">NOTIZBUCH</option>
+    <option value="meter">SET-O-METER</option>
+    <option value="prog">PROGRESSION</option>
+    <option value="faq">FAQs</option>
+    ${isAdmin ? '<option value="admin">ADMIN</option>' : ''}`;
   menue.onchange = () => {
     const w = menue.value;
     location.hash = w;
@@ -296,7 +299,7 @@ function setNavActive(view) {
   // bleibt hellblau. Setzt --bg um, damit Kopfleiste und Bedienleiste von selbst
   // mitgehen, statt jede Flaeche einzeln umfaerben zu muessen.
   document.body.dataset.seite = view;
-  const namen = { log: 'Log', faq: 'FAQ', meter: 'Meter', prog: 'Prog', admin: 'Admin', profile: 'Profil' };
+  const namen = { log: 'Log', faq: 'FAQ', meter: 'Meter', prog: 'Prog', notizbuch: 'Notizbuch', admin: 'Admin', profile: 'Profil' };
   app.querySelector('#app-menue-l').textContent = namen[view] || 'Log';
   // Die vier Log-Felder bleiben auf jeder Seite sichtbar, damit die Leiste
   // ueberall gleich aussieht. Ohne gemountetes Log sind sie stillgelegt (siehe
@@ -309,7 +312,7 @@ async function routeView() {
   if (!view) return;
   let hash = (location.hash.replace('#', '') || 'log');
   if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
-  if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog'].includes(hash)) hash = 'log';
+  if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'notizbuch'].includes(hash)) hash = 'log';
   setNavActive(hash);
 
   const token = ++routeToken;
@@ -328,6 +331,8 @@ async function routeView() {
       await mountMeter(view, { userId: session.user.id });
     } else if (hash === 'prog') {
       await mountProg(view, { userId: session.user.id });
+    } else if (hash === 'notizbuch') {
+      await mountNotizbuch(view, { userId: session.user.id });
     } else if (hash === 'admin') {
       const v = await mountAdmin(view, { session });
       guard(v);

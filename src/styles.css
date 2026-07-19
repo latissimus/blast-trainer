@@ -494,21 +494,26 @@ body[data-seite="meter"]{--bg:#D9BBF7}
 body[data-seite="prog"]{--bg:#F7C9DE}
 body[data-seite="faq"]{--bg:#FBE7A4}
 body[data-seite="profile"]{--bg:#BFE7D2}
+/* Papierton – die vier bunten Seiten waren vergeben, und zum Notizbuch passt
+   ohnehin Papier. Gedeckt genug, um nicht mit dem Gelb der FAQs zu streiten. */
+body[data-seite="notizbuch"]{--bg:#EDE1CC}
 
 :root[data-theme="dark"] body[data-seite="meter"]{--bg:#2A1B45}
+:root[data-theme="dark"] body[data-seite="notizbuch"]{--bg:#2B2519}
 :root[data-theme="dark"] body[data-seite="prog"]{--bg:#3A1B2B}
 :root[data-theme="dark"] body[data-seite="faq"]{--bg:#332B14}
 :root[data-theme="dark"] body[data-seite="profile"]{--bg:#143024}
 
 body[data-seite="meter"],body[data-seite="prog"],
-body[data-seite="faq"],body[data-seite="profile"]{
+body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 9l4.2 7h-8.4z' fill='%230B1B44' fill-opacity='.07'/%3E%3C/svg%3E")}
 /* Nur die Unterseiten, NICHT das Log: "body[data-seite]" haette auch das Log
    getroffen, weil es dieselbe Auszeichnung traegt. */
 :root[data-theme="dark"] body[data-seite="meter"],
 :root[data-theme="dark"] body[data-seite="prog"],
 :root[data-theme="dark"] body[data-seite="faq"],
-:root[data-theme="dark"] body[data-seite="profile"]{
+:root[data-theme="dark"] body[data-seite="profile"],
+:root[data-theme="dark"] body[data-seite="notizbuch"]{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 9l4.2 7h-8.4z' fill='%23EDF0F6' fill-opacity='.05'/%3E%3C/svg%3E")}
 :root[data-theme="dark"] body[data-seite="log"]{background-image:none}
 
@@ -598,3 +603,29 @@ body[data-seite="faq"],body[data-seite="profile"]{
 .k-achse{fill:var(--muted);font-family:var(--mono);font-size:9px}
 .kurve-leer{font-size:12px;color:var(--muted);text-align:center;padding:18px 0;line-height:1.6}
 .kurve-leer span{font-size:11px;opacity:.75}
+
+/* ---------- Notizbuch ---------- */
+.nb-karte{margin-top:12px}
+.nb-kopf{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.nb-titel{flex:1 1 auto;min-width:0;font-family:var(--display);font-style:italic;
+  font-weight:900;font-size:17px;overflow-wrap:anywhere}
+.nb-akt{display:flex;gap:5px;flex:0 0 auto}
+.nb-text{margin:0;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+/* Links muessen sich vom Fliesstext abheben, ohne die Akzentfarben zu kapern. */
+.nb-text a{color:var(--navy);text-decoration:underline;text-underline-offset:2px}
+:root[data-theme="dark"] .nb-text a{color:var(--pink)}
+
+.nb-bilder{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.nb-bild{max-width:100%;width:132px;height:132px;object-fit:cover;
+  border:3px solid var(--ink);border-radius:12px;background:var(--surface2);display:block}
+.nb-slot{position:relative;display:inline-block}
+.nb-bildweg{position:absolute;top:-7px;right:-7px;width:24px;height:24px;padding:0;
+  border:2px solid var(--ink);border-radius:50%;background:var(--surface);
+  font-weight:900;line-height:1;font-size:14px;color:var(--ink)}
+
+.nb-in-titel,.nb-in-text{width:100%;margin-bottom:8px}
+.nb-in-text{resize:vertical;line-height:1.6}
+/* Die Dateiauswahl liegt versteckt im Label – der Knopf IST das Label. */
+.nb-upload{text-align:center;cursor:pointer;margin-bottom:8px}
+.nb-zeile{display:flex;gap:8px}
+.nb-zeile .btn{flex:1 1 0}
