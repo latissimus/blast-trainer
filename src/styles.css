@@ -382,10 +382,14 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    Timer abbrechen. So ist die Zahl gross genug, um sie zwischen zwei Saetzen
    aus zwei Metern Entfernung abzulesen. */
 .ctrlbar.timer-an .inner::before{background:var(--navy);-webkit-backdrop-filter:none;backdrop-filter:none}
-/* Im Dark-Mode hellblau und deckend – auf Wunsch. ACHTUNG Kontrast: Die weisse
-   Ziffer steht darauf nur bei 1.35:1, das ist praktisch unlesbar. Soll sie
-   navy werden (12.3:1), reicht eine Zeile weiter unten. */
+/* Im Dark-Mode hellblau und deckend, Ziffer schwarz. Weiss stand darauf bei
+   1.35:1 und war unlesbar – schwarz bringt 14.6:1. */
 :root[data-theme="dark"] .ctrlbar.timer-an .inner::before{background:#AEDCF6}
+:root[data-theme="dark"] .ctrlbar.timer-an .timerfeld,
+:root[data-theme="dark"] .ctrlbar.timer-an .timerfeld .x{color:#0A0A0A}
+/* Der abgelaufene Zustand traegt sonst ein helles Gruen, das auf Hellblau
+   ebenfalls verschwindet. Dunkelgruen haelt den Unterschied zum Lauf. */
+:root[data-theme="dark"] .ctrlbar.timer-an .timerfeld.done{color:#0E5B30}
 .ctrlbar.timer-an .slots,.ctrlbar.timer-an .menue{display:none}
 /* Das × liegt absolut rechts und zaehlt nicht zur Breite – sonst waere die
    Zahl um dessen halbe Breite nach links verschoben statt wirklich mittig. */
@@ -498,12 +502,15 @@ body[data-seite="meter"]{--bg:#D9BBF7}
 body[data-seite="prog"]{--bg:#F7C9DE}
 body[data-seite="faq"]{--bg:#FBE7A4}
 body[data-seite="profile"]{--bg:#BFE7D2}
-/* Papierton – die vier bunten Seiten waren vergeben, und zum Notizbuch passt
-   ohnehin Papier. Gedeckt genug, um nicht mit dem Gelb der FAQs zu streiten. */
-body[data-seite="notizbuch"]{--bg:#EDE1CC}
+/* Pinker Grund, hellblaue Flaechen. Anders als die uebrigen Seiten setzt diese
+   auch --surface um: Damit werden Karte UND Felder hellblau, ohne dass eine
+   einzelne Regel sie einzeln einfaerben muesste.
+   ACHTUNG: Progression ist ebenfalls pink (#F7C9DE). Dieses hier ist satter,
+   damit die beiden Seiten sich noch unterscheiden. */
+body[data-seite="notizbuch"]{--bg:#F9B8D6;--surface:#AEDCF6;--surface2:#C9E7FA}
 
 :root[data-theme="dark"] body[data-seite="meter"]{--bg:#2A1B45}
-:root[data-theme="dark"] body[data-seite="notizbuch"]{--bg:#2B2519}
+:root[data-theme="dark"] body[data-seite="notizbuch"]{--bg:#45162E;--surface:#16283A;--surface2:#1D3346}
 :root[data-theme="dark"] body[data-seite="prog"]{--bg:#3A1B2B}
 :root[data-theme="dark"] body[data-seite="faq"]{--bg:#332B14}
 :root[data-theme="dark"] body[data-seite="profile"]{--bg:#143024}
