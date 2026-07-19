@@ -1,5 +1,6 @@
 import { TPL } from './template.js';
 import { KATALOG, KONTEN } from './katalog.js';
+import { targetSets, setsForExercise, effTypeOf, exOf } from './saetze.js';
 
 // Set-O-Meter: Wie viele Arbeitssätze hat in dieser Woche welcher Muskel
 // abbekommen?
@@ -36,11 +37,32 @@ export const zeigName = (k) => KURZ[k] || k;
 
 const klein = (s) => String(s || '').trim().toLowerCase();
 
-// Gemacht heisst: Es steht etwas drin. Die App legt beim blossen Ansehen eines
-// Tages leere Satzzeilen an – zaehlten die mit, fuellte sich das Bild vom
-// Hinsehen.
-const gemacht = (s) => !!(s && (String(s.w || '').trim() || String(s.r || '').trim()));
+export const istDeload = (woche) => Number(woche) >= 7;
 
+// Welche Tage gehoeren zu dieser Woche? Gleiche Regel wie im Log – A/B-Rotation
+// im Overreach, drei Cluster-Slots im Deload.
+export function tageDerWoche(payload, woche) {
+  if (istDeload(woche)) return ['MRs', 'MRs-2', 'MRs-3'];
+  const rot = ((payload && payload.rot) || {})[woche] || (Number(woche) % 2 === 1 ? 'A' : 'B');
+  return ['OK-' + rot, 'UK-' + rot, 'MRs'];
+}
+
+const tierVon = (payload, tag, woche) => {
+  if (istDeload(woche)) return 0;
+  const t = ((payload && payload.tier) || {})[tag + '|' + woche];
+  return (t === 0 || t === 1 || t === 2) ? t : 2;
+};
+
+// GEZAEHLT WIRD DER PLAN, nicht das Eingetragene.
+//
+// Sobald eine Uebung gewaehlt ist, zaehlen die Saetze, die Level und Vorlage
+// dafuer vorsehen. Das macht aus dem Set-O-Meter ein Werkzeug fuer VORHER: Man
+// sieht, was die Heavy-Wahl liefert, und waehlt Pump und Cluster danach.
+//
+// Vorher wurden nur ausgefuellte Saetze gezaehlt. Dann stand das Bild erst am
+// Ende der Woche – zu einem Zeitpunkt, an dem man nichts mehr steuern kann.
+//
+// Ein Feld ohne gewaehlte Uebung zaehlt nicht: Es ist noch keine Entscheidung.
 export function zaehleWoche(payload, woche, katalog = KATALOG) {
   const idx = new Map(katalog.map((e) => [klein(e.n), e]));
   const konten = {};
@@ -51,33 +73,37 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
   const data = (payload && payload.data) || {};
   const exAlle = (payload && payload.ex) || {};
 
-  Object.keys(data).forEach((tag) => {
+  tageDerWoche(payload, woche).forEach((tag) => {
     const tpl = TPL[tag];
     if (!tpl) return;
-    const zelle = (data[tag] || {})[woche];
-    if (!zelle) return;
+    const tier = tierVon(payload, tag, woche);
+    const zelle = ((data[tag] || {})[woche]) || {};
 
-    Object.keys(zelle).forEach((bid) => {
-      const blk = tpl.blocks.find((b) => b.id === bid);
-      const eintragBlock = zelle[bid];
-      if (!blk || !eintragBlock) return;
+    tpl.blocks.forEach((blk) => {
+      if (!targetSets(blk, tier)) return;      // Block bei diesem Level nicht dabei
+      const eintragBlock = zelle[blk.id] || {};
+      const frei = blk.type !== 'load';
+      // Heavy haelt seine Namen tagweit (payload.ex) – deshalb steht die
+      // Heavy-Verteilung schon, bevor man den Tag ueberhaupt geoeffnet hat.
+      // Pump und Cluster werden je Woche neu gewaehlt und liegen im Block.
+      const namen = eintragBlock.names || ((exAlle[tag] || {})[blk.id]) || [];
 
-      // Heavy haelt seine Namen tagweit (payload.ex), Pump und Cluster je Woche
-      // im Block selbst (entry.names).
-      const namen = eintragBlock.names || ((exAlle[tag] || {})[bid]) || [];
+      exOf(blk, tier).forEach((_, xi) => {
+        const name = (namen[xi] || '').trim();
+        if (!name) return;                      // noch nicht gewaehlt
 
-      (eintragBlock.sets || []).forEach((satzListe, xi) => {
-        const anzahl = (satzListe || []).filter(gemacht).length;
+        // Zusatzsaetze gibt es nur bei Pump – wie im Log.
+        const extra = effTypeOf(blk, tier) === 'pump'
+          ? ((eintragBlock.extra || [])[xi] || 0) : 0;
+        const anzahl = (frei ? targetSets(blk, tier) : setsForExercise(blk, tier, xi)) + extra;
         if (!anzahl) return;
 
-        const name = (namen[xi] || '').trim();
         const eintrag = idx.get(klein(name));
         if (!eintrag) {
-          // Alte oder aus der Excel entfernte Uebungen: Die Saetze sind gemacht,
-          // aber wir wissen nicht, wohin damit. Verschweigen waere schlimmer als
-          // melden – sonst zeigt das Bild weniger Arbeit, als stattgefunden hat.
+          // Uebung nicht im Katalog: Die Saetze sind eingeplant, aber wir wissen
+          // nicht, wohin damit. Verschweigen waere schlimmer als melden.
           ohneZuordnung += anzahl;
-          if (name) unbekannte.add(name);
+          unbekannte.add(name);
           return;
         }
         konten[eintrag.haupt] += anzahl;

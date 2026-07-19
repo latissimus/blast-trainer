@@ -1,134 +1,159 @@
 import { describe, it, expect } from 'vitest';
-import { zaehleWoche, sortiert, zeigName } from './setometer.js';
+import { zaehleWoche, sortiert, zeigName, istDeload, tageDerWoche } from './setometer.js';
 import { KONTEN } from './katalog.js';
 
-// Das Set-O-Meter ist eine Zahl, an der man Entscheidungen festmacht ("Schultern
-// fehlen noch"). Eine falsche Zahl sieht aus wie eine richtige – deshalb hier
-// festgezurrt, besonders die Kanten: leere Gerüste, unbekannte Namen, Nebenspieler.
+// Das Set-O-Meter zaehlt den PLAN, nicht das Eingetragene: Sobald eine Übung
+// gewählt ist, zählen die Sätze, die Level und Vorlage dafür vorsehen. Nur so
+// steht das Bild, bevor die Woche gelaufen ist – dann, wenn man noch steuern kann.
+//
+// Ein Zählfehler sieht hier aus wie eine richtige Zahl. Deshalb festgezurrt.
 
 const K = [
   { n: 'Bankdrücken', haupt: 'Brust', neben: ['Trizeps', 'Vordere Schulter'], typ: 'Comp' },
+  { n: 'Fliegende', haupt: 'Brust', neben: ['Vordere Schulter'], typ: 'Iso' },
   { n: 'Curls', haupt: 'Bizeps', neben: [], typ: 'Iso' },
   { n: 'Rudern', haupt: 'Oberer Rücken', neben: ['Bizeps'], typ: 'Comp' },
+  { n: 'Wadenheben', haupt: 'Waden', neben: [], typ: 'Iso' },
 ];
 
-const satz = (w, r) => ({ w, r, rir: '' });
-const leer = () => ({ w: '', r: '', rir: '' });
+// Level III ist der Standard, wenn nichts anderes gesetzt ist.
+// OK-A/chest: load, sets [1,2,4], zwei Felder (Comp + Iso).
+// OK-A/p_calf: pump, sets [1,1,2], ein Feld.
+const heavyBrust = (namen) => ({ ex: { 'OK-A': { chest: namen } }, data: {} });
 
-// data[Tag][Woche][Block] – 'chest' ist ein load-Block in OK-A, 'm_ch' ein mr-Block.
-const bau = (block, saetze, name, tag = 'OK-A', woche = 1) => ({
-  ex: { [tag]: { [block]: [name] } },
-  data: { [tag]: { [woche]: { [block]: { sets: [saetze] } } } },
-});
-
-describe('zaehleWoche', () => {
-  it('zählt den Hauptspieler voll', () => {
-    const { konten } = zaehleWoche(bau('chest', [satz(80, 8), satz(80, 7)], 'Bankdrücken'), 1, K);
-    expect(konten['Brust']).toBe(2);
+describe('zaehleWoche – Plan statt Eingetragenes', () => {
+  it('zählt, sobald eine Übung gewählt ist – ganz ohne Sätze im Log', () => {
+    // Genau der Zweck: vorher sehen, was die Wahl liefert.
+    const { konten } = zaehleWoche(heavyBrust(['Bankdrücken', 'Fliegende']), 1, K);
+    expect(konten['Brust']).toBe(4);          // chest Level III = 4 Sätze
   });
 
-  it('zählt Nebenspieler halb', () => {
-    const { konten } = zaehleWoche(bau('chest', [satz(80, 8), satz(80, 7)], 'Bankdrücken'), 1, K);
+  it('zählt ein leeres Feld nicht – das ist noch keine Entscheidung', () => {
+    expect(zaehleWoche(heavyBrust(['', '']), 1, K).gesamt).toBe(0);
+  });
+
+  it('teilt Heavy-Sätze auf Comp und Iso auf', () => {
+    // Nur das Comp-Feld gewählt -> nur dessen Anteil (4 Sätze / 2 Felder = 2).
+    expect(zaehleWoche(heavyBrust(['Bankdrücken', '']), 1, K).konten['Brust']).toBe(2);
+  });
+
+  it('wertet Nebenspieler halb', () => {
+    const { konten } = zaehleWoche(heavyBrust(['Bankdrücken', '']), 1, K);
     expect(konten['Trizeps']).toBe(1);
     expect(konten['Vordere Schulter']).toBe(1);
   });
 
-  it('zählt leere Satzzeilen nicht mit', () => {
-    // Die App legt beim blossen Ansehen eines Tages leere Zeilen an. Zählten die
-    // mit, füllte sich das Konto vom Hinsehen.
-    const { konten } = zaehleWoche(bau('chest', [satz(80, 8), leer(), leer()], 'Bankdrücken'), 1, K);
-    expect(konten['Brust']).toBe(1);
+  it('folgt dem eingestellten Level', () => {
+    const p = (t) => ({ ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } }, data: {}, tier: { 'OK-A|1': t } });
+    expect(zaehleWoche(p(0), 1, K).konten['Brust']).toBe(1);   // Level I
+    expect(zaehleWoche(p(1), 1, K).konten['Brust']).toBe(2);   // Level II
+    expect(zaehleWoche(p(2), 1, K).konten['Brust']).toBe(4);   // Level III
   });
 
-  it('nimmt auch einen Satz mit, in dem nur das Gewicht steht', () => {
-    const { konten } = zaehleWoche(bau('chest', [satz(80, '')], 'Bankdrücken'), 1, K);
-    expect(konten['Brust']).toBe(1);
+  it('nimmt Level III, wenn nichts eingestellt ist', () => {
+    expect(zaehleWoche(heavyBrust(['Bankdrücken', 'Fliegende']), 1, K).konten['Brust']).toBe(4);
   });
 
-  it('summiert über mehrere Tage derselben Woche', () => {
+  it('ignoriert eingetragene Gewichte – der Plan zählt, nicht die Ausführung', () => {
+    const ohne = zaehleWoche(heavyBrust(['Bankdrücken', 'Fliegende']), 1, K).konten['Brust'];
+    const mit = zaehleWoche({
+      ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } },
+      data: { 'OK-A': { 1: { chest: { sets: [[{ w: 80, r: 8 }], []] } } } },
+    }, 1, K).konten['Brust'];
+    expect(mit).toBe(ohne);
+  });
+});
+
+describe('zaehleWoche – Wochen und Tage', () => {
+  it('nimmt in ungeraden Wochen die A-Tage, in geraden die B-Tage', () => {
+    const p = { ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } }, data: {} };
+    expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(4);
+    expect(zaehleWoche(p, 2, K).konten['Brust']).toBe(0);   // Woche 2 ist B
+  });
+
+  it('folgt einer von Hand gesetzten Rotation', () => {
+    const p = { ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } }, data: {}, rot: { 2: 'A' } };
+    expect(zaehleWoche(p, 2, K).konten['Brust']).toBe(4);
+  });
+
+  it('zählt im Deload nur die Cluster-Tage und fest auf Level I', () => {
     const p = {
-      ex: { 'OK-A': { chest: ['Bankdrücken'] }, 'OK-B': { chest: ['Bankdrücken'] } },
-      data: {
-        'OK-A': { 1: { chest: { sets: [[satz(80, 8)]] } } },
-        'OK-B': { 1: { chest: { sets: [[satz(80, 8), satz(80, 8)]] } } },
-      },
+      ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } },
+      data: { MRs: { 7: { m_ch: { names: ['Bankdrücken'], sets: [[]] } } } },
+      tier: { 'MRs|7': 2 },   // wird im Deload ignoriert
     };
-    expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(3);
+    const { konten } = zaehleWoche(p, 7, K);
+    expect(konten['Brust']).toBe(1);   // m_ch Level I = 1, Heavy-Tage zählen nicht mit
   });
 
-  it('trennt die Wochen sauber', () => {
+  it('summiert dieselbe Übung über mehrere Tage der Woche', () => {
     const p = {
-      ex: { 'OK-A': { chest: ['Bankdrücken'] } },
-      data: { 'OK-A': { 1: { chest: { sets: [[satz(80, 8)]] } }, 2: { chest: { sets: [[satz(80, 8)]] } } } },
+      ex: { 'OK-A': { chest: ['Bankdrücken', ''] } },
+      data: { MRs: { 1: { m_ch: { names: ['Bankdrücken'], sets: [[]] } } } },
     };
-    expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(1);
-    expect(zaehleWoche(p, 2, K).konten['Brust']).toBe(1);
+    // OK-A/chest Comp = 2, MRs/m_ch Level III = 2
+    expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(4);
+  });
+});
+
+describe('zaehleWoche – Pump und Zusatzsätze', () => {
+  const pump = (extra) => ({
+    data: { 'OK-A': { 1: { p_calf: { names: ['Wadenheben'], sets: [[]], ...(extra ? { extra } : {}) } } } },
   });
 
-  it('addiert Haupt- und Nebenrolle desselben Muskels', () => {
-    // Curls (Bizeps voll) + Rudern (Bizeps halb) = 1,5
-    const p = {
-      ex: { 'UK-A': { p_arm: ['Curls'], p_bk: ['Rudern'] } },
-      data: { 'UK-A': { 1: { p_arm: { sets: [[satz(20, 12)]] }, p_bk: { sets: [[satz(60, 10)]] } } } },
-    };
-    expect(zaehleWoche(p, 1, K).konten['Bizeps']).toBe(1.5);
+  it('gibt jedem freien Feld die volle Satzzahl des Blocks', () => {
+    expect(zaehleWoche(pump(), 1, K).konten['Waden']).toBe(2);   // p_calf Level III = 2
   });
 
-  it('meldet Sätze ohne Zuordnung, statt sie zu verschlucken', () => {
-    const r = zaehleWoche(bau('chest', [satz(80, 8), satz(80, 8)], 'Fat-Gripz Halt'), 1, K);
+  it('rechnet Zusatzsätze mit', () => {
+    expect(zaehleWoche(pump([3]), 1, K).konten['Waden']).toBe(5);
+  });
+
+  it('ignoriert Zusatzsätze bei Cluster-Blöcken', () => {
+    // Zusatzsätze gibt es nur bei Pump – ein Wert an einem mr-Block wäre Altlast.
+    const p = { data: { MRs: { 1: { m_ch: { names: ['Bankdrücken'], sets: [[]], extra: [5] } } } } };
+    expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(2);
+  });
+});
+
+describe('zaehleWoche – Robustheit', () => {
+  it('meldet Übungen, die nicht im Katalog stehen', () => {
+    const r = zaehleWoche(heavyBrust(['Fat-Gripz Halt', '']), 1, K);
     expect(r.ohneZuordnung).toBe(2);
     expect(r.unbekannte).toEqual(['Fat-Gripz Halt']);
     expect(r.konten['Brust']).toBe(0);
   });
 
-  it('zählt Sätze ohne Übungsnamen nicht als unbekannte Übung', () => {
-    const r = zaehleWoche(bau('chest', [satz(80, 8)], ''), 1, K);
-    expect(r.ohneZuordnung).toBe(1);
-    expect(r.unbekannte).toEqual([]);
-  });
-
-  it('nimmt den Namen aus dem Block, wenn er dort steht (Pump/Cluster)', () => {
-    const p = { data: { MRs: { 1: { m_ch: { names: ['Bankdrücken'], sets: [[satz(60, 4)]] } } } } };
-    expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(1);
-  });
-
   it('ignoriert unbekannte Tage und Blöcke', () => {
-    const p = {
-      ex: { 'Gibt-Es-Nicht': { chest: ['Bankdrücken'] }, 'OK-A': { quatsch: ['Bankdrücken'] } },
-      data: {
-        'Gibt-Es-Nicht': { 1: { chest: { sets: [[satz(80, 8)]] } } },
-        'OK-A': { 1: { quatsch: { sets: [[satz(80, 8)]] } } },
-      },
-    };
-    expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(0);
+    const p = { ex: { 'Gibt-Es-Nicht': { chest: ['Bankdrücken'] }, 'OK-A': { quatsch: ['Bankdrücken'] } }, data: {} };
+    expect(zaehleWoche(p, 1, K).gesamt).toBe(0);
   });
 
   it('kommt mit leerem Payload klar', () => {
-    expect(zaehleWoche(null, 1, K).konten['Brust']).toBe(0);
-    expect(zaehleWoche({}, 1, K).ohneZuordnung).toBe(0);
+    expect(zaehleWoche(null, 1, K).gesamt).toBe(0);
+    expect(zaehleWoche({}, 1, K).konten['Brust']).toBe(0);
   });
 
   it('gibt immer alle 15 Konten zurück', () => {
     expect(Object.keys(zaehleWoche({}, 1, K).konten).sort()).toEqual([...KONTEN].sort());
   });
+
+  it('erkennt die Übung unabhängig von Schreibweise und Leerzeichen', () => {
+    expect(zaehleWoche(heavyBrust(['  bankdrücken ', '']), 1, K).konten['Brust']).toBe(2);
+  });
 });
 
-
-
-
-describe('gesamt (leere Woche)', () => {
-  it('ist null, solange nichts eingetragen ist', () => {
-    // Daran haengt, ob ueberhaupt ein Bild gezeigt wird oder der Hinweis
-    // "noch nichts eingetragen".
-    expect(zaehleWoche({}, 1, K).gesamt).toBe(0);
-    expect(zaehleWoche(bau('chest', [leer(), leer()], 'Bankdrücken'), 1, K).gesamt).toBe(0);
+describe('tageDerWoche / istDeload', () => {
+  it('wechselt A und B im Overreach', () => {
+    expect(tageDerWoche({}, 1)).toEqual(['OK-A', 'UK-A', 'MRs']);
+    expect(tageDerWoche({}, 2)).toEqual(['OK-B', 'UK-B', 'MRs']);
   });
-  it('zählt auch Sätze ohne Zuordnung als "es ist etwas passiert"', () => {
-    expect(zaehleWoche(bau('chest', [satz(80, 8)], 'Unbekannt'), 1, K).gesamt).toBe(1);
+  it('gibt im Deload die drei Cluster-Slots', () => {
+    expect(tageDerWoche({}, 7)).toEqual(['MRs', 'MRs-2', 'MRs-3']);
   });
-  it('summiert volle und halbe Wertungen', () => {
-    // Bankdrücken: Brust 1 + Trizeps 0,5 + Vordere Schulter 0,5 = 2
-    expect(zaehleWoche(bau('chest', [satz(80, 8)], 'Bankdrücken'), 1, K).gesamt).toBe(2);
+  it('trennt Overreach von Deload', () => {
+    expect(istDeload(6)).toBe(false);
+    expect(istDeload(7)).toBe(true);
   });
 });
 
@@ -141,13 +166,11 @@ describe('sortiert', () => {
   });
 
   it('gibt alle 15 Konten zurück, auch die leeren', () => {
-    // Ein Muskel, der gar nichts abbekommen hat, ist die wichtigste Aussage
-    // des Bildes – er darf nicht einfach fehlen.
+    // Ein Muskel, der gar nichts abbekommt, ist die wichtigste Aussage des Bildes.
     expect(sortiert(konten)).toHaveLength(KONTEN.length);
   });
 
   it('ordnet bei Gleichstand stabil', () => {
-    // Sonst springt die Reihenfolge bei jedem Neuzeichnen.
     expect(sortiert(konten).map((x) => x.konto)).toEqual(KONTEN);
   });
 
@@ -165,4 +188,3 @@ describe('zeigName', () => {
     KONTEN.forEach((k) => expect(zeigName(k), k).toBeTruthy());
   });
 });
-

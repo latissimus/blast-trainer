@@ -636,7 +636,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             plus.textContent = '+ Satz';
             plus.onclick = () => {
               entry.extra[xi] = (entry.extra[xi] || 0) + 1;
-              queuePersist(); renderDay();
+              queuePersist(); renderDay(); renderSom();
             };
             leiste.appendChild(plus);
             if (entry.extra[xi] > 0) {
@@ -777,11 +777,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const { konten, ohneZuordnung, unbekannte, gesamt } = zaehleWoche(payloadOut(), state.week);
 
     somKopf.innerHTML = `<span class="som-titel">Set-O-Meter</span>`
-      + `<span class="som-lage">${gesamt === 0 ? 'noch nichts eingetragen' : 'Woche ' + state.week}</span>`;
+      + `<span class="som-lage">${gesamt === 0 ? 'noch keine Übung gewählt' : 'Woche ' + state.week + ' · geplant'}</span>`;
 
     if (gesamt === 0) {
-      somBody.innerHTML = `<p class="som-hinweis">Sobald Sätze eingetragen sind, steht hier,
-        welcher Muskel wie viel Arbeit bekommen hat.</p>`;
+      somBody.innerHTML = `<p class="som-hinweis">Sobald Übungen gewählt sind, steht hier,
+        welcher Muskel diese Woche wie viel Arbeit bekommt.</p>`;
       return;
     }
 
