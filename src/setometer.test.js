@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { zaehleWoche, defizite, istDeload, zeigZahl, zeigName, ZIELE } from './setometer.js';
+import { zaehleWoche, sortiert, zeigName } from './setometer.js';
 import { KONTEN } from './katalog.js';
 
 // Das Set-O-Meter ist eine Zahl, an der man Entscheidungen festmacht ("Schultern
@@ -113,51 +113,13 @@ describe('zaehleWoche', () => {
   });
 });
 
-describe('defizite', () => {
-  const voll = Object.fromEntries(KONTEN.map((k) => [k, 99]));
 
-  it('meldet nichts, wenn alle Ziele erreicht sind', () => {
-    expect(defizite(voll, 1)).toEqual([]);
-  });
 
-  it('nennt genau die Konten unter Ziel', () => {
-    const k = { ...voll, Brust: 3, Waden: 0 };
-    expect(defizite(k, 1).sort()).toEqual(['Brust', 'Waden']);
-  });
-
-  it('zählt das Erreichen des Ziels nicht als Defizit', () => {
-    expect(defizite({ ...voll, Brust: ZIELE['Brust'] }, 1)).toEqual([]);
-  });
-
-  it('schlägt im Deload keinen Alarm', () => {
-    // Wenig Volumen ist dort der Zweck, kein Versäumnis.
-    const leer = Object.fromEntries(KONTEN.map((k) => [k, 0]));
-    expect(defizite(leer, 7)).toEqual([]);
-    expect(defizite(leer, 8)).toEqual([]);
-    expect(defizite(leer, 6).length).toBe(KONTEN.length);
-  });
-});
-
-describe('istDeload', () => {
-  it('trennt Overreach von Deload', () => {
-    expect(istDeload(6)).toBe(false);
-    expect(istDeload(7)).toBe(true);
-  });
-});
-
-describe('zeigZahl', () => {
-  it('rundet auf halbe Sätze und nutzt das Komma', () => {
-    expect(zeigZahl(6)).toBe('6');
-    expect(zeigZahl(6.5)).toBe('6,5');
-    expect(zeigZahl(6.25)).toBe('6,5');
-    expect(zeigZahl(6.1)).toBe('6');
-  });
-});
 
 describe('gesamt (leere Woche)', () => {
   it('ist null, solange nichts eingetragen ist', () => {
-    // Daran haengt der Unterschied zwischen "noch nichts gemacht" und
-    // "Ziel verfehlt". Ohne ihn leuchtete jede Woche von Montag an rot.
+    // Daran haengt, ob ueberhaupt ein Bild gezeigt wird oder der Hinweis
+    // "noch nichts eingetragen".
     expect(zaehleWoche({}, 1, K).gesamt).toBe(0);
     expect(zaehleWoche(bau('chest', [leer(), leer()], 'Bankdrücken'), 1, K).gesamt).toBe(0);
   });
@@ -167,6 +129,30 @@ describe('gesamt (leere Woche)', () => {
   it('summiert volle und halbe Wertungen', () => {
     // Bankdrücken: Brust 1 + Trizeps 0,5 + Vordere Schulter 0,5 = 2
     expect(zaehleWoche(bau('chest', [satz(80, 8)], 'Bankdrücken'), 1, K).gesamt).toBe(2);
+  });
+});
+
+describe('sortiert', () => {
+  const konten = Object.fromEntries(KONTEN.map((k) => [k, 0]));
+
+  it('stellt den größten Wert nach vorn', () => {
+    const r = sortiert({ ...konten, Brust: 3, Waden: 9, Bizeps: 5 });
+    expect(r.slice(0, 3).map((x) => x.konto)).toEqual(['Waden', 'Bizeps', 'Brust']);
+  });
+
+  it('gibt alle 15 Konten zurück, auch die leeren', () => {
+    // Ein Muskel, der gar nichts abbekommen hat, ist die wichtigste Aussage
+    // des Bildes – er darf nicht einfach fehlen.
+    expect(sortiert(konten)).toHaveLength(KONTEN.length);
+  });
+
+  it('ordnet bei Gleichstand stabil', () => {
+    // Sonst springt die Reihenfolge bei jedem Neuzeichnen.
+    expect(sortiert(konten).map((x) => x.konto)).toEqual(KONTEN);
+  });
+
+  it('verträgt fehlende Schlüssel', () => {
+    expect(sortiert({}).every((x) => x.wert === 0)).toBe(true);
   });
 });
 
@@ -180,9 +166,3 @@ describe('zeigName', () => {
   });
 });
 
-describe('Zieltabelle', () => {
-  it('deckt alle 15 Konten ab', () => {
-    // Ein fehlendes Ziel wäre stumm: Das Konto könnte nie ein Defizit melden.
-    KONTEN.forEach((k) => expect(ZIELE[k], k).toBeGreaterThan(0));
-  });
-});

@@ -347,23 +347,28 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   transition:transform .15s}
 .som[open]>summary::before{transform:rotate(90deg)}
 .som-titel{font-family:var(--display);font-style:italic;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:.02em}
-.som-lage{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700}
-.som-lage.ok{color:var(--up)}
-.som-lage.warn{color:var(--down)}
-.som-lage.ruhig{color:var(--muted)}
-.som-body{padding:4px 13px 12px;border-top:2px dashed var(--ink)}
+.som-lage{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted)}
+.som-body{padding:8px 13px 12px;border-top:2px dashed var(--ink)}
 .som-zeile{display:flex;align-items:center;gap:9px;padding:3px 0;font-size:12.5px}
 /* 122px ist gemessen, nicht geschaetzt: "Seitl. Schulter" braucht 113px und
    stiess bei 112 an. Der Rest der Zeile gibt entsprechend nach. */
 .som-name{flex:0 0 122px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-weight:600}
-.som-zeile.unter .som-name{color:var(--ink);font-weight:800}
-.som-track{flex:1;height:7px;background:var(--surface);border:1px solid var(--ink);border-radius:4px;overflow:hidden}
-.som-fill{display:block;height:100%;background:var(--down);transition:width .18s}
-.som-fill.met{background:var(--up)}
-.som-zahl{flex:0 0 46px;text-align:right;font-family:var(--mono);font-size:11px;color:var(--muted)}
-.som-zahl b{color:var(--ink);font-weight:800}
+/* Eine Farbe, kein Zielbalken, keine Zahl. Das Ding vergleicht die Gruppen
+   miteinander und sagt sonst nichts – jede zweite Farbe waere eine Wertung.
+   Navy traegt in beiden Themes (im Dark-Mode aufgehellt, siehe Variablen). */
+.som-track{flex:1;height:9px;background:var(--surface);border:1px solid var(--ink);border-radius:4px;overflow:hidden}
+.som-fill{display:block;height:100%;background:var(--navy);transition:width .18s}
 .som-hinweis{margin:10px 0 0;font-size:11px;line-height:1.45;color:var(--muted)}
-.som-hinweis.warn{color:var(--down)}
+
+/* Zusatzsätze bei Pump. Bewusst klein und unauffällig: Der Regelfall ist die
+   Satzzahl aus der Vorlage, das hier ist die Ausnahme für einen Muskel, dem
+   man mehr geben will. */
+.extrabar{display:flex;gap:7px;margin-top:9px}
+.extra{background:var(--surface2);border:2px solid var(--ink);border-radius:var(--r);
+  padding:5px 11px;font-size:11px;font-weight:800;font-family:var(--mono);color:var(--ink);
+  cursor:pointer;box-shadow:var(--shadow-xs)}
+.extra:active{transform:translate(2px,2px);box-shadow:none}
+.extra.weg{color:var(--muted)}
 
 .volbar{background:var(--navy);color:#fff;border:3px solid var(--ink);border-radius:var(--r);padding:14px 15px;margin-bottom:14px;box-shadow:var(--shadow)}
 .volbar h3{margin:0 0 4px;font-size:12px;color:#fff}

@@ -4,8 +4,7 @@ import { TPL, LEGACY, TIER_NAMES } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
 import { auswahlGruppen, imKatalog } from './auswahl.js';
-import { zaehleWoche, defizite, istDeload, zeigZahl, zeigName, ZIELE } from './setometer.js';
-import { KONTEN } from './katalog.js';
+import { zaehleWoche, sortiert, zeigName } from './setometer.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
 // ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
@@ -603,7 +602,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
         // Anzahl Sätze: Pump-Paare sind Supersets und Cluster-Felder eigenständig -> jede Übung
         // bekommt die volle Zahl. Nur Heavy wird im Wechsel auf Comp/Iso aufgeteilt.
-        const count = freeEx ? targetSets(blk, tier) : setsForExercise(blk, tier, xi);
+        const geplant = freeEx ? targetSets(blk, tier) : setsForExercise(blk, tier, xi);
+        // Zusatzsätze: nur bei Pump. Heavy und Cluster bleiben fest – das eine ist
+        // die Messlatte der Progression, das andere ein durchgetakteter Ablauf.
+        // Pump ist die billige Währung: Wer mehr für einen Muskel tun will, holt
+        // sich das Volumen hier, ohne die Erholung zu belasten wie ein schwerer Satz.
+        const darfExtra = !readOnly && effType === 'pump';
+        entry.extra = entry.extra || [];
+        const count = geplant + (darfExtra ? (entry.extra[xi] || 0) : 0);
         entry.sets[xi] = entry.sets[xi] || [];
         while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
 
@@ -621,6 +627,33 @@ export async function mountLog(container, { userId, readOnly = false }) {
           renderMem(prevLine, entry.names[xi], memKind);
           exDiv.appendChild(prevLine);
           for (let si = 0; si < count; si++) exDiv.appendChild(effType === 'mr' ? mrRow(entry, xi, si, blk, prevLine) : pumpMrRow(entry, xi, si, prevLine, memKind));
+
+          if (darfExtra) {
+            const leiste = document.createElement('div');
+            leiste.className = 'extrabar';
+            const plus = document.createElement('button');
+            plus.type = 'button'; plus.className = 'extra';
+            plus.textContent = '+ Satz';
+            plus.onclick = () => {
+              entry.extra[xi] = (entry.extra[xi] || 0) + 1;
+              queuePersist(); renderDay();
+            };
+            leiste.appendChild(plus);
+            if (entry.extra[xi] > 0) {
+              const minus = document.createElement('button');
+              minus.type = 'button'; minus.className = 'extra weg';
+              minus.textContent = '− Satz';
+              // Nimmt den letzten Zusatzsatz samt Inhalt weg. Ihn stehen zu lassen
+              // hiesse, dass er weiterzaehlt, obwohl er nicht mehr sichtbar ist.
+              minus.onclick = () => {
+                entry.extra[xi] -= 1;
+                entry.sets[xi].pop();
+                queuePersist(); renderDay();
+              };
+              leiste.appendChild(minus);
+            }
+            exDiv.appendChild(leiste);
+          }
         } else {
           const prevSets = (prev && prev.data[blk.id] && prev.data[blk.id].sets && prev.data[blk.id].sets[xi]) ? prev.data[blk.id].sets[xi] : null;
           renderPrev(prevLine, prevSets, entry.sets[xi].slice(0, count), prev ? prev.week : null);
@@ -688,7 +721,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const entry = cell[blk.id]; if (!entry) return null;
       let sets = 0;
       (entry.sets || []).forEach((arr, xi) => {
-        const cnt = setsForExercise(blk, tier, xi);
+        // Zusatzsaetze zaehlen mit: Sie sind Arbeit, auch wenn sie ueber dem Plan
+        // liegen. Sonst traegt man drei Saetze ein und der Balken ruehrt sich nicht.
+        const cnt = setsForExercise(blk, tier, xi) + ((entry.extra && entry.extra[xi]) || 0);
         (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) sets++; });
       });
       total += sets; tgtTotal += tgt;
@@ -710,7 +745,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const entry = cell[blk.id]; let sets = 0;
       const tgt = targetSets(blk, tier);
       ((entry && entry.sets) || []).forEach((arr, xi) => {
-        const cnt = setsForExercise(blk, tier, xi);
+        // Zusatzsaetze zaehlen mit: Sie sind Arbeit, auch wenn sie ueber dem Plan
+        // liegen. Sonst traegt man drei Saetze ein und der Balken ruehrt sich nicht.
+        const cnt = setsForExercise(blk, tier, xi) + ((entry && entry.extra && entry.extra[xi]) || 0);
         (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) sets++; });
       });
       el.classList.toggle('met', tgt > 0 && sets >= tgt);
@@ -738,31 +775,30 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   function renderSom() {
     const { konten, ohneZuordnung, unbekannte, gesamt } = zaehleWoche(payloadOut(), state.week);
-    const fehlt = defizite(konten, state.week);
-    const deload = istDeload(state.week);
-    const leereWoche = gesamt === 0;
 
-    somKopf.innerHTML = `<span class="som-titel">Set-O-Meter</span>` + (
-      leereWoche ? `<span class="som-lage ruhig">noch nichts eingetragen</span>`
-        : deload ? `<span class="som-lage ruhig">Deload · Volumen bewusst niedrig</span>`
-          : fehlt.length ? `<span class="som-lage warn">${fehlt.length} ${fehlt.length === 1 ? 'Konto' : 'Konten'} unter Ziel</span>`
-            : `<span class="som-lage ok">alle Konten im Soll</span>`);
+    somKopf.innerHTML = `<span class="som-titel">Set-O-Meter</span>`
+      + `<span class="som-lage">${gesamt === 0 ? 'noch nichts eingetragen' : 'Woche ' + state.week}</span>`;
 
-    somBody.innerHTML = KONTEN.map((k) => {
-      const ist = konten[k] || 0;
-      const ziel = ZIELE[k];
-      const pct = Math.max(0, Math.min(100, (ist / ziel) * 100));
-      const unter = !deload && !leereWoche && ist < ziel;
-      return `<div class="som-zeile${unter ? ' unter' : ''}">
-        <span class="som-name">${zeigName(k)}</span>
-        <span class="som-track"><span class="som-fill${unter ? '' : ' met'}" style="width:${pct}%"></span></span>
-        <span class="som-zahl"><b>${zeigZahl(ist)}</b>/${ziel}</span></div>`;
-    }).join('') + (ohneZuordnung
-      ? `<p class="som-hinweis warn">${zeigZahl(ohneZuordnung)} Sätze zählen nicht mit – die Übung steht nicht im Katalog:
-         ${unbekannte.map((u) => `<b>${u}</b>`).join(', ') || '(ohne Namen)'}</p>`
-      : '')
-      + `<p class="som-hinweis">Gezählt wird je Satz: Hauptspieler <b>1</b>, Nebenspieler <b>½</b>.
-         Ein Cluster gilt als ein Satz. Die Ziele sind Richtwerte, keine Naturgesetze.</p>`;
+    if (gesamt === 0) {
+      somBody.innerHTML = `<p class="som-hinweis">Sobald Sätze eingetragen sind, steht hier,
+        welcher Muskel wie viel Arbeit bekommen hat.</p>`;
+      return;
+    }
+
+    // Bezug ist der laengste Balken, nicht ein Sollwert: Das Bild zeigt das
+    // Verhaeltnis der Gruppen zueinander, es bewertet nichts.
+    const reihen = sortiert(konten);
+    const max = reihen[0].wert || 1;
+
+    somBody.innerHTML = reihen.map((r) => `
+      <div class="som-zeile">
+        <span class="som-name">${zeigName(r.konto)}</span>
+        <span class="som-track"><span class="som-fill" style="width:${(r.wert / max) * 100}%"></span></span>
+      </div>`).join('')
+      + (ohneZuordnung
+        ? `<p class="som-hinweis">Nicht im Bild: Sätze mit einer Übung, die nicht im Katalog steht
+           (${unbekannte.map((u) => `<b>${u}</b>`).join(', ') || 'ohne Namen'}).</p>`
+        : '');
   }
 
   function renderAll() { renderHeader(); renderDay(); renderSom(); }
