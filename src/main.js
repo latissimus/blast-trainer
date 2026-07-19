@@ -222,7 +222,13 @@ function renderChrome() {
     <div class="ctrlbar">
       <div class="inner">
         <div class="timerfeld" id="app-timer" hidden>
-          <span id="app-timertxt">0:00</span>
+          <span class="mitte">
+            <svg class="pausensymbol" viewBox="0 0 20 20" width="17" height="17" aria-hidden="true">
+              <rect x="3.5" y="2.5" width="4.6" height="15" rx="1.6"/>
+              <rect x="11.9" y="2.5" width="4.6" height="15" rx="1.6"/>
+            </svg>
+            <span id="app-timertxt">0:00</span>
+          </span>
           <button class="x" id="app-timerx" aria-label="Timer abbrechen">×</button>
         </div>
         <div class="slots" id="app-slots">
