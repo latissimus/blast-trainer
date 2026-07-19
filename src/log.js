@@ -248,27 +248,15 @@ export async function mountLog(container, { userId, readOnly = false }) {
   container.innerHTML = '';
   const wrap = document.createElement('div');
   wrap.className = 'wrap pad-bottom';
+  // Woche, Tag, Level und Datum sind in die untere Leiste gewandert (siehe
+  // unten). Oben bleibt nur, was man liest und nicht bedient: die Phase und
+  // die Beschreibung des Tages. Dadurch faengt der erste Trainingsblock
+  // unmittelbar unter der Kopfleiste an, statt nach drei Reihen Bedienelementen.
   wrap.innerHTML = `
-    <div class="blastbar">
-      <div class="wk">
-        <button id="lg-wkdn" aria-label="Woche zurück">←</button>
-        <span class="num" id="lg-wknum">Wo 1</span>
-        <button id="lg-wkup" aria-label="Woche vor">→</button>
-      </div>
-      <span class="rotchip" id="lg-rot">A-Woche</span>
+    <div class="tagkopf">
       <span class="phasechip" id="lg-phase"></span>
+      <span class="daymeta" id="lg-daymeta"></span>
     </div>
-    <div class="tabs" id="lg-tabs"></div>
-    <div class="tierbar">
-      <select class="lvlsel" id="lg-tier" aria-label="Level">
-        <option value="0">Level I · wenig</option>
-        <option value="1">Level II · mittel</option>
-        <option value="2">Level III · voll</option>
-      </select>
-      <input class="datumfeld" id="lg-datum" type="date" aria-label="Datum der Einheit">
-      <span class="tierhint" id="lg-tierhint"></span>
-    </div>
-    <div class="daymeta" id="lg-daymeta"></div>
     <div id="lg-content"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
@@ -280,86 +268,128 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // haelt den Platz bereit, das Log fuellt ihn – und raeumt ihn beim Verlassen.
   saveStateEl = readOnly ? null : document.querySelector('#app-save');
   if (saveStateEl) saveStateEl.hidden = false;
-  const tabsEl = wrap.querySelector('#lg-tabs');
   const contentEl = wrap.querySelector('#lg-content');
   const volEl = wrap.querySelector('#lg-vol');
   const dayMetaEl = wrap.querySelector('#lg-daymeta');
-  const wkNumEl = wrap.querySelector('#lg-wknum');
-  const wkDownEl = wrap.querySelector('#lg-wkdn');
-  const wkUpEl = wrap.querySelector('#lg-wkup');
-  const rotEl = wrap.querySelector('#lg-rot');
   const phaseEl = wrap.querySelector('#lg-phase');
-  const tierSeg = wrap.querySelector('#lg-tier');
-  const datumEl = wrap.querySelector('#lg-datum');
-  const tierHintEl = wrap.querySelector('#lg-tierhint');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
 
-  wrap.querySelector('#lg-wkup').onclick = () => { if (state.week < 8) { state.week++; queuePersist(); renderAll(); } }; // Overreach 1-6 + Deload 7-8
-  wrap.querySelector('#lg-wkdn').onclick = () => { if (state.week > 1) { state.week--; queuePersist(); renderAll(); } };
-  // Das A/B-Feld ist nur Anzeige (folgt der Woche), nicht klickbar.
+  // ---- untere Bedienleiste -----------------------------------------
+  // Woche, Tag, Level und Datum. Alle vier stellt man einmal zu Beginn der
+  // Einheit ein und fasst sie danach nicht mehr an – sie brauchen keinen
+  // Dauerplatz oben, aber sie muessen ablesbar bleiben. Darum je Feld zwei
+  // Zeilen: oben der Wert, unten wofuer er steht.
+  //
+  // WIRD IMMER GEBAUT, auch in der Nur-Lese-Ansicht des Admins: Dort sind es
+  // die einzigen Bedienelemente, mit denen er durch fremde Wochen blaettert.
+  // Frueher hing das an der Speicherleiste, die es im readOnly nicht gab.
+  //
+  // Je Feld liegt ein durchsichtiges natives Element ueber der Beschriftung:
+  // <select> und <input type="date"> oeffnen auf iOS die Systemauswahl, die
+  // sich mit einer eigenen Nachbildung nur verschlechtern liesse.
+  const ctrl = document.createElement('div');
+  ctrl.className = 'ctrlbar';
+  ctrl.innerHTML = `
+    <div class="timerpille" id="lg-timer" hidden><span id="lg-timertxt">0:00</span><button class="x" id="lg-timerx" aria-label="Timer abbrechen">×</button></div>
+    <div class="inner">
+      <label class="ci"><span class="wert" id="ci-wo-w">Wo 1</span><span class="lbl" id="ci-wo-l">Woche</span>
+        <select id="lg-woche" aria-label="Woche"></select></label>
+      <label class="ci"><span class="wert" id="ci-tag-w">Tag 1</span><span class="lbl" id="ci-tag-l">—</span>
+        <select id="lg-tag" aria-label="Tag"></select></label>
+      <label class="ci"><span class="wert" id="ci-lvl-w">III</span><span class="lbl" id="ci-lvl-l">Level</span>
+        <select id="lg-tier" aria-label="Level">
+          <option value="0">Level I · wenig</option>
+          <option value="1">Level II · mittel</option>
+          <option value="2">Level III · voll</option>
+        </select></label>
+      <label class="ci"><span class="wert" id="ci-dat-w">—</span><span class="lbl">Datum</span>
+        <input id="lg-datum" type="date" aria-label="Datum der Einheit"></label>
+      <button class="ci som" id="lg-sombtn" aria-label="Set-O-Meter öffnen">
+        <svg viewBox="0 0 20 20" width="19" height="19" aria-hidden="true">
+          <rect x="2" y="3.4" width="16" height="3.2" rx="1.2"/>
+          <rect x="2" y="8.4" width="11" height="3.2" rx="1.2"/>
+          <rect x="2" y="13.4" width="6" height="3.2" rx="1.2"/>
+        </svg><span class="lbl">Meter</span></button>
+    </div>`;
+  document.body.appendChild(ctrl);
+  saveBar = ctrl;   // destroy() raeumt sie ueber diesen Namen wieder ab
+
+  const wocheSel = ctrl.querySelector('#lg-woche');
+  const tagSel = ctrl.querySelector('#lg-tag');
+  const tierSeg = ctrl.querySelector('#lg-tier');
+  const datumEl = ctrl.querySelector('#lg-datum');
+  const woWert = ctrl.querySelector('#ci-wo-w'), woLbl = ctrl.querySelector('#ci-wo-l');
+  const tagWert = ctrl.querySelector('#ci-tag-w'), tagLbl = ctrl.querySelector('#ci-tag-l');
+  const lvlWert = ctrl.querySelector('#ci-lvl-w');
+  const datWert = ctrl.querySelector('#ci-dat-w');
+
+  wocheSel.innerHTML = Array.from({ length: 8 }, (_, i) =>
+    `<option value="${i + 1}">Woche ${i + 1}${i + 1 >= 7 ? ' · Deload' : ''}</option>`).join('');
+  wocheSel.onchange = () => { state.week = Number(wocheSel.value); queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
+  tagSel.onchange = () => { state.day = tagSel.value; queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
   tierSeg.onchange = () => { setTier(state.day, state.week, Number(tierSeg.value)); queuePersist(); renderAll(); };
 
   // Datum der Einheit. Ohne das weiss man beim Blick auf Woche 3 nie, wann sie
   // tatsaechlich stattgefunden hat – und ob zwischen zwei Einheiten zwei Tage
-  // lagen oder zwei Wochen. type="date" oeffnet auf dem iPhone den System-
-  // Kalender; eine eigene Kalenderoberflaeche waere nur schlechter.
+  // lagen oder zwei Wochen.
   datumEl.onchange = () => {
     const w = datumEl.value;
     if (w) state.datum[state.day + '|' + state.week] = w;
     else delete state.datum[state.day + '|' + state.week];
-    datumEl.classList.toggle('leer', !w);
     queuePersist();
+    renderControls();
   };
 
   // ---- render ------------------------------------------------------
   function renderHeader() {
-    wkNumEl.textContent = 'Wo ' + state.week;
-    // Pfeile an den Enden ausblenden. visibility statt hidden, damit "Wo 1"
-    // nicht bei jedem Wochenwechsel seitlich springt.
-    wkDownEl.style.visibility = state.week > 1 ? 'visible' : 'hidden';
-    wkUpEl.style.visibility = state.week < 8 ? 'visible' : 'hidden';
-    rotEl.textContent = rotOf(state.week) + '-Woche';
     // Phase immer ablesbar, aber unterschiedlich laut: Der Overreach ist der
     // Normalzustand und bleibt eine Beschriftung; der Deload ist die Ausnahme,
     // in der sich wirklich etwas aendert – der darf auffallen.
     const imDeload = isCruise(state.week);
     phaseEl.textContent = imDeload ? 'Deload' : 'Overreach';
     phaseEl.classList.toggle('laut', imDeload);
+    renderControls();
+  }
 
-    tabsEl.innerHTML = '';
+  // Beschriftung der unteren Leiste. Steht getrennt, weil sie auch nach einer
+  // Datumsaenderung allein nachgezogen wird.
+  function renderControls() {
     const days = daysOfWeek(state.week);
     if (!days.includes(state.day)) state.day = days[0];
-    const cruiseWk = isCruise(state.week);
-    days.forEach((d, i) => {
-      const tpl = TPL[d];
-      const b = document.createElement('button');
-      b.className = 'tab' + (d === state.day ? ' active' : '');
-      // Tag-Nummer aus der Position: Overreach = Tag 1-3, Deload = drei Cluster-Einheiten,
-      // die dritte optional (2-3x pro Woche).
-      const opt = cruiseWk && i === 2 ? ' <span class="opt">(opt.)</span>' : '';
-      b.innerHTML = `<span>Tag ${i + 1}${opt}</span><span class="t2">${tpl.short}</span>`;
-      const pr = dayProgress(d, state.week);
-      if (pr.any) {
-        const dot = document.createElement('span');
-        dot.className = 'dot' + (pr.met ? ' met' : '');
-        dot.title = pr.met ? 'Soll-Sätze erreicht' : 'angefangen';
-        b.appendChild(dot);
-      }
-      b.onclick = () => { state.day = d; queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
-      tabsEl.appendChild(b);
-    });
-
     const cruise = isCruise(state.week);
-    rotEl.style.display = cruise ? 'none' : '';   // A/B-Feld im Deload ausblenden
+
+    wocheSel.value = String(state.week);
+    woWert.textContent = 'Wo ' + state.week;
+    // Die Unterzeile traegt die Rotation – im Deload gibt es keine.
+    woLbl.textContent = cruise ? 'Deload' : rotOf(state.week) + '-Woche';
+
+    // Der Fortschritt der ANDEREN Tage war frueher als Punkt auf den drei
+    // Reitern sichtbar. In einer Klappliste faellt das weg, also steht er jetzt
+    // im Eintrag: ✓ Soll erreicht, ◦ angefangen, sonst nichts.
+    tagSel.innerHTML = days.map((d, i) => {
+      const pr = dayProgress(d, state.week);
+      const mark = pr.any ? (pr.met ? '✓ ' : '◦ ') : '';
+      const opt = cruise && i === 2 ? ' (opt.)' : '';
+      return `<option value="${d}">${mark}Tag ${i + 1}${opt} · ${TPL[d].short}</option>`;
+    }).join('');
+    tagSel.value = state.day;
+    const idx = days.indexOf(state.day);
+    tagWert.textContent = 'Tag ' + (idx + 1);
+    // Kurzform ohne "· Heavy": In 60px passt nur der Koerperteil, und die volle
+    // Beschreibung steht ohnehin direkt ueber dem ersten Block.
+    tagLbl.textContent = TPL[state.day].short.split(' · ')[0];
+
     const tier = tierOf(state.day, state.week);
     tierSeg.value = String(tier);
     tierSeg.disabled = cruise;                    // Level im Deload gesperrt (I)
-    datumEl.value = state.datum[state.day + '|' + state.week] || '';
-    datumEl.classList.toggle('leer', !datumEl.value);
-    // Nur noch im Deload ein Hinweis – er erklaert die gesperrte Liste. Sonst
-    // steht die Bedeutung schon im gewaehlten Eintrag ("Level III · voll"), und
-    // der Platz gehoert dem Datum.
-    tierHintEl.textContent = cruise ? 'im Deload fest' : '';
+    lvlWert.textContent = TIER_NAMES[tier];
+    ctrl.querySelector('#ci-lvl-l').textContent = cruise ? 'fest' : 'Level';
+
+    const dat = state.datum[state.day + '|' + state.week] || '';
+    datumEl.value = dat;
+    // Kurzdatum: "19.07." reicht, das Jahr ist aus dem Zusammenhang klar.
+    datWert.textContent = dat ? dat.slice(8, 10) + '.' + dat.slice(5, 7) + '.' : '—';
+    datWert.classList.toggle('leer', !dat);
   }
 
   function renderPrev(node, prevSets, todaySets, pWeek) {
@@ -888,21 +918,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
       .catch(() => {});
   }
 
-  // Laeuft der Timer, teilen sich drei Elemente die Leiste – dann passt
-  // "Einheit speichern" nicht mehr in eine Zeile und die Leiste waechst von 69
-  // auf 87 px. Das ist ein Neuntel des Bildschirms, dauerhaft belegt, genau
-  // waehrend man zwischen den Saetzen sitzt. Also kuerzt der Knopf sich selbst.
-  function passeSpeichernAn() {
-    if (!saveBar) return;
-    const box = saveBar.querySelector('#lg-timer');
-    const btn = saveBar.querySelector('#lg-savebtn');
-    const eng = box && !box.hidden;
-    btn.textContent = eng ? '💾' : 'Einheit speichern';
-    btn.classList.toggle('nurzeichen', !!eng);
-    // Ohne Beschriftung braucht der Knopf einen Namen fuer die Sprachausgabe.
-    btn.setAttribute('aria-label', 'Einheit speichern');
-  }
-
   function startTimer(sec, label) {
     if (!saveBar) return;
     primeAudio();
@@ -910,7 +925,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
     clearInterval(timerId);
     tEnd = Date.now() + sec * 1000;
     const box = saveBar.querySelector('#lg-timer'); box.hidden = false; box.classList.remove('done');
-    passeSpeichernAn();
     tick();
     timerId = setInterval(tick, 250);
   }
@@ -922,7 +936,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       clearInterval(timerId);
       box.classList.add('done');
       alertDone();
-      setTimeout(() => { box.hidden = true; passeSpeichernAn(); }, 4000);
+      setTimeout(() => { box.hidden = true; }, 4000);
     }
   }
 
@@ -942,47 +956,19 @@ export async function mountLog(container, { userId, readOnly = false }) {
     writeLog(userId, payloadOut(), false, false);
   }
 
-  // ---- sticky save bar (editable only) -----------------------------
-  if (!readOnly) {
-    saveBar = document.createElement('div');
-    saveBar.className = 'savebar';
-    saveBar.innerHTML = `
-      <div class="inner">
-        <button class="btn btn-primary" id="lg-savebtn">Einheit speichern</button>
-        <button class="btn-som" id="lg-sombtn" aria-label="Set-O-Meter öffnen" title="Set-O-Meter">
-          <svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true">
-            <rect x="2" y="3.4" width="16" height="3.4" rx="1.3"/>
-            <rect x="2" y="8.3" width="11" height="3.4" rx="1.3"/>
-            <rect x="2" y="13.2" width="6" height="3.4" rx="1.3"/>
-          </svg></button>
-        <div class="timer" id="lg-timer" hidden><span id="lg-timertxt">0:00</span><button class="x" id="lg-timerx" aria-label="Timer abbrechen">×</button></div>
-      </div>`;
-    document.body.appendChild(saveBar);
-    saveBar.querySelector('#lg-sombtn').onclick = somAuf;
-    saveBar.querySelector('#lg-savebtn').onclick = async (e) => {
-      // Kurz gelb aufleuchten und zurueck ins Pink faden: sichtbare Bestaetigung,
-      // dass der Tipp angekommen ist. Bewusst unabhaengig vom Upload – der ist
-      // mal nach 90ms durch, mal nach einer Sekunde; die Rueckmeldung soll immer
-      // gleich aussehen. Was tatsaechlich passiert ist, sagen Toast und Sync-Zeichen.
-      const btn = e.currentTarget;
-      btn.classList.remove('flash');
-      void btn.offsetWidth;              // Reflow: laesst schnelles Nachtippen erneut aufleuchten
-      btn.classList.add('flash');
-      setTimeout(() => btn.classList.remove('flash'), 200);
-
-      clearTimeout(saveTimer);
-      const ok = await persist();
-      if (ok) toast('Wo ' + state.week + ' · ' + state.day + ' gespeichert');
-    };
-    saveBar.querySelector('#lg-timerx').onclick = () => {
-      clearInterval(timerId);
-      saveBar.querySelector('#lg-timer').hidden = true;
-      passeSpeichernAn();
-      // Auch den schlafenden Auftrag abbestellen, sonst meldet er sich spaeter
-      // fuer eine Pause, die du abgebrochen hast.
-      pushTimer('stop');
-    };
-  }
+  // Set-O-Meter und Timer-Abbruch haengen an der Steuerleiste, die weiter oben
+  // gebaut wird. Der Knopf "Einheit speichern" ist ersatzlos entfallen: Die App
+  // speichert nach jeder Eingabe von selbst, und ob das geklappt hat, sagt der
+  // Sync-Punkt in der Kopfleiste. Ein Knopf, der nur das ausloest, was ohnehin
+  // laeuft, verspricht eine Notwendigkeit, die es nicht gibt.
+  ctrl.querySelector('#lg-sombtn').onclick = somAuf;
+  ctrl.querySelector('#lg-timerx').onclick = () => {
+    clearInterval(timerId);
+    ctrl.querySelector('#lg-timer').hidden = true;
+    // Auch den schlafenden Auftrag abbestellen, sonst meldet er sich spaeter
+    // fuer eine Pause, die du abgebrochen hast.
+    pushTimer('stop');
+  };
 
   return {
     destroy() {

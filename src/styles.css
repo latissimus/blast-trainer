@@ -212,78 +212,18 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .save-dot.err{color:var(--down)}
 
 /* ---------- Log: week / rotation ---------- */
-.blastbar{display:flex;align-items:center;gap:8px;padding:18px 0 10px}
-/* Genau eine Tab-Spalte breit (die Tabs darunter sind drei gleiche Spalten mit
-   8px Abstand). So steht die Wochen-Box buendig ueber "Tag 1" und laesst der
-   Zeile genug Platz fuer A/B-Woche und Phase. */
-/* Frueher auf ein Drittel der Zeile festgenagelt (eine Tab-Spalte breit), damit
-   "A-WOCHE" daneben nicht umbrach. Die beiden Chips brauchen aber nur 88px
-   Eigenbreite – der Rest gehoert der Wochenwahl, damit die Pfeile gross genug
-   zum Treffen sind. min-width:0 laesst die Zahl notfalls schrumpfen statt die
-   Zeile zu sprengen. */
-.wk{flex:1 1 auto;min-width:0;display:flex;align-items:center;background:var(--surface);border:3px solid var(--ink);
-  border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
-/* 44px statt 30 – die von Apple empfohlene Mindestgroesse. Moeglich geworden,
-   weil .wk nicht mehr auf ein Drittel der Zeile begrenzt ist. */
-.wk button{flex:0 0 44px;background:none;border:0;color:var(--ink);height:44px;font-size:19px;font-family:var(--mono);font-weight:700}
-.wk button:active{background:var(--surface2)}
-.wk .num{flex:1;min-width:0;font-family:var(--display);font-style:italic;font-size:15px;text-align:center;font-weight:900}
-.rotchip{display:inline-flex;align-items:center;background:var(--surface);border:3px solid var(--ink);color:var(--ink);
-  height:40px;padding:0 13px;border-radius:var(--r);font-size:12.5px;font-weight:900;font-family:var(--display);
-  font-style:italic;text-transform:uppercase;box-shadow:var(--shadow-sm);cursor:default;user-select:none}
-/* Phasen-Chip. Grundzustand ist leise: In Wochen 1–6 ist Overreach der
-   Normalfall und soll nur beschriften, nicht rufen. Im Deload aendert sich
-   wirklich etwas (nur Clusters, Level fest) – dort schaltet .laut auf Gelb. */
-.phasechip{margin-left:auto;font-size:11px;color:var(--muted);background:transparent;border:2px solid var(--faint);
-  padding:5px 9px;border-radius:var(--r);font-weight:800;font-family:var(--display);font-style:italic;text-transform:uppercase}
-.phasechip.laut{color:var(--ink);background:var(--mr);border-color:var(--ink)}
-
-/* ---------- Log: session tabs ---------- */
-.tabs{display:flex;gap:8px;padding:0 0 10px}
-.tab{flex:1;background:var(--surface);border:3px solid var(--ink);color:var(--ink);
-  padding:8px 6px;border-radius:var(--r);font-size:13px;font-weight:900;font-family:var(--display);
-  font-style:italic;text-transform:uppercase;box-shadow:var(--shadow-xs);
-  position:relative;display:flex;flex-direction:column;align-items:center;gap:1px}
-.tab:active{transform:translate(2px,2px);box-shadow:none}
-.tab .t2{font-size:9px;font-weight:700;letter-spacing:.02em;opacity:.75;font-style:normal;text-transform:none;font-family:var(--mono)}
-.tab.active{background:var(--navy);color:#fff}
-/* Punkt = Fortschritt der Einheit. Offener Ring: angefangen. Gefuellt: Soll-Saetze erreicht.
-   Ring in currentColor, damit er auf hellem wie auf navyfarbenem (aktivem) Tab sichtbar ist. */
-.tab .dot{position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:50%;
-  background:transparent;border:2px solid currentColor}
-.tab .dot.met{background:var(--up)}
-.tab .opt{font-style:normal;font-weight:700;font-size:9px;opacity:.7;letter-spacing:0}
-/* ---------- Log: tier ---------- */
-.tierbar{display:flex;align-items:center;gap:8px;padding:0 0 12px}
-.tierbar .lbl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-weight:800}
-/* Level als Klappliste statt drei Knoepfen: Die Knoepfe waren 28px hoch und
-   damit das kleinste Bedienelement der App – und sie brauchten die halbe Zeile.
-   Als Liste passt daneben das Datum. Der Zusatz im Eintrag ("· voll") ersetzt
-   den frueheren Hinweistext rechts. */
-.lvlsel,.datumfeld{background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);
-  color:var(--ink);font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
-  height:42px;padding:0 26px 0 11px;box-shadow:var(--shadow-xs);
-  appearance:none;-webkit-appearance:none;cursor:pointer;
-  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
-                   linear-gradient(135deg,currentColor 50%,transparent 50%);
-  background-size:5px 5px,5px 5px;
-  background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat}
-.lvlsel{flex:0 0 auto}
-.lvlsel:disabled{opacity:.5;cursor:default}
-/* Das Datumsfeld traegt Zahlen – Monospace liest sich hier besser als kursiv. */
-.datumfeld{flex:1 1 auto;min-width:0;font-family:var(--mono);font-style:normal;font-weight:700;font-size:12.5px}
-.datumfeld.leer{color:var(--faint)}
-.datumfeld::-webkit-date-and-time-value{text-align:left}
-.datumfeld::-webkit-calendar-picker-indicator{opacity:0;width:22px;margin:0;cursor:pointer}
-.lvlsel option{background:var(--surface);color:var(--ink);font-style:normal}
-.seg{display:flex;background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-xs)}
-.seg button{background:none;border:0;color:var(--muted);padding:6px 14px;font-size:13px;font-weight:900;font-family:var(--display);font-style:italic;border-right:2px solid var(--ink)}
-.seg button:last-child{border-right:0}
-.seg button.on{background:var(--navy);color:#fff}
-.seg button:disabled{opacity:.4;cursor:default}
-.tierhint{font-size:10.5px;color:var(--muted);line-height:1.3;font-weight:600}
-
-.daymeta{font-size:12px;color:var(--muted);padding:0 2px 14px;font-weight:600}
+/* Phase. Der Overreach ist der Normalzustand und bleibt eine ruhige
+   Beschriftung; der Deload ist die Ausnahme, in der sich wirklich etwas
+   aendert – der darf auffallen. */
+.phasechip{flex:0 0 auto;font-family:var(--display);font-style:italic;font-weight:900;
+  font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  padding:5px 10px;border-radius:20px;border:2px solid var(--faint);
+  color:var(--muted);background:transparent}
+.phasechip.laut{background:var(--mr);border-color:var(--ink);color:var(--ink)}
+/* Umbrechen statt kappen: "Unterkörper Heavy · Oberkörper Pump" braucht neben
+   dem Phasen-Chip ein paar Pixel mehr, als die Zeile hat. Abgeschnitten waere
+   die zweite Haelfte des Tages nicht mehr lesbar. */
+.daymeta{font-size:11.5px;color:var(--muted);font-weight:600;min-width:0;line-height:1.35}
 
 /* ---------- Blocks ---------- */
 .block{background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
@@ -366,6 +306,54 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .exnote:focus{outline:none;border-style:solid;border-color:var(--pink)}
 
 /* ---------- Volume ---------- */
+
+/* ---------- untere Bedienleiste ----------
+   Woche, Tag, Level, Datum und das Set-O-Meter. Alles, was man einmal je
+   Einheit einstellt, liegt hier unten im Daumenbereich – oben faengt dafuer
+   der erste Trainingsblock direkt unter der Kopfleiste an.
+
+   Je Feld zwei Zeilen: oben der Wert, unten wofuer er steht. Ohne die zweite
+   Zeile waere "II" oder "19.07." nicht deutbar, und mit einer einzelnen Zeile
+   passte beides nicht in 60px. */
+.ctrlbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
+  padding:8px 10px max(6px, calc(env(safe-area-inset-bottom) - 6px));
+  background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 42%)}
+.ctrlbar .inner{max-width:580px;margin:0 auto;display:flex;gap:4px;
+  background:var(--surface);border:3px solid var(--ink);border-radius:16px;
+  box-shadow:var(--shadow);padding:5px}
+.ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1px;padding:6px 2px;
+  border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
+.ci .wert{font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
+  max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci .wert.leer{color:var(--faint)}
+.ci .lbl{font-family:var(--mono);font-size:8.5px;font-weight:700;color:var(--muted);
+  max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Das native Element liegt unsichtbar ueber dem Feld: <select> und
+   type="date" oeffnen so die Systemauswahl von iOS, ohne dass wir sie
+   nachbauen – nachgebaut waere sie in jedem Punkt schlechter. */
+.ci select,.ci input{position:absolute;inset:0;width:100%;height:100%;
+  opacity:0;border:0;background:none;-webkit-appearance:none;appearance:none}
+.ci select:disabled{cursor:default}
+.ci:has(select:disabled) .wert{opacity:.55}
+.ci.som{background:var(--lila);color:var(--lila-ink);flex:0 0 54px}
+.ci.som svg{display:block;fill:currentColor}
+.ci.som .lbl{color:var(--lila-ink);opacity:.72}
+.ci.som:active{transform:translateY(1px)}
+
+/* Pausentimer schwebt UEBER der Leiste statt in ihr: In der Reihe waere kein
+   Feld mehr breit genug, und der Timer ist ohnehin nur voruebergehend da. */
+.timerpille{position:absolute;right:12px;bottom:calc(100% - 4px);
+  display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;
+  border:3px solid var(--ink);border-radius:20px;padding:6px 8px 6px 14px;
+  font-family:var(--mono);font-size:16px;font-weight:800;box-shadow:var(--shadow-sm)}
+.timerpille.done{background:var(--green)}
+.timerpille[hidden]{display:none}
+.timerpille .x{background:none;border:0;color:inherit;font-size:15px;padding:0 4px;opacity:.75}
+
+/* Kopfzeile ueber dem ersten Block: nur noch Phase und Tagesbeschreibung. */
+.tagkopf{display:flex;align-items:center;gap:9px;padding:14px 0 12px}
+
 /* ---------- Set-O-Meter ----------
    Liegt in einem Overlay wie die FAQ, geoeffnet ueber den schwebenden Knopf in
    der Speicherleiste. Frueher stand es oben im Log – dann musste man beim
@@ -423,28 +411,6 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 /* ---------- Sticky save + timer ---------- */
 /* Unterer Abstand: Safe-Area minus 8px (mind. 4px) – tief, aber der
    iPhone-Home-Indicator bleibt frei. */
-.savebar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px max(4px, calc(env(safe-area-inset-bottom) - 8px));
-  background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 45%);z-index:30}
-.savebar .inner{max-width:580px;margin:0 auto;display:flex;gap:9px;align-items:stretch}
-.savebar .btn-primary{flex:1;padding:15px}
-/* Nur noch das Zeichen: waehrend der Timer laeuft, damit die Leiste einzeilig
-   bleibt. line-height fest, sonst macht die hohe Zeilenbox des Emojis den Knopf
-   groesser als vorher – und align-items:stretch zieht Timer und Meter mit hoch. */
-.savebar .btn-primary.nurzeichen{flex:1;font-size:18px;line-height:18px;letter-spacing:0}
-.savebar .btn-ghost{flex:0 0 52px;padding:15px 0;font-size:17px}
-/* Set-O-Meter-Knopf: schwebt mit, damit man beim Eintragen unten nicht zum
-   Nachsehen nach oben scrollen muss. */
-.btn-som{flex:0 0 52px;display:flex;align-items:center;justify-content:center;
-  background:var(--lila);color:var(--lila-ink);border:3px solid var(--ink);
-  border-radius:var(--r);box-shadow:var(--shadow-sm);cursor:pointer;padding:0}
-.btn-som:active{transform:translate(3px,3px);box-shadow:none}
-.btn-som svg{display:block;fill:currentColor}
-.timer{flex:0 0 auto;display:flex;align-items:center;gap:8px;background:var(--navy);color:#fff;
-  border:3px solid var(--ink);border-radius:var(--r);padding:0 12px;font-family:var(--mono);
-  font-size:17px;font-weight:800;box-shadow:var(--shadow-sm)}
-.timer.done{background:var(--green);color:#fff}
-.timer[hidden]{display:none}
-.timer .x{background:none;border:0;color:inherit;font-size:15px;padding:0;opacity:.75}
 
 /* "Neue Phase" – Reset-Button (nur letzte Woche) */
 .phase-reset{display:block;width:100%;margin:2px 0 6px;background:var(--mr);border:3px solid var(--ink);
@@ -455,7 +421,10 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    dunkler Kontur/Schrift – steht klar auf dem dunklen Grund und bleibt on-brand. */
 :root[data-theme="dark"] .phase-reset{background:#AEDCF6;color:#0B1B44;border-color:#0B1B44;box-shadow:4px 4px 0 #0B1B44}
 
-.pad-bottom{padding-bottom:100px}
+/* Platz fuer die feste Bedienleiste unten. Zwei Zeilen je Feld machen sie
+   hoeher als die fruehere Speicherleiste – ohne das verdeckt sie den
+   letzten Block. */
+.pad-bottom{padding-bottom:112px}
 
 .toast{position:fixed;left:50%;bottom:112px;transform:translateX(-50%) translateY(18px);opacity:0;
   background:var(--navy);color:#fff;font-size:12.5px;font-weight:800;padding:11px 18px;border-radius:var(--r);
