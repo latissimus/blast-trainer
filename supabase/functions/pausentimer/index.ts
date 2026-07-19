@@ -80,7 +80,10 @@ Deno.serve(async (req) => {
 
     // Gilt die Marke noch? Neustart oder Abbruch haben sie ersetzt bzw. geloescht.
     const { data: jetzt } = await supabase.from('rest_timers').select('token').eq('user_id', user.id).maybeSingle();
-    if (!jetzt || jetzt.token !== token) return;   // ueberholt – schweigen
+    if (!jetzt || jetzt.token !== token) {
+      console.log('ueberholt – schweige');
+      return;
+    }
 
     await supabase.from('rest_timers').delete().eq('user_id', user.id).eq('token', token);
 
@@ -91,18 +94,30 @@ Deno.serve(async (req) => {
       body: label ? `${label} — nächster Satz` : 'Nächster Satz',
       tag: 'pause',
     });
+    console.log('sende an', abos.data?.length, 'Abo(s)');
     await Promise.allSettled((abos.data ?? []).map((a) =>
       webpush.sendNotification(
         { endpoint: a.endpoint, keys: { p256dh: a.p256dh, auth: a.auth } },
         payload,
         { TTL: 0, urgency: 'high' },
-      ).catch(async (e: { statusCode?: number }) => {
-        // 404/410 = Geraet hat das Abo weggeworfen (App vom Homescreen geloescht).
-        // Aufraeumen, sonst sammeln sich Leichen, die Apple sogar mit 201 annimmt.
-        if (e?.statusCode === 404 || e?.statusCode === 410) {
-          await supabase.from('push_subscriptions').delete().eq('endpoint', a.endpoint);
-        }
-      }),
+      ).then(
+        (r: { statusCode?: number }) => console.log('push ok', r?.statusCode, a.endpoint.slice(-12)),
+        async (e: { statusCode?: number; body?: string; message?: string }) => {
+          // JEDEN Fehlschlag protokollieren, nicht nur die behandelten.
+          //
+          // Vorher verschwand hier alles ausser 404/410 spurlos: allSettled
+          // schluckt die Ablehnung, und die Funktion hatte laengst mit 200
+          // geantwortet. Ein 403 (VAPID-Schluessel passen nicht zusammen) sah
+          // von aussen exakt aus wie ein geglueckter Versand – der Timer
+          // schwieg und nichts wies darauf hin, warum.
+          console.error('push fehlgeschlagen', e?.statusCode, e?.body || e?.message, a.endpoint.slice(-12));
+          // 404/410 = Geraet hat das Abo weggeworfen (App vom Homescreen geloescht).
+          // Aufraeumen, sonst sammeln sich Leichen, die Apple sogar mit 201 annimmt.
+          if (e?.statusCode === 404 || e?.statusCode === 410) {
+            await supabase.from('push_subscriptions').delete().eq('endpoint', a.endpoint);
+          }
+        },
+      ),
     ));
   })();
 
