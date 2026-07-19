@@ -96,6 +96,19 @@ function build() {
           </div>
         </details>
 
+        <details class="faq"><summary>Was zeigt die Heavy-Progression im Profil?</summary>
+          <div class="faq-a">
+            <p>Die Kurve deiner Leistung über die Wochen — <b>der wichtigste Wert, den die App hat</b>. Zu finden im Profil, unter den Einstellungen.</p>
+            <p><b>Warum ausgerechnet die?</b> Muskelaufbau folgt der progressiven Überlastung: Wächst deine Leistung über die Wochen nicht, fehlt dem Körper der Grund, sich anzupassen. Alles andere — Volumen, Übungswahl, Ernährung — zahlt erst darauf ein. Ob ein Muskel gewachsen ist, siehst du im Spiegel frühestens nach Monaten; ob die Leistung steigt, siehst du hier nach zwei Wochen.</p>
+            <p><b>Was genau aufgetragen wird:</b> das <b>geschätzte 1RM</b> deines besten Satzes je Woche — also die Last, die du rechnerisch genau einmal schaffen würdest. Berechnet nach der Epley-Formel aus Gewicht und Wiederholungen.</p>
+            <p><b>Wozu die Umrechnung?</b> Damit beide Wege zählen. Sind 85 kg × 6 besser als 80 kg × 8? Am reinen Gewicht kannst du das nicht ablesen, am geschätzten 1RM schon: <b>102 kg gegen 101,3 kg</b> — also ja, aber denkbar knapp. Ohne diese Umrechnung müsstest du Gewicht und Wiederholungen im Kopf gegeneinander abwägen.</p>
+            <p><b>Es zählt der beste Satz der Woche</b>, nicht der letzte — ein schwacher Abschlusssatz nach vier harten drückt die Kurve sonst grundlos.</p>
+            <p><b>Nur Heavy-Sätze.</b> Pump und Cluster sind nicht zum Messen von Fortschritt gedacht, sie tauchen hier gar nicht auf.</p>
+            <p>Eine Übung erscheint, sobald sie in <b>mindestens zwei Wochen</b> steht — aus einem Punkt lässt sich keine Entwicklung lesen. Weil die Heavy-Tage zwischen A und B wechseln, kommt jede Übung alle zwei Wochen dran: Die Kurve hat also Punkte bei Woche 1, 3, 5 oder bei 2, 4, 6.</p>
+            <p><b>Das geschätzte 1RM ist eine Rechnung, kein Test.</b> Sie wird ungenauer, je weiter die Wiederholungszahl von einem echten Maximalversuch entfernt liegt. Für den Vergleich mit dir selbst über die Wochen reicht das völlig — geh nicht los, um die Zahl auszutesten.</p>
+          </div>
+        </details>
+
         <details class="faq"><summary>Wie merkt sich die App meine Übungen und Gewichte?</summary>
           <div class="faq-a">
             <p><b>Heavy-Übungen gehören fest zum Tag — du wählst sie genau zweimal.</b> In <b>Woche 1</b> legst du die Übungen der A-Tage fest, in <b>Woche 2</b> die der B-Tage. Ab Woche 3 stehen sie automatisch da: Woche 3 und 5 holen sich die Wahl aus Woche 1, Woche 4 und 6 die aus Woche 2. Du musst also nie zweimal dasselbe eintragen.</p>
