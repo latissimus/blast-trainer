@@ -3,6 +3,7 @@ import { readLog, writeLog, mergePayload } from './localstore.js';
 import { TPL, LEGACY, TIER_NAMES } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
+import { auswahlGruppen, imKatalog } from './auswahl.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
 // ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
@@ -510,20 +511,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const prev = prevFilled(state.day, state.week);
     contentEl.innerHTML = '';
 
-    // Je Block eine datalist – sonst widerspraeche die Tipp-Hilfe am Rechner den
-    // Chips darunter. Auf iOS zeigt Safari sie ohnehin nicht an; dort sind die
-    // Chips der eigentliche Weg.
-    const poolEl = wrap.querySelector('#lg-pool');
-    poolEl.innerHTML = '';
-    tpl.blocks.forEach((blk) => {
-      if (blk.type === 'load') return;
-      const dl = document.createElement('datalist');
-      dl.id = 'lg-pool-' + blk.id;
-      recentNames(blk.type === 'mr' ? 'mr' : 'pump', blk.id).forEach((r) => {
-        const o = document.createElement('option'); o.value = r.n; dl.appendChild(o);
-      });
-      poolEl.appendChild(dl);
-    });
+    // Frueher hing hier je Block eine datalist fuer die Tipp-Hilfe am Rechner.
+    // Mit der Katalog-Auswahl gibt es nichts mehr zu tippen – das <select>
+    // bringt seine Liste selbst mit, auf iOS als Auswahlrad.
+    wrap.querySelector('#lg-pool').innerHTML = '';
 
     tpl.blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
@@ -562,49 +553,49 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
         const hd = document.createElement('div'); hd.className = 'exhead';
         if (exDef.r) { const rl = document.createElement('span'); rl.className = 'role' + (exDef.r === 'Comp' ? ' comp' : ''); rl.textContent = exDef.r; hd.appendChild(rl); }
-        const nameIn = document.createElement('input');
-        nameIn.className = 'exname'; nameIn.value = (freeEx ? entry.names[xi] : names[xi]) || ''; nameIn.placeholder = blk.free ? 'Übung wählen…' : 'Übung';
+        // Auswahl statt Freitext: Nur was im Katalog steht, laesst sich
+        // eintragen. Sonst wuesste das Wochenkonto nicht, auf welches
+        // Muskelkonto ein Satz laeuft – und ein Tippfehler waere still eine
+        // zweite Uebung. Welche Uebungen ein Feld anbietet, entscheiden die
+        // Konten des Blocks und (bei Heavy) Comp/Iso.
+        //
+        // Natives <select> statt eigener Liste: iOS zeigt es als Auswahlrad,
+        // es funktioniert offline und ohne Tastatur. Die <optgroup> sind noetig,
+        // weil manche Felder lang werden – "Brust + Rücken" bietet ueber 60.
+        const aktuell = (freeEx ? entry.names[xi] : names[xi]) || '';
+        const nameIn = document.createElement('select');
+        nameIn.className = 'exname';
         nameIn.disabled = readOnly;
-        // Frei rotierende Uebungen aus dem eigenen Bestand vorschlagen: Das
-        // Gedaechtnis haengt am Namen, gleiche Schreibweise ist also Bedingung.
-        if (freeEx && !readOnly) nameIn.setAttribute('list', 'lg-pool-' + blk.id);
-        hd.appendChild(nameIn); exDiv.appendChild(hd);
 
-        // Antippbare Vorschlaege aus dem eigenen Bestand dieses Blocks. Nur bei
-        // leerem Feld – ist die Uebung gewaehlt, waeren sie nur noch Rauschen.
-        let syncSug = () => {};
-        if (freeEx && !readOnly) {
-          const all = recentNames(baseMR ? 'mr' : 'pump', blk.id);
-          if (all.length) {
-            const sugBar = document.createElement('div'); sugBar.className = 'exsug';
-            const chip = (r) => {
-              const b = document.createElement('button');
-              b.type = 'button'; b.className = 'sug'; b.textContent = r.n;
-              b.onclick = () => {
-                nameIn.value = r.n;
-                nameIn.dispatchEvent(new Event('input', { bubbles: true }));
-              };
-              return b;
-            };
-            const SHOWN = 5;
-            all.slice(0, SHOWN).forEach((r) => sugBar.appendChild(chip(r)));
-            const rest = all.slice(SHOWN);
-            if (rest.length) {
-              // Rest hinter einem "+N", damit die Bloecke nicht in die Hoehe wachsen.
-              const more = document.createElement('button');
-              more.type = 'button'; more.className = 'sug more';
-              more.textContent = '+' + rest.length;
-              more.onclick = () => {
-                more.remove();
-                rest.forEach((r) => sugBar.appendChild(chip(r)));
-              };
-              sugBar.appendChild(more);
-            }
-            syncSug = () => { sugBar.hidden = !!nameIn.value.trim(); };
-            syncSug();
-            exDiv.appendChild(sugBar);
-          }
+        const leerOpt = document.createElement('option');
+        leerOpt.value = ''; leerOpt.textContent = 'Übung wählen…';
+        nameIn.appendChild(leerOpt);
+
+        // Zuletzt Benutztes nach oben – nur bei Pump und Cluster, denn nur die
+        // rotieren frei. Heavy behaelt seine Uebung ohnehin ueber die Rotation.
+        const zuletzt = freeEx ? recentNames(baseMR ? 'mr' : 'pump', blk.id).map((r) => r.n) : [];
+        auswahlGruppen(blk.konten, exDef.r || null, zuletzt).forEach((g) => {
+          const og = document.createElement('optgroup'); og.label = g.label;
+          g.eintraege.forEach((e) => {
+            const o = document.createElement('option'); o.value = e.n; o.textContent = e.n;
+            og.appendChild(o);
+          });
+          nameIn.appendChild(og);
+        });
+
+        // Ein Name aus einem alten Log, den der Katalog nicht (mehr) kennt:
+        // sichtbar lassen und als solchen kennzeichnen, statt ihn stumm zu
+        // verschlucken. Streicht jemand eine Zeile aus der Excel, wuerde sonst
+        // rueckwirkend die Beschriftung schon geloggter Saetze verschwinden.
+        if (aktuell && !imKatalog(aktuell)) {
+          const og = document.createElement('optgroup'); og.label = 'Nicht im Katalog';
+          const o = document.createElement('option'); o.value = aktuell; o.textContent = aktuell;
+          og.appendChild(o); nameIn.appendChild(og);
         }
+        nameIn.value = aktuell;
+        const tonAnpassen = () => nameIn.classList.toggle('leer', !nameIn.value);
+        tonAnpassen();
+        hd.appendChild(nameIn); exDiv.appendChild(hd);
 
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
         // Anzahl Sätze: Pump-Paare sind Supersets und Cluster-Felder eigenständig -> jede Übung
@@ -614,10 +605,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
         while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
 
         const memKind = baseMR ? 'mr' : 'pump';
-        if (!readOnly) nameIn.oninput = () => {
+        if (!readOnly) nameIn.onchange = () => {
           if (freeEx) { entry.names[xi] = nameIn.value; renderMem(prevLine, entry.names[xi], memKind); }
           else { names[xi] = nameIn.value; }
-          syncSug();
+          tonAnpassen();
           queuePersist();
         };
 

@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "predev": "node scripts/gen-katalog.mjs",
+    "katalog": "node scripts/gen-katalog.mjs",
+    "prebuild": "node scripts/gen-katalog.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",

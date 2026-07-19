@@ -241,18 +241,6 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   background:transparent;border:2px solid currentColor}
 .tab .dot.met{background:var(--up)}
 .tab .opt{font-style:normal;font-weight:700;font-size:9px;opacity:.7;letter-spacing:0}
-/* Vorschlaege aus dem eigenen Uebungsbestand, sichtbar unter dem Namensfeld.
-   Die native datalist zeigt iOS nicht an – deshalb echte Buttons. */
-.exsug{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
-.exsug[hidden]{display:none}
-.sug{background:var(--surface);border:2px solid var(--ink);border-radius:var(--r);
-  padding:5px 9px;font-size:11px;font-weight:800;font-family:var(--mono);color:var(--ink);
-  cursor:pointer;box-shadow:2px 2px 0 var(--ink);max-width:100%;overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap}
-.sug:active{transform:translate(2px,2px);box-shadow:none}
-/* "+N" ist kein Uebungsname, sondern eine Aktion – darum abgesetzt. */
-.sug.more{background:var(--navy);color:#fff}
-
 /* ---------- Log: tier ---------- */
 .tierbar{display:flex;align-items:center;gap:9px;padding:0 0 12px}
 .tierbar .lbl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-weight:800}
@@ -290,10 +278,25 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .role{font-size:8.5px;font-weight:900;letter-spacing:.08em;color:var(--muted);border:2px solid var(--ink);
   padding:2px 5px;border-radius:4px;flex:0 0 auto;font-family:var(--display);font-style:italic;background:var(--surface2)}
 .role.comp{color:#fff;background:var(--navy)}
+/* Uebungsauswahl. Ein <select>, kein Eingabefeld – eintragbar ist nur, was im
+   Katalog steht. Eigenes Pfeil-Zeichen statt des Systemsteuerelements, damit es
+   in beiden Themes zum Rest passt; das rechte padding haelt ihm den Platz frei. */
 .exname{width:100%;background:var(--surface2);border:2px solid var(--ink);border-radius:var(--r);
-  color:var(--ink);font-size:14.5px;font-weight:700;padding:9px 10px;font-family:var(--ui)}
-.exname::placeholder{color:var(--faint)}
+  color:var(--ink);font-size:14.5px;font-weight:700;padding:9px 26px 9px 10px;font-family:var(--ui);
+  appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
+                   linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-size:5px 5px,5px 5px;
+  background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;
+  background-repeat:no-repeat}
+/* Solange nichts gewaehlt ist, soll das Feld leer wirken und nicht wie eine
+   bereits getroffene Entscheidung. */
+.exname.leer{color:var(--faint)}
 .exname:focus{outline:none;border-color:var(--pink)}
+.exname:disabled{cursor:default;opacity:.75}
+/* Die Klappliste zeichnet das System. Ohne diese Zeile stuende sie im
+   Dark-Mode auf manchen Geraeten schwarz auf schwarz. */
+.exname option,.exname optgroup{background:var(--surface2);color:var(--ink)}
 .prev{font-size:11px;color:var(--muted);font-family:var(--mono);margin:8px 0 9px;min-height:15px}
 .prev b{color:var(--ink);font-weight:700}
 .delta{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:900;font-family:var(--mono);padding:2px 6px;border-radius:4px;margin-left:6px;border:2px solid var(--ink)}
