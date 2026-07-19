@@ -652,6 +652,17 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 .nb-bilder{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .nb-bild{max-width:100%;width:120px;height:120px;object-fit:cover;
   border:2px solid var(--ink);border-radius:10px;background:var(--surface2);display:block}
+/* Antippbare Vorschau: nur in der Leseansicht, im Formular traegt das Bild
+   stattdessen sein Entfernen-Kreuz. */
+.nb-bild.auf{cursor:zoom-in}
+.nb-lupe{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.88);
+  display:flex;align-items:center;justify-content:center;
+  padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px)}
+.nb-lupe img{max-width:100%;max-height:100%;object-fit:contain;
+  border:3px solid #fff;border-radius:10px;display:block}
+.nb-lupe-zu{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:14px;
+  width:40px;height:40px;padding:0;border:3px solid #0A0A0A;border-radius:50%;
+  background:#fff;color:#0A0A0A;font-size:22px;font-weight:900;line-height:1}
 .nb-slot{position:relative;display:inline-block}
 .nb-bildweg{position:absolute;top:-7px;right:-7px;width:24px;height:24px;padding:0;
   border:2px solid var(--ink);border-radius:50%;background:var(--surface);

@@ -153,12 +153,36 @@ export async function mountNotizbuch(container, { userId }) {
     });
   }
 
+  // ---- Lupe ----------------------------------------------------------------
+
+  // Die Vorschau ist auf 120px quadratisch zugeschnitten (object-fit:cover) –
+  // von einem Hochformat sieht man darin die Mitte und sonst nichts. Zum
+  // Ansehen braucht es also das ganze Bild.
+  //
+  // Ueber document.body, nicht in der Karte: Die Bedienleiste unten liegt
+  // hoeher im Stapel und wuerde sonst ueber dem Bild kleben.
+  function zeigeBild(src) {
+    const lupe = document.createElement('div');
+    lupe.className = 'nb-lupe';
+    lupe.innerHTML = `<img src="${src}" alt=""><button class="nb-lupe-zu" aria-label="Schließen">×</button>`;
+    const zu = () => {
+      lupe.remove();
+      window.removeEventListener('hashchange', zu);
+      document.removeEventListener('keydown', taste);
+    };
+    const taste = (e) => { if (e.key === 'Escape') zu(); };
+    lupe.onclick = zu;                       // irgendwohin tippen schliesst
+    window.addEventListener('hashchange', zu);   // sonst bleibt sie beim Seitenwechsel stehen
+    document.addEventListener('keydown', taste);
+    document.body.appendChild(lupe);
+  }
+
   // ---- Lesen ---------------------------------------------------------------
 
   async function zeigeAnsicht(n) {
     const urls = await signiere(n.bilder || []);
     const bilder = (n.bilder || [])
-      .map((p) => (urls[p] ? `<img class="nb-bild" src="${urls[p]}" alt="">` : '')).join('');
+      .map((p) => (urls[p] ? `<img class="nb-bild auf" src="${urls[p]}" alt="" tabindex="0">` : '')).join('');
     inhalt.innerHTML = `
       <div class="card nb-karte">
         <h2 class="nb-titel">${escape(n.titel) || '<i>Ohne Titel</i>'}</h2>
@@ -169,6 +193,10 @@ export async function mountNotizbuch(container, { userId }) {
           <button class="nb-chip nb-zu">Zurück</button>
         </div>
       </div>`;
+    inhalt.querySelectorAll('.nb-bild.auf').forEach((b) => {
+      b.onclick = () => zeigeBild(b.src);
+      b.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); zeigeBild(b.src); } };
+    });
     inhalt.querySelector('.nb-edit').onclick = () => { bearbeitet = true; zeichne(); };
     inhalt.querySelector('.nb-zu').onclick = () => { offen = null; zeichne(); };
   }
