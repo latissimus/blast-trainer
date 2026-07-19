@@ -266,7 +266,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
       <span class="tierhint" id="lg-tierhint"></span>
     </div>
     <div class="daymeta" id="lg-daymeta"></div>
-    <details class="som" id="lg-som"><summary></summary><div class="som-body"></div></details>
     <div id="lg-content"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
@@ -715,10 +714,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   function renderVolume(cell, tpl, tier) {
     let total = 0, tgtTotal = 0;
-    const rows = tpl.blocks.map((blk) => {
+    tpl.blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
-      if (tgt === 0) return null;
-      const entry = cell[blk.id]; if (!entry) return null;
+      if (tgt === 0) return;
+      const entry = cell[blk.id]; if (!entry) { tgtTotal += tgt; return; }
       let sets = 0;
       (entry.sets || []).forEach((arr, xi) => {
         // Zusatzsaetze zaehlen mit: Sie sind Arbeit, auch wenn sie ueber dem Plan
@@ -727,18 +726,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
         (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) sets++; });
       });
       total += sets; tgtTotal += tgt;
-      return { mus: blk.mus, sets, tgt };
-    }).filter(Boolean);
+    });
 
+    // Nur noch Kopf und Gesamtzahl. Die Muskelzeilen mit Balken standen frueher
+    // hier – sie wiederholten aber lediglich das "Sätze N" aus jedem Blockkopf,
+    // ein paar Zentimeter weiter oben. Doppelt gefuehrt, nie benutzt.
     volEl.innerHTML = '<h3>Volumen · Level ' + TIER_NAMES[tier] + '</h3>' +
-      '<div class="voltot">' + total + ' <span>/ ' + tgtTotal + ' ARBEITSSÄTZE</span></div>' +
-      rows.map((r) => {
-        const pct = r.tgt ? Math.min(100, Math.round(r.sets / r.tgt * 100)) : (r.sets ? 100 : 0);
-        const met = r.tgt > 0 && r.sets >= r.tgt;
-        return `<div class="volrow"><span class="m">${r.mus}</span>
-          <span class="track"><span class="fill${met ? ' met' : ''}" style="width:${pct}%"></span></span>
-          <span class="v"><b>${r.sets}</b>/${r.tgt}</span></div>`;
-      }).join('');
+      '<div class="voltot">' + total + ' <span>/ ' + tgtTotal + ' ARBEITSSÄTZE</span></div>';
 
     contentEl.querySelectorAll('.target[data-tgt]').forEach((el) => {
       const blk = tpl.blocks.find((b) => b.id === el.dataset.tgt); if (!blk) return;
@@ -769,15 +763,32 @@ export async function mountLog(container, { userId, readOnly = false }) {
   //
   // Zugeklappt steht dort nur, wo etwas fehlt. Fuenfzehn Zahlen zu lesen ist
   // Arbeit; "drei Konten unter Ziel" ist eine Entscheidung.
-  const somEl = wrap.querySelector('#lg-som');
-  const somKopf = somEl.querySelector('summary');
-  const somBody = somEl.querySelector('.som-body');
+  // Liegt in einem Overlay wie die FAQ und nicht mehr oben im Log: Gewaehlt wird
+  // unten, in den Pump- und Cluster-Feldern – dort will man nachsehen koennen,
+  // ohne jedes Mal hochzuscrollen.
+  const somSheet = document.createElement('div');
+  somSheet.className = 'sheet'; somSheet.hidden = true;
+  somSheet.innerHTML = `
+    <div class="sheet-in">
+      <div class="sheet-hd"><h2>Set-O-Meter</h2><button class="sp-x" id="som-x" aria-label="schließen">×</button></div>
+      <p class="som-lage" id="som-lage" style="margin:0 0 10px"></p>
+      <div class="som-body" id="som-body"></div>
+    </div>`;
+  document.body.appendChild(somSheet);
+  const somKopf = somSheet.querySelector('#som-lage');
+  const somBody = somSheet.querySelector('#som-body');
+  const somZu = () => { somSheet.hidden = true; };
+  somSheet.querySelector('#som-x').onclick = somZu;
+  // Tipp neben das Blatt schliesst es – wie beim FAQ.
+  somSheet.onclick = (e) => { if (e.target === somSheet) somZu(); };
+  const somAuf = () => { renderSom(); somSheet.hidden = false; };
 
   function renderSom() {
     const { konten, ohneZuordnung, unbekannte, gesamt } = zaehleWoche(payloadOut(), state.week);
 
-    somKopf.innerHTML = `<span class="som-titel">Set-O-Meter</span>`
-      + `<span class="som-lage">${gesamt === 0 ? 'noch keine Übung gewählt' : 'Woche ' + state.week + ' · geplant'}</span>`;
+    somKopf.textContent = gesamt === 0
+      ? 'Woche ' + state.week + ' · noch keine Übung gewählt'
+      : 'Woche ' + state.week + ' · geplant aus Level und Übungswahl';
 
     if (gesamt === 0) {
       somBody.innerHTML = `<p class="som-hinweis">Sobald Übungen gewählt sind, steht hier,
@@ -906,9 +917,16 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saveBar.innerHTML = `
       <div class="inner">
         <button class="btn btn-primary" id="lg-savebtn">Einheit speichern</button>
+        <button class="btn-som" id="lg-sombtn" aria-label="Set-O-Meter öffnen" title="Set-O-Meter">
+          <svg viewBox="0 0 20 20" width="21" height="21" aria-hidden="true">
+            <rect x="2" y="3.4" width="16" height="3.4" rx="1.3"/>
+            <rect x="2" y="8.3" width="11" height="3.4" rx="1.3"/>
+            <rect x="2" y="13.2" width="6" height="3.4" rx="1.3"/>
+          </svg></button>
         <div class="timer" id="lg-timer" hidden><span id="lg-timertxt">0:00</span><button class="x" id="lg-timerx" aria-label="Timer abbrechen">×</button></div>
       </div>`;
     document.body.appendChild(saveBar);
+    saveBar.querySelector('#lg-sombtn').onclick = somAuf;
     saveBar.querySelector('#lg-savebtn').onclick = async (e) => {
       // Kurz gelb aufleuchten und zurueck ins Pink faden: sichtbare Bestaetigung,
       // dass der Tipp angekommen ist. Bewusst unabhaengig vom Upload – der ist
@@ -940,6 +958,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
       clearInterval(retryId);
       window.removeEventListener('online', retrySync);
       if (saveBar) saveBar.remove();
+      // Haengt am body, nicht am View – muss also von Hand mit weg, sonst bleibt
+      // beim Wechsel ins Profil ein unsichtbares Blatt ueber der App liegen.
+      somSheet.remove();
       // Der Punkt gehoert dem Log – ausserhalb gibt es nichts zu synchronisieren.
       if (saveStateEl) saveStateEl.hidden = true;
     },

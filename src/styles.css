@@ -17,6 +17,11 @@
   --load:#0B1B44;   /* navy  */
   --pump:#F48FB8;   /* pink  */
   --mr:#FFDE59;     /* yellow*/
+  /* Flieder: gehoert nur dem Set-O-Meter. Bewusst eine Farbe, die sonst nichts
+     benutzt – der schwebende Knopf soll sich vom pinken Speichern daneben auf
+     einen Blick unterscheiden. Wie die anderen Akzente in beiden Themes gleich. */
+  --lila:#D9BBF7;
+  --lila-ink:#2A1240;   /* Symbol auf Flieder – in beiden Themes derselbe Kontrast */
   --up:#12A150;
   --green:#154C2B;  /* MR-Badge und abgelaufener Timer – dieselbe Optik */
   --down:#E8785B;
@@ -335,20 +340,11 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 
 /* ---------- Volume ---------- */
 /* ---------- Set-O-Meter ----------
-   Zugeklappt eine Zeile, aufgeklappt die volle Tabelle. Bewusst flacher
-   gehalten als ein Block: Es ist eine Auskunft, kein Eingabefeld, und soll
-   den Bloecken darunter nicht die Aufmerksamkeit wegnehmen. */
-.som{background:var(--surface2);border:2px solid var(--ink);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
-.som>summary{display:flex;align-items:center;gap:9px;padding:10px 13px;cursor:pointer;list-style:none}
-.som>summary::-webkit-details-marker{display:none}
-/* Eigenes Dreieck, damit es in beiden Themes sitzt und sich beim Aufklappen dreht. */
-.som>summary::before{content:'';flex:0 0 auto;width:0;height:0;
-  border-left:6px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;
-  transition:transform .15s}
-.som[open]>summary::before{transform:rotate(90deg)}
-.som-titel{font-family:var(--display);font-style:italic;font-weight:900;font-size:14px;text-transform:uppercase;letter-spacing:.02em}
+   Liegt in einem Overlay wie die FAQ, geoeffnet ueber den schwebenden Knopf in
+   der Speicherleiste. Frueher stand es oben im Log – dann musste man beim
+   Eintragen der Pump-Saetze jedes Mal hochscrollen, um nachzusehen, wofuer man
+   sie ueberhaupt waehlt. */
 .som-lage{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted)}
-.som-body{padding:8px 13px 12px;border-top:2px dashed var(--ink)}
 .som-zeile{display:flex;align-items:center;gap:9px;padding:3px 0;font-size:12.5px}
 /* 122px ist gemessen, nicht geschaetzt: "Seitl. Schulter" braucht 113px und
    stiess bei 112 an. Der Rest der Zeile gibt entsprechend nach. */
@@ -372,15 +368,10 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 
 .volbar{background:var(--navy);color:#fff;border:3px solid var(--ink);border-radius:var(--r);padding:14px 15px;margin-bottom:14px;box-shadow:var(--shadow)}
 .volbar h3{margin:0 0 4px;font-size:12px;color:#fff}
-.voltot{font-family:var(--mono);font-size:24px;font-weight:800;margin-bottom:12px;letter-spacing:-.02em;color:var(--pink)}
+/* Kein margin-bottom mehr: Unter der Zahl kommt nichts mehr. Die Muskelzeilen
+   (.volrow/.track/.fill) sind mit der Verschlankung entfallen. */
+.voltot{font-family:var(--mono);font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--pink)}
 .voltot span{font-size:11px;color:#B9C6E8;font-weight:600;letter-spacing:.04em}
-.volrow{display:flex;align-items:center;gap:9px;padding:4px 0;font-size:12.5px}
-.volrow .m{flex:0 0 118px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.track{flex:1;height:8px;background:rgba(255,255,255,.16);border-radius:4px;overflow:hidden;border:1px solid rgba(255,255,255,.25)}
-.fill{display:block;height:100%;background:#B9C6E8;transition:width .18s}
-.fill.met{background:var(--up)}
-.volrow .v{flex:0 0 46px;text-align:right;font-family:var(--mono);font-size:11px;color:#B9C6E8}
-.volrow .v b{color:#fff;font-weight:700}
 
 .foot{font-size:11px;color:var(--muted);text-align:center;padding:8px 6px 20px;line-height:1.7;font-weight:600}
 
@@ -392,6 +383,13 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .savebar .inner{max-width:580px;margin:0 auto;display:flex;gap:9px;align-items:stretch}
 .savebar .btn-primary{flex:1;padding:15px}
 .savebar .btn-ghost{flex:0 0 52px;padding:15px 0;font-size:17px}
+/* Set-O-Meter-Knopf: schwebt mit, damit man beim Eintragen unten nicht zum
+   Nachsehen nach oben scrollen muss. */
+.btn-som{flex:0 0 52px;display:flex;align-items:center;justify-content:center;
+  background:var(--lila);color:var(--lila-ink);border:3px solid var(--ink);
+  border-radius:var(--r);box-shadow:var(--shadow-sm);cursor:pointer;padding:0}
+.btn-som:active{transform:translate(3px,3px);box-shadow:none}
+.btn-som svg{display:block;fill:currentColor}
 .timer{flex:0 0 auto;display:flex;align-items:center;gap:8px;background:var(--navy);color:#fff;
   border:3px solid var(--ink);border-radius:var(--r);padding:0 12px;font-family:var(--mono);
   font-size:17px;font-weight:800;box-shadow:var(--shadow-sm)}
