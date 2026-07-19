@@ -429,6 +429,12 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .sheet p b{color:var(--ink);font-weight:700}
 .sheet .src{font-size:10px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:2px solid var(--ink);padding-top:10px}
 /* FAQ-Accordion */
+/* Abschnittsueberschrift im FAQ. Die Liste ist lang genug, dass man sonst nicht
+   mehr weiss, auf welcher Ebene man liest – vom Prinzip bis zur Bedienung. */
+.faq-sektion{border-top:2px dashed var(--ink);margin:22px 0 12px;padding-top:12px;
+  font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.faq-sektion:first-of-type{border-top:0;margin-top:4px;padding-top:0}
 .faq{border:3px solid var(--ink);border-radius:var(--r);background:var(--surface);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow-xs)}
 .faq>summary{list-style:none;cursor:pointer;padding:12px 40px 12px 13px;position:relative;
   font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:13px;color:var(--navy)}
