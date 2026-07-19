@@ -382,6 +382,10 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    Timer abbrechen. So ist die Zahl gross genug, um sie zwischen zwei Saetzen
    aus zwei Metern Entfernung abzulesen. */
 .ctrlbar.timer-an .inner::before{background:var(--navy);-webkit-backdrop-filter:none;backdrop-filter:none}
+/* Im Dark-Mode hellblau und deckend – auf Wunsch. ACHTUNG Kontrast: Die weisse
+   Ziffer steht darauf nur bei 1.35:1, das ist praktisch unlesbar. Soll sie
+   navy werden (12.3:1), reicht eine Zeile weiter unten. */
+:root[data-theme="dark"] .ctrlbar.timer-an .inner::before{background:#AEDCF6}
 .ctrlbar.timer-an .slots,.ctrlbar.timer-an .menue{display:none}
 /* Das × liegt absolut rechts und zaehlt nicht zur Breite – sonst waere die
    Zahl um dessen halbe Breite nach links verschoben statt wirklich mittig. */
@@ -608,9 +612,9 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 .nb-karte{margin-top:12px}
 .nb-kopf{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
 .nb-titel{flex:1 1 auto;min-width:0;font-family:var(--display);font-style:italic;
-  font-weight:900;font-size:17px;overflow-wrap:anywhere}
+  font-weight:900;font-size:21px;overflow-wrap:anywhere}
 .nb-akt{display:flex;gap:5px;flex:0 0 auto}
-.nb-text{margin:0;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.nb-text{margin:0;font-size:16px;line-height:1.65;overflow-wrap:anywhere}
 /* Links muessen sich vom Fliesstext abheben, ohne die Akzentfarben zu kapern. */
 .nb-text a{color:var(--navy);text-decoration:underline;text-underline-offset:2px}
 :root[data-theme="dark"] .nb-text a{color:var(--pink)}
@@ -623,9 +627,11 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   border:2px solid var(--ink);border-radius:50%;background:var(--surface);
   font-weight:900;line-height:1;font-size:14px;color:var(--ink)}
 
-.nb-in-titel,.nb-in-text{width:100%;margin-bottom:8px}
-.nb-in-text{resize:vertical;line-height:1.6}
-/* Die Dateiauswahl liegt versteckt im Label – der Knopf IST das Label. */
-.nb-upload{text-align:center;cursor:pointer;margin-bottom:8px}
-.nb-zeile{display:flex;gap:8px}
-.nb-zeile .btn{flex:1 1 0}
+/* Groesser als die uebrigen .input-Felder: Hier tippt man Absaetze, nicht einen
+   Namen. Der Titel traegt die Display-Schrift wie in der fertigen Karte, damit
+   das Feld schon beim Tippen aussieht wie das Ergebnis. */
+.nb-in-titel{font-family:var(--display);font-style:italic;font-weight:900;font-size:20px}
+.nb-in-text{font-size:16px;line-height:1.65;resize:vertical}
+/* Die Dateiauswahl liegt versteckt im Label – der Chip IST das Label. */
+.nb-upload{display:inline-block;cursor:pointer;margin-bottom:14px}
+.nb-karte .btn + .btn{margin-top:8px}

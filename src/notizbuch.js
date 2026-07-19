@@ -80,7 +80,7 @@ export async function mountNotizbuch(container, { userId }) {
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
     <div class="seitenkopf">
-      <h1 class="section-title">📓 Notizbuch</h1>
+      <h1 class="section-title">📒 Notizbuch</h1>
       ${zurueckChip()}
     </div>
     <button class="btn btn-primary btn-block" id="nb-neu">+ Neue Notiz</button>
@@ -141,9 +141,14 @@ export async function mountNotizbuch(container, { userId }) {
   async function bearbeiten(n) {
     const el = liste.querySelector(`[data-id="${n.id}"]`);
     const urls = await signiere(n.bilder || []);
+    // Felder in der Hausform (.fld-l + .input) statt eigener: Das Profil sieht
+    // schon so aus, und ein zweites Formular-Aussehen in derselben App waere
+    // eine Erfindung ohne Anlass.
     el.innerHTML = `
-      <input class="nb-in-titel" value="${escape(n.titel)}" placeholder="Titel" maxlength="120">
-      <textarea class="nb-in-text" rows="8" placeholder="Text, Links…">${escape(n.text)}</textarea>
+      <label class="fld-l">Titel</label>
+      <input class="input nb-in-titel" value="${escape(n.titel)}" placeholder="Worum geht es?" maxlength="120">
+      <label class="fld-l">Text</label>
+      <textarea class="input nb-in-text" rows="10" placeholder="Gedanken, Links, Cues…">${escape(n.text)}</textarea>
       <div class="nb-bilder nb-bilder-edit">
         ${(n.bilder || []).map((p) => `
           <span class="nb-slot">
@@ -151,12 +156,10 @@ export async function mountNotizbuch(container, { userId }) {
             <button class="nb-bildweg" data-pfad="${p}" aria-label="Bild entfernen">×</button>
           </span>`).join('')}
       </div>
-      <label class="btn btn-block nb-upload">+ Bild
+      <label class="chip nb-upload">+ Bild
         <input type="file" accept="image/*" hidden multiple></label>
-      <div class="nb-zeile">
-        <button class="btn btn-primary nb-ok">Sichern</button>
-        <button class="btn nb-ab">Abbrechen</button>
-      </div>`;
+      <button class="btn btn-primary btn-block nb-ok">Sichern</button>
+      <button class="btn btn-block nb-ab">Abbrechen</button>`;
 
     const titelIn = el.querySelector('.nb-in-titel');
     const textIn = el.querySelector('.nb-in-text');
