@@ -28,8 +28,9 @@ function build() {
 
         <details class="faq"><summary>Was ist LOGMAN?</summary>
           <div class="faq-a">
-            <p>Ein <b>Trainingstagebuch für ein bestimmtes System</b> — keine allgemeine Fitness-App. LOGMAN kennt den Plan bereits: Es weiß, welche Tage es gibt, welche Muskelgruppen wann drankommen und wie viele Sätze bei welchem Level fällig sind. Du trägst nur noch Gewicht und Wiederholungen ein.</p>
-            <p>Alles, was die App darüber hinaus tut, dient einer einzigen Frage: <b>Wirst du stärker?</b> Deshalb steht über jeder Heavy-Übung, was du beim letzten Mal geschafft hast, und im Profil eine Kurve deiner Entwicklung.</p>
+            <p>Ein <b>Trainingstagebuch für ein System zum Muskelaufbau</b> — keine allgemeine Fitness-App. Das Ziel ist <b>Hypertrophie</b>, also mehr Muskelmasse. Nicht Maximalkraft, nicht Ausdauer.</p>
+            <p><b>Stärker werden ist dabei das Mittel, nicht der Zweck.</b> Muskeln wachsen, wenn sie regelmäßig mehr leisten müssen als zuletzt — das ist die progressive Überlastung. Du kannst von Woche zu Woche nicht sehen, ob ein Muskel gewachsen ist, aber du kannst sehen, ob die Last steigt. Deshalb misst die App das: Über jeder Heavy-Übung steht, was du beim letzten Mal geschafft hast, und im Profil liegt eine Kurve deiner Entwicklung.</p>
+            <p>LOGMAN kennt den Plan bereits: welche Tage es gibt, welche Muskelgruppen wann drankommen und wie viele Sätze bei welchem Level fällig sind. Du trägst nur Gewicht und Wiederholungen ein und wählst die Übungen.</p>
             <p>Die App läuft auch <b>ohne Empfang</b>. Was du eintippst, liegt sofort auf dem Gerät; hochgeladen wird, sobald wieder Netz da ist. Im Keller-Studio kannst du also normal weiterarbeiten.</p>
           </div>
         </details>
@@ -37,10 +38,11 @@ function build() {
         <details class="faq"><summary>Wie sieht die Trainingswoche aus?</summary>
           <div class="faq-a">
             <p><b>Drei Einheiten pro Woche</b>, jede mit einem anderen Schwerpunkt:</p>
-            <p><b>Tag 1 — Oberkörper schwer, Unterkörper leicht.</b> Oben die harten Sätze, unten Durchblutungsarbeit.<br>
-            <b>Tag 2 — genau umgekehrt.</b> Unterkörper schwer, Oberkörper leicht.<br>
-            <b>Tag 3 — Clusters für den ganzen Körper.</b> Kurze, dichte Sätze.</p>
-            <p>Jeder Muskel wird so <b>dreimal pro Woche</b> berührt — einmal schwer, einmal leicht, einmal als Cluster. Das ist der Kerngedanke: nicht ein großer Reiz pro Woche, sondern drei verschiedene.</p>
+            <p><b>Tag 1 — Oberkörper Heavy, Unterkörper Pump.</b><br>
+            <b>Tag 2 — genau umgekehrt:</b> Unterkörper Heavy, Oberkörper Pump.<br>
+            <b>Tag 3 — Clusters für den ganzen Körper.</b></p>
+            <p>Jeder Muskel wird so <b>dreimal pro Woche</b> gereizt — einmal als Heavy, einmal als Pump, einmal als Cluster. Das ist der Kerngedanke: nicht ein großer Reiz pro Woche, sondern drei verschiedene.</p>
+            <p><b>„Pump" heißt nicht „locker".</b> Die drei Satzarten unterscheiden sich in <b>Last und Wiederholungszahl</b>, nicht in der Anstrengung. Ein Pump-Satz läuft mit leichterem Gewicht, geht dafür aber bis zum metabolischen Versagen und danach noch in Teilwiederholungen — das brennt anders als ein schwerer Satz, aber es ist nicht weniger hart. <b>Jeder Satz an jedem Tag soll einen Wachstumsreiz setzen</b>, über Nähe zum Versagen und steigende Leistung. Nur der Weg dorthin ist jedes Mal ein anderer.</p>
             <p>Darüber liegt ein größerer Rhythmus: <b>6 Wochen Overreach, dann 2 Wochen Deload.</b> Mehr dazu weiter unten.</p>
           </div>
         </details>
@@ -69,7 +71,7 @@ function build() {
           <div class="faq-a">
             <p><b>1. Woche und Tag wählen.</b> Ganz oben stellst du die Woche ein, darunter den Tag. Die Chips daneben zeigen, ob A- oder B-Woche und ob Overreach oder Deload.</p>
             <p><b>2. Level nach Tagesform wählen.</b> I, II oder III. Danach richtet sich, wie viele Sätze heute fällig sind — nicht nach Ehrgeiz, sondern danach, wie du dich fühlst.</p>
-            <p><b>3. Übungen auswählen.</b> Jedes Feld bietet dir nur Übungen an, die zu diesem Block passen. Bei Heavy stehen sie nach der ersten Wahl dauerhaft; Pump und Cluster wählst du jede Woche neu.</p>
+            <p><b>3. Übungen auswählen.</b> Jedes Feld bietet dir nur Übungen an, die zu diesem Block passen. Die <b>Heavy-Übungen wählst du einmalig in Woche 1 und Woche 2</b> — ab Woche 3 stehen sie von selbst da (siehe unten). Pump und Cluster wählst du jede Woche neu.</p>
             <p><b>4. Eintragen.</b> Gewicht und Wiederholungen je Satz. Über der Übung siehst du die Werte vom letzten Mal, damit du weißt, was du schlagen musst. Der Pausentimer startet über den Chip mit der Uhr.</p>
             <p><b>5. Zwischendurch ins Set-O-Meter schauen</b> (der Knopf unten rechts), um zu sehen, welche Muskeln diese Woche zu kurz kommen — und die freien Pump- und Cluster-Übungen danach auszuwählen.</p>
             <p>Gespeichert wird nach jeder Eingabe automatisch. Den Knopf „Einheit speichern" brauchst du nur, wenn du sofort sichern willst.</p>
@@ -96,7 +98,9 @@ function build() {
 
         <details class="faq"><summary>Wie merkt sich die App meine Übungen und Gewichte?</summary>
           <div class="faq-a">
-            <p><b>Heavy-Übungen</b> gehören fest zum Tag: einmal gewählt, stehen sie in jeder Woche derselben A/B-Woche wieder da. Darunter siehst du <i>„Wo 3: 80×8, 80×7"</i> — die Werte vom letzten Mal, plus <b>▲ gesteigert</b> / <b>= gehalten</b> / <b>▼ gesunken</b>, sobald du heute etwas einträgst.</p>
+            <p><b>Heavy-Übungen gehören fest zum Tag — du wählst sie genau zweimal.</b> In <b>Woche 1</b> legst du die Übungen der A-Tage fest, in <b>Woche 2</b> die der B-Tage. Ab Woche 3 stehen sie automatisch da: Woche 3 und 5 holen sich die Wahl aus Woche 1, Woche 4 und 6 die aus Woche 2. Du musst also nie zweimal dasselbe eintragen.</p>
+            <p>Über der Übung siehst du <i>„Wo 3: 80×8, 80×7"</i> — die Werte vom letzten Mal, plus <b>▲ gesteigert</b> / <b>= gehalten</b> / <b>▼ gesunken</b>, sobald du heute etwas einträgst.</p>
+            <p>Änderst du eine Heavy-Übung später doch noch, gilt die Änderung <b>für alle Wochen dieser Rotation</b> — auch rückwirkend für die Beschriftung schon eingetragener Sätze. Die Zahlen bleiben stehen, nur der Name darüber wechselt.</p>
             <p><b>Pump- und Cluster-Übungen</b> rotierst du frei. Sie hängen deshalb nicht am Tag, sondern <b>am Namen</b>: Wählst du dieselbe Übung irgendwann wieder — egal an welchem Tag oder in welcher Woche — erscheint automatisch <i>„zuletzt: 30 kg × 18 Wdh · Wo 3"</i> bzw. beim Cluster <i>„zuletzt: 40 kg · 3 Wdh. im letzten Cluster"</i>.</p>
             <p>Bei Pump und Cluster gibt es bewusst <b>kein</b> ▲/▼-Delta: Diese Sätze sind nicht zum Messen von Fortschritt gedacht — der Wert dient nur als Anhaltspunkt fürs Einstellen. Gemessen wird an den Heavy-Sätzen.</p>
           </div>
@@ -119,8 +123,8 @@ function build() {
           </div>
         </details>
 
-        <details class="faq"><summary>Was heißt das Zeichen oben rechts?</summary>
-          <div class="faq-a"><p>Der Sync-Status: <b>✓</b> gespeichert · <b>↻</b> speichert gerade oder noch nicht gesichert · <b>↑</b> auf dem Gerät gesichert, wartet auf Verbindung · <b>⚠</b> Upload fehlgeschlagen. In den letzten beiden Fällen sind deine Daten trotzdem sicher — sie liegen lokal und werden automatisch nachgereicht.</p></div>
+        <details class="faq"><summary>Was heißt das kleine Zeichen neben „Log"?</summary>
+          <div class="faq-a"><p>In der Kopfleiste, links vom Log-Knopf, steht der Sync-Status: <b>✓</b> gespeichert · <b>↻</b> speichert gerade oder noch nicht gesichert · <b>↑</b> auf dem Gerät gesichert, wartet auf Verbindung · <b>⚠</b> Upload fehlgeschlagen. In den letzten beiden Fällen sind deine Daten trotzdem sicher — sie liegen lokal und werden automatisch nachgereicht, sobald wieder Netz da ist.</p></div>
         </details>
 
         <details class="faq"><summary>Wofür ist das Notizfeld?</summary>
@@ -191,7 +195,11 @@ function build() {
         </details>
 
         <details class="faq"><summary>Was bedeutet die A/B-Woche?</summary>
-          <div class="faq-a"><p>Die Heavy-Tage wechseln wöchentlich zwischen zwei Übungs-Gruppierungen: <b>A</b> in ungeraden, <b>B</b> in geraden Wochen. So kommt jede Übung alle zwei Wochen wieder — oft genug, um Fortschritt sauber zu vergleichen, aber mit genug Abwechslung. Pump und Cluster sind davon nicht betroffen, die wählst du jedes Mal frei.</p></div>
+          <div class="faq-a">
+            <p>Die Heavy-Tage wechseln wöchentlich zwischen zwei Übungs-Gruppierungen: <b>A</b> in ungeraden, <b>B</b> in geraden Wochen. So kommt jede Übung alle zwei Wochen wieder — oft genug, um Fortschritt sauber zu vergleichen, aber ohne dass du sechs Wochen lang dieselben vier Übungen machst.</p>
+            <p><b>Der Zweck ist auch ein mentaler.</b> Sechs Wochen Overreach sind lang, und das größte Risiko ist nicht die falsche Satzzahl, sondern dass man keine Lust mehr hat. Die A/B-Rotation und die freie Wahl bei Pump und Clustern sorgen dafür, dass jede Einheit etwas anders aussieht — ohne dass die Messgröße darunter leidet: Verglichen wird immer nur A mit A und B mit B.</p>
+            <p>Pump und Cluster sind von der Rotation nicht betroffen, die wählst du jedes Mal völlig frei.</p>
+          </div>
         </details>
 
         <details class="faq"><summary>Wie steigere ich mich (Progression)?</summary>
