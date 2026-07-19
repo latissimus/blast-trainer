@@ -251,7 +251,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // die Beschreibung des Tages. Dadurch faengt der erste Trainingsblock
   // unmittelbar unter der Kopfleiste an, statt nach drei Reihen Bedienelementen.
   wrap.innerHTML = `
-    <div class="tagkopf"><span class="daymeta" id="lg-daymeta"></span></div>
     <div id="lg-content"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
@@ -265,7 +264,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
   if (saveStateEl) saveStateEl.hidden = false;
   const contentEl = wrap.querySelector('#lg-content');
   const volEl = wrap.querySelector('#lg-vol');
-  const dayMetaEl = wrap.querySelector('#lg-daymeta');
   const phaseEl = document.querySelector('#app-phase');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
 
@@ -302,23 +300,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   wocheSel.innerHTML = Array.from({ length: 8 }, (_, i) =>
     `<option value="${i + 1}">Woche ${i + 1}${i + 1 >= 7 ? ' · Deload' : ''}</option>`).join('');
-  // Zuletzt benutztes Feld einfaerben. Rein visuell – es macht die sonst sehr
-  // weisse Leiste ruhiger und zeigt, woran zuletzt gedreht wurde.
-  let zuletztFeld = null;
-  function merkeFeld(el) {
-    zuletztFeld = el.closest('.ci');
-    ctrl.querySelectorAll('.ci').forEach((c) => c.classList.toggle('zuletzt', c === zuletztFeld));
-  }
-
-  wocheSel.onchange = () => { merkeFeld(wocheSel); state.week = Number(wocheSel.value); queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
-  tagSel.onchange = () => { merkeFeld(tagSel); state.day = tagSel.value; queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
-  tierSeg.onchange = () => { merkeFeld(tierSeg); setTier(state.day, state.week, Number(tierSeg.value)); queuePersist(); renderAll(); };
+  wocheSel.onchange = () => { state.week = Number(wocheSel.value); queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
+  tagSel.onchange = () => { state.day = tagSel.value; queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
+  tierSeg.onchange = () => { setTier(state.day, state.week, Number(tierSeg.value)); queuePersist(); renderAll(); };
 
   // Datum der Einheit. Ohne das weiss man beim Blick auf Woche 3 nie, wann sie
   // tatsaechlich stattgefunden hat – und ob zwischen zwei Einheiten zwei Tage
   // lagen oder zwei Wochen.
   datumEl.onchange = () => {
-    merkeFeld(datumEl);
     const w = datumEl.value;
     if (w) state.datum[state.day + '|' + state.week] = w;
     else delete state.datum[state.day + '|' + state.week];
@@ -341,7 +330,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // Beschriftung der unteren Leiste. Steht getrennt, weil sie auch nach einer
   // Datumsaenderung allein nachgezogen wird.
   function renderControls() {
-    if (zuletztFeld) ctrl.querySelectorAll('.ci').forEach((c) => c.classList.toggle('zuletzt', c === zuletztFeld));
     const days = daysOfWeek(state.week);
     if (!days.includes(state.day)) state.day = days[0];
     const cruise = isCruise(state.week);
@@ -538,7 +526,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function renderDay() {
     const tpl = TPL[state.day];
     const tier = tierOf(state.day, state.week);
-    dayMetaEl.textContent = tpl.sub;
 
     const cell = ensureCell();
     const prev = prevFilled(state.day, state.week);

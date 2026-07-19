@@ -51,8 +51,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   const email = session.user.email;
   container.innerHTML = '';
   const wrap = document.createElement('div');
-  wrap.className = 'wrap';
-  wrap.style.paddingBottom = '40px';
+  wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
     <div class="seitenkopf">
       <h1 class="section-title">Mein Profil</h1>

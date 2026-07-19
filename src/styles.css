@@ -316,28 +316,39 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    Je Feld zwei Zeilen: oben der Wert, unten wofuer er steht. Ohne die zweite
    Zeile waere "II" oder "19.07." nicht deutbar, und mit einer einzelnen Zeile
    passte beides nicht in 60px. */
+/* Der Streifen hinter der Leiste zeichnet weich, damit sie sich vom Block
+   darunter abhebt, ohne dass die Leiste selbst durchscheinend wird – sie
+   bleibt flach und undurchsichtig wie alles andere in der App. */
 .ctrlbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
   padding:8px 10px max(6px, calc(env(safe-area-inset-bottom) - 6px));
-  background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 42%)}
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  background:linear-gradient(180deg,rgba(174,220,246,.35),var(--bg) 62%)}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
    auf. Der Schatten liegt ausserhalb und wird davon nicht beschnitten. */
 .ctrlbar .slots{display:contents}
 .ctrlbar .slots[hidden]{display:none}
+/* translateZ/isolation sind kein Zierrat: Die Leiste ist fest positioniert und
+   hat Rundung, Schatten UND einen Weichzeichner darunter. Beim Oeffnen einer
+   Klappliste zeichnete der Browser den Bereich neu und liess dabei gelegentlich
+   weisse, eckige Reste ueber der Rundung stehen. Eine eigene Kompositionsebene
+   laesst die Ecken einmal rastern, statt sie bei jedem Neuzeichnen zu berechnen. */
 .ctrlbar .inner{max-width:580px;margin:0 auto;display:flex;gap:4px;
   background:var(--surface);border:3px solid var(--ink);border-radius:16px;
-  box-shadow:var(--shadow);padding:5px;overflow:hidden}
+  box-shadow:var(--shadow);padding:5px;overflow:hidden;
+  transform:translateZ(0);isolation:isolate;backface-visibility:hidden}
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;padding:8px 2px;
   border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
-.ci .wert{font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
+.ci .wert{font-family:var(--display);font-style:italic;font-weight:900;font-size:13.5px;
+  text-transform:uppercase;letter-spacing:.01em;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ci .wert.leer{color:var(--faint)}
 /* Beschriftungen in Versalien: Die App setzt jede andere Kleinbeschriftung
    ebenso (Badges, Chips, Blocktitel). Die WERTE bleiben gemischt – "WO 3" und
    "TAG 3" in Versalkursive wirken laut, und beim Datum aendert sich ohnehin
    nichts. */
-.ci .lbl{font-family:var(--mono);font-size:8px;font-weight:700;color:var(--muted);
+.ci .lbl{font-family:var(--mono);font-size:8px;font-weight:800;color:var(--muted);
   text-transform:uppercase;letter-spacing:.06em;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Das native Element liegt unsichtbar ueber dem Feld: <select> und
@@ -348,16 +359,12 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   -webkit-appearance:none;appearance:none}
 .ci select:disabled{cursor:default}
 .ci:has(select:disabled) .wert{opacity:.55}
-/* Das zuletzt benutzte Feld bleibt hellblau hinterlegt – die Leiste wirkt sonst
-   sehr weiss, und man sieht auf einen Blick, woran man zuletzt gedreht hat.
-   Hellblau, damit es sich vom fliederfarbenen Menue klar unterscheidet: Das
-   eine markiert eine Einstellung, das andere wechselt die Seite. */
-.ci.zuletzt{background:var(--bg)}
 /* Das Menue rechts. Flieder mit demselben Dreiecksmuster wie die
    Set-O-Meter-Seite – es hebt sich damit von den vier Einstellfeldern ab:
    Die aendern den Inhalt der Seite, dieses wechselt die Seite. */
 .ci.menue{background:var(--lila);color:var(--lila-ink);flex:0 0 62px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 8.5l4.5 7.5h-9z' fill='%230B1B44' fill-opacity='.09'/%3E%3C/svg%3E")}
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15'%3E%3Cpath d='M7.5 4l3.2 5.4H4.3z' fill='%230B1B44' fill-opacity='.13'/%3E%3C/svg%3E");
+  background-position:center}
 .ci.menue .wert{font-family:var(--ui);font-style:normal;font-size:17px;line-height:1}
 .ci.menue .lbl{color:var(--lila-ink);opacity:.8}
 
@@ -500,7 +507,10 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 :focus-visible{outline:3px solid var(--pink);outline-offset:2px}
 
 /* Baustand, unten im Profil – bewusst unauffaellig. */
-.buildinfo{text-align:center;font-size:11px;color:var(--faint);margin:22px 0 0;font-family:var(--mono)}
+/* Dicht unter den Abmelden-Knopf: Der Abstand von dort bis zur Leiste soll dem
+   im Log entsprechen (Woche 8, "Neue Phase starten"). Die Versionszeile ist
+   Diagnose, kein eigener Abschnitt – sie braucht keinen Absatz davor. */
+.buildinfo{text-align:center;font-size:11px;color:var(--faint);margin:10px 0 0;font-family:var(--mono)}
 
 /* Einmaliger Hinweis fuer Benachrichtigungen. Kein Dauergast: Nach dem Tippen
    oder Wegwischen ist er fuer immer weg. */
