@@ -109,3 +109,33 @@ describe('mergePayload – Pool und Einstellungen', () => {
     expect(mergePayload({}, {}).v).toBe(3);
   });
 });
+
+describe('mergePayload – Vollstaendigkeit', () => {
+  // mergePayload baut das Payload NEU auf, statt es zu kopieren. Ein neu
+  // eingefuehrtes Feld, das dort vergessen wird, verschwindet still – und zwar
+  // nur nach Offline-Arbeit, also genau dann, wenn es niemand sofort merkt.
+  it('traegt jedes Feld des Payloads weiter', () => {
+    const p = {
+      week: 3, day: 'UK-A',
+      data: { 'UK-A': { 3: { legs: { sets: [[{ w: '100', r: '8' }]], names: ['X'] } } } },
+      ex: { 'UK-A': { legs: ['X'] } },
+      notes: { 'UK-A': { legs: ['Sitz 4'] } },
+      tier: { 'UK-A|3': 1 },
+      rot: { 3: 'B' },
+      mem: { 'pump|x': { w: '20' } },
+      datum: { 'UK-A|3': '2026-07-19' },
+      v: 3,
+    };
+    const m = mergePayload(p, {});
+    Object.keys(p).forEach((k) => expect(m, `Feld "${k}" fehlt nach dem Merge`).toHaveProperty(k));
+  });
+
+  it('laesst das Datum lokal gewinnen und mischt beide Seiten', () => {
+    const m = mergePayload(
+      { datum: { 'OK-A|1': '2026-07-01', 'OK-A|2': '2026-07-08' } },
+      { datum: { 'OK-A|1': '2026-07-02' } },
+    );
+    expect(m.datum['OK-A|1']).toBe('2026-07-02');
+    expect(m.datum['OK-A|2']).toBe('2026-07-08');
+  });
+});

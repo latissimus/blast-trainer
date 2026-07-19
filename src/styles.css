@@ -216,9 +216,16 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 /* Genau eine Tab-Spalte breit (die Tabs darunter sind drei gleiche Spalten mit
    8px Abstand). So steht die Wochen-Box buendig ueber "Tag 1" und laesst der
    Zeile genug Platz fuer A/B-Woche und Phase. */
-.wk{flex:0 0 calc((100% - 16px) / 3);display:flex;align-items:center;background:var(--surface);border:3px solid var(--ink);
+/* Frueher auf ein Drittel der Zeile festgenagelt (eine Tab-Spalte breit), damit
+   "A-WOCHE" daneben nicht umbrach. Die beiden Chips brauchen aber nur 88px
+   Eigenbreite – der Rest gehoert der Wochenwahl, damit die Pfeile gross genug
+   zum Treffen sind. min-width:0 laesst die Zahl notfalls schrumpfen statt die
+   Zeile zu sprengen. */
+.wk{flex:1 1 auto;min-width:0;display:flex;align-items:center;background:var(--surface);border:3px solid var(--ink);
   border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
-.wk button{flex:0 0 30px;background:none;border:0;color:var(--ink);height:40px;font-size:19px;font-family:var(--mono);font-weight:700}
+/* 44px statt 30 – die von Apple empfohlene Mindestgroesse. Moeglich geworden,
+   weil .wk nicht mehr auf ein Drittel der Zeile begrenzt ist. */
+.wk button{flex:0 0 44px;background:none;border:0;color:var(--ink);height:44px;font-size:19px;font-family:var(--mono);font-weight:700}
 .wk button:active{background:var(--surface2)}
 .wk .num{flex:1;min-width:0;font-family:var(--display);font-style:italic;font-size:15px;text-align:center;font-weight:900}
 .rotchip{display:inline-flex;align-items:center;background:var(--surface);border:3px solid var(--ink);color:var(--ink);
@@ -247,8 +254,28 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .tab .dot.met{background:var(--up)}
 .tab .opt{font-style:normal;font-weight:700;font-size:9px;opacity:.7;letter-spacing:0}
 /* ---------- Log: tier ---------- */
-.tierbar{display:flex;align-items:center;gap:9px;padding:0 0 12px}
+.tierbar{display:flex;align-items:center;gap:8px;padding:0 0 12px}
 .tierbar .lbl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-weight:800}
+/* Level als Klappliste statt drei Knoepfen: Die Knoepfe waren 28px hoch und
+   damit das kleinste Bedienelement der App – und sie brauchten die halbe Zeile.
+   Als Liste passt daneben das Datum. Der Zusatz im Eintrag ("· voll") ersetzt
+   den frueheren Hinweistext rechts. */
+.lvlsel,.datumfeld{background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);
+  color:var(--ink);font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
+  height:42px;padding:0 26px 0 11px;box-shadow:var(--shadow-xs);
+  appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
+                   linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-size:5px 5px,5px 5px;
+  background-position:calc(100% - 13px) 55%,calc(100% - 8px) 55%;background-repeat:no-repeat}
+.lvlsel{flex:0 0 auto}
+.lvlsel:disabled{opacity:.5;cursor:default}
+/* Das Datumsfeld traegt Zahlen – Monospace liest sich hier besser als kursiv. */
+.datumfeld{flex:1 1 auto;min-width:0;font-family:var(--mono);font-style:normal;font-weight:700;font-size:12.5px}
+.datumfeld.leer{color:var(--faint)}
+.datumfeld::-webkit-date-and-time-value{text-align:left}
+.datumfeld::-webkit-calendar-picker-indicator{opacity:0;width:22px;margin:0;cursor:pointer}
+.lvlsel option{background:var(--surface);color:var(--ink);font-style:normal}
 .seg{display:flex;background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-xs)}
 .seg button{background:none;border:0;color:var(--muted);padding:6px 14px;font-size:13px;font-weight:900;font-family:var(--display);font-style:italic;border-right:2px solid var(--ink)}
 .seg button:last-child{border-right:0}
@@ -400,6 +427,10 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 45%);z-index:30}
 .savebar .inner{max-width:580px;margin:0 auto;display:flex;gap:9px;align-items:stretch}
 .savebar .btn-primary{flex:1;padding:15px}
+/* Nur noch das Zeichen: waehrend der Timer laeuft, damit die Leiste einzeilig
+   bleibt. line-height fest, sonst macht die hohe Zeilenbox des Emojis den Knopf
+   groesser als vorher – und align-items:stretch zieht Timer und Meter mit hoch. */
+.savebar .btn-primary.nurzeichen{flex:1;font-size:18px;line-height:18px;letter-spacing:0}
 .savebar .btn-ghost{flex:0 0 52px;padding:15px 0;font-size:17px}
 /* Set-O-Meter-Knopf: schwebt mit, damit man beim Eintragen unten nicht zum
    Nachsehen nach oben scrollen muss. */

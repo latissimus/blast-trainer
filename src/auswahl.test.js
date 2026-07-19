@@ -98,7 +98,7 @@ describe('echter Katalog gegen echte Vorlage', () => {
         [0, 1, 2].forEach((tier) => {
           const felder = (blk.exByTier && blk.exByTier[tier]) || blk.ex;
           felder.forEach((exDef, xi) => {
-            const g = auswahlGruppen(blk.konten, exDef.r || null);
+            const g = auswahlGruppen(exDef.konten || blk.konten, exDef.r || null);
             if (!g.length) leer.push(`${tag}/${blk.id}[${xi}] Level ${tier + 1} (${exDef.r || 'frei'})`);
           });
         });
@@ -121,10 +121,12 @@ describe('echter Katalog gegen echte Vorlage', () => {
     // steht dann nur zur Zierde in der Excel.
     const erreichbar = new Set();
     Object.values(TPL).forEach((def) => def.blocks.forEach((blk) => {
-      [null, 'Comp', 'Iso'].forEach((rolle) => {
-        const rollenImBlock = blk.ex.map((e) => e.r || null);
-        if (!rollenImBlock.includes(rolle)) return;
-        passende(blk.konten, rolle).forEach((e) => erreichbar.add(e.n));
+      // Ueber alle Level, weil exByTier je Level andere Felder haben kann.
+      [0, 1, 2].forEach((tier) => {
+        const felder = (blk.exByTier && blk.exByTier[tier]) || blk.ex;
+        felder.forEach((exDef) => {
+          passende(exDef.konten || blk.konten, exDef.r || null).forEach((e) => erreichbar.add(e.n));
+        });
       });
     }));
     const verwaist = KATALOG.filter((e) => !erreichbar.has(e.n)).map((e) => `${e.n} (${e.haupt}, ${e.typ})`);

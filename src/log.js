@@ -67,6 +67,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     ex: p.ex || {},      // gemeinsame Übungsnamen pro Tag (über alle Wochen der Rotation)
     notes: p.notes || {}, // gemeinsame Notizen pro Tag/Übung
     mem: p.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
+    datum: p.datum || {},  // Tag|Woche -> ISO-Datum der Einheit
   };
   migrateData();
 
@@ -93,7 +94,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saveStateEl.title = title;
   }
   function payloadOut() {
-    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, mem: state.mem, v: 3 };
+    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, mem: state.mem, datum: state.datum, v: 3 };
   }
   // Lokal vormerken, ohne ein gesetztes replace-Kennzeichen zu verlieren:
   // Es darf erst fallen, wenn der Server den Stand wirklich hat.
@@ -259,10 +260,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
     </div>
     <div class="tabs" id="lg-tabs"></div>
     <div class="tierbar">
-      <span class="lbl">Level</span>
-      <div class="seg" id="lg-tier">
-        <button data-t="0">I</button><button data-t="1">II</button><button data-t="2">III</button>
-      </div>
+      <select class="lvlsel" id="lg-tier" aria-label="Level">
+        <option value="0">Level I · wenig</option>
+        <option value="1">Level II · mittel</option>
+        <option value="2">Level III · voll</option>
+      </select>
+      <input class="datumfeld" id="lg-datum" type="date" aria-label="Datum der Einheit">
       <span class="tierhint" id="lg-tierhint"></span>
     </div>
     <div class="daymeta" id="lg-daymeta"></div>
@@ -287,15 +290,26 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const rotEl = wrap.querySelector('#lg-rot');
   const phaseEl = wrap.querySelector('#lg-phase');
   const tierSeg = wrap.querySelector('#lg-tier');
+  const datumEl = wrap.querySelector('#lg-datum');
   const tierHintEl = wrap.querySelector('#lg-tierhint');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
 
   wrap.querySelector('#lg-wkup').onclick = () => { if (state.week < 8) { state.week++; queuePersist(); renderAll(); } }; // Overreach 1-6 + Deload 7-8
   wrap.querySelector('#lg-wkdn').onclick = () => { if (state.week > 1) { state.week--; queuePersist(); renderAll(); } };
   // Das A/B-Feld ist nur Anzeige (folgt der Woche), nicht klickbar.
-  tierSeg.querySelectorAll('button').forEach((b) => {
-    b.onclick = () => { setTier(state.day, state.week, Number(b.dataset.t)); queuePersist(); renderAll(); };
-  });
+  tierSeg.onchange = () => { setTier(state.day, state.week, Number(tierSeg.value)); queuePersist(); renderAll(); };
+
+  // Datum der Einheit. Ohne das weiss man beim Blick auf Woche 3 nie, wann sie
+  // tatsaechlich stattgefunden hat – und ob zwischen zwei Einheiten zwei Tage
+  // lagen oder zwei Wochen. type="date" oeffnet auf dem iPhone den System-
+  // Kalender; eine eigene Kalenderoberflaeche waere nur schlechter.
+  datumEl.onchange = () => {
+    const w = datumEl.value;
+    if (w) state.datum[state.day + '|' + state.week] = w;
+    else delete state.datum[state.day + '|' + state.week];
+    datumEl.classList.toggle('leer', !w);
+    queuePersist();
+  };
 
   // ---- render ------------------------------------------------------
   function renderHeader() {
@@ -338,14 +352,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const cruise = isCruise(state.week);
     rotEl.style.display = cruise ? 'none' : '';   // A/B-Feld im Deload ausblenden
     const tier = tierOf(state.day, state.week);
-    tierSeg.querySelectorAll('button').forEach((b) => {
-      b.classList.toggle('on', Number(b.dataset.t) === tier);
-      b.disabled = cruise;                        // Level im Deload gesperrt (I)
-    });
-    tierHintEl.textContent = cruise ? 'nur Clusters · Level I fest'
-      : tier === 0 ? 'wenig Volumen · schlechter Tag'
-      : tier === 1 ? 'mittleres Volumen'
-      : 'volles Volumen · guter Tag';
+    tierSeg.value = String(tier);
+    tierSeg.disabled = cruise;                    // Level im Deload gesperrt (I)
+    datumEl.value = state.datum[state.day + '|' + state.week] || '';
+    datumEl.classList.toggle('leer', !datumEl.value);
+    // Nur noch im Deload ein Hinweis – er erklaert die gesperrte Liste. Sonst
+    // steht die Bedeutung schon im gewaehlten Eintrag ("Level III · voll"), und
+    // der Platz gehoert dem Datum.
+    tierHintEl.textContent = cruise ? 'im Deload fest' : '';
   }
 
   function renderPrev(node, prevSets, todaySets, pWeek) {
@@ -575,7 +589,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
         // Zuletzt Benutztes nach oben – nur bei Pump und Cluster, denn nur die
         // rotieren frei. Heavy behaelt seine Uebung ohnehin ueber die Rotation.
         const zuletzt = freeEx ? recentNames(baseMR ? 'mr' : 'pump', blk.id).map((r) => r.n) : [];
-        auswahlGruppen(blk.konten, exDef.r || null, zuletzt).forEach((g) => {
+        // Feld schlaegt Block: Bei "Brust + Rücken" bietet das erste Feld nur
+        // Brust an, das zweite nur Rücken – statt beide Male alles.
+        auswahlGruppen(exDef.konten || blk.konten, exDef.r || null, zuletzt).forEach((g) => {
           const og = document.createElement('optgroup'); og.label = g.label;
           g.eintraege.forEach((e) => {
             const o = document.createElement('option'); o.value = e.n; o.textContent = e.n;
@@ -700,7 +716,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein Pump- und Cluster-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
     // Pool retten, bevor die Wochendaten fallen. Neuere Werte gewinnen.
     state.mem = Object.assign({}, state.mem, harvestMem(state.data));
-    state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {};
+    state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {}; state.datum = {};
     state.week = 1; state.day = 'OK-A';
     clearTimeout(saveTimer);
     // Leeren ist eine Absicht: Dieser Stand ersetzt den Server, auch wenn der
@@ -872,6 +888,21 @@ export async function mountLog(container, { userId, readOnly = false }) {
       .catch(() => {});
   }
 
+  // Laeuft der Timer, teilen sich drei Elemente die Leiste – dann passt
+  // "Einheit speichern" nicht mehr in eine Zeile und die Leiste waechst von 69
+  // auf 87 px. Das ist ein Neuntel des Bildschirms, dauerhaft belegt, genau
+  // waehrend man zwischen den Saetzen sitzt. Also kuerzt der Knopf sich selbst.
+  function passeSpeichernAn() {
+    if (!saveBar) return;
+    const box = saveBar.querySelector('#lg-timer');
+    const btn = saveBar.querySelector('#lg-savebtn');
+    const eng = box && !box.hidden;
+    btn.textContent = eng ? '💾' : 'Einheit speichern';
+    btn.classList.toggle('nurzeichen', !!eng);
+    // Ohne Beschriftung braucht der Knopf einen Namen fuer die Sprachausgabe.
+    btn.setAttribute('aria-label', 'Einheit speichern');
+  }
+
   function startTimer(sec, label) {
     if (!saveBar) return;
     primeAudio();
@@ -879,6 +910,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     clearInterval(timerId);
     tEnd = Date.now() + sec * 1000;
     const box = saveBar.querySelector('#lg-timer'); box.hidden = false; box.classList.remove('done');
+    passeSpeichernAn();
     tick();
     timerId = setInterval(tick, 250);
   }
@@ -890,7 +922,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       clearInterval(timerId);
       box.classList.add('done');
       alertDone();
-      setTimeout(() => { box.hidden = true; }, 4000);
+      setTimeout(() => { box.hidden = true; passeSpeichernAn(); }, 4000);
     }
   }
 
@@ -945,6 +977,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saveBar.querySelector('#lg-timerx').onclick = () => {
       clearInterval(timerId);
       saveBar.querySelector('#lg-timer').hidden = true;
+      passeSpeichernAn();
       // Auch den schlafenden Auftrag abbestellen, sonst meldet er sich spaeter
       // fuer eine Pause, die du abgebrochen hast.
       pushTimer('stop');

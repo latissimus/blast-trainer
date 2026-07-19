@@ -102,9 +102,14 @@ export function mergePayload(srv, loc) {
     data: mergeData(srv.data, loc.data),
     ex: mergeNested(srv.ex, loc.ex, pickList),
     notes: mergeNested(srv.notes, loc.notes, pickList),
-    // Tier/Rotation sind bewusste Entscheidungen -> lokal gewinnt pro Schluessel.
+    // ACHTUNG bei neuen Feldern: Diese Funktion baut das Payload NEU auf, sie
+    // kopiert es nicht. Was hier fehlt, faellt beim Zusammenfuehren still weg –
+    // und zwar genau dann, wenn offline gearbeitet wurde.
+    //
+    // Tier/Rotation/Datum sind bewusste Entscheidungen -> lokal gewinnt je Schluessel.
     tier: Object.assign({}, srv.tier, loc.tier),
     rot: Object.assign({}, srv.rot, loc.rot),
+    datum: Object.assign({}, srv.datum, loc.datum),
     // Uebungs-Pool: Vereinigung, nichts wird verworfen.
     mem: Object.assign({}, srv.mem, loc.mem),
     v: 3,
