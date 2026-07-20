@@ -42,6 +42,9 @@
      eckiger. */
   --r-karte:18px;
   --r:7px;
+  /* Seitenmuster als Variablen – siehe Abschnitt "Seitenmuster" weiter unten. */
+  --muster-dreieck:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 9l4.2 7h-8.4z' fill='%230B1B44' fill-opacity='.07'/%3E%3C/svg%3E");
+  --muster-tropfen:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%230B1B44' fill-opacity='.07' d='M6.362 0H2.878l.016.026C3.408.85 4.142 1.471 4.8 1.44 5.441 1.41 6.005.713 6.362 0ZM0 2.517V1.322c.15.364.12.784 0 1.195Zm0 10.6V8.532c.638.135 1.215.513 1.45 1.02.304.66.01 1.526-.435 2.316-.27.481-.6.934-1.015 1.249ZM6.356 24H2.878c-.503-.819-.786-1.821-.42-2.455.37-.641 1.394-.912 2.26-.821.87.091 1.58.545 1.865 1.142.286.598.161 1.335-.194 2.067a5.1 5.1 0 0 1-.033.067Zm10.066 0h-4.92a2.258 2.258 0 0 1-.016-.264c.01-.838.492-1.706 1.162-1.975.67-.269 1.514.045 2.275.542.673.44 1.292.975 1.499 1.697ZM24 8.532v4.585a2.07 2.07 0 0 1-.905.405c-.871.15-2.006-.248-2.4-1.006-.393-.758-.043-1.867.526-2.678.569-.812 1.353-1.325 2.193-1.359.196-.006.394.012.586.053ZM24 1.3v1.227a4.24 4.24 0 0 1-.286.696 2.971 2.971 0 0 1-1.262 1.397 2.446 2.446 0 0 1-2.086.154c-.698-.305-1.3-1.061-1.322-1.812-.022-.747.54-1.493 1.195-2.019a2.954 2.954 0 0 1 2.112-.72c.71.076 1.4.51 1.649 1.077ZM11.502 0h4.92c.027.094.047.192.059.293.105.873-.331 1.98-1.114 2.333-.782.352-1.862-.048-2.64-.65-.695-.54-1.139-1.239-1.225-1.976ZM6.6 3.953c-.84.033-1.625.547-2.194 1.358-.568.811-.919 1.92-.525 2.679.393.758 1.529 1.156 2.4 1.008.871-.15 1.476-.867 1.92-1.656.444-.79.749-1.654.439-2.316-.31-.663-1.2-1.102-2.04-1.073Zm8.093 3.487c-.96-.1-2.1.2-2.51.912-.411.713-.087 1.84.48 2.753.566.912 1.387 1.605 2.116 1.557.73-.048 1.37-.844 1.764-1.658.394-.814.538-1.632.216-2.294-.321-.663-1.104-1.179-2.066-1.27Zm-4.805 6.814c.588.607.895 1.624.61 2.4-.284.77-1.17 1.296-2.045 1.56-.876.264-1.757.254-2.453-.118s-1.229-1.12-1.236-1.81c-.007-.688.52-1.339 1.078-1.819a3.27 3.27 0 0 1 1.857-.907 2.686 2.686 0 0 1 2.189.694Zm7.488 5.56c.72.744 1.862 1.275 2.686.96.823-.314 1.33-1.454 1.488-2.596.158-1.143-.041-2.256-.67-2.715-.629-.458-1.704-.24-2.585.154-.88.393-1.557.977-1.747 1.74-.19.763.106 1.716.828 2.457Z'/%3E%3C/svg%3E");
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
   --display:"Helvetica Neue",Arial,system-ui,sans-serif;
@@ -79,6 +82,8 @@
      brightness(0) faerbt das PNG schwarz und laesst die Transparenz stehen,
      invert(1) macht daraus Weiss – so bleibt es bei einer Bilddatei. */
   --sil-filter:brightness(0) invert(1);
+  --muster-dreieck-dunkel:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 9l4.2 7h-8.4z' fill='%23EDF0F6' fill-opacity='.05'/%3E%3C/svg%3E");
+  --muster-tropfen-dunkel:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23EDF0F6' fill-opacity='.055' d='M6.362 0H2.878l.016.026C3.408.85 4.142 1.471 4.8 1.44 5.441 1.41 6.005.713 6.362 0ZM0 2.517V1.322c.15.364.12.784 0 1.195Zm0 10.6V8.532c.638.135 1.215.513 1.45 1.02.304.66.01 1.526-.435 2.316-.27.481-.6.934-1.015 1.249ZM6.356 24H2.878c-.503-.819-.786-1.821-.42-2.455.37-.641 1.394-.912 2.26-.821.87.091 1.58.545 1.865 1.142.286.598.161 1.335-.194 2.067a5.1 5.1 0 0 1-.033.067Zm10.066 0h-4.92a2.258 2.258 0 0 1-.016-.264c.01-.838.492-1.706 1.162-1.975.67-.269 1.514.045 2.275.542.673.44 1.292.975 1.499 1.697ZM24 8.532v4.585a2.07 2.07 0 0 1-.905.405c-.871.15-2.006-.248-2.4-1.006-.393-.758-.043-1.867.526-2.678.569-.812 1.353-1.325 2.193-1.359.196-.006.394.012.586.053ZM24 1.3v1.227a4.24 4.24 0 0 1-.286.696 2.971 2.971 0 0 1-1.262 1.397 2.446 2.446 0 0 1-2.086.154c-.698-.305-1.3-1.061-1.322-1.812-.022-.747.54-1.493 1.195-2.019a2.954 2.954 0 0 1 2.112-.72c.71.076 1.4.51 1.649 1.077ZM11.502 0h4.92c.027.094.047.192.059.293.105.873-.331 1.98-1.114 2.333-.782.352-1.862-.048-2.64-.65-.695-.54-1.139-1.239-1.225-1.976ZM6.6 3.953c-.84.033-1.625.547-2.194 1.358-.568.811-.919 1.92-.525 2.679.393.758 1.529 1.156 2.4 1.008.871-.15 1.476-.867 1.92-1.656.444-.79.749-1.654.439-2.316-.31-.663-1.2-1.102-2.04-1.073Zm8.093 3.487c-.96-.1-2.1.2-2.51.912-.411.713-.087 1.84.48 2.753.566.912 1.387 1.605 2.116 1.557.73-.048 1.37-.844 1.764-1.658.394-.814.538-1.632.216-2.294-.321-.663-1.104-1.179-2.066-1.27Zm-4.805 6.814c.588.607.895 1.624.61 2.4-.284.77-1.17 1.296-2.045 1.56-.876.264-1.757.254-2.453-.118s-1.229-1.12-1.236-1.81c-.007-.688.52-1.339 1.078-1.819a3.27 3.27 0 0 1 1.857-.907 2.686 2.686 0 0 1 2.189.694Zm7.488 5.56c.72.744 1.862 1.275 2.686.96.823-.314 1.33-1.454 1.488-2.596.158-1.143-.041-2.256-.67-2.715-.629-.458-1.704-.24-2.585.154-.88.393-1.557.977-1.747 1.74-.19.763.106 1.716.828 2.457Z'/%3E%3C/svg%3E");
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
@@ -270,11 +275,19 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .target b{color:var(--ink);font-weight:800}
 .target.met b{color:var(--up)}
 
-.cue{display:flex;gap:10px;flex-wrap:wrap;padding:11px 13px 11px}
+/* Luecke und Seitenpolster knapp: Mit der groesseren Chip-Schrift brauchten
+   "Versagen nur letzter Minisatz" und "2 min" zusammen 6px mehr als die
+   Zeile hergab und rutschten untereinander. */
+.cue{display:flex;gap:8px;flex-wrap:wrap;padding:11px 11px 11px}
 /* Seitliches Polster knapper als frueher (war 11px): Mit der groesseren Schrift
    lief der laengste Chip ("bis metab. Versagen") 5px aus dem Block. Lieber am
    Polster sparen als am Text – das ist eine Ansage, die man im Studio liest. */
-.chip{font-size:12.5px;color:var(--ink);background:var(--surface2);border:var(--bw) solid var(--ink);padding:5px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
+/* inline-flex statt inline: Als reines Inline-Element wirkt das Polster nicht
+   auf die Zeilenbox – der Text sass sichtbar zu hoch im Chip. Jetzt wird er
+   ueber die volle Hoehe zentriert. */
+.chip{display:inline-flex;align-items:center;justify-content:center;line-height:1.2;
+  font-size:12.5px;color:var(--ink);background:var(--surface2);border:var(--bw) solid var(--ink);
+  padding:7px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
 .chip.stretch{background:var(--pink)}
 .chip.rest{background:var(--surface);font-family:var(--mono);font-weight:700}
 .chip.rest:active{background:var(--mr)}
@@ -384,8 +397,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    backdrop-filter, dann zeichnet er nicht mehr die Seite dahinter. */
 .ctrlbar .inner{position:relative;max-width:580px;margin:0 auto;display:flex;gap:4px;padding:5px}
 .ctrlbar .inner::before{content:'';position:absolute;inset:0;z-index:-1;
-  background:rgba(255,255,255,.49);
-  -webkit-backdrop-filter:blur(11px) saturate(1.3);backdrop-filter:blur(11px) saturate(1.3);
+  background:rgba(255,255,255,.36);
+  -webkit-backdrop-filter:blur(7px) saturate(1.25);backdrop-filter:blur(7px) saturate(1.25);
   /* Ohne Schlagschatten (testweise). Er war der Grund fuer die 7px Polster an
      .ctrlbar – ohne ihn koennte die Leiste wieder breiter werden. */
   border:var(--bw) solid var(--ink);border-radius:16px}
@@ -417,7 +430,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* Das Menue rechts. Flieder mit demselben Dreiecksmuster wie die
    Set-O-Meter-Seite – es hebt sich damit von den vier Einstellfeldern ab:
    Die aendern den Inhalt der Seite, dieses wechselt die Seite. */
-:root[data-theme="dark"] .ctrlbar .inner::before{background:rgba(30,33,42,.49)}
+:root[data-theme="dark"] .ctrlbar .inner::before{background:rgba(30,33,42,.36)}
 .ci.menue{background:var(--lila);color:var(--lila-ink);flex:0 0 62px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15'%3E%3Cpath d='M7.5 4l3.2 5.4H4.3z' fill='%230B1B44' fill-opacity='.13'/%3E%3C/svg%3E");
   background-position:center}
@@ -565,18 +578,31 @@ body[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
 :root[data-theme="dark"] body[data-seite="faq"]{--bg:#332B14}
 :root[data-theme="dark"] body[data-seite="profile"]{--bg:#143024}
 
+/* ---------- Seitenmuster ----------
+   Zwei Muster, ueber Variablen waehlbar: die bisherigen Dreiecke und die
+   organischen Tropfen von der Kollektionsseite (dort als CSS-Maske, 112px
+   gekachelt, Deckkraft 0.25).
+   Beide liegen ton-in-ton in der Tintenfarbe statt in einem festen Lila –
+   so tragen sie jeden Seitengrund und kippen im Dark-Mode von selbst mit.
+   Welches Muster eine Seite bekommt, ist unten eine Zeile. */
 body[data-seite="meter"],body[data-seite="prog"],
 body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 9l4.2 7h-8.4z' fill='%230B1B44' fill-opacity='.07'/%3E%3C/svg%3E")}
-/* Nur die Unterseiten, NICHT das Log: "body[data-seite]" haette auch das Log
-   getroffen, weil es dieselbe Auszeichnung traegt. */
+  background-image:var(--muster-dreieck);background-size:auto}
 :root[data-theme="dark"] body[data-seite="meter"],
 :root[data-theme="dark"] body[data-seite="prog"],
 :root[data-theme="dark"] body[data-seite="faq"],
 :root[data-theme="dark"] body[data-seite="profile"],
 :root[data-theme="dark"] body[data-seite="notizbuch"]{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M13 9l4.2 7h-8.4z' fill='%23EDF0F6' fill-opacity='.05'/%3E%3C/svg%3E")}
+  background-image:var(--muster-dreieck-dunkel)}
 :root[data-theme="dark"] body[data-seite="log"]{background-image:none}
+
+/* Tropfenmuster – aktuell auf Set-O-Meter und Notizbuch. Umstellen heisst:
+   Seitennamen zwischen den beiden Bloecken verschieben. */
+body[data-seite="meter"],body[data-seite="notizbuch"]{
+  background-image:var(--muster-tropfen);background-size:112px}
+:root[data-theme="dark"] body[data-seite="meter"],
+:root[data-theme="dark"] body[data-seite="notizbuch"]{
+  background-image:var(--muster-tropfen-dunkel)}
 
 /* ---------- FAQ- und Meter-Seite ---------- */
 .src{font-size:12px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:var(--bw) solid var(--ink);padding-top:10px}
