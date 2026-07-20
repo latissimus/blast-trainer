@@ -1,6 +1,6 @@
 /* ============================================================
    LOGMAN — RetroMuscle Design System (Light / Neo-Brutalismus)
-   Hellblau · Navy · Pink-Akzent · harte schwarze Ränder & Schatten
+   Hellblau · Navy · Pink-Akzent · harte schwarze Ränder, keine Schatten
    ============================================================ */
 :root{
   --bg:#AEDCF6;
@@ -31,10 +31,12 @@
   --brand-outline:#0B1B44;   /* Kontur und Schatten des Schriftzugs */
   --sil-filter:none;         /* Silhouette hinter dem Schriftzug */
 
-  --shadow:4px 4px 0 var(--ink);
-  --shadow-sm:3px 3px 0 var(--ink);
-  --shadow-xs:2px 2px 0 var(--ink);
-  --r:6px;
+  /* EINE Randstaerke fuer alles. Vorher lag sie je nach Element bei 2 oder 3px;
+     das Vorbild (retromuscle.net) haelt sie durchgehend gleich und duenner.
+     Die frueheren --shadow-Variablen sind ersatzlos entfallen: Die Flaechen
+     tragen jetzt nur noch ihre Kontur. */
+  --bw:2px;
+  --r:14px;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
   --display:"Helvetica Neue",Arial,system-ui,sans-serif;
@@ -89,7 +91,7 @@ a{color:var(--navy)}
 
 /* ---------- Top bar / nav ---------- */
 .topbar{position:sticky;top:0;z-index:20;background:var(--bg);
-  border-bottom:3px solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
+  border-bottom:var(--bw) solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
 .topbar .wrap{display:flex;align-items:center;gap:10px}
 /* LOGMAN-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
    Kein Layout-Effekt (Kontur/Schatten ändern die Header-Höhe nicht). */
@@ -106,10 +108,9 @@ a{color:var(--navy)}
   filter:var(--sil-filter);
   background:url(./assets/silhouette-navy.png) center/contain no-repeat}
 .nav{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
-.nav-btn{background:var(--surface);border:2px solid var(--ink);color:var(--ink);
+.nav-btn{background:var(--surface);border:var(--bw) solid var(--ink);color:var(--ink);
   padding:7px 11px;border-radius:var(--r);font-size:12px;font-weight:700;
-  box-shadow:var(--shadow-xs);font-family:var(--display);font-style:italic;text-transform:uppercase}
-.nav-btn:active{transform:translate(2px,2px);box-shadow:none}
+  font-family:var(--display);font-style:italic;text-transform:uppercase}
 .nav-btn.active{background:var(--navy);color:#fff}
 .nav-btn.pink{background:var(--pink)}
 /* FAQ-Knopf, solange das Sheet offen ist. Gelb passt auf den hellblauen Grund
@@ -119,15 +120,14 @@ a{color:var(--navy)}
 :root[data-theme="dark"] .nav-btn.faq-on{background:var(--pink);color:#0B1B44}
 /* 44px = Apples Mindestmass fuer Tippziele. Groesser waere es nicht wert:
    Der Kopf richtet sich an der Logo-Hoehe aus, darueber schiebt der Knopf ihn auf. */
-.nav-av{width:44px;height:44px;padding:0;border:2px solid var(--ink);border-radius:50%;overflow:hidden;
-  background:var(--surface2);box-shadow:var(--shadow-xs);flex:0 0 auto;display:flex;align-items:center;justify-content:center}
-.nav-av:active{transform:translate(2px,2px);box-shadow:none}
+.nav-av{width:44px;height:44px;padding:0;border:var(--bw) solid var(--ink);border-radius:50%;overflow:hidden;
+  background:var(--surface2);flex:0 0 auto;display:flex;align-items:center;justify-content:center}
 .nav-av img{width:100%;height:100%;object-fit:cover;display:block}
 .nav-av-fb{font-family:var(--display);font-style:italic;font-weight:900;font-size:16px;color:var(--navy)}
 .nav-av.active{border-color:var(--pink);box-shadow:0 0 0 3px var(--pink)}
 
 /* ---------- Generic card / buttons ---------- */
-.card{background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.card{background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);padding:18px}
 /* Zwei Karten direkt untereinander (Profil) sollen sich nicht beruehren. */
 .card + .card{margin-top:22px}
 
@@ -166,16 +166,15 @@ a{color:var(--navy)}
 }
 @media (prefers-reduced-motion:reduce){.ladebild .brand{animation:none}}
 /* Theme-Wahl im Profil – gleiche Optik wie die Tier-Umschaltung im Log. */
-.themeseg{display:flex;border:3px solid var(--ink);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
-.themebtn{flex:1;background:var(--surface);border:0;border-right:3px solid var(--ink);color:var(--ink);
+.themeseg{display:flex;border:var(--bw) solid var(--ink);border-radius:var(--r);overflow:hidden}
+.themebtn{flex:1;background:var(--surface);border:0;border-right:var(--bw) solid var(--ink);color:var(--ink);
   padding:12px 0;font-family:var(--display);font-style:italic;font-weight:900;font-size:14px;
   text-transform:uppercase;cursor:pointer}
 .themebtn:last-child{border-right:0}
 .themebtn.on{background:var(--navy);color:#fff}
-.btn{border:3px solid var(--ink);border-radius:var(--r);padding:14px 16px;font-size:15px;
+.btn{border:var(--bw) solid var(--ink);border-radius:var(--r);padding:14px 16px;font-size:15px;
   font-weight:900;font-family:var(--display);font-style:italic;text-transform:uppercase;
-  letter-spacing:.02em;box-shadow:var(--shadow);background:var(--surface);color:var(--ink)}
-.btn:active{transform:translate(4px,4px);box-shadow:none}
+  letter-spacing:.02em;background:var(--surface);color:var(--ink)}
 .btn-primary{background:var(--pink);color:var(--ink);transition:background .3s ease}
 /* Bestaetigung beim Speichern: sofort gelb, danach zurueck ins Pink faden.
    transition:none beim Aufleuchten, damit der Farbwechsel nicht selbst faded. */
@@ -183,13 +182,13 @@ a{color:var(--navy)}
 @media (prefers-reduced-motion:reduce){.btn-primary{transition:none}}
 .btn-navy{background:var(--navy);color:#fff}
 .btn-block{width:100%}
-.btn:disabled{opacity:.5;box-shadow:none;transform:none}
+.btn:disabled{opacity:.5}
 
 /* ---------- Inputs ---------- */
 label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 5px}
-.input{width:100%;background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);
+.input{width:100%;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);
   color:var(--ink);font-family:var(--mono);font-size:15px;padding:12px;margin-bottom:14px}
-.input:focus{outline:none;border-color:var(--pink);box-shadow:var(--shadow-sm)}
+.input:focus{outline:none;border-color:var(--pink)}
 
 /* ---------- Auth ---------- */
 /* Gesamter Anmelde-Block mittig im Viewport; Abstände untereinander bleiben unverändert.
@@ -199,7 +198,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    rueckt die zweite exakt dorthin, wo die erste war, und die Schleife hat
    keinen Sprung. */
 .marquee{display:flex;overflow:hidden;height:var(--mq-h);align-items:center;
-  background:var(--navy);color:#fff;border-bottom:3px solid var(--ink);
+  background:var(--navy);color:#fff;border-bottom:var(--bw) solid var(--ink);
   font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.09em;white-space:nowrap}
 .marquee span{flex:0 0 auto;animation:mq 26s linear infinite}
 @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-100%)}}
@@ -215,15 +214,14 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .auth-sub{text-align:center;color:var(--muted);font-size:13px;margin:0 0 22px}
 .auth-switch{text-align:center;font-size:13px;margin-top:16px}
 .auth-switch button{background:none;border:0;color:var(--navy);font-weight:800;text-decoration:underline;font-family:var(--mono)}
-.msg{border:3px solid var(--ink);border-radius:var(--r);padding:11px 13px;font-size:13px;margin-bottom:14px;font-weight:600}
+.msg{border:var(--bw) solid var(--ink);border-radius:var(--r);padding:11px 13px;font-size:13px;margin-bottom:14px;font-weight:600}
 .msg.err{background:#FFE0D8;color:#8A2A12}
 .msg.ok{background:#D8F5E6;color:#0B5C33}
 
 /* ---------- Log: Info-Button + dezenter Sync-Status ---------- */
-.ibtn{background:var(--surface);border:2px solid var(--ink);color:var(--ink);
+.ibtn{background:var(--surface);border:var(--bw) solid var(--ink);color:var(--ink);
   width:30px;height:30px;border-radius:var(--r);font-size:14px;font-weight:900;
-  box-shadow:var(--shadow-xs);font-family:var(--display);font-style:italic}
-.ibtn:active{transform:translate(2px,2px);box-shadow:none}
+  font-family:var(--display);font-style:italic}
 /* align-self, weil die Nav ihre Kinder streckt: Der Punkt hat eine feste Hoehe
    und saesse sonst oben statt auf einer Linie mit "Log". */
 .save-dot{flex:0 0 auto;align-self:center;display:inline-flex;align-items:center;justify-content:center;
@@ -253,11 +251,11 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .daymeta{font-size:11.5px;color:var(--muted);font-weight:600;min-width:0;line-height:1.35}
 
 /* ---------- Blocks ---------- */
-.block{background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);margin-bottom:14px;overflow:hidden;box-shadow:var(--shadow)}
+.block{background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
 .block.opt{border-style:dashed}
-.bhead{display:flex;align-items:center;gap:8px;padding:12px 13px 9px;border-bottom:3px solid var(--ink)}
+.bhead{display:flex;align-items:center;gap:8px;padding:12px 13px 9px;border-bottom:var(--bw) solid var(--ink)}
 .bhead .mus{font-family:var(--display);font-style:italic;font-weight:900;font-size:16px;text-transform:uppercase}
-.badge{font-size:10px;font-weight:900;letter-spacing:.06em;padding:4px 8px;border-radius:4px;text-transform:uppercase;border:2px solid var(--ink);font-family:var(--display);font-style:italic}
+.badge{font-size:10px;font-weight:900;letter-spacing:.06em;padding:4px 8px;border-radius:999px;text-transform:uppercase;border:var(--bw) solid var(--ink);font-family:var(--display);font-style:italic}
 .b-load{background:var(--load);color:#fff}
 .b-pump{background:var(--pump);color:var(--ink)}
 .b-mr{background:var(--green);color:#fff}
@@ -266,7 +264,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .target.met b{color:var(--up)}
 
 .cue{display:flex;gap:10px;flex-wrap:wrap;padding:11px 13px 11px}
-.chip{font-size:11.5px;color:var(--ink);background:var(--surface2);border:2px solid var(--ink);padding:5px 11px;border-radius:20px;font-weight:600;white-space:nowrap}
+.chip{font-size:11.5px;color:var(--ink);background:var(--surface2);border:var(--bw) solid var(--ink);padding:5px 11px;border-radius:20px;font-weight:600;white-space:nowrap}
 .chip.stretch{background:var(--pink)}
 .chip.rest{background:var(--surface);font-family:var(--mono);font-weight:700}
 .chip.rest:active{background:var(--mr)}
@@ -274,13 +272,13 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 
 .ex{border-top:2px dashed var(--ink);padding:12px 13px}
 .exhead{display:flex;align-items:center;gap:7px;margin-bottom:6px}
-.role{font-size:8.5px;font-weight:900;letter-spacing:.08em;color:var(--muted);border:2px solid var(--ink);
-  padding:2px 5px;border-radius:4px;flex:0 0 auto;font-family:var(--display);font-style:italic;background:var(--surface2)}
+.role{font-size:8.5px;font-weight:900;letter-spacing:.08em;color:var(--muted);border:var(--bw) solid var(--ink);
+  padding:2px 7px;border-radius:999px;flex:0 0 auto;font-family:var(--display);font-style:italic;background:var(--surface2)}
 .role.comp{color:#fff;background:var(--navy)}
 /* Uebungsauswahl. Ein <select>, kein Eingabefeld – eintragbar ist nur, was im
    Katalog steht. Eigenes Pfeil-Zeichen statt des Systemsteuerelements, damit es
    in beiden Themes zum Rest passt; das rechte padding haelt ihm den Platz frei. */
-.exname{width:100%;background:var(--surface2);border:2px solid var(--ink);border-radius:var(--r);
+.exname{width:100%;background:var(--surface2);border:var(--bw) solid var(--ink);border-radius:var(--r);
   color:var(--ink);font-size:14.5px;font-weight:700;padding:9px 26px 9px 10px;font-family:var(--ui);
   appearance:none;-webkit-appearance:none;cursor:pointer;
   background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
@@ -298,7 +296,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .exname option,.exname optgroup{background:var(--surface2);color:var(--ink)}
 .prev{font-size:11px;color:var(--muted);font-family:var(--mono);margin:8px 0 9px;min-height:15px}
 .prev b{color:var(--ink);font-weight:700}
-.delta{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:900;font-family:var(--mono);padding:2px 6px;border-radius:4px;margin-left:6px;border:2px solid var(--ink)}
+.delta{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:900;font-family:var(--mono);padding:2px 8px;border-radius:999px;margin-left:6px;border:var(--bw) solid var(--ink)}
 .d-up{background:#D8F5E6;color:var(--up)}
 .d-hold{background:#FBEFD2;color:var(--hold)}
 .d-down{background:#FFE0D8;color:var(--down)}
@@ -306,7 +304,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .setrow{display:flex;align-items:center;gap:7px;margin-top:8px}
 .sidx{font-family:var(--display);font-style:italic;font-size:13px;color:var(--ink);width:16px;text-align:center;flex:0 0 auto;font-weight:900}
 .fld{position:relative;flex:1;min-width:0}
-.fld input{width:100%;background:var(--surface);border:3px solid var(--ink);color:var(--ink);
+.fld input{width:100%;background:var(--surface);border:var(--bw) solid var(--ink);color:var(--ink);
   font-family:var(--mono);font-size:17px;font-weight:700;text-align:center;padding:11px 4px;border-radius:var(--r)}
 .fld input:focus{outline:none;border-color:var(--pink)}
 .fld .u{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--faint);font-family:var(--mono);pointer-events:none}
@@ -370,7 +368,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   -webkit-backdrop-filter:blur(11px) saturate(1.3);backdrop-filter:blur(11px) saturate(1.3);
   /* Ohne Schlagschatten (testweise). Er war der Grund fuer die 7px Polster an
      .ctrlbar – ohne ihn koennte die Leiste wieder breiter werden. */
-  border:3px solid var(--ink);border-radius:16px}
+  border:var(--bw) solid var(--ink);border-radius:16px}
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;padding:8px 2px;
   border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
@@ -444,11 +442,10 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .seitenkopf{display:flex;align-items:center;gap:10px;padding:18px 0 10px}
 .seitenkopf .section-title{margin:0;flex:1;min-width:0}
 .zurueck{flex:0 0 auto;display:inline-flex;align-items:center;text-decoration:none;
-  background:var(--surface);border:3px solid var(--ink);border-radius:var(--r);
-  box-shadow:var(--shadow-xs);color:var(--ink);padding:8px 12px;
+  background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);
+  color:var(--ink);padding:8px 12px;
   font-family:var(--display);font-style:italic;font-weight:900;font-size:12px;text-transform:uppercase}
 .zurueck .pf{font-family:var(--mono);font-style:normal;font-size:15px;margin-right:3px;line-height:1}
-.zurueck:active{transform:translate(2px,2px);box-shadow:none}
 
 /* ---------- Set-O-Meter ----------
    Liegt in einem Overlay wie die FAQ, geoeffnet ueber den schwebenden Knopf in
@@ -457,8 +454,8 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    sie ueberhaupt waehlt. */
 /* Weiss wie jede andere Karte der App. Frueher hellblau, weil sie auf dem
    fliederfarbenen Blatt lag – auf der hellblauen Seite waere sie unsichtbar. */
-.som-karte{background:var(--surface);border:3px solid var(--ink);border-radius:12px;
-  padding:13px 14px;box-shadow:var(--shadow)}
+.som-karte{background:var(--surface);border:var(--bw) solid var(--ink);border-radius:12px;
+  padding:13px 14px}
 /* Im Dark-Mode waere ein vollflaechiges Flieder eine Leuchtreklame. Derselbe
    Farbton, nur tief – die Zuordnung zum Knopf bleibt, das Auge auch. */
 :root[data-theme="dark"] .som-karte{background:var(--surface)}
@@ -470,7 +467,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 /* Eine Farbe, kein Zielbalken, keine Zahl. Das Ding vergleicht die Gruppen
    miteinander und sagt sonst nichts – jede zweite Farbe waere eine Wertung.
    Navy traegt in beiden Themes (im Dark-Mode aufgehellt, siehe Variablen). */
-.som-track{flex:1;height:9px;background:var(--surface);border:1px solid var(--ink);border-radius:4px;overflow:hidden}
+.som-track{flex:1;height:9px;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:999px;overflow:hidden}
 .som-fill{display:block;height:100%;background:var(--navy);transition:width .18s}
 .som-hinweis{margin:10px 0 0;font-size:11px;line-height:1.45;color:var(--muted)}
 
@@ -478,13 +475,12 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    Satzzahl aus der Vorlage, das hier ist die Ausnahme für einen Muskel, dem
    man mehr geben will. */
 .extrabar{display:flex;gap:7px;margin-top:9px}
-.extra{background:var(--surface2);border:2px solid var(--ink);border-radius:var(--r);
+.extra{background:var(--surface2);border:var(--bw) solid var(--ink);border-radius:var(--r);
   padding:5px 11px;font-size:11px;font-weight:800;font-family:var(--mono);color:var(--ink);
-  cursor:pointer;box-shadow:var(--shadow-xs)}
-.extra:active{transform:translate(2px,2px);box-shadow:none}
+  cursor:pointer}
 .extra.weg{color:var(--muted)}
 
-.volbar{background:var(--navy);color:#fff;border:3px solid var(--ink);border-radius:var(--r);padding:14px 15px;margin-bottom:14px;box-shadow:var(--shadow)}
+.volbar{background:var(--navy);color:#fff;border:var(--bw) solid var(--ink);border-radius:var(--r);padding:14px 15px;margin-bottom:14px}
 .volbar h3{margin:0 0 4px;font-size:12px;color:#fff}
 /* Kein margin-bottom mehr: Unter der Zahl kommt nichts mehr. Die Muskelzeilen
    (.volrow/.track/.fill) sind mit der Verschlankung entfallen. */
@@ -498,13 +494,12 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    iPhone-Home-Indicator bleibt frei. */
 
 /* "Neue Phase" – Reset-Button (nur letzte Woche) */
-.phase-reset{display:block;width:100%;margin:2px 0 6px;background:var(--mr);border:3px solid var(--ink);
-  border-radius:var(--r);box-shadow:var(--shadow);padding:15px;font-family:var(--display);font-style:italic;
+.phase-reset{display:block;width:100%;margin:2px 0 6px;background:var(--mr);border:var(--bw) solid var(--ink);
+  border-radius:var(--r);padding:15px;font-family:var(--display);font-style:italic;
   font-weight:900;text-transform:uppercase;font-size:14px;color:var(--ink);text-align:center;letter-spacing:.02em}
-.phase-reset:active{transform:translate(4px,4px);box-shadow:none}
 /* Im Dark-Mode ist Gelb + helle Schrift kaum lesbar. Stattdessen hellblau mit
    dunkler Kontur/Schrift – steht klar auf dem dunklen Grund und bleibt on-brand. */
-:root[data-theme="dark"] .phase-reset{background:#AEDCF6;color:#0B1B44;border-color:#0B1B44;box-shadow:4px 4px 0 #0B1B44}
+:root[data-theme="dark"] .phase-reset{background:#AEDCF6;color:#0B1B44;border-color:#0B1B44}
 
 /* Platz fuer die feste Bedienleiste unten. Zwei Zeilen je Feld machen sie
    hoeher als die fruehere Speicherleiste – ohne das verdeckt sie den
@@ -513,7 +508,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 
 .toast{position:fixed;left:50%;bottom:112px;transform:translateX(-50%) translateY(18px);opacity:0;
   background:var(--navy);color:#fff;font-size:12.5px;font-weight:800;padding:11px 18px;border-radius:var(--r);
-  border:3px solid var(--ink);box-shadow:var(--shadow);z-index:40;transition:.22s;pointer-events:none;
+  border:var(--bw) solid var(--ink);z-index:40;transition:.22s;pointer-events:none;
   white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;font-family:var(--display);font-style:italic;text-transform:uppercase}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
@@ -560,7 +555,7 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 :root[data-theme="dark"] body[data-seite="log"]{background-image:none}
 
 /* ---------- FAQ- und Meter-Seite ---------- */
-.src{font-size:10px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:2px solid var(--ink);padding-top:10px}
+.src{font-size:10px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:var(--bw) solid var(--ink);padding-top:10px}
 /* FAQ-Accordion */
 /* Abschnittsueberschrift im FAQ. Die Liste ist lang genug, dass man sonst nicht
    mehr weiss, auf welcher Ebene man liest – vom Prinzip bis zur Bedienung. */
@@ -568,13 +563,13 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
   text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .faq-sektion:first-of-type{border-top:0;margin-top:4px;padding-top:0}
-.faq{border:3px solid var(--ink);border-radius:var(--r);background:var(--surface);margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow-xs)}
+.faq{border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface);margin-bottom:10px;overflow:hidden}
 .faq>summary{list-style:none;cursor:pointer;padding:12px 40px 12px 13px;position:relative;
   font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:13px;color:var(--navy)}
 .faq>summary::-webkit-details-marker{display:none}
 .faq>summary::after{content:"+";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:900;color:var(--ink)}
 .faq[open]>summary::after{content:"–"}
-.faq[open]>summary{border-bottom:3px solid var(--ink);background:var(--surface2)}
+.faq[open]>summary{border-bottom:var(--bw) solid var(--ink);background:var(--surface2)}
 .faq-a{padding:12px 13px}
 .faq-a p{margin:0 0 6px;font-size:12.5px;color:var(--muted);line-height:1.55}
 .faq-a p:last-child{margin-bottom:0}
@@ -582,21 +577,20 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 
 /* ---------- Profile ---------- */
 .profile-top{display:flex;align-items:center;gap:16px;margin-bottom:20px}
-.avatar{width:88px;height:88px;border-radius:50%;border:3px solid var(--ink);object-fit:cover;background:var(--surface2);box-shadow:var(--shadow-sm);flex:0 0 auto}
+.avatar{width:88px;height:88px;border-radius:50%;border:var(--bw) solid var(--ink);object-fit:cover;background:var(--surface2);flex:0 0 auto}
 .avatar-fallback{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-style:italic;font-weight:900;font-size:34px;color:var(--navy)}
-.role-tag{display:inline-block;background:var(--pink);border:2px solid var(--ink);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:900;text-transform:uppercase;font-family:var(--display);font-style:italic;margin-top:4px}
+.role-tag{display:inline-block;background:var(--pink);border:var(--bw) solid var(--ink);border-radius:999px;padding:2px 9px;font-size:11px;font-weight:900;text-transform:uppercase;font-family:var(--display);font-style:italic;margin-top:4px}
 .role-tag.admin{background:var(--mr)}
 
 /* ---------- Admin ---------- */
-.cust-row{display:flex;align-items:center;gap:12px;padding:12px;border:3px solid var(--ink);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow-sm);margin-bottom:10px;width:100%;text-align:left}
-.cust-row:active{transform:translate(3px,3px);box-shadow:none}
-.cust-row .av{width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);object-fit:cover;background:var(--surface2);flex:0 0 auto}
+.cust-row{display:flex;align-items:center;gap:12px;padding:12px;border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface);margin-bottom:10px;width:100%;text-align:left}
+.cust-row .av{width:44px;height:44px;border-radius:50%;border:var(--bw) solid var(--ink);object-fit:cover;background:var(--surface2);flex:0 0 auto}
 .cust-row .nm{font-weight:800}
 .cust-row .em{font-size:12px;color:var(--muted)}
 .cust-row .chev{margin-left:auto;font-size:20px;font-weight:900}
 .section-title{font-size:26px;margin:6px 0 16px}
 .back-link{background:none;border:0;color:var(--navy);font-weight:800;font-family:var(--mono);padding:0;margin-bottom:12px;text-decoration:underline}
-.readonly-note{background:var(--mr);border:3px solid var(--ink);border-radius:var(--r);padding:10px 13px;font-size:12px;font-weight:700;margin-bottom:14px}
+.readonly-note{background:var(--mr);border:var(--bw) solid var(--ink);border-radius:var(--r);padding:10px 13px;font-size:12px;font-weight:700;margin-bottom:14px}
 .empty{color:var(--muted);font-weight:600;padding:20px 0;text-align:center}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -611,8 +605,8 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 /* Einmaliger Hinweis fuer Benachrichtigungen. Kein Dauergast: Nach dem Tippen
    oder Wegwischen ist er fuer immer weg. */
 .pushbar{display:flex;align-items:center;gap:8px;margin-top:12px;
-  background:var(--mr);border:3px solid var(--ink);border-radius:var(--r);
-  box-shadow:var(--shadow-sm);padding:4px 4px 4px 12px}
+  background:var(--mr);border:var(--bw) solid var(--ink);border-radius:var(--r);
+  padding:4px 4px 4px 12px}
 .pb-go{flex:1;background:none;border:0;text-align:left;color:var(--ink);
   font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
   text-transform:uppercase;padding:8px 0}
@@ -629,7 +623,7 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 .mess-datum{font-size:11.5px;color:var(--muted);margin-top:4px}
 .mess-leer{font-size:13px;color:var(--muted)}
 .mess-hinweis{font-size:11.5px;color:var(--muted);line-height:1.5;margin:10px 0 0;
-  border-left:3px solid var(--faint);padding-left:9px}
+  border-left:var(--bw) solid var(--faint);padding-left:9px}
 .mess-neu{margin-top:14px}
 .mess-neu summary{font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
   text-transform:uppercase;cursor:pointer;padding:8px 0}
@@ -656,11 +650,10 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 .nb-raster{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:22px}
 /* Hinweis, wenn der Spiegel gezeigt wird statt frischer Serverdaten. */
 .nb-offline{margin:14px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted);
-  border-left:3px solid var(--ink);padding-left:9px;border-radius:0}
+  border-left:var(--bw) solid var(--ink);padding-left:9px;border-radius:0}
 .nb-kachel{display:flex;flex-direction:column;gap:4px;text-align:left;
-  background:var(--surface);border:2px solid var(--ink);border-radius:var(--r);
-  padding:10px;box-shadow:var(--shadow-xs);min-height:76px;overflow:hidden}
-.nb-kachel:active{transform:translate(2px,2px);box-shadow:none}
+  background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);
+  padding:10px;min-height:76px;overflow:hidden}
 .nb-k-titel{font-family:var(--display);font-style:italic;font-weight:900;
   font-size:14px;line-height:1.15;color:var(--ink);overflow-wrap:anywhere}
 /* Zwei Zeilen Vorschau, dann Schluss – mehr waere Fliesstext in Briefmarken. */
@@ -672,9 +665,8 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
    Schrift, ~9px Polster). Damit fasst sich die Seite an wie das Log. */
 .nb-leiste{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .nb-chip{font-size:13.5px;font-weight:700;color:var(--ink);background:var(--surface);
-  border:2px solid var(--ink);border-radius:20px;padding:8px 15px;
-  box-shadow:var(--shadow-xs);white-space:nowrap;cursor:pointer}
-.nb-chip:active{transform:translate(2px,2px);box-shadow:none}
+  border:var(--bw) solid var(--ink);border-radius:20px;padding:8px 15px;
+  white-space:nowrap;cursor:pointer}
 .nb-chip.pink{background:var(--pink)}
 
 /* Leseansicht – der einzige Ort, an dem Links anklickbar sind. */
@@ -685,7 +677,7 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 
 .nb-bilder{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .nb-bild{max-width:100%;width:120px;height:120px;object-fit:cover;
-  border:2px solid var(--ink);border-radius:10px;background:var(--surface2);display:block}
+  border:var(--bw) solid var(--ink);border-radius:10px;background:var(--surface2);display:block}
 /* Antippbare Vorschau: nur in der Leseansicht, im Formular traegt das Bild
    stattdessen sein Entfernen-Kreuz. */
 .nb-bild.auf{cursor:zoom-in}
@@ -693,13 +685,13 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   display:flex;align-items:center;justify-content:center;
   padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px)}
 .nb-lupe img{max-width:100%;max-height:100%;object-fit:contain;
-  border:3px solid #fff;border-radius:10px;display:block}
+  border:var(--bw) solid #fff;border-radius:10px;display:block}
 .nb-lupe-zu{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:14px;
-  width:40px;height:40px;padding:0;border:3px solid #0A0A0A;border-radius:50%;
+  width:40px;height:40px;padding:0;border:var(--bw) solid #0A0A0A;border-radius:50%;
   background:#fff;color:#0A0A0A;font-size:22px;font-weight:900;line-height:1}
 .nb-slot{position:relative;display:inline-block}
 .nb-bildweg{position:absolute;top:-7px;right:-7px;width:24px;height:24px;padding:0;
-  border:2px solid var(--ink);border-radius:50%;background:var(--surface);
+  border:var(--bw) solid var(--ink);border-radius:50%;background:var(--surface);
   font-weight:900;line-height:1;font-size:14px;color:var(--ink)}
 
 .nb-in-titel{font-family:var(--display);font-style:italic;font-weight:900;font-size:18px}
