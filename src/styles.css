@@ -144,6 +144,23 @@ a{color:var(--navy)}
   to{transform:scale(1.25);opacity:1}
 }
 @media (prefers-reduced-motion:reduce){.splash .brand{animation:none}}
+
+/* Ladebildschirm beim Kaltstart – dieselbe Geste wie der Splash, nur mit dem
+   Laufband darueber und einer Zeile darunter. Er zieht auf und atmet dann
+   weiter: Ohne WLAN steht er laenger, und ein eingefrorenes Logo laesst die
+   App haengend wirken. Der Puls startet bei 1.25, wo splash-in aufhoert. */
+.ladebild{min-height:calc(100dvh - var(--mq-h) - 90px);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;
+  padding:20px 20px calc(20px + env(safe-area-inset-bottom))}
+.ladebild .brand{font-size:40px;
+  animation:splash-in 2s cubic-bezier(.16,.84,.32,1) both,
+            splash-puls 2.6s 2s ease-in-out infinite}
+.ladebild .auth-sub{margin:0}
+@keyframes splash-puls{
+  0%,100%{transform:scale(1.25)}
+  50%{transform:scale(1.08)}
+}
+@media (prefers-reduced-motion:reduce){.ladebild .brand{animation:none}}
 /* Theme-Wahl im Profil – gleiche Optik wie die Tier-Umschaltung im Log. */
 .themeseg{display:flex;border:3px solid var(--ink);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
 .themebtn{flex:1;background:var(--surface);border:0;border-right:3px solid var(--ink);color:var(--ink);
@@ -623,6 +640,9 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 /* Luft nach dem "+ Neue Notiz"-Chip: Der Chip ist eine Handlung, die Kacheln
    sind Inhalt. Ohne Abstand lasen sich beide wie eine zusammenhaengende Gruppe. */
 .nb-raster{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:22px}
+/* Hinweis, wenn der Spiegel gezeigt wird statt frischer Serverdaten. */
+.nb-offline{margin:14px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted);
+  border-left:3px solid var(--ink);padding-left:9px;border-radius:0}
 .nb-kachel{display:flex;flex-direction:column;gap:4px;text-align:left;
   background:var(--surface);border:2px solid var(--ink);border-radius:var(--r);
   padding:10px;box-shadow:var(--shadow-xs);min-height:76px;overflow:hidden}

@@ -363,7 +363,10 @@ async function render() {
 
   if (!profile || profile.id !== session.user.id) {
     // Nur wenn kein Splash laeuft – sonst wuerde er ihn ueberschreiben.
-    if (!splashFertig) app.innerHTML = `${MARQUEE}<div class="wrap" style="padding-top:40px;text-align:center"><div class="brand" style="font-size:30px">${brandSvg()}</div><p class="auth-sub">lädt…</p></div>`;
+    // Dasselbe aufziehende Logo wie beim Anmelden. Es endet aber nicht, sondern
+    // atmet danach weiter: Dieser Schirm steht ohne WLAN deutlich laenger, und
+    // ein eingefrorenes Logo sieht aus wie eine haengende App.
+    if (!splashFertig) app.innerHTML = `${MARQUEE}<div class="ladebild"><span class="brand">${brandSvg()}</span><p class="auth-sub">lädt…</p></div>`;
     const zwischengespeichert = readProfile(session.user.id);
     if (!navigator.onLine && zwischengespeichert) {
       // Nachweislich offline: gar nicht erst fragen. Der Versuch laeuft nur in

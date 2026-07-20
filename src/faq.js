@@ -16,7 +16,7 @@ export function mountFaq(container) {
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
       <div class="seitenkopf">
-        <h1 class="section-title">FAQ</h1>
+        <h1 class="section-title">💬 FAQ</h1>
         <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
       </div>
         <p class="faq-sektion">LOGMAN und das Prinzip</p>

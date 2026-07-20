@@ -10,6 +10,7 @@
 
 const LOG_KEY = (uid) => 'blast:log:' + uid;
 const PROFILE_KEY = (uid) => 'blast:profile:' + uid;
+const NOTIZ_KEY = (uid) => 'blast:notizen:' + uid;
 
 // Jeder Zugriff gekapselt: Im privaten Modus oder bei vollem Speicher wirft
 // localStorage. Das darf die App nie zum Absturz bringen – im schlimmsten Fall
@@ -42,6 +43,19 @@ export const writeLog = (uid, payload, dirty, replace = false) =>
 
 export const readProfile = (uid) => safeGet(PROFILE_KEY(uid));
 export const writeProfile = (uid, profile) => safeSet(PROFILE_KEY(uid), profile);
+
+// Notizbuch: reiner LESE-Spiegel, anders als das Log.
+//
+// Geschrieben wird weiterhin nur online. Der Grund fuer den Spiegel ist das
+// Lesen: Cues, Sitzhoehen und Griffbreiten schlaegt man MITTEN in der Einheit
+// nach – im Keller ohne Empfang. Ohne Spiegel war die Seite dort leer, also
+// genau in dem Fall unbrauchbar, fuer den sie gebaut wurde.
+//
+// Deshalb auch keine Zusammenfuehrung wie bei mergePayload: Es gibt keine
+// lokalen Aenderungen, die mit dem Server streiten koennten. Der Server hat
+// immer recht, der Spiegel ist nur die letzte gesehene Fassung.
+export const readNotizen = (uid) => safeGet(NOTIZ_KEY(uid));
+export const writeNotizen = (uid, notizen) => safeSet(NOTIZ_KEY(uid), notizen);
 
 // ---- Zusammenfuehren -------------------------------------------------------
 // Nur noetig, wenn lokal ungespeicherte Aenderungen liegen UND der Server

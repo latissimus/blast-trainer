@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { readNotizen, writeNotizen } from './localstore.js';
 import { zurueckChip } from './meter.js';
 
 // Notizbuch: freie Notizen mit Links und Bildern.
@@ -98,14 +99,36 @@ export async function mountNotizbuch(container, { userId }) {
   // Links man nicht antippen kann, verfehlt den halben Zweck.
   let offen = null;
   let bearbeitet = false;
+  // Der Server war nicht erreichbar, gezeigt wird der lokale Spiegel.
+  let veraltet = false;
 
+  // Erst den Spiegel zeigen, dann vom Server nachziehen.
+  //
+  // Ohne das war die Seite im Funkloch leer – ausgerechnet dort, wo man sie
+  // braucht. Der Spiegel steht sofort da, auch ohne Empfang; scheitert der
+  // Server, bleibt er stehen und sagt es.
   async function laden() {
-    const { data, error } = await supabase
-      .from('notizen').select('*').order('updated_at', { ascending: false });
-    if (error) { inhalt.innerHTML = `<div class="msg err">${escape(error.message)}</div>`; return; }
-    notizen = data || [];
     offen = null;
     bearbeitet = false;
+
+    const lokal = readNotizen(userId);
+    if (lokal) { notizen = lokal; veraltet = false; await zeichne(); }
+
+    try {
+      const { data, error } = await supabase
+        .from('notizen').select('*').order('updated_at', { ascending: false });
+      if (error) throw error;
+      notizen = data || [];
+      writeNotizen(userId, notizen);
+      veraltet = false;
+    } catch (e) {
+      if (!lokal) {
+        inhalt.innerHTML = `<div class="msg err">Keine Verbindung – und auf diesem Gerät
+          liegt noch kein Notizbuch. Bitte einmal mit Internet öffnen.</div>`;
+        return;
+      }
+      veraltet = true;   // Spiegel bleibt stehen, Hinweis erscheint
+    }
     await zeichne();
   }
 
@@ -134,6 +157,8 @@ export async function mountNotizbuch(container, { userId }) {
 
     inhalt.innerHTML = `
       <div class="nb-leiste"><button class="nb-chip pink" id="nb-neu">+ Neue Notiz</button></div>
+      ${veraltet ? `<p class="nb-offline">Ohne Verbindung – zuletzt geladener Stand.
+        Bilder und Änderungen brauchen Internet.</p>` : ''}
       ${notizen.length
         ? `<div class="nb-raster">${kacheln}</div>`
         : `<p class="som-hinweis">Noch nichts notiert. Platz für Links, Screenshots,
@@ -285,6 +310,13 @@ export async function mountNotizbuch(container, { userId }) {
     };
 
     el.querySelector('.nb-ok').onclick = async () => {
+      // Geschrieben wird nur online. Ohne diesen Riegel liefe der Aufruf in
+      // einen Timeout und meldete dann etwas Technisches – gesagt gehoert aber,
+      // dass der Text noch im Feld steht und nichts verloren ist.
+      if (!navigator.onLine) {
+        alert('Keine Verbindung. Dein Text bleibt stehen – sichere ihn, sobald du wieder online bist.');
+        return;
+      }
       const felder = { titel: titelIn.value.trim(), text: textIn.value, bilder };
       if (n.neu) {
         const { error } = await supabase.from('notizen').insert({ user_id: userId, ...felder });
