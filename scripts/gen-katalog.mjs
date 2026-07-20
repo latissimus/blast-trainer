@@ -45,7 +45,8 @@ const KORREKTUREN = {
   'Multipresse Shruggs': { neben: [] },
   'KH Shruggs': { neben: [] },
   'Kabel Shruggs': { neben: [] },
-  'PL Abduktionen': { haupt: 'Glutes', neben: [] },
+  // Name in der Excel geaendert von 'PL Abduktionen' zu 'PlateLoaded Abduktionen'.
+  'PlateLoaded Abduktionen': { haupt: 'Glutes', neben: [] },
   'Steck Abduktionen': { haupt: 'Glutes', neben: [] },
 };
 
