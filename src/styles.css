@@ -338,8 +338,10 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    Je Feld zwei Zeilen: oben der Wert, unten wofuer er steht. Ohne die zweite
    Zeile waere "II" oder "19.07." nicht deutbar, und mit einer einzelnen Zeile
    passte beides nicht in 60px. */
+/* Seitliches Polster bewusst knapp: Auf dem Telefon greift nicht max-width,
+   sondern diese Zahl – sie allein bestimmt, wie breit die Leiste wird. */
 .ctrlbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
-  padding:8px 10px max(6px, calc(env(safe-area-inset-bottom) - 6px));
+  padding:8px 5px max(6px, calc(env(safe-area-inset-bottom) - 6px));
   background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 55%)}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
@@ -364,7 +366,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;padding:8px 2px;
   border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
-.ci .wert{font-family:var(--display);font-style:italic;font-weight:900;font-size:13.5px;
+.ci .wert{font-family:var(--display);font-style:italic;font-weight:900;font-size:15px;
   text-transform:uppercase;letter-spacing:.01em;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ci .wert.leer{color:var(--faint)}
@@ -372,8 +374,11 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    ebenso (Badges, Chips, Blocktitel). Die WERTE bleiben gemischt – "WO 3" und
    "TAG 3" in Versalkursive wirken laut, und beim Datum aendert sich ohnehin
    nichts. */
-.ci .lbl{font-family:var(--mono);font-size:8px;font-weight:800;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.06em;
+/* 9.5px statt 8px und ein dunkleres Grau: Bei 8px war die Beschriftung im
+   Studio kaum zu lesen. Das Sperren faellt dabei von .06 auf .04em – sonst
+   wuerde "NOTIZBUCH" auf einem schmalen Telefon abgeschnitten. */
+.ci .lbl{font-family:var(--mono);font-size:9.5px;font-weight:800;color:var(--ink);opacity:.72;
+  text-transform:uppercase;letter-spacing:.04em;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Das native Element liegt unsichtbar ueber dem Feld: <select> und
    type="date" oeffnen so die Systemauswahl von iOS, ohne dass wir sie
