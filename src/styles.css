@@ -149,8 +149,12 @@ a{color:var(--navy)}
    Laufband darueber und einer Zeile darunter. Er zieht auf und atmet dann
    weiter: Ohne WLAN steht er laenger, und ein eingefrorenes Logo laesst die
    App haengend wirken. Der Puls startet bei 1.25, wo splash-in aufhoert. */
+/* Der Abstand ist bewusst gross: Der Schriftzug ist ein SVG mit
+   overflow:visible – Kontur, Schatten und Silhouette werden AUSSERHALB der Box
+   gezeichnet, und die Skalierung auf 125% traegt weiter auf. Das Layout weiss
+   von beidem nichts, mit knappem Abstand lag "lädt…" unter dem Logo. */
 .ladebild{min-height:calc(100dvh - var(--mq-h) - 90px);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:10px;
+  align-items:center;justify-content:center;gap:38px;
   padding:20px 20px calc(20px + env(safe-area-inset-bottom))}
 .ladebild .brand{font-size:40px;
   animation:splash-in 2s cubic-bezier(.16,.84,.32,1) both,
@@ -338,10 +342,12 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    Je Feld zwei Zeilen: oben der Wert, unten wofuer er steht. Ohne die zweite
    Zeile waere "II" oder "19.07." nicht deutbar, und mit einer einzelnen Zeile
    passte beides nicht in 60px. */
-/* Seitliches Polster bewusst knapp: Auf dem Telefon greift nicht max-width,
-   sondern diese Zahl – sie allein bestimmt, wie breit die Leiste wird. */
+/* Seitliches Polster bestimmt auf dem Telefon die Breite der Leiste – nicht
+   max-width, die greift dort nie.
+   UNTERGRENZE sind 7px: Der Schlagschatten steht 4px nach rechts, darunter
+   beruehrt die rechte untere Ecke den Bildschirmrand. */
 .ctrlbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
-  padding:8px 5px max(6px, calc(env(safe-area-inset-bottom) - 6px));
+  padding:8px 7px max(6px, calc(env(safe-area-inset-bottom) - 6px));
   background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 55%)}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
@@ -426,9 +432,10 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .ctrlbar.timer-an .timerfeld.done{color:#8FE9B4}
 
 /* Kopfzeile ueber dem ersten Block: nur noch Phase und Tagesbeschreibung. */
-/* Luft zwischen Kopfleiste und erstem Block – bewusst mehr als die 14px
-   zwischen zwei Bloecken, damit der Anfang der Liste als Anfang liest. */
-.erstblock{padding-top:22px}
+/* Genau so viel Luft wie zwischen zwei Bloecken (.block hat margin-bottom:14px).
+   Stand vorher auf 22px, damit der Anfang der Liste als Anfang liest – im
+   Gebrauch wirkte der Sonderabstand aber nur wie ein Versehen. */
+.erstblock{padding-top:14px}
 
 /* Kopf der Unterseiten: Titel links, Rueckweg rechts. Der Chip ist der
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
