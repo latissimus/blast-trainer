@@ -3,24 +3,24 @@
    Hellblau · Navy · Pink-Akzent · harte schwarze Ränder, keine Schatten
    ============================================================ */
 :root{
-  --bg:#AEDCF6;
+  --bg:#B1E7FF;      /* gemessen auf retromuscle.net */
   --surface:#FFFFFF;
   --surface2:#EAF4FC;
-  --navy:#0B1B44;
-  --pink:#F48FB8;
-  --pink-press:#EE6FA3;
-  --ink:#0A0A0A;
+  --navy:#001454;
+  --pink:#FF69AE;
+  --pink-press:#F0448F;
+  --ink:#141414;
   --muted:#586274;
   --faint:#8A94A3;
   --line:#0A0A0A;
 
-  --load:#0B1B44;   /* navy  */
-  --pump:#F48FB8;   /* pink  */
+  --load:#001454;   /* navy  */
+  --pump:#FF69AE;   /* pink  */
   --mr:#FFDE59;     /* yellow*/
   /* Flieder: gehoert nur dem Set-O-Meter. Bewusst eine Farbe, die sonst nichts
      benutzt – der schwebende Knopf soll sich vom pinken Speichern daneben auf
      einen Blick unterscheiden. Wie die anderen Akzente in beiden Themes gleich. */
-  --lila:#D9BBF7;
+  --lila:#DFBAFF;
   --lila-ink:#2A1240;   /* Symbol auf Flieder – in beiden Themes derselbe Kontrast */
   --up:#12A150;
   --green:#154C2B;  /* MR-Badge und abgelaufener Timer – dieselbe Optik */
@@ -28,7 +28,7 @@
   --hold:#C7912A;
 
   --mq-h:34px;      /* Hoehe des Laufbands – auth-shell rechnet damit */
-  --brand-outline:#0B1B44;   /* Kontur und Schatten des Schriftzugs */
+  --brand-outline:#001454;   /* Kontur und Schatten des Schriftzugs */
   --sil-filter:none;         /* Silhouette hinter dem Schriftzug */
 
   /* EINE Randstaerke fuer alles. Vorher lag sie je nach Element bei 2 oder 3px;
@@ -36,7 +36,12 @@
      Die frueheren --shadow-Variablen sind ersatzlos entfallen: Die Flaechen
      tragen jetzt nur noch ihre Kontur. */
   --bw:2px;
-  --r:14px;
+  /* ZWEI Radien, nicht einer. Das Vorbild rundet Karten grosszuegig (1rem =
+     18px), Bedienelemente aber fast eckig (0.375rem = 6.75px). Pauschal alles
+     gleich zu runden war mein Fehler – Knoepfe wurden runder als dort, Karten
+     eckiger. */
+  --r-karte:18px;
+  --r:7px;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
   --display:"Helvetica Neue",Arial,system-ui,sans-serif;
@@ -81,8 +86,10 @@ body{
   background:var(--bg);color:var(--ink);font-family:var(--mono);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
 }
+/* 700 statt 900: Das Vorbild setzt --heading-font-weight auf 700. Unsere
+   kursiven Versalien waren spuerbar wuchtiger als dort. */
 h1,h2,h3,.display{
-  font-family:var(--display);font-style:italic;font-weight:900;
+  font-family:var(--display);font-style:italic;font-weight:700;
   text-transform:uppercase;letter-spacing:-.01em;line-height:.95;margin:0;
 }
 button{font-family:inherit;cursor:pointer}
@@ -123,11 +130,11 @@ a{color:var(--navy)}
 .nav-av{width:44px;height:44px;padding:0;border:var(--bw) solid var(--ink);border-radius:50%;overflow:hidden;
   background:var(--surface2);flex:0 0 auto;display:flex;align-items:center;justify-content:center}
 .nav-av img{width:100%;height:100%;object-fit:cover;display:block}
-.nav-av-fb{font-family:var(--display);font-style:italic;font-weight:900;font-size:16px;color:var(--navy)}
+.nav-av-fb{font-family:var(--display);font-style:italic;font-weight:700;font-size:16px;color:var(--navy)}
 .nav-av.active{border-color:var(--pink);box-shadow:0 0 0 3px var(--pink)}
 
 /* ---------- Generic card / buttons ---------- */
-.card{background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);padding:18px}
+.card{background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte);padding:18px}
 /* Zwei Karten direkt untereinander (Profil) sollen sich nicht beruehren. */
 .card + .card{margin-top:22px}
 
@@ -166,14 +173,14 @@ a{color:var(--navy)}
 }
 @media (prefers-reduced-motion:reduce){.ladebild .brand{animation:none}}
 /* Theme-Wahl im Profil – gleiche Optik wie die Tier-Umschaltung im Log. */
-.themeseg{display:flex;border:var(--bw) solid var(--ink);border-radius:var(--r);overflow:hidden}
+.themeseg{display:flex;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);overflow:hidden}
 .themebtn{flex:1;background:var(--surface);border:0;border-right:var(--bw) solid var(--ink);color:var(--ink);
-  padding:12px 0;font-family:var(--display);font-style:italic;font-weight:900;font-size:14px;
+  padding:12px 0;font-family:var(--display);font-style:italic;font-weight:700;font-size:14px;
   text-transform:uppercase;cursor:pointer}
 .themebtn:last-child{border-right:0}
 .themebtn.on{background:var(--navy);color:#fff}
 .btn{border:var(--bw) solid var(--ink);border-radius:var(--r);padding:14px 16px;font-size:15px;
-  font-weight:900;font-family:var(--display);font-style:italic;text-transform:uppercase;
+  font-weight:700;font-family:var(--display);font-style:italic;text-transform:uppercase;
   letter-spacing:.02em;background:var(--surface);color:var(--ink)}
 .btn-primary{background:var(--pink);color:var(--ink);transition:background .3s ease}
 /* Bestaetigung beim Speichern: sofort gelb, danach zurueck ins Pink faden.
@@ -214,18 +221,18 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .auth-sub{text-align:center;color:var(--muted);font-size:13px;margin:0 0 22px}
 .auth-switch{text-align:center;font-size:13px;margin-top:16px}
 .auth-switch button{background:none;border:0;color:var(--navy);font-weight:800;text-decoration:underline;font-family:var(--mono)}
-.msg{border:var(--bw) solid var(--ink);border-radius:var(--r);padding:11px 13px;font-size:13px;margin-bottom:14px;font-weight:600}
+.msg{border:var(--bw) solid var(--ink);border-radius:var(--r-karte);padding:11px 13px;font-size:13px;margin-bottom:14px;font-weight:600}
 .msg.err{background:#FFE0D8;color:#8A2A12}
 .msg.ok{background:#D8F5E6;color:#0B5C33}
 
 /* ---------- Log: Info-Button + dezenter Sync-Status ---------- */
 .ibtn{background:var(--surface);border:var(--bw) solid var(--ink);color:var(--ink);
-  width:30px;height:30px;border-radius:var(--r);font-size:14px;font-weight:900;
+  width:30px;height:30px;border-radius:var(--r);font-size:14px;font-weight:700;
   font-family:var(--display);font-style:italic}
 /* align-self, weil die Nav ihre Kinder streckt: Der Punkt hat eine feste Hoehe
    und saesse sonst oben statt auf einer Linie mit "Log". */
 .save-dot{flex:0 0 auto;align-self:center;display:inline-flex;align-items:center;justify-content:center;
-  width:26px;height:26px;font-size:18px;font-weight:900;font-family:var(--mono);color:var(--muted)}
+  width:26px;height:26px;font-size:18px;font-weight:700;font-family:var(--mono);color:var(--muted)}
 .save-dot.ok{color:var(--up)}
 .save-dot.saving{color:var(--faint)}
 /* wartet auf Verbindung – kein Fehler, die Daten liegen lokal sicher */
@@ -237,7 +244,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    Beschriftung; der Deload ist die Ausnahme, in der sich wirklich etwas
    aendert – der darf auffallen. */
 .phasechip[hidden]{display:none}
-.phasechip{flex:0 0 auto;font-family:var(--display);font-style:italic;font-weight:900;
+.phasechip{flex:0 0 auto;font-family:var(--display);font-style:italic;font-weight:700;
   font-size:10px;letter-spacing:.06em;text-transform:uppercase;
   padding:5px 10px;border-radius:20px;border:2px solid var(--faint);
   color:var(--muted);background:transparent}
@@ -251,11 +258,11 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .daymeta{font-size:11.5px;color:var(--muted);font-weight:600;min-width:0;line-height:1.35}
 
 /* ---------- Blocks ---------- */
-.block{background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.block{background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte);margin-bottom:14px;overflow:hidden}
 .block.opt{border-style:dashed}
 .bhead{display:flex;align-items:center;gap:8px;padding:12px 13px 9px;border-bottom:var(--bw) solid var(--ink)}
-.bhead .mus{font-family:var(--display);font-style:italic;font-weight:900;font-size:16px;text-transform:uppercase}
-.badge{font-size:10px;font-weight:900;letter-spacing:.06em;padding:4px 8px;border-radius:999px;text-transform:uppercase;border:var(--bw) solid var(--ink);font-family:var(--display);font-style:italic}
+.bhead .mus{font-family:var(--display);font-style:italic;font-weight:700;font-size:16px;text-transform:uppercase}
+.badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:999px;text-transform:uppercase;border:var(--bw) solid var(--ink);font-family:var(--display);font-style:italic}
 .b-load{background:var(--load);color:#fff}
 .b-pump{background:var(--pump);color:var(--ink)}
 .b-mr{background:var(--green);color:#fff}
@@ -272,7 +279,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 
 .ex{border-top:2px dashed var(--ink);padding:12px 13px}
 .exhead{display:flex;align-items:center;gap:7px;margin-bottom:6px}
-.role{font-size:8.5px;font-weight:900;letter-spacing:.08em;color:var(--muted);border:var(--bw) solid var(--ink);
+.role{font-size:8.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);border:var(--bw) solid var(--ink);
   padding:2px 7px;border-radius:999px;flex:0 0 auto;font-family:var(--display);font-style:italic;background:var(--surface2)}
 .role.comp{color:#fff;background:var(--navy)}
 /* Uebungsauswahl. Ein <select>, kein Eingabefeld – eintragbar ist nur, was im
@@ -296,23 +303,23 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .exname option,.exname optgroup{background:var(--surface2);color:var(--ink)}
 .prev{font-size:11px;color:var(--muted);font-family:var(--mono);margin:8px 0 9px;min-height:15px}
 .prev b{color:var(--ink);font-weight:700}
-.delta{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:900;font-family:var(--mono);padding:2px 8px;border-radius:999px;margin-left:6px;border:var(--bw) solid var(--ink)}
+.delta{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;font-family:var(--mono);padding:2px 8px;border-radius:999px;margin-left:6px;border:var(--bw) solid var(--ink)}
 .d-up{background:#D8F5E6;color:var(--up)}
 .d-hold{background:#FBEFD2;color:var(--hold)}
 .d-down{background:#FFE0D8;color:var(--down)}
 
 .setrow{display:flex;align-items:center;gap:7px;margin-top:8px}
-.sidx{font-family:var(--display);font-style:italic;font-size:13px;color:var(--ink);width:16px;text-align:center;flex:0 0 auto;font-weight:900}
+.sidx{font-family:var(--display);font-style:italic;font-size:13px;color:var(--ink);width:16px;text-align:center;flex:0 0 auto;font-weight:700}
 .fld{position:relative;flex:1;min-width:0}
 .fld input{width:100%;background:var(--surface);border:var(--bw) solid var(--ink);color:var(--ink);
   font-family:var(--mono);font-size:17px;font-weight:700;text-align:center;padding:11px 4px;border-radius:var(--r)}
 .fld input:focus{outline:none;border-color:var(--pink)}
 .fld .u{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--faint);font-family:var(--mono);pointer-events:none}
-.times{color:var(--ink);font-family:var(--display);font-style:italic;font-size:15px;flex:0 0 auto;font-weight:900}
+.times{color:var(--ink);font-family:var(--display);font-style:italic;font-size:15px;flex:0 0 auto;font-weight:700}
 .fld.rir{flex:0 0 56px}
 .fld.rir input{padding:11px 2px;font-size:15px}
 /* Muscle-Round-Cluster-Zeile: Gewicht · 6×4 · Wdh im letzten Satz */
-.mrrow .mrclu{font-family:var(--display);font-style:italic;font-weight:900;font-size:14px;color:var(--navy);flex:0 0 auto;padding:0 1px}
+.mrrow .mrclu{font-family:var(--display);font-style:italic;font-weight:700;font-size:14px;color:var(--navy);flex:0 0 auto;padding:0 1px}
 .fld.mrlast{flex:0 0 96px}
 .fld.mrlast input{padding-right:42px}
 .fld.mrlast .u{right:6px;font-size:8.5px}
@@ -346,7 +353,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
    beruehrt die rechte untere Ecke den Bildschirmrand. */
 .ctrlbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
   padding:8px 7px max(6px, calc(env(safe-area-inset-bottom) - 6px));
-  background:linear-gradient(180deg,rgba(174,220,246,0),var(--bg) 55%)}
+  background:linear-gradient(180deg,rgba(177,231,255,0),var(--bg) 55%)}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
    auf. Der Schatten liegt ausserhalb und wird davon nicht beschnitten. */
@@ -372,7 +379,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;padding:8px 2px;
   border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
-.ci .wert{font-family:var(--display);font-style:italic;font-weight:900;font-size:15px;
+.ci .wert{font-family:var(--display);font-style:italic;font-weight:700;font-size:15px;
   text-transform:uppercase;letter-spacing:.01em;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ci .wert.leer{color:var(--faint)}
@@ -444,7 +451,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 .zurueck{flex:0 0 auto;display:inline-flex;align-items:center;text-decoration:none;
   background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);
   color:var(--ink);padding:8px 12px;
-  font-family:var(--display);font-style:italic;font-weight:900;font-size:12px;text-transform:uppercase}
+  font-family:var(--display);font-style:italic;font-weight:700;font-size:12px;text-transform:uppercase}
 .zurueck .pf{font-family:var(--mono);font-style:normal;font-size:15px;margin-right:3px;line-height:1}
 
 /* ---------- Set-O-Meter ----------
@@ -480,7 +487,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
   cursor:pointer}
 .extra.weg{color:var(--muted)}
 
-.volbar{background:var(--navy);color:#fff;border:var(--bw) solid var(--ink);border-radius:var(--r);padding:14px 15px;margin-bottom:14px}
+.volbar{background:var(--navy);color:#fff;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);padding:14px 15px;margin-bottom:14px}
 .volbar h3{margin:0 0 4px;font-size:12px;color:#fff}
 /* Kein margin-bottom mehr: Unter der Zahl kommt nichts mehr. Die Muskelzeilen
    (.volrow/.track/.fill) sind mit der Verschlankung entfallen. */
@@ -496,7 +503,7 @@ label.fld-l{display:block;font-size:11px;font-weight:700;text-transform:uppercas
 /* "Neue Phase" – Reset-Button (nur letzte Woche) */
 .phase-reset{display:block;width:100%;margin:2px 0 6px;background:var(--mr);border:var(--bw) solid var(--ink);
   border-radius:var(--r);padding:15px;font-family:var(--display);font-style:italic;
-  font-weight:900;text-transform:uppercase;font-size:14px;color:var(--ink);text-align:center;letter-spacing:.02em}
+  font-weight:700;text-transform:uppercase;font-size:14px;color:var(--ink);text-align:center;letter-spacing:.02em}
 /* Im Dark-Mode ist Gelb + helle Schrift kaum lesbar. Stattdessen hellblau mit
    dunkler Kontur/Schrift – steht klar auf dem dunklen Grund und bleibt on-brand. */
 :root[data-theme="dark"] .phase-reset{background:#AEDCF6;color:#0B1B44;border-color:#0B1B44}
@@ -560,14 +567,14 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 /* Abschnittsueberschrift im FAQ. Die Liste ist lang genug, dass man sonst nicht
    mehr weiss, auf welcher Ebene man liest – vom Prinzip bis zur Bedienung. */
 .faq-sektion{border-top:2px dashed var(--ink);margin:22px 0 12px;padding-top:12px;
-  font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
+  font-family:var(--display);font-style:italic;font-weight:700;font-size:13px;
   text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .faq-sektion:first-of-type{border-top:0;margin-top:4px;padding-top:0}
-.faq{border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface);margin-bottom:10px;overflow:hidden}
+.faq{border:var(--bw) solid var(--ink);border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;overflow:hidden}
 .faq>summary{list-style:none;cursor:pointer;padding:12px 40px 12px 13px;position:relative;
-  font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:13px;color:var(--navy)}
+  font-family:var(--display);font-style:italic;font-weight:700;text-transform:uppercase;font-size:13px;color:var(--navy)}
 .faq>summary::-webkit-details-marker{display:none}
-.faq>summary::after{content:"+";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:900;color:var(--ink)}
+.faq>summary::after{content:"+";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:700;color:var(--ink)}
 .faq[open]>summary::after{content:"–"}
 .faq[open]>summary{border-bottom:var(--bw) solid var(--ink);background:var(--surface2)}
 .faq-a{padding:12px 13px}
@@ -578,16 +585,16 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 /* ---------- Profile ---------- */
 .profile-top{display:flex;align-items:center;gap:16px;margin-bottom:20px}
 .avatar{width:88px;height:88px;border-radius:50%;border:var(--bw) solid var(--ink);object-fit:cover;background:var(--surface2);flex:0 0 auto}
-.avatar-fallback{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-style:italic;font-weight:900;font-size:34px;color:var(--navy)}
-.role-tag{display:inline-block;background:var(--pink);border:var(--bw) solid var(--ink);border-radius:999px;padding:2px 9px;font-size:11px;font-weight:900;text-transform:uppercase;font-family:var(--display);font-style:italic;margin-top:4px}
+.avatar-fallback{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-style:italic;font-weight:700;font-size:34px;color:var(--navy)}
+.role-tag{display:inline-block;background:var(--pink);border:var(--bw) solid var(--ink);border-radius:999px;padding:2px 9px;font-size:11px;font-weight:700;text-transform:uppercase;font-family:var(--display);font-style:italic;margin-top:4px}
 .role-tag.admin{background:var(--mr)}
 
 /* ---------- Admin ---------- */
-.cust-row{display:flex;align-items:center;gap:12px;padding:12px;border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface);margin-bottom:10px;width:100%;text-align:left}
+.cust-row{display:flex;align-items:center;gap:12px;padding:12px;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;width:100%;text-align:left}
 .cust-row .av{width:44px;height:44px;border-radius:50%;border:var(--bw) solid var(--ink);object-fit:cover;background:var(--surface2);flex:0 0 auto}
 .cust-row .nm{font-weight:800}
 .cust-row .em{font-size:12px;color:var(--muted)}
-.cust-row .chev{margin-left:auto;font-size:20px;font-weight:900}
+.cust-row .chev{margin-left:auto;font-size:20px;font-weight:700}
 .section-title{font-size:26px;margin:6px 0 16px}
 .back-link{background:none;border:0;color:var(--navy);font-weight:800;font-family:var(--mono);padding:0;margin-bottom:12px;text-decoration:underline}
 .readonly-note{background:var(--mr);border:var(--bw) solid var(--ink);border-radius:var(--r);padding:10px 13px;font-size:12px;font-weight:700;margin-bottom:14px}
@@ -608,7 +615,7 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   background:var(--mr);border:var(--bw) solid var(--ink);border-radius:var(--r);
   padding:4px 4px 4px 12px}
 .pb-go{flex:1;background:none;border:0;text-align:left;color:var(--ink);
-  font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
+  font-family:var(--display);font-style:italic;font-weight:700;font-size:13px;
   text-transform:uppercase;padding:8px 0}
 .pb-x{background:none;border:0;color:var(--ink);font-size:20px;line-height:1;
   padding:6px 10px;opacity:.6}
@@ -618,14 +625,14 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 
 /* ---------- Wert-Box mit Verlaufskurve (Heavy-Progression) ---------- */
 .mess-kopf{margin-bottom:10px}
-.mess-wert{font-family:var(--display);font-style:italic;font-weight:900;font-size:30px;line-height:1}
+.mess-wert{font-family:var(--display);font-style:italic;font-weight:700;font-size:30px;line-height:1}
 .mess-wert span{font-size:16px;opacity:.6}
 .mess-datum{font-size:11.5px;color:var(--muted);margin-top:4px}
 .mess-leer{font-size:13px;color:var(--muted)}
 .mess-hinweis{font-size:11.5px;color:var(--muted);line-height:1.5;margin:10px 0 0;
   border-left:var(--bw) solid var(--faint);padding-left:9px}
 .mess-neu{margin-top:14px}
-.mess-neu summary{font-family:var(--display);font-style:italic;font-weight:900;font-size:13px;
+.mess-neu summary{font-family:var(--display);font-style:italic;font-weight:700;font-size:13px;
   text-transform:uppercase;cursor:pointer;padding:8px 0}
 
 /* Kurve. Der Tageswert ist blass, der Trend kraeftig – das Auge soll dem
@@ -652,9 +659,9 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 .nb-offline{margin:14px 0 0;font-size:11.5px;line-height:1.5;color:var(--muted);
   border-left:var(--bw) solid var(--ink);padding-left:9px;border-radius:0}
 .nb-kachel{display:flex;flex-direction:column;gap:4px;text-align:left;
-  background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);
+  background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
   padding:10px;min-height:76px;overflow:hidden}
-.nb-k-titel{font-family:var(--display);font-style:italic;font-weight:900;
+.nb-k-titel{font-family:var(--display);font-style:italic;font-weight:700;
   font-size:14px;line-height:1.15;color:var(--ink);overflow-wrap:anywhere}
 /* Zwei Zeilen Vorschau, dann Schluss – mehr waere Fliesstext in Briefmarken. */
 .nb-k-text{font-size:11px;line-height:1.4;color:var(--muted);
@@ -688,13 +695,13 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   border:var(--bw) solid #fff;border-radius:10px;display:block}
 .nb-lupe-zu{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:14px;
   width:40px;height:40px;padding:0;border:var(--bw) solid #0A0A0A;border-radius:50%;
-  background:#fff;color:#0A0A0A;font-size:22px;font-weight:900;line-height:1}
+  background:#fff;color:#0A0A0A;font-size:22px;font-weight:700;line-height:1}
 .nb-slot{position:relative;display:inline-block}
 .nb-bildweg{position:absolute;top:-7px;right:-7px;width:24px;height:24px;padding:0;
   border:var(--bw) solid var(--ink);border-radius:50%;background:var(--surface);
-  font-weight:900;line-height:1;font-size:14px;color:var(--ink)}
+  font-weight:700;line-height:1;font-size:14px;color:var(--ink)}
 
-.nb-in-titel{font-family:var(--display);font-style:italic;font-weight:900;font-size:18px}
+.nb-in-titel{font-family:var(--display);font-style:italic;font-weight:700;font-size:18px}
 .nb-in-text{font-size:15px;line-height:1.6;resize:vertical}
 /* Die Dateiauswahl liegt versteckt im Label – der Chip IST das Label. */
 .nb-upload{display:inline-block}
