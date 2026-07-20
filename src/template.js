@@ -25,15 +25,15 @@ export const TPL = {
     { id: 'delt',  mus: 'Schultern', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'], type: 'load', sets: [1, 2, 4], rest: 90,  reps: '6–12', ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
     { id: 'p_quad', mus: 'Beine',         konten: ['Quads', 'Glutes', 'Hams', 'Adduktoren'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
     // Fussnote ‡: Level I nur ein Satz fuer den schwaecheren von beiden, Level II/III je einer.
-    { id: 'p_gh',   mus: 'Quads + Hams',  konten: ['Quads', 'Hams'], type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1,
-      ex: [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams'] }],
+    { id: 'p_gh',   mus: 'Quads + Hams/Glutes',  konten: ['Quads', 'Hams', 'Glutes'], type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1,
+      ex: [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }],
       // Level I hat nur ein Feld (der schwaechere von beiden) – dort beide anbieten.
-      exByTier: [[{ n: '', konten: ['Quads', 'Hams'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams'] }]] },
+      exByTier: [[{ n: '', konten: ['Quads', 'Hams', 'Glutes'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }]] },
     { id: 'p_calf', mus: 'Waden',         konten: ['Waden'], type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },  ] },
   'UK-A': { short: 'UK · Heavy', sub: 'Unterkörper Heavy · Oberkörper Pump', rot: 'A', blocks: [
     { id: 'legs', mus: 'Beine',       konten: ['Quads', 'Glutes'], type: 'load', sets: [1, 2, 3], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }] },
     { id: 'quad', mus: 'Quads',       konten: ['Quads'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
-    { id: 'gh',   mus: 'Hams',        konten: ['Hams'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', ex: [{ r: 'Iso', n: '' }] },
+    { id: 'gh',   mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', ex: [{ r: 'Iso', n: '' }] },
     { id: 'add',  mus: 'Adduktoren',  konten: ['Adduktoren'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', free: 1, ex: [{ r: 'Iso', n: '' }] },
     // Waden sind im Katalog durchgehend Iso – es gibt keine Verbund-Wadenübung.
     // Stand hier frueher auf Comp, dann bot die Auswahl nichts an.
@@ -50,15 +50,15 @@ export const TPL = {
     { id: 'chest', mus: 'Brust',     konten: ['Brust'], type: 'load', sets: [1, 2, 4], rest: 90, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
     { id: 'delt',  mus: 'Schultern', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'], type: 'load', sets: [1, 2, 4], rest: 90, reps: '6–12', ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
     { id: 'p_quad', mus: 'Beine',         konten: ['Quads', 'Glutes', 'Hams', 'Adduktoren'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
-    { id: 'p_gh',   mus: 'Quads + Hams',  konten: ['Quads', 'Hams'], type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1,
-      ex: [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams'] }],
+    { id: 'p_gh',   mus: 'Quads + Hams/Glutes',  konten: ['Quads', 'Hams', 'Glutes'], type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1,
+      ex: [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }],
       // Level I hat nur ein Feld (der schwaechere von beiden) – dort beide anbieten.
-      exByTier: [[{ n: '', konten: ['Quads', 'Hams'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams'] }]] },
+      exByTier: [[{ n: '', konten: ['Quads', 'Hams', 'Glutes'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }]] },
     { id: 'p_calf', mus: 'Waden',         konten: ['Waden'], type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },  ] },
   'UK-B': { short: 'UK · Heavy', sub: 'Unterkörper Heavy · Oberkörper Pump', rot: 'B', blocks: [
     { id: 'legs', mus: 'Beine',       konten: ['Quads', 'Glutes'], type: 'load', sets: [1, 2, 3], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }] },
     { id: 'quad', mus: 'Quads',       konten: ['Quads'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
-    { id: 'gh',   mus: 'Hams',        konten: ['Hams'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', ex: [{ r: 'Iso', n: '' }] },
+    { id: 'gh',   mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', ex: [{ r: 'Iso', n: '' }] },
     { id: 'add',  mus: 'Adduktoren',  konten: ['Adduktoren'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', free: 1, ex: [{ r: 'Iso', n: '' }] },
     { id: 'calf', mus: 'Waden',       konten: ['Waden'], type: 'load', sets: [2, 4, 5], rest: 60,  reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
     { id: 'p_bk', mus: 'Brust + Rücken',  konten: ['Brust', 'Lat', 'Oberer Rücken'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, stretch: 1,
