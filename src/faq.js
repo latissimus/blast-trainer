@@ -37,8 +37,8 @@ export function mountFaq(container) {
             <b>Tag 2 — genau umgekehrt:</b> Unterkörper Heavy, Oberkörper Pump.<br>
             <b>Tag 3 — Clusters für den ganzen Körper.</b></p>
             <p>Jeder Muskel wird so <b>dreimal pro Woche</b> gereizt — einmal als Heavy, einmal als Pump, einmal als Cluster. Das ist der Kerngedanke: nicht ein großer Reiz pro Woche, sondern drei verschiedene.</p>
-            <p><b>„Pump" heißt nicht „locker".</b> Die drei Satzarten unterscheiden sich in <b>Last und Wiederholungszahl</b>, nicht in der Anstrengung. Ein Pump-Satz läuft mit leichterem Gewicht, geht dafür aber bis zum metabolischen Versagen und danach noch in Teilwiederholungen — das brennt anders als ein schwerer Satz, aber es ist nicht weniger hart. <b>Jeder Satz an jedem Tag soll einen Wachstumsreiz setzen</b>, über Nähe zum Versagen und steigende Leistung. Nur der Weg dorthin ist jedes Mal ein anderer.</p>
-            <p>Darüber liegt ein größerer Rhythmus: <b>6 Wochen Overreach, dann 2 Wochen Deload.</b> Mehr dazu weiter unten.</p>
+            <p><b>„Pump" heißt nicht „locker".</b> Pump ist <b>leichte, aber versagensnahe Arbeit</b>: Das geringere Gewicht erlaubt mehr Wiederholungen, der Wachstumsreiz entsteht jedoch wie bei den anderen Sätzen vor allem durch hohe mechanische Spannung in den letzten anstrengenden Wiederholungen — nicht durch einen eigenen „metabolischen" Mechanismus. <b>Jeder Satz an jedem Tag soll einen Wachstumsreiz setzen</b>; nur Last und Wiederholungsbereich unterscheiden sich.</p>
+            <p>Darüber liegt ein größerer Rhythmus: Nach <b>6 Wochen Overreach</b> entscheidest du zwischen einer neuen Phase und standardmäßig <b>1 Woche Deload</b>. Mehr dazu weiter unten.</p>
           </div>
         </details>
 
@@ -47,7 +47,7 @@ export function mountFaq(container) {
             <p><b>1. Progressive Überlastung</b> — mehr Last oder mehr Wdh. gegenüber dem letzten Mal. Steht als Delta über jeder Heavy-Übung.</p>
             <p><b>2. Nähe zum Versagen</b> — der Reizauslöser pro Satz. Ein Satz, bei dem noch fünf Wdh. drin gewesen wären, zählt kaum.</p>
             <p><b>3. Erholung</b> — Schlaf, Protein, Stress. Das Fundament, ohne das die ersten beiden nichts bringen.</p>
-            <p>Das <b>Volumen</b> (Anzahl Sätze) ist der Dosis-Regler darüber. Man liest oft „10–20 Sätze pro Muskel und Woche" — diese Zahl stammt aber überwiegend aus Studien, in denen die Sätze <i>nicht</i> bis zum Versagen gingen. Hier gehen sie das, und dazu kommen Techniken wie Lengthened Partials und Clusters. Ein Satz ist also nicht gleich ein Satz, und die Zahl lässt sich nicht 1:1 übertragen. Genau deshalb zeigt das Set-O-Meter bewusst <b>keinen Zielwert</b>.</p>
+            <p>Das <b>Volumen</b> (Anzahl Sätze) ist der Dosis-Regler darüber. Man liest oft „10–20 Sätze pro Muskel und Woche" — diese Zahl stammt aber überwiegend aus Studien mit unterschiedlich großer Versagensnähe. Hier wird bewusst versagensnah trainiert; Techniken wie Lengthened Partials können optional dazukommen. Ein Satz ist also nicht gleich ein Satz, und die Zahl lässt sich nicht 1:1 übertragen. Genau deshalb zeigt das Set-O-Meter bewusst <b>keinen Zielwert</b>.</p>
             <p>Muskelkater ist übrigens kein Maß für irgendetwas.</p>
           </div>
         </details>
@@ -55,7 +55,7 @@ export function mountFaq(container) {
         <details class="faq"><summary>Was ist Overreach und Deload?</summary>
           <div class="faq-a">
             <p><b>Overreach</b> = 6 Wochen progressiv (Level steigend): bewusst etwas mehr, als du dauerhaft wegstecken würdest. Am Ende fühlst du dich platt — das ist kein Fehler, sondern der Plan.</p>
-            <p><b>Deload</b> = 2 Wochen danach: Volumen und Frequenz runter, nur Clusters. <b>Erst hier kommt der Zugewinn an</b> — der Körper holt nicht nur auf, sondern legt drauf. Ohne diese zwei Wochen wäre der Overreach nur Erschöpfung.</p>
+            <p>Nach Woche 6 entscheidest du: Fühlst du dich erholt und leistungsfähig, kannst du direkt eine <b>neue Phase</b> beginnen. Ist Ermüdung aufgelaufen, wählst du standardmäßig <b>1 Woche Deload</b>: Volumen und Frequenz runter, nur Clusters. Danach beginnt die nächste Phase.</p>
             <p><b>Warum dann ausgerechnet Clusters?</b> Weil im Deload das <b>Volumen</b> fallen soll, der <b>Reiz</b> aber nicht. Genau das ist der Befund der Deload-Forschung: Volumen und Frequenz darf man deutlich senken — solange die Intensität oben bleibt, bleibt die Anpassung erhalten, statt abzubauen. Ein Cluster liefert genau das in kompakter Form: wenig Gesamtvolumen, aber ein echter Versagenspunkt im letzten Minisatz. Du erholst dich, ohne den Faden zu verlieren.</p>
           </div>
         </details>
@@ -157,9 +157,10 @@ export function mountFaq(container) {
           <div class="faq-a"><p>„+ Notiz" gehört zur Übung und gilt für <b>alle</b> Wochen — gedacht für Einstellungen und Cues, die gleich bleiben: Sitzhöhe, Griffbreite, Fußposition.</p></div>
         </details>
 
-        <details class="faq"><summary>Was macht der Button in Woche 8?</summary>
+        <details class="faq"><summary>Was passiert nach Woche 6?</summary>
           <div class="faq-a">
-            <p>„🔄 Neue Phase starten" leert alle eingetragenen Daten und setzt dich zurück auf Woche 1: Übungen, Gewichte, Wdh., RIR und Notizen. Gedacht für den Start einer komplett neuen Overreach-Phase.</p>
+            <p>Die App bietet zwei Wege an: <b>„Weitertrainieren · neue Phase"</b> startet direkt wieder in Woche 1; <b>„1 Woche Deload"</b> führt zuerst durch Woche 7 mit reduziertem Cluster-Training.</p>
+            <p>Beim Start der neuen Phase werden Übungen, Gewichte, Wdh., RIR und Notizen der abgeschlossenen Phase geleert. Das Level ist für neue Einheiten zunächst auf <b>Level II</b> vorausgewählt und kann weiterhin nach Tagesform geändert werden.</p>
             <p><b>Dein Pump- und Cluster-Übungspool bleibt aber erhalten</b> — siehe unten.</p>
           </div>
         </details>
@@ -192,8 +193,8 @@ export function mountFaq(container) {
 
         <details class="faq"><summary>Wie trainiere ich die Pump-Sätze?</summary>
           <div class="faq-a">
-            <p>15–25 Wdh., leichte Last (~50 % 1RM), Pause 60 s, im Supersatz gekoppelt. Bis zum <b>metabolischen Versagen</b>, dann <b>Lengthened Partials</b>. Übungen frei wählen.</p>
-            <p><b>Lengthened Partials</b> sind Teilwiederholungen <b>nur im gedehnten Bereich</b> — du kommst nicht mehr in die volle Kontraktion, sondern arbeitest weiter dort, wo der Muskel am längsten ist. Genau diese Position treibt das Wachstum überproportional; Teilwdh. dort erzielen ähnliche Anpassungen wie volle Wiederholungen.</p>
+            <p>15–25 Wdh., leichte Last (~50 % 1RM), Pause 60 s, im Supersatz gekoppelt. Trainiere <b>versagensnah</b>: Die letzten Wiederholungen sollen deutlich anstrengend sein, ohne dass ein besonderer „metabolischer" Mechanismus angenommen werden muss. Übungen frei wählen.</p>
+            <p><b>Lengthened Partials sind optional</b>, nicht der vorgeschriebene Abschluss jedes Pump-Satzes. Du kannst sie nach einem passenden Satz einsetzen, wenn saubere volle Wiederholungen nicht mehr möglich sind. Es sind Teilwiederholungen <b>nur im gedehnten Bereich</b>, also dort, wo der Muskel lang und weiterhin belastet ist.</p>
             <p>Das funktioniert nur, wo unten auch Spannung anliegt: Fly-Maschine, Latzug, Beinstrecker, sitzender Beinbeuger, Schrägbank-Curl. Bei KH-Seitheben oder stehenden KH-Curls hängt der Arm unten spannungslos — dort bringt es nichts.</p>
             <p>Nicht zu verwechseln mit der <b>1¼-Wdh.</b> („1/4 Wdh. unten"): volle Wiederholung <i>plus</i> ein Viertel unten, bei jeder Wdh. Verwandtes Prinzip, aber ohne eigene Studienlage.</p>
           </div>
@@ -209,7 +210,7 @@ export function mountFaq(container) {
         </details>
 
         <details class="faq"><summary>Was bedeuten die Level (I/II/III)?</summary>
-          <div class="faq-a"><p><b>Level I</b> = wenig Sätze, schlechter Tag. <b>Level III</b> = volles Volumen, guter Tag. Nach Tagesform wählen, nicht nach Ehrgeiz. Das Level gilt je Tag und Woche — du kannst also Montag III und Mittwoch I fahren.</p></div>
+          <div class="faq-a"><p><b>Level I</b> = wenig Sätze, schlechter Tag. <b>Level II</b> = Standard und bei einer neuen Phase vorausgewählt. <b>Level III</b> = volles Volumen, guter Tag. Nach Tagesform wählen, nicht nach Ehrgeiz. Das Level gilt je Tag und Woche — du kannst also Montag III und Mittwoch I fahren.</p></div>
         </details>
 
         <details class="faq"><summary>Wie kommen die Satzzahlen zustande?</summary>

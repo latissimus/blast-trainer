@@ -85,7 +85,7 @@ export const TPL = {
   ] },
 };
 
-// Deload (Wochen 7–8): 2–3× pro Woche, ausschliesslich Clusters. Drei Slots teilen sich
+// Deload (Woche 7): 2–3× pro Woche, ausschliesslich Clusters. Drei Slots teilen sich
 // dieselbe Vorlage, damit jede Einheit einzeln geloggt wird; der dritte ist optional.
 // Gleiche Referenz genuegt – TPL wird nur gelesen.
 TPL['MRs-2'] = TPL['MRs'];

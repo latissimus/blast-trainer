@@ -23,7 +23,7 @@ export function tageDerWoche(payload, woche) {
 export function tierVon(payload, tag, woche) {
   if (istDeload(woche)) return 0;
   const t = ((payload && payload.tier) || {})[tag + '|' + woche];
-  return (t === 0 || t === 1 || t === 2) ? t : 2;
+  return (t === 0 || t === 1 || t === 2) ? t : 1;
 }
 
 const volumenVon = (payload) => (payload && payload.volumen) || {};

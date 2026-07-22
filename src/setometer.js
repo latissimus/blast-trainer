@@ -12,9 +12,9 @@ import { istDeload, tageDerWoche, tierVon, prioritaetsAnpassungen, slotKey } fro
 //
 // Hier stand vorher eine Zieltabelle mit Sollwerten je Muskel. Die ist raus.
 // Sie berief sich auf die Empfehlung "10-20 harte Sätze pro Muskel und Woche",
-// aber die stammt aus Studien, in denen die Sätze überwiegend NICHT bis zum
-// Versagen gingen. Heavy auf 0-2 RIR, Pump bis zum metabolischen Versagen und
-// Cluster sind damit nicht vergleichbar – aus dieser Zahl einen Sollwert für
+// aber die stammt aus Studien mit unterschiedlich grosser Versagensnaehe.
+// Heavy, versagensnahe leichte Pump-Arbeit und Cluster sind damit nicht direkt
+// vergleichbar – aus dieser Zahl einen Sollwert für
 // dieses Training abzuleiten, sah nach Rechnung aus, war aber keine.
 //
 // GEZÄHLT WIRD PRO SATZ:

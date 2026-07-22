@@ -16,10 +16,13 @@ const K = [
   { n: 'Wadenheben', haupt: 'Waden', neben: [], typ: 'Iso' },
 ];
 
-// Level III ist der Standard, wenn nichts anderes gesetzt ist.
+// Die meisten Rechenbeispiele setzen Level III ausdruecklich; der Standard
+// ohne Auswahl wird separat als Level II geprueft.
 // OK-A/chest: load, sets [1,2,4], zwei Felder (Comp + Iso).
 // OK-A/p_calf: pump, sets [1,1,2], ein Feld.
-const heavyBrust = (namen) => ({ ex: { 'OK-A': { chest: namen } }, data: {} });
+const heavyBrust = (namen) => ({
+  ex: { 'OK-A': { chest: namen } }, data: {}, tier: { 'OK-A|1': 2 },
+});
 
 describe('zaehleWoche – Plan statt Eingetragenes', () => {
   it('zählt, sobald eine Übung gewählt ist – ganz ohne Sätze im Log', () => {
@@ -52,8 +55,9 @@ describe('zaehleWoche – Plan statt Eingetragenes', () => {
     expect(zaehleWoche(p(2), 1, K).konten['Brust']).toBe(4);   // Level III
   });
 
-  it('nimmt Level III, wenn nichts eingestellt ist', () => {
-    expect(zaehleWoche(heavyBrust(['Bankdrücken', 'Fliegende']), 1, K).konten['Brust']).toBe(4);
+  it('nimmt Level II, wenn nichts eingestellt ist', () => {
+    const p = { ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } }, data: {} };
+    expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(2);
   });
 
   it('ignoriert eingetragene Gewichte – der Plan zählt, nicht die Ausführung', () => {
@@ -61,6 +65,7 @@ describe('zaehleWoche – Plan statt Eingetragenes', () => {
     const mit = zaehleWoche({
       ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } },
       data: { 'OK-A': { 1: { chest: { sets: [[{ w: 80, r: 8 }], []] } } } },
+      tier: { 'OK-A|1': 2 },
     }, 1, K).konten['Brust'];
     expect(mit).toBe(ohne);
   });
@@ -68,13 +73,13 @@ describe('zaehleWoche – Plan statt Eingetragenes', () => {
 
 describe('zaehleWoche – Wochen und Tage', () => {
   it('nimmt in ungeraden Wochen die A-Tage, in geraden die B-Tage', () => {
-    const p = { ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } }, data: {} };
+    const p = { ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } }, data: {}, tier: { 'OK-A|1': 2 } };
     expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(4);
     expect(zaehleWoche(p, 2, K).konten['Brust']).toBe(0);   // Woche 2 ist B
   });
 
   it('folgt einer von Hand gesetzten Rotation', () => {
-    const p = { ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } }, data: {}, rot: { 2: 'A' } };
+    const p = { ex: { 'OK-A': { chest: ['Bankdrücken', 'Fliegende'] } }, data: {}, rot: { 2: 'A' }, tier: { 'OK-A|2': 2 } };
     expect(zaehleWoche(p, 2, K).konten['Brust']).toBe(4);
   });
 
@@ -92,6 +97,7 @@ describe('zaehleWoche – Wochen und Tage', () => {
     const p = {
       ex: { 'OK-A': { chest: ['Bankdrücken', ''] } },
       data: { MRs: { 1: { m_ch: { names: ['Bankdrücken'], sets: [[]] } } } },
+      tier: { 'OK-A|1': 2, 'MRs|1': 2 },
     };
     // OK-A/chest Comp = 2, MRs/m_ch Level III = 2
     expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(4);
@@ -101,6 +107,7 @@ describe('zaehleWoche – Wochen und Tage', () => {
 describe('zaehleWoche – Pump', () => {
   const pump = (extra) => ({
     data: { 'OK-A': { 1: { p_calf: { names: ['Wadenheben'], sets: [[]], ...(extra ? { extra } : {}) } } } },
+    tier: { 'OK-A|1': 2 },
   });
 
   it('gibt jedem freien Feld die volle Satzzahl des Blocks', () => {

@@ -286,7 +286,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Zeile hergab und rutschten untereinander. */
 .cue{display:flex;gap:8px;flex-wrap:wrap;padding:11px 11px 11px}
 /* Seitliches Polster knapper als frueher (war 11px): Mit der groesseren Schrift
-   lief der laengste Chip ("bis metab. Versagen") 5px aus dem Block. Lieber am
+   lief der laengste Pump-Hinweis 5px aus dem Block. Lieber am
    Polster sparen als am Text – das ist eine Ansage, die man im Studio liest. */
 /* inline-flex statt inline: Als reines Inline-Element wirkt das Polster nicht
    auf die Zeilenbox – der Text sass sichtbar zu hoch im Chip. Jetzt wird er
@@ -606,12 +606,17 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    iPhone-Home-Indicator bleibt frei. */
 
 /* "Neue Phase" – Reset-Button (nur letzte Woche) */
-.phase-reset{display:block;width:100%;margin:2px 0 6px;background:var(--mr);border:var(--bw) solid var(--ink);
+.phase-ende{margin:2px 0 6px}
+.phase-ende>p{margin:0 0 8px;text-align:center;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--muted)}
+.phase-ende-aktionen{display:grid;gap:8px}
+.phase-reset{display:block;width:100%;margin:0;background:var(--mr);border:var(--bw) solid var(--ink);
   border-radius:var(--r);padding:15px;font-family:var(--display);font-style:italic;
   font-weight:700;text-transform:uppercase;font-size:15.5px;color:var(--ink);text-align:center;letter-spacing:.02em}
+.phase-deload{background:var(--surface)}
 /* Im Dark-Mode ist Gelb + helle Schrift kaum lesbar. Stattdessen hellblau mit
    dunkler Kontur/Schrift – steht klar auf dem dunklen Grund und bleibt on-brand. */
 :root[data-theme="dark"] .phase-reset{background:#AEDCF6;color:#0B1B44;border-color:#0B1B44}
+:root[data-theme="dark"] .phase-deload{background:var(--surface);color:var(--ink);border-color:var(--ink)}
 
 /* Platz fuer die feste Bedienleiste unten. Zwei Zeilen je Feld machen sie
    hoeher als die fruehere Speicherleiste – ohne das verdeckt sie den
@@ -695,7 +700,7 @@ body[data-seite="meter"],body[data-seite="notizbuch"]{
    Gewicht 400, nicht in der kursiven Display-Schrift. Die Versalien stehen
    dort im Text, nicht im CSS; wir behalten text-transform, weil unsere Fragen
    gemischt geschrieben sind. */
-.faq{border:var(--bw) solid var(--ink);border-radius:var(--r-karte);background:var(--surface);margin-bottom:18px;overflow:hidden}
+.faq{border:var(--bw) solid var(--ink);border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;overflow:hidden}
 .faq>summary{list-style:none;cursor:pointer;padding:18px 46px 18px 18px;position:relative;
   font-family:var(--mono);font-weight:400;text-transform:uppercase;font-size:16px;
   line-height:1.35;color:var(--ink)}
@@ -740,7 +745,7 @@ body[data-seite="meter"],body[data-seite="notizbuch"]{
 
 /* Baustand, unten im Profil – bewusst unauffaellig. */
 /* Dicht unter den Abmelden-Knopf: Der Abstand von dort bis zur Leiste soll dem
-   im Log entsprechen (Woche 8, "Neue Phase starten"). Die Versionszeile ist
+   im Log entsprechen (Phasenende, "Neue Phase starten"). Die Versionszeile ist
    Diagnose, kein eigener Abschnitt – sie braucht keinen Absatz davor. */
 .buildinfo{text-align:center;font-size:12px;color:var(--faint);margin:10px 0 0;font-family:var(--mono)}
 

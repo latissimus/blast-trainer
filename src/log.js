@@ -59,7 +59,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
   } else if (serverOk) p = server;
   else { p = local.payload; mergedOffline = true; }
   const state = {
-    week: p.week || 1,
+    // Seit dem einwoechigen Deload endet eine Phase mit Woche 7. Alte
+    // Speicherstaende aus der frueheren Woche 8 landen sicher im Deload.
+    week: Math.min(7, Math.max(1, Number(p.week) || 1)),
     day: TPL[p.day] ? p.day : 'OK-A',
     data: p.data || {},
     tier: p.tier || {},
@@ -191,7 +193,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   // ---- structure helpers -------------------------------------------
   const rotOf = (week) => state.rot[week] || (week % 2 === 1 ? 'A' : 'B');
-  const isCruise = (week) => week >= 7;   // Wochen 7-8 = Deload: nur Clusters, Level I
+  const isCruise = (week) => week >= 7;   // Woche 7 = Deload: nur Clusters, Level I
   // Deload: 2-3 Einheiten pro Woche, alle nur Clusters -> drei
   // eigene Slots, damit jede Einheit getrennt geloggt wird. Der dritte ist optional.
   const daysOfWeek = (week) => {
@@ -200,7 +202,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   };
   const tierOf = (day, week) => {
     if (isCruise(week)) return 0;   // Deload fest auf Level I
-    const t = state.tier[day + '|' + week]; return (t === 0 || t === 1 || t === 2) ? t : 2;
+    const t = state.tier[day + '|' + week]; return (t === 0 || t === 1 || t === 2) ? t : 1;
   };
   const setTier = (day, week, t) => { state.tier[day + '|' + week] = t; };
   // Duenner Aufsatz: der Pool ist zustandslos, den Zustand geben wir hier rein.
@@ -369,7 +371,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const lvlWert = ctrl.querySelector('#ci-lvl-w');
   const datWert = ctrl.querySelector('#ci-dat-w');
 
-  wocheSel.innerHTML = Array.from({ length: 8 }, (_, i) =>
+  wocheSel.innerHTML = Array.from({ length: 7 }, (_, i) =>
     `<option value="${i + 1}">Woche ${i + 1}${i + 1 >= 7 ? ' · Deload' : ''}</option>`).join('');
   wocheSel.onchange = () => { state.week = Number(wocheSel.value); queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
   tagSel.onchange = () => { state.day = tagSel.value; queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
@@ -647,7 +649,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const el = document.createElement('div'); el.className = 'block';
       const cues = [];
       if (effType === 'load') cues.push('<span class="chip">' + effReps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');
-      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · leicht</span>', '<span class="chip">bis metab. Versagen + Lengthened Partials</span>');
+      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · leicht</span>', '<span class="chip">versagensnah · Partials optional</span>');
       if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
       cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + (effRest >= 60 ? (effRest / 60) + ' min' : effRest + ' s') + '</button>');
 
@@ -776,15 +778,31 @@ export async function mountLog(container, { userId, readOnly = false }) {
     });
     renderVolume(cell, tpl, tier);
 
-    // Reset-Button nur in der letzten Woche (Phase-Ende) – mittig, ganz unten
+    // Nach den sechs Belastungswochen bewusst entscheiden: direkt eine neue
+    // Phase beginnen oder eine Woche deloaden. Im Deload bleibt nur noch der
+    // Weg in die neue Phase.
     phaseResetEl.innerHTML = '';
-    if (!readOnly && state.week === 8) {
-      const rb = document.createElement('button');
-      rb.className = 'phase-reset';
-      rb.textContent = '🔄 Neue Phase starten – alle Daten löschen';
-      rb.onclick = resetAllData;
-      phaseResetEl.appendChild(rb);
+    if (!readOnly && state.week >= 6) {
+      const box = document.createElement('div');
+      box.className = 'phase-ende';
+      box.innerHTML = `<p>${state.week === 6 ? '6 Wochen abgeschlossen. Wie geht es weiter?' : 'Deload abgeschlossen.'}</p>
+        <div class="phase-ende-aktionen">
+          <button class="phase-reset" data-phase-neu>↻ Weitertrainieren · neue Phase</button>
+          ${state.week === 6 ? '<button class="phase-reset phase-deload" data-phase-deload>1 Woche Deload</button>' : ''}
+        </div>`;
+      box.querySelector('[data-phase-neu]').onclick = resetAllData;
+      box.querySelector('[data-phase-deload]')?.addEventListener('click', startDeload);
+      phaseResetEl.appendChild(box);
     }
+  }
+
+  function startDeload() {
+    state.week = 7;
+    state.day = 'MRs';
+    queuePersist();
+    renderAll();
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    toast('Deload · 1 Woche');
   }
 
   async function resetAllData() {

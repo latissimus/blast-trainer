@@ -53,7 +53,7 @@ let logScrollY = 0;
 const MQ_TEXT = [
   'SCHLAG DEIN LETZTES MAL',
   'HEAVY · PUMP · CLUSTERS',
-  '6 WOCHEN OVERREACH · 2 WOCHEN DELOAD',
+  '6 WOCHEN OVERREACH · OPTIONAL 1 WOCHE DELOAD',
   'LEVEL NACH TAGESFORM, NICHT NACH EHRGEIZ',
 ].join(' ◆ ') + ' ◆ ';
 const MARQUEE = `<div class="marquee" aria-hidden="true"><span>${MQ_TEXT.repeat(2)}</span><span>${MQ_TEXT.repeat(2)}</span></div>`;
