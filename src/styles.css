@@ -393,9 +393,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    beruehrt die rechte untere Ecke den Bildschirmrand. */
 .ctrlbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
   padding:8px 7px max(6px, calc(env(safe-area-inset-bottom) - 6px));
-  background:linear-gradient(180deg,transparent,
-    color-mix(in srgb,var(--bg) 55%,transparent) 55%,
-    color-mix(in srgb,var(--bg) 70%,transparent))}
+  background:linear-gradient(180deg,rgba(177,231,255,0),var(--bg) 55%)}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
    auf. Der Schatten liegt ausserhalb und wird davon nicht beschnitten. */
