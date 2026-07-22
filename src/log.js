@@ -21,7 +21,7 @@ const TYPE_LABEL = { load: 'HEAVY', pump: 'PUMP', mr: 'CLUSTER' };
      readOnly  – true for the admin viewing a customer (no editing/saving)
    Returns { destroy } to remove the sticky save bar on nav.
    ------------------------------------------------------------------ */
-export async function mountLog(container, { userId, readOnly = false }) {
+export async function mountLog(container, { userId, readOnly = false, zeigeSomPeek = false }) {
   // Local-first laden: Der Server ist die Sicherungskopie, nicht die Voraussetzung.
   // Nur wenn lokal ungespeicherte Aenderungen liegen, wird zusammengefuehrt –
   // sonst gewinnt der Server (sein Stand ist dann identisch mit dem lokalen).
@@ -258,9 +258,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // die Beschreibung des Tages. Dadurch faengt der erste Trainingsblock
   // unmittelbar unter der Kopfleiste an, statt nach drei Reihen Bedienelementen.
   wrap.innerHTML = `
-    ${readOnly ? '' : `<div class="som-tab" id="lg-som-tab">
-      <button class="som-tab-toggle" type="button" aria-expanded="false" aria-controls="lg-som-ziel">Set-O</button>
-      <a class="som-tab-ziel" id="lg-som-ziel" href="#meter" tabindex="-1">Öffnen</a>
+    ${readOnly ? '' : `<div class="som-tab" id="lg-som-tab"${zeigeSomPeek ? ' data-peek="true"' : ''}>
+      <a class="som-tab-ziel" id="lg-som-ziel" href="#meter" tabindex="-1" aria-label="Set-O-Mat öffnen">
+        <span>Set-O</span><small>Öffnen</small>
+      </a>
     </div>`}
     <div id="lg-content" class="erstblock${readOnly ? '' : ' mit-som-hinweis'}"></div>
     <div class="volbar" id="lg-vol"></div>
@@ -278,17 +279,37 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const phaseEl = document.querySelector('#app-phase');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
 
-  // Kleine Lasche statt Pull-down-Karte: Ein Tipp verlaengert sie nach unten.
-  // Weil sie im Seitenfluss bleibt, schiebt sie die Trainingsbloecke sanft mit.
+  // Die Lasche haengt spaeter physisch am Sticky-Header (main.js). Ein Zug nach
+  // unten am Seitenanfang holt sie hervor; erst echtes Hochscrollen schliesst
+  // sie wieder. Die ganze sichtbare Flaeche ist der Link zum Set-O-Mat.
   const somTab = wrap.querySelector('#lg-som-tab');
+  let somTouchStart = null;
+  let somOffen = false;
+  const setSomOffen = (offen) => {
+    if (!somTab || somOffen === offen) return;
+    somOffen = offen;
+    somTab.classList.remove('peek');
+    somTab.classList.toggle('gezogen', offen);
+    container.classList.toggle('som-gezogen', offen);
+    somTab.querySelector('.som-tab-ziel').tabIndex = offen ? 0 : -1;
+  };
+  const somTouchStartFn = (e) => {
+    somTouchStart = window.scrollY <= 1 ? e.touches[0]?.clientY ?? null : null;
+  };
+  const somTouchMoveFn = (e) => {
+    if (somTouchStart == null) return;
+    const y = e.touches[0]?.clientY;
+    if (Number.isFinite(y) && y - somTouchStart > 16) setSomOffen(true);
+  };
+  const somTouchEndFn = () => { somTouchStart = null; };
+  const somScrollFn = () => { if (somOffen && window.scrollY > 12) setSomOffen(false); };
+  const somWheelFn = (e) => { if (window.scrollY <= 1 && e.deltaY < -8) setSomOffen(true); };
   if (somTab) {
-    const toggle = somTab.querySelector('.som-tab-toggle');
-    const ziel = somTab.querySelector('.som-tab-ziel');
-    toggle.onclick = () => {
-      const offen = somTab.classList.toggle('offen');
-      toggle.setAttribute('aria-expanded', offen ? 'true' : 'false');
-      ziel.tabIndex = offen ? 0 : -1;
-    };
+    window.addEventListener('touchstart', somTouchStartFn, { passive: true });
+    window.addEventListener('touchmove', somTouchMoveFn, { passive: true });
+    window.addEventListener('touchend', somTouchEndFn, { passive: true });
+    window.addEventListener('scroll', somScrollFn, { passive: true });
+    window.addEventListener('wheel', somWheelFn, { passive: true });
   }
 
   // ---- untere Bedienleiste -----------------------------------------
@@ -951,6 +972,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
       clearInterval(timerId);
       clearInterval(retryId);
       window.removeEventListener('online', retrySync);
+      window.removeEventListener('touchstart', somTouchStartFn);
+      window.removeEventListener('touchmove', somTouchMoveFn);
+      window.removeEventListener('touchend', somTouchEndFn);
+      window.removeEventListener('scroll', somScrollFn);
+      window.removeEventListener('wheel', somWheelFn);
+      container.classList.remove('som-gezogen');
       // Die Felder bleiben sichtbar, damit die Leiste auf jeder Seite gleich
       // aussieht – aber sie sind ohne Log wirkungslos und werden stillgelegt.
       const slots = document.querySelector('#app-slots');

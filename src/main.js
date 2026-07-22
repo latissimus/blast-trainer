@@ -324,15 +324,14 @@ function setNavActive(view) {
 }
 
 async function routeView() {
+  const vorherigeAnsicht = aktiveAnsicht;
   if (aktiveAnsicht === 'log') logScrollY = window.scrollY;
   cleanupActive();
   // Set-O-Lasche und Zurueck-Chip muessen physisch am Sticky-Header haengen.
   // Auf iOS wandert der Header beim Gummiband nach unten, fixed Elemente aber
   // nicht – dadurch erschienen sie im Header. Vor dem Ansichtswechsel alte
   // angedockte Elemente entfernen; die neue Ansicht wird unten neu angedockt.
-  // Die Set-O-Lasche bleibt im Seitenfluss, damit ihr Aufklappen den Log-Inhalt
-  // wirklich nach unten schiebt.
-  app.querySelectorAll('.topbar > .zurueck')
+  app.querySelectorAll('.topbar > .som-tab, .topbar > .zurueck')
     .forEach((el) => el.remove());
   const view = document.getElementById('view');
   if (!view) return;
@@ -347,7 +346,11 @@ async function routeView() {
   view.innerHTML = '';
   try {
     if (hash === 'log') {
-      const v = await mountLog(view, { userId: session.user.id, readOnly: false });
+      const v = await mountLog(view, {
+        userId: session.user.id,
+        readOnly: false,
+        zeigeSomPeek: !!vorherigeAnsicht && vorherigeAnsicht !== 'log',
+      });
       guard(v);
     } else if (hash === 'profile') {
       mountProfile(view, { session, profile, onProfileUpdated: (p) => { profile = p; } });
@@ -369,7 +372,14 @@ async function routeView() {
   if (token !== routeToken) return;
   const topbar = app.querySelector('.topbar');
   if (topbar) {
+    const pull = view.querySelector('.som-tab');
     const zurueck = view.querySelector('.zurueck');
+    if (pull) {
+      topbar.appendChild(pull);
+      if (pull.dataset.peek === 'true') requestAnimationFrame(() => {
+        if (token === routeToken) pull.classList.add('peek');
+      });
+    }
     if (zurueck) topbar.appendChild(zurueck);
   }
   aktiveAnsicht = hash;
