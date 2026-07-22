@@ -393,7 +393,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    beruehrt die rechte untere Ecke den Bildschirmrand. */
 .ctrlbar{--ctrlbar-bottom:max(6px, calc(env(safe-area-inset-bottom) - 6px));
   position:fixed;left:0;right:0;bottom:0;z-index:30;
-  padding:0 7px var(--ctrlbar-bottom);overflow:hidden;background:transparent}
+  padding:0 7px var(--ctrlbar-bottom);overflow:hidden;
+  background:linear-gradient(180deg,transparent 0,var(--bg) 8px,transparent 8px)}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
    auf. Der Schatten liegt ausserhalb und wird davon nicht beschnitten. */
@@ -410,13 +411,16 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Kein transform: Ein transformierter Vorfahr verschiebt die Bezugsflaeche des
    backdrop-filter, dann zeichnet er nicht mehr die Seite dahinter. */
 .ctrlbar .inner{position:relative;z-index:0;max-width:580px;margin:0 auto;display:flex;gap:4px;padding:5px;
-  border-radius:16px;box-shadow:0 0 0 100vmax var(--bg)}
+  border-radius:16px}
 .ctrlbar .inner::before{content:'';position:absolute;inset:0;z-index:-1;
   background:rgba(255,255,255,.27);
   -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);
   /* Ohne Schlagschatten (testweise). Er war der Grund fuer die 7px Polster an
      .ctrlbar – ohne ihn koennte die Leiste wieder breiter werden. */
   border:var(--bw) solid var(--ink);border-radius:16px}
+.ctrlbar .inner::after{content:'';position:absolute;inset:0;z-index:-2;pointer-events:none;
+  border-radius:16px;box-shadow:0 0 0 100vmax var(--bg);
+  clip-path:inset(8px -100vmax -100vmax -100vmax)}
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;padding:8px 2px;
   border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
