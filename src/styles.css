@@ -291,6 +291,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .chip.stretch{background:var(--pink)}
 .chip.rest{background:var(--surface);font-family:var(--mono);font-weight:700}
 .chip.rest:active{background:var(--mr)}
+:root[data-theme="dark"] .chip.rest:active{background:#AEDCF6;color:#0A0A0A}
 .chip.rest:disabled{opacity:.55}
 
 .ex{border-top:2px dashed var(--ink);padding:12px 13px}
@@ -401,7 +402,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);
   /* Ohne Schlagschatten (testweise). Er war der Grund fuer die 7px Polster an
      .ctrlbar – ohne ihn koennte die Leiste wieder breiter werden. */
-  border:0;border-radius:16px}
+  border:var(--bw) solid var(--ink);border-radius:16px}
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;padding:8px 2px;
   border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
@@ -483,9 +484,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-pull-clip.zieht .som-pull{transition:none}
 .som-pull-clip.offen .som-pull{transform:translate(-50%,8px);opacity:1;pointer-events:auto}
 .som-pull-link{display:flex;align-items:center;gap:10px;padding:10px 12px;text-decoration:none;
-  background:rgba(255,255,255,.31);color:var(--ink);border:0;border-radius:16px;
+  background:rgba(255,255,255,.41);color:var(--ink);border:var(--bw) solid var(--ink);border-radius:16px;
   -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25)}
-:root[data-theme="dark"] .som-pull-link{background:rgba(30,33,42,.31)}
+:root[data-theme="dark"] .som-pull-link{background:rgba(30,33,42,.41)}
 .som-pull-link>span{flex:1;min-width:0}
 .som-pull-link b{display:block;font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:14px}
 .som-pull-link small{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-top:2px}
@@ -498,9 +499,11 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .zurueck{position:fixed;top:calc(var(--topbar-h,58px) + 18px);
   right:max(14px,calc((100vw - 580px) / 2 + 14px));z-index:19;
   display:inline-flex;align-items:center;text-decoration:none;
-  background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);
+  background:rgba(255,255,255,.41);border:var(--bw) solid var(--ink);border-radius:16px;
+  -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);
   color:var(--ink);padding:8px 12px;
   font-family:var(--display);font-style:italic;font-weight:700;font-size:13px;text-transform:uppercase}
+:root[data-theme="dark"] .zurueck{background:rgba(30,33,42,.41)}
 .zurueck .pf{font-family:var(--mono);font-style:normal;font-size:16px;margin-right:3px;line-height:1}
 
 /* ---------- Set-O-Meter ----------
