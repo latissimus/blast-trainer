@@ -1,6 +1,7 @@
 import { TPL } from './template.js';
 import { KATALOG, KONTEN } from './katalog.js';
 import { targetSets, setsForExercise, effTypeOf, exOf } from './saetze.js';
+import { istDeload, tageDerWoche, tierVon, prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 
 // Set-O-Meter: Wie viele Arbeitssätze hat in dieser Woche welcher Muskel
 // abbekommen?
@@ -20,8 +21,9 @@ import { targetSets, setsForExercise, effTypeOf, exOf } from './saetze.js';
 //   Hauptspieler  1,0
 //   Nebenspieler  0,5
 // Die halbe Wertung indirekter Arbeit folgt Pelland et al. (2025). Sie ist
-// bereits die Umrechnung – deshalb wird direkt und indirekt NICHT getrennt
-// ausgewiesen. Zwei indirekte Belastungen sind ein Satz, fertig.
+// bereits die Umrechnung: Im Balken wird beides zusammengefuehrt. Der
+// Planungseditor zeigt direkt/indirekt zusaetzlich getrennt, damit ein
+// Spendervorschlag nachvollziehbar bleibt.
 //
 // Ein Cluster (6×4) zählt als EIN Satz, so wie ihn die App auch sonst zählt.
 
@@ -37,21 +39,7 @@ export const zeigName = (k) => KURZ[k] || k;
 
 const klein = (s) => String(s || '').trim().toLowerCase();
 
-export const istDeload = (woche) => Number(woche) >= 7;
-
-// Welche Tage gehoeren zu dieser Woche? Gleiche Regel wie im Log – A/B-Rotation
-// im Overreach, drei Cluster-Slots im Deload.
-export function tageDerWoche(payload, woche) {
-  if (istDeload(woche)) return ['MRs', 'MRs-2', 'MRs-3'];
-  const rot = ((payload && payload.rot) || {})[woche] || (Number(woche) % 2 === 1 ? 'A' : 'B');
-  return ['OK-' + rot, 'UK-' + rot, 'MRs'];
-}
-
-const tierVon = (payload, tag, woche) => {
-  if (istDeload(woche)) return 0;
-  const t = ((payload && payload.tier) || {})[tag + '|' + woche];
-  return (t === 0 || t === 1 || t === 2) ? t : 2;
-};
+export { istDeload, tageDerWoche };
 
 // GEZAEHLT WIRD DER PLAN, nicht das Eingetragene.
 //
@@ -66,7 +54,10 @@ const tierVon = (payload, tag, woche) => {
 export function zaehleWoche(payload, woche, katalog = KATALOG) {
   const idx = new Map(katalog.map((e) => [klein(e.n), e]));
   const konten = {};
-  KONTEN.forEach((k) => { konten[k] = 0; });
+  const direkt = {};
+  const indirekt = {};
+  KONTEN.forEach((k) => { konten[k] = 0; direkt[k] = 0; indirekt[k] = 0; });
+  const prio = prioritaetsAnpassungen(payload, woche, katalog);
 
   let ohneZuordnung = 0;
   const unbekannte = new Set();
@@ -95,7 +86,9 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
         // Zusatzsaetze gibt es nur bei Pump – wie im Log.
         const extra = effTypeOf(blk, tier) === 'pump'
           ? ((eintragBlock.extra || [])[xi] || 0) : 0;
-        const anzahl = (frei ? targetSets(blk, tier) : setsForExercise(blk, tier, xi)) + extra;
+        const anzahl = Math.max(0,
+          (frei ? targetSets(blk, tier) : setsForExercise(blk, tier, xi)) + extra +
+          (prio.delta[slotKey(tag, blk.id, xi)] || 0));
         if (!anzahl) return;
 
         const eintrag = idx.get(klein(name));
@@ -107,15 +100,19 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
           return;
         }
         konten[eintrag.haupt] += anzahl;
+        direkt[eintrag.haupt] += anzahl;
         eintrag.neben.forEach((nb) => {
-          if (konten[nb] !== undefined) konten[nb] += anzahl * 0.5;
+          if (konten[nb] !== undefined) {
+            konten[nb] += anzahl * 0.5;
+            indirekt[nb] += anzahl * 0.5;
+          }
         });
       });
     });
   });
 
   const gesamt = KONTEN.reduce((s, k) => s + konten[k], 0) + ohneZuordnung;
-  return { konten, ohneZuordnung, unbekannte: [...unbekannte], gesamt };
+  return { konten, direkt, indirekt, ohneZuordnung, unbekannte: [...unbekannte], gesamt, prioritaet: prio.ergebnisse };
 }
 
 // Absteigend sortiert – die Reihenfolge IST die Aussage. Bei Gleichstand

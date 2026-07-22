@@ -114,6 +114,21 @@ describe('zaehleWoche – Pump und Zusatzsätze', () => {
     const p = { data: { MRs: { 1: { m_ch: { names: ['Bankdrücken'], sets: [[]], extra: [5] } } } } };
     expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(2);
   });
+
+  it('rechnet aktive Priorisierung und Umverteilung in die Planung ein', () => {
+    const p = {
+      tier: { 'UK-A|1': 1 },
+      data: { 'UK-A': { 1: {
+        p_bk: { names: ['Bankdrücken', 'Rudern'], sets: [[], []] },
+        p_arm: { names: ['Curls', ''], sets: [[], []] },
+      } } },
+      volumen: { prioritaet: { Bizeps: { modus: 'tausch', spender: 'Brust' } } },
+    };
+    const { konten, direkt } = zaehleWoche(p, 1, K);
+    expect(direkt.Bizeps).toBe(2);  // p_arm Level II: 1 + Prioritaet
+    expect(direkt.Brust).toBe(1);   // p_bk Level II: 2 - Umverteilung
+    expect(konten.Bizeps).toBeGreaterThan(direkt.Bizeps); // Rudern wirkt weiter indirekt
+  });
 });
 
 describe('zaehleWoche – Robustheit', () => {

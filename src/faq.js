@@ -99,7 +99,10 @@ export function mountFaq(container) {
           <div class="faq-a">
             <p>Wie viel Arbeit jeder Muskel <b>in dieser Woche</b> abbekommt — als Balken, absteigend sortiert. Zu öffnen über das Menü rechts in der unteren Leiste.</p>
             <p><b>Gezählt wird der Plan, nicht das Eingetragene.</b> Sobald eine Übung gewählt ist, zählen die Sätze, die Level und Vorlage dafür vorsehen. Deshalb steht das Bild schon, <i>bevor</i> du trainiert hast — und genau dann nützt es: Du siehst, was deine Heavy-Wahl liefert, und wählst Pump und Cluster gegen die Lücken.</p>
-            <p><b>Ein Satz zählt für den Hauptspieler ganz, für die Nebenspieler halb.</b> Ein Satz Rudern ist ein voller Satz für den oberen Rücken und ein halber für Bizeps und Lat. Zwei halbe ergeben einen — deshalb wird das nicht getrennt ausgewiesen.</p>
+            <p><b>Ein Satz zählt für den Hauptspieler ganz, für die Nebenspieler halb.</b> Ein Satz Rudern ist ein voller Satz für den oberen Rücken und ein halber für Bizeps und Lat. Im Balken wird beides zusammengeführt; tippst du den Muskel an, siehst du direkt und indirekt zusätzlich getrennt.</p>
+            <p><b>Tippe einen Muskel an, um ihn zu planen.</b> „Basis" lässt den Plan unverändert. „Erhalt" kennzeichnet einen Muskel, der bei einer späteren Umverteilung bevorzugt als Spender vorgeschlagen werden darf. „Priorität" gibt dem gewählten Muskel ab Level II einen zusätzlichen Pump-Satz in dieser Woche.</p>
+            <p>Bei einer Priorität entscheidest du zwischen <b>Umverteilen</b> und <b>Aufschlagen</b>. Umverteilen bedeutet: +1 Satz für den Zielmuskel und −1 Satz bei einer von dir bestätigten, nicht priorisierten Pump-Übung derselben Einheit. Die App schlägt zuerst Erhalt-Muskeln und Muskeln mit vergleichsweise viel direkter und indirekter Arbeit vor, entscheidet aber nie selbst. Aufschlagen erhöht das Gesamtvolumen bewusst um einen Satz.</p>
+            <p><b>Auf Level I wirkt keine Priorität.</b> Der niedrige Tages-Level hat Vorrang; deshalb wird dann auch beim gewählten Spender nichts gekürzt. Ist die passende Pump-Übung oder der bestätigte Spender nicht gewählt, pausiert die ganze Umverteilung — aus einem fehlenden Spender wird nie still ein Volumenaufschlag.</p>
             <p><b>Es gibt keinen Zielwert und keine Warnung</b>, und das ist Absicht. Das Meter vergleicht die Muskeln nur untereinander. Ob dir auffällt, dass die Waden einen längeren Balken haben als die Brust, und ob dich das stört, ist deine Entscheidung — nicht die der App.</p>
             <p>Ein Cluster zählt dabei als <b>ein</b> Satz.</p>
           </div>
@@ -131,6 +134,7 @@ export function mountFaq(container) {
         <details class="faq"><summary>Kann ich zusätzliche Sätze machen?</summary>
           <div class="faq-a">
             <p>Bei <b>Pump</b> ja: Unter den Satzzeilen steht „+ Satz". Damit holst du dir gezielt mehr Volumen für einen Muskel, der im Set-O-Meter zu kurz kommt.</p>
+            <p>Der manuelle Knopf gilt nur für diese konkrete Übung. Eine geplante Muskel-Priorität stellst du dagegen im Set-O-Meter ein; sie wird im Log als „Priorität +1" beziehungsweise „Umverteilung −1" am Übungsfeld angezeigt.</p>
             <p><b>Heavy und Cluster bleiben fest.</b> Heavy ist die Messlatte deiner Progression — Sätze dort zu verändern macht den Vergleich über die Wochen unsauber. Und ein schwerer Satz kostet deutlich mehr Erholung als ein Pump-Satz. Deshalb ist Pump die richtige Stelle, um nachzulegen.</p>
           </div>
         </details>

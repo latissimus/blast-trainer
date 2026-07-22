@@ -124,6 +124,11 @@ export function mergePayload(srv, loc) {
     tier: Object.assign({}, srv.tier, loc.tier),
     rot: Object.assign({}, srv.rot, loc.rot),
     datum: Object.assign({}, srv.datum, loc.datum),
+    // Prioritaet/Erhalt bilden eine zusammenhaengende Planungsentscheidung.
+    // Liegt lokal eine Fassung vor, muss auch das Entfernen eines Eintrags
+    // erhalten bleiben; ein Object.assign wuerde geloeschte Server-Schluessel
+    // sonst wieder auferstehen lassen.
+    volumen: loc.volumen !== undefined ? loc.volumen : (srv.volumen || {}),
     // Uebungs-Pool: Vereinigung, nichts wird verworfen.
     mem: Object.assign({}, srv.mem, loc.mem),
     v: 3,

@@ -4,6 +4,7 @@ import { TPL, LEGACY, TIER_NAMES } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
 import { auswahlGruppen, imKatalog } from './auswahl.js';
+import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
 // ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
@@ -67,6 +68,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     notes: p.notes || {}, // gemeinsame Notizen pro Tag/Übung
     mem: p.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
     datum: p.datum || {},  // Tag|Woche -> ISO-Datum der Einheit
+    volumen: p.volumen || {}, // Muskel-Prioritaeten und Erhalt-Markierungen
   };
   migrateData();
 
@@ -92,7 +94,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saveStateEl.title = title;
   }
   function payloadOut() {
-    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, mem: state.mem, datum: state.datum, v: 3 };
+    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, mem: state.mem, datum: state.datum, volumen: state.volumen, v: 3 };
   }
   // Lokal vormerken, ohne ein gesetztes replace-Kennzeichen zu verlieren:
   // Es darf erst fallen, wenn der Server den Stand wirklich hat.
@@ -221,13 +223,17 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const cell = (state.data[day] || {})[week];
     if (!tpl || !cell) return { any: false, met: false };
     const tier = tierOf(day, week);
+    const prio = prioritaetsAnpassungen(payloadOut(), week);
     let done = 0, tgtTotal = 0;
     tpl.blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier); if (tgt === 0) return;
-      tgtTotal += tgt;
-      const entry = cell[blk.id]; if (!entry) return;
-      (entry.sets || []).forEach((arr, xi) => {
-        const cnt = setsForExercise(blk, tier, xi);
+      const entry = cell[blk.id];
+      exOf(blk, tier).forEach((_, xi) => {
+        const basis = blk.type === 'load' ? setsForExercise(blk, tier, xi) : targetSets(blk, tier);
+        const extra = (effTypeOf(blk, tier) === 'pump' && entry && entry.extra && entry.extra[xi]) || 0;
+        const cnt = Math.max(0, basis + extra + (prio.delta[slotKey(day, blk.id, xi)] || 0));
+        tgtTotal += cnt;
+        const arr = (entry && entry.sets && entry.sets[xi]) || [];
         (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) done++; });
       });
     });
@@ -546,6 +552,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function renderDay() {
     const tpl = TPL[state.day];
     const tier = tierOf(state.day, state.week);
+    const prio = prioritaetsAnpassungen(payloadOut(), state.week);
 
     const cell = ensureCell();
     const prev = prevFilled(state.day, state.week);
@@ -649,7 +656,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
         // sich das Volumen hier, ohne die Erholung zu belasten wie ein schwerer Satz.
         const darfExtra = !readOnly && effType === 'pump';
         entry.extra = entry.extra || [];
-        const count = geplant + (darfExtra ? (entry.extra[xi] || 0) : 0);
+        const prioDelta = prio.delta[slotKey(state.day, blk.id, xi)] || 0;
+        const count = Math.max(0, geplant + (darfExtra ? (entry.extra[xi] || 0) : 0) + prioDelta);
+        if (prioDelta) {
+          const vc = document.createElement('span');
+          vc.className = 'volrolle ' + (prioDelta > 0 ? 'prio' : 'minus');
+          vc.textContent = prioDelta > 0 ? 'Priorität +1' : 'Umverteilung −1';
+          hd.appendChild(vc);
+        }
         entry.sets[xi] = entry.sets[xi] || [];
         while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
 
@@ -659,6 +673,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
           else { names[xi] = nameIn.value; }
           tonAnpassen();
           queuePersist();
+          // Eine Pump-Wahl kann eine gespeicherte Prioritaet oder deren Spender
+          // aktivieren/deaktivieren. Die Satzzahl muss deshalb sofort neu
+          // berechnet werden, nicht erst beim naechsten Seitenwechsel.
+          if (freeEx) renderDay();
         };
 
         if (freeEx) {
@@ -739,7 +757,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein Pump- und Cluster-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
     // Pool retten, bevor die Wochendaten fallen. Neuere Werte gewinnen.
     state.mem = Object.assign({}, state.mem, harvestMem(state.data));
-    state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {}; state.datum = {};
+    state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {}; state.datum = {}; state.volumen = {};
     state.week = 1; state.day = 'OK-A';
     clearTimeout(saveTimer);
     // Leeren ist eine Absicht: Dieser Stand ersetzt den Server, auch wenn der
@@ -753,18 +771,24 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   function renderVolume(cell, tpl, tier) {
     let total = 0, tgtTotal = 0;
+    const prio = prioritaetsAnpassungen(payloadOut(), state.week);
     tpl.blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
       if (tgt === 0) return;
-      const entry = cell[blk.id]; if (!entry) { tgtTotal += tgt; return; }
+      const entry = cell[blk.id];
       let sets = 0;
-      (entry.sets || []).forEach((arr, xi) => {
+      let blockTgt = 0;
+      exOf(blk, tier).forEach((_, xi) => {
         // Zusatzsaetze zaehlen mit: Sie sind Arbeit, auch wenn sie ueber dem Plan
         // liegen. Sonst traegt man drei Saetze ein und der Balken ruehrt sich nicht.
-        const cnt = setsForExercise(blk, tier, xi) + ((entry.extra && entry.extra[xi]) || 0);
+        const basis = blk.type === 'load' ? setsForExercise(blk, tier, xi) : targetSets(blk, tier);
+        const extra = (effTypeOf(blk, tier) === 'pump' && entry && entry.extra && entry.extra[xi]) || 0;
+        const cnt = Math.max(0, basis + extra + (prio.delta[slotKey(state.day, blk.id, xi)] || 0));
+        blockTgt += cnt;
+        const arr = (entry && entry.sets && entry.sets[xi]) || [];
         (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) sets++; });
       });
-      total += sets; tgtTotal += tgt;
+      total += sets; tgtTotal += blockTgt;
     });
 
     // Nur noch Kopf und Gesamtzahl. Die Muskelzeilen mit Balken standen frueher
@@ -777,13 +801,18 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const blk = tpl.blocks.find((b) => b.id === el.dataset.tgt); if (!blk) return;
       const entry = cell[blk.id]; let sets = 0;
       const tgt = targetSets(blk, tier);
-      ((entry && entry.sets) || []).forEach((arr, xi) => {
+      let blockTgt = 0;
+      exOf(blk, tier).forEach((_, xi) => {
         // Zusatzsaetze zaehlen mit: Sie sind Arbeit, auch wenn sie ueber dem Plan
         // liegen. Sonst traegt man drei Saetze ein und der Balken ruehrt sich nicht.
-        const cnt = setsForExercise(blk, tier, xi) + ((entry && entry.extra && entry.extra[xi]) || 0);
+        const basis = blk.type === 'load' ? setsForExercise(blk, tier, xi) : targetSets(blk, tier);
+        const extra = (effTypeOf(blk, tier) === 'pump' && entry && entry.extra && entry.extra[xi]) || 0;
+        const cnt = Math.max(0, basis + extra + (prio.delta[slotKey(state.day, blk.id, xi)] || 0));
+        blockTgt += cnt;
+        const arr = (entry && entry.sets && entry.sets[xi]) || [];
         (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) sets++; });
       });
-      el.classList.toggle('met', tgt > 0 && sets >= tgt);
+      el.classList.toggle('met', blockTgt > 0 && sets >= blockTgt);
       el.innerHTML = 'Sätze <b>' + tgt + '</b>';
     });
   }

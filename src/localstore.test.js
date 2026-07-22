@@ -104,6 +104,17 @@ describe('mergePayload – Pool und Einstellungen', () => {
     expect(m.day).toBe('MRs');
   });
 
+  it('uebernimmt die lokale Muskelplanung als zusammenhaengende Entscheidung', () => {
+    const m = mergePayload(
+      { volumen: { prioritaet: { Brust: { modus: 'plus' } }, erhalt: { Abs: true } } },
+      { volumen: { prioritaet: { Unterarme: { modus: 'tausch', spender: 'Abs' } }, erhalt: { Abs: true } } },
+    );
+    expect(m.volumen).toEqual({
+      prioritaet: { Unterarme: { modus: 'tausch', spender: 'Abs' } },
+      erhalt: { Abs: true },
+    });
+  });
+
   it('kommt mit leeren Seiten klar', () => {
     expect(() => mergePayload(null, null)).not.toThrow();
     expect(mergePayload({}, {}).v).toBe(3);
@@ -124,6 +135,7 @@ describe('mergePayload – Vollstaendigkeit', () => {
       rot: { 3: 'B' },
       mem: { 'pump|x': { w: '20' } },
       datum: { 'UK-A|3': '2026-07-19' },
+      volumen: { prioritaet: { Unterarme: { modus: 'plus' } }, erhalt: {} },
       v: 3,
     };
     const m = mergePayload(p, {});

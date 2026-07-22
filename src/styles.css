@@ -294,14 +294,14 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .chip.rest:disabled{opacity:.55}
 
 .ex{border-top:2px dashed var(--ink);padding:12px 13px}
-.exhead{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.exhead{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
 .role{font-size:8.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);border:var(--bw) solid var(--ink);
   padding:2px 7px;border-radius:999px;flex:0 0 auto;font-family:var(--display);font-style:italic;background:var(--surface2)}
 .role.comp{color:#fff;background:var(--navy)}
 /* Uebungsauswahl. Ein <select>, kein Eingabefeld – eintragbar ist nur, was im
    Katalog steht. Eigenes Pfeil-Zeichen statt des Systemsteuerelements, damit es
    in beiden Themes zum Rest passt; das rechte padding haelt ihm den Platz frei. */
-.exname{width:100%;background:var(--surface2);border:var(--bw) solid var(--ink);border-radius:var(--r);
+.exname{width:100%;min-width:0;flex:1 1 190px;background:var(--surface2);border:var(--bw) solid var(--ink);border-radius:var(--r);
   color:var(--ink);font-size:16px;font-weight:700;padding:9px 26px 9px 10px;font-family:var(--ui);
   appearance:none;-webkit-appearance:none;cursor:pointer;
   /* Gezeichnetes Chevron statt zweier CSS-Farbverlaeufe. Die Verlauf-Loesung
@@ -493,18 +493,62 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Farbton, nur tief – die Zuordnung zum Knopf bleibt, das Auge auch. */
 :root[data-theme="dark"] .som-karte{background:var(--surface)}
 .som-lage{margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--muted)}
-.som-zeile{display:flex;align-items:center;gap:9px;padding:3px 0;font-size:13.5px}
+.som-zeile{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13.5px;width:100%;
+  background:transparent;border:0;color:var(--ink);text-align:left}
+.som-waehlbar{border-radius:var(--r);padding-left:4px;padding-right:4px}
+.som-waehlbar.on{background:var(--surface2)}
 /* 122px ist gemessen, nicht geschaetzt: "Seitl. Schulter" braucht 113px und
    stiess bei 112 an. Der Rest der Zeile gibt entsprechend nach. */
 /* 130px statt 122: Bei 14px braucht der laengste Name ("Seitl. Schulter")
    126px – bei 122 wurde er abgeschnitten. */
 .som-name{flex:0 0 130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-weight:600;font-size:14px}
+.som-name small{display:block;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;line-height:1.25;
+  color:var(--navy);font-weight:800;text-transform:uppercase;letter-spacing:.02em}
 /* Eine Farbe, kein Zielbalken, keine Zahl. Das Ding vergleicht die Gruppen
    miteinander und sagt sonst nichts – jede zweite Farbe waere eine Wertung.
    Navy traegt in beiden Themes (im Dark-Mode aufgehellt, siehe Variablen). */
 .som-track{flex:1;height:9px;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:999px;overflow:hidden}
 .som-fill{display:block;height:100%;background:var(--navy);transition:width .18s}
 .som-hinweis{margin:10px 0 0;font-size:12px;line-height:1.45;color:var(--muted)}
+.som-speicher{min-height:18px;margin:8px 2px 0;text-align:center;font-size:11px;color:var(--muted)}
+
+/* Muskelplanung unter dem Meter. Kein Dialog ueber dem Bild: Beim Auswaehlen
+   soll der Balkenvergleich sichtbar bleiben, weil genau daraus die
+   Umverteilungsentscheidung entsteht. */
+.som-editor{margin-top:14px;background:var(--surface);border:var(--bw) solid var(--ink);
+  border-radius:var(--r-karte);padding:16px}
+.som-ed-kopf{display:flex;align-items:flex-start;gap:10px}
+.som-ed-kopf>div{flex:1;min-width:0}
+.som-ed-label{display:block;font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.som-ed-kopf h2{font-size:23px;margin-top:3px;overflow-wrap:anywhere}
+.som-ed-zu{flex:0 0 auto;width:34px;height:34px;border:var(--bw) solid var(--ink);border-radius:50%;
+  background:var(--surface2);color:var(--ink);font-size:20px;line-height:1}
+.som-ed-stand{font-size:12px;color:var(--muted);margin:9px 0 12px}
+.som-prio-status{font-size:12.5px;line-height:1.45;margin:8px 0;padding:9px 10px;
+  border-left:4px solid var(--pink);background:var(--surface2)}
+.som-rollen{display:grid;grid-template-columns:repeat(3,1fr);border:var(--bw) solid var(--ink);
+  border-radius:var(--r);overflow:hidden;margin-top:12px}
+.som-rollen button{border:0;border-right:var(--bw) solid var(--ink);background:var(--surface);
+  color:var(--ink);padding:10px 4px;font-family:var(--display);font-style:italic;font-weight:700;
+  text-transform:uppercase;font-size:12px}
+.som-rollen button:last-child{border-right:0}
+.som-rollen button.on{background:var(--navy);color:#fff}
+.som-rollen button:disabled{opacity:.35;cursor:not-allowed}
+.som-frage{border-top:2px dashed var(--ink);margin-top:15px;padding-top:13px}
+.som-frage h3{font-size:14px;margin:0 0 9px}
+.som-wahl{display:block;width:100%;text-align:left;background:var(--surface2);color:var(--ink);
+  border:var(--bw) solid var(--ink);border-radius:var(--r);padding:10px 11px;margin-top:8px}
+.som-wahl b{display:block;font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:14px}
+.som-wahl span{display:block;font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.som-wahl small{display:block;font-size:9.5px;color:var(--navy);font-weight:800;text-transform:uppercase;margin-top:5px}
+.som-zurueck{margin-top:11px;background:transparent;border:0;color:var(--navy);font-size:12px;font-weight:800;padding:4px}
+
+/* Direkt am Uebungsfeld sichtbar: Der Satz stammt aus der Planung, nicht vom
+   manuellen +Satz-Knopf. */
+.volrolle{display:inline-flex;align-items:center;flex:0 0 auto;border:1px solid var(--ink);border-radius:999px;
+  padding:2px 6px;font-size:9px;font-weight:800;text-transform:uppercase;white-space:nowrap}
+.volrolle.prio{background:var(--pink);color:#141414}
+.volrolle.minus{background:var(--surface2);color:var(--muted)}
 
 /* Zusatzsätze bei Pump. Bewusst klein und unauffällig: Der Regelfall ist die
    Satzzahl aus der Vorlage, das hier ist die Ausnahme für einen Muskel, dem
