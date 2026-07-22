@@ -27,8 +27,9 @@ export async function mountMeter(container, { userId }) {
       <button class="som-info-knopf" id="som-info-knopf" type="button" aria-expanded="false" aria-controls="som-info">i</button>
     </div>
     <div class="som-kurzhilfe" id="som-info" hidden>
-      Das Meter zeigt dein geplantes Wochenvolumen. Tippe einen Muskel an, um ihn direkt hier zu priorisieren.
-      Indirekte Arbeit wird mit 0,5 gewichtet.
+      <p><b>Direkte Arbeit:</b> Der Muskel ist das Hauptziel der Übung.</p>
+      <p><b>Indirekte Arbeit:</b> Der Muskel arbeitet als unterstützender Nebenmuskel mit, während eine andere Muskelgruppe das Hauptziel ist – zum Beispiel der Trizeps beim Bankdrücken oder der Bizeps beim Rudern.</p>
+      <p>Jeder solche Satz wird als <b>1 indirekter Satz</b> angezeigt, trägt im Vergleichsbalken aber nur <b>0,5</b> bei. So bleibt sichtbar, wie oft der Muskel mitarbeitet, ohne indirekte und direkte Belastung gleichzusetzen.</p>
     </div>
     <div class="som-legende" aria-label="Balkenlegende">
       <span><i class="direkt"></i> Direkte Arbeit</span><span><i class="indirekt"></i> Indirekte Arbeit</span>
@@ -115,8 +116,12 @@ export async function mountMeter(container, { userId }) {
     const kandidaten = alleKandidaten.slice(0, 3);
     const istGewaehlt = (k) => cfg?.spenderFeld ? cfg.spenderFeld === k.key : cfg?.spender === k.konto;
     const zeigeModus = modusOffen || !!cfg;
+    const quellen = werte.indirektQuellen?.[konto] || [];
 
     return `<div class="som-inline-editor">
+      ${quellen.length ? `<div class="som-indirekt-quellen"><span>Indirekt durch</span><div>
+        ${quellen.map((q) => `<small><b>${q.saetze}×</b> ${html(q.name)}</small>`).join('')}
+      </div></div>` : ''}
       ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
       ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt je 1 Satz ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
       <button type="button" class="som-prio-toggle${cfg ? ' on' : ''}" data-prio-toggle ${!hatPumpplatz ? ' disabled' : ''}>

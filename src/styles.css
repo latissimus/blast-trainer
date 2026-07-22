@@ -531,9 +531,11 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-stat small{font-size:8px;line-height:1.1;font-weight:800;color:var(--muted);text-transform:uppercase}
 .som-stat b{margin-top:3px;font-size:16px;line-height:1;color:var(--ink)}
 .som-info-knopf{flex:0 0 auto;width:28px;height:28px;padding:0;border:var(--bw) solid var(--ink);border-radius:50%;
-  align-self:center;background:var(--surface2);color:var(--ink);font-family:var(--mono);font-size:13px;font-weight:800}
+  align-self:center;background:#67318F;color:#fff;font-family:var(--mono);font-size:13px;font-weight:800}
 .som-kurzhilfe{margin:0 0 9px;padding:10px 11px;background:#FFB3D6;border:var(--bw) solid var(--ink);
   border-radius:var(--r);font-size:11.5px;line-height:1.45;color:#141414}
+.som-kurzhilfe p{margin:0 0 7px}
+.som-kurzhilfe p:last-child{margin-bottom:0}
 .som-legende{display:flex;gap:13px;margin:0 3px 9px;font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase}
 .som-legende span{display:flex;align-items:center;gap:5px}
 .som-legende i{display:inline-block;width:17px;height:7px;border-radius:999px;border:1px solid var(--ink)}
@@ -569,13 +571,20 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   transition:transform .16s ease}
 .som-muskel.offen .som-pfeil{transform:rotate(180deg)}
 .som-inline-editor{padding:0 12px 12px;border-top:2px dashed var(--ink)}
+.som-indirekt-quellen{margin:9px 0 0;color:var(--muted)}
+.som-indirekt-quellen>span{display:block;margin-bottom:5px;font-size:8.5px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.06em}
+.som-indirekt-quellen>div{display:flex;flex-wrap:wrap;gap:4px}
+.som-indirekt-quellen small{display:inline-flex;gap:4px;padding:3px 6px;background:var(--surface);
+  border:1px solid var(--ink);border-radius:999px;font-size:8.5px;line-height:1.2;color:var(--muted)}
+.som-indirekt-quellen small b{color:var(--ink)}
 .som-prio-status{font-size:11.5px;line-height:1.45;margin:10px 0 0;padding:8px 9px;
   border-left:4px solid var(--pink);background:var(--surface)}
 .som-prio-status.neutral{border-left-color:var(--muted)}
 .som-prio-toggle{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:42px;margin-top:10px;
-  border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface);color:var(--ink);
+  border:var(--bw) solid var(--ink);border-radius:var(--r);background:#67318F;color:#fff;
   font-family:var(--display);font-style:italic;font-weight:700;text-transform:uppercase;font-size:13px}
-.som-prio-toggle.on{background:var(--pink);color:#141414}
+.som-prio-toggle.on{background:#67318F;color:#fff}
 .som-prio-toggle:disabled{opacity:.35;cursor:not-allowed}
 .som-inline-plan{margin-top:11px}
 .som-ed-label{display:block;margin-bottom:6px;font-size:9px;color:var(--muted);font-weight:800;
@@ -584,14 +593,16 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-modusseg button{min-width:0;padding:8px 6px;border:0;border-right:var(--bw) solid var(--ink);
   background:var(--surface);color:var(--ink)}
 .som-modusseg button:last-child{border-right:0}
-.som-modusseg button.on{background:var(--pink);color:#141414}
+.som-modusseg button.on{background:#67318F;color:#fff}
 .som-modusseg b,.som-modusseg small{display:block}
 .som-modusseg b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:12px}
 .som-modusseg small{margin-top:2px;font-size:8.5px;opacity:.75}
 .som-spender{margin-top:12px}
 .som-spender-wahl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;margin-top:6px;padding:8px 9px;
   text-align:left;background:var(--surface);color:var(--ink);border:1.5px solid var(--ink);border-radius:var(--r)}
-.som-spender-wahl.on{border-color:var(--pink)}
+.som-spender-wahl.on{border-color:var(--ink);background:#67318F;color:#fff}
+.som-spender-wahl.on small,.som-spender-wahl.on .som-spender-zahlen{color:rgba(255,255,255,.78)}
+.som-spender-wahl.on em{color:#fff}
 .som-spender-wahl span:first-child{min-width:0}
 .som-spender-wahl b,.som-spender-wahl small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .som-spender-wahl b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:12px}

@@ -56,7 +56,10 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
   const konten = {};
   const direkt = {};
   const indirekt = {};
-  KONTEN.forEach((k) => { konten[k] = 0; direkt[k] = 0; indirekt[k] = 0; });
+  const quellen = {};
+  KONTEN.forEach((k) => {
+    konten[k] = 0; direkt[k] = 0; indirekt[k] = 0; quellen[k] = new Map();
+  });
   const prio = prioritaetsAnpassungen(payload, woche, katalog);
 
   let ohneZuordnung = 0;
@@ -102,6 +105,7 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
           if (konten[nb] !== undefined) {
             konten[nb] += anzahl * 0.5;
             indirekt[nb] += anzahl;
+            quellen[nb].set(name, (quellen[nb].get(name) || 0) + anzahl);
           }
         });
       });
@@ -109,7 +113,15 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
   });
 
   const gesamt = KONTEN.reduce((s, k) => s + konten[k], 0) + ohneZuordnung;
-  return { konten, direkt, indirekt, ohneZuordnung, unbekannte: [...unbekannte], gesamt, prioritaet: prio.ergebnisse };
+  const indirektQuellen = {};
+  KONTEN.forEach((k) => {
+    indirektQuellen[k] = [...quellen[k]].map(([name, saetze]) => ({ name, saetze }))
+      .sort((a, b) => b.saetze - a.saetze || a.name.localeCompare(b.name));
+  });
+  return {
+    konten, direkt, indirekt, indirektQuellen,
+    ohneZuordnung, unbekannte: [...unbekannte], gesamt, prioritaet: prio.ergebnisse,
+  };
 }
 
 // Absteigend sortiert – die Reihenfolge IST die Aussage. Bei Gleichstand
