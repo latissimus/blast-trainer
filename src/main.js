@@ -247,9 +247,9 @@ function renderChrome() {
             <select id="lg-tag" aria-label="Tag" disabled></select></label>
           <label class="ci"><span class="wert" id="ci-lvl-w">III</span><span class="lbl" id="ci-lvl-l">Level</span>
             <select id="lg-tier" aria-label="Level" disabled>
-              <option value="0">Level I · wenig</option>
-              <option value="1">Level II · mittel</option>
-              <option value="2">Level III · voll</option>
+              <option value="0">Kompakt · weniger Volumen</option>
+              <option value="1">Standard · normales Volumen</option>
+              <option value="2">Voll · höchstes Volumen</option>
             </select></label>
           <label class="ci"><span class="wert" id="ci-dat-w">—</span><span class="lbl">Datum</span>
             <input id="lg-datum" type="date" aria-label="Datum der Einheit" disabled></label>
