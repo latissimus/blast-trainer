@@ -47,7 +47,7 @@ export function mountFaq(container) {
             <p><b>1. Progressive Überlastung</b> — mehr Last oder mehr Wdh. gegenüber dem letzten Mal. Steht als Delta über jeder Heavy-Übung.</p>
             <p><b>2. Nähe zum Versagen</b> — der Reizauslöser pro Satz. Ein Satz, bei dem noch fünf Wdh. drin gewesen wären, zählt kaum.</p>
             <p><b>3. Erholung</b> — Schlaf, Protein, Stress. Das Fundament, ohne das die ersten beiden nichts bringen.</p>
-            <p>Das <b>Volumen</b> (Anzahl Sätze) ist der Dosis-Regler darüber. Man liest oft „10–20 Sätze pro Muskel und Woche" — diese Zahl stammt aber überwiegend aus Studien mit unterschiedlich großer Versagensnähe. Hier wird bewusst versagensnah trainiert; Techniken wie Lengthened Partials können optional dazukommen. Ein Satz ist also nicht gleich ein Satz, und die Zahl lässt sich nicht 1:1 übertragen. Genau deshalb zeigt das Set-O-Meter bewusst <b>keinen Zielwert</b>.</p>
+            <p>Das <b>Volumen</b> (Anzahl Sätze) ist der Dosis-Regler darüber. Man liest oft „10–20 Sätze pro Muskel und Woche" — das ist eine grobe Faustregel aus sehr unterschiedlichen Studien, keine notwendige Mindestmenge und kein persönlicher Optimalwert. Einige dieser Studien trainierten sogar bis zum Versagen. Hier kommen außerdem Heavy-, leichte versagensnahe Pump- und dichte Cluster-Sätze zusammen; sie lassen sich nicht mit einem festen Faktor ineinander umrechnen. Genau deshalb zeigt das Set-O-Meter bewusst <b>keinen Zielwert</b>.</p>
             <p>Muskelkater ist übrigens kein Maß für irgendetwas.</p>
           </div>
         </details>
@@ -210,7 +210,15 @@ export function mountFaq(container) {
         </details>
 
         <details class="faq"><summary>Was bedeuten die Level (I/II/III)?</summary>
-          <div class="faq-a"><p><b>Level I</b> = wenig Sätze, schlechter Tag. <b>Level II</b> = Standard und bei einer neuen Phase vorausgewählt. <b>Level III</b> = volles Volumen, guter Tag. Nach Tagesform wählen, nicht nach Ehrgeiz. Das Level gilt je Tag und Woche — du kannst also Montag III und Mittwoch I fahren.</p></div>
+          <div class="faq-a">
+            <p>Die Level regeln nur die <b>Satzdosis dieser Einheit</b>. Sie sagen nicht, wie hart du dich anstrengen sollst: Auch auf Level I bleiben die ausgeführten Sätze produktiv und versagensnah.</p>
+            <p><b>Level I — reduzierte Tagesdosis.</b> Für einen schlechten oder bereits ermüdeten Tag. Das ist kein nutzloses Training, sondern eine wirksame Minimaldosis. Dauerhaft ist es aber nicht für jeden Muskel die beste Wahl, wenn du maximal aufbauen willst.</p>
+            <p><b>Level II — produktiver Standard.</b> Deshalb ist es bei einer neuen Phase vorausgewählt. Für die meisten normalen Trainingstage liefert es genug Arbeit, ohne die Erholung unnötig auszureizen.</p>
+            <p><b>Level III — obere Overreach-Dosis.</b> Für einen guten Tag, an dem Leistung und Erholung stimmen. Es ist die höchste sinnvolle Stufe, nicht der Wert, den du jedes Mal erreichen musst. Ein Level IV gibt es bewusst nicht: Wenn ein einzelner Muskel mehr braucht, wird er im Set-O-Meter priorisiert, statt das komplette Training noch größer zu machen.</p>
+            <p>Dass du nach Level III lokal müde bist und „genug" hast, ist normal. Du musst dich aber nicht vollständig zerstört fühlen. Enden spätere Sätze regelmäßig wegen Atemnot, allgemeiner Erschöpfung oder unsauberer Technik statt wegen des Zielmuskels, war das Level für diesen Tag zu hoch.</p>
+            <p><b>Ein passendes Level erkennst du daran:</b> Der Zielmuskel begrenzt die Sätze, die Technik bleibt stabil und deine Heavy-Leistung ist bei der nächsten vergleichbaren Einheit mindestens stabil. Fällt die Leistung über mehrere Einheiten oder erholst du dich nicht rechtzeitig, wähle weniger Volumen.</p>
+            <p>Wähle also nach Tagesform und Leistung, nicht nach Ehrgeiz. Das Level gilt je Tag und Woche — du kannst beispielsweise Montag Level III und Mittwoch Level I fahren.</p>
+          </div>
         </details>
 
         <details class="faq"><summary>Wie kommen die Satzzahlen zustande?</summary>
