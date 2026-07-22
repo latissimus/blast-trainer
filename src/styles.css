@@ -482,7 +482,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-pull-hinweis{display:flex;align-items:center;justify-content:center;width:100%;height:32px;
   margin:0;background:transparent;border:0;color:var(--muted);opacity:.72}
 .som-pull-hinweis .pf{font-family:var(--mono);font-size:16px;font-weight:800;line-height:1}
-.som-pull-clip{position:fixed;z-index:19;top:var(--topbar-h,58px);left:0;right:0;bottom:0;
+.som-pull-clip{position:absolute;z-index:-1;top:100%;left:0;right:0;bottom:auto;
+  height:calc(100vh - var(--topbar-h,58px));height:calc(100dvh - var(--topbar-h,58px));
   overflow:hidden;-webkit-clip-path:inset(0);clip-path:inset(0);contain:paint;pointer-events:none}
 .som-pull{position:absolute;top:0;left:50%;width:min(calc(100vw - 56px),360px);
   transform:translate(-50%,calc(-100% - 8px + var(--som-zug,0px)));opacity:var(--som-sicht,0);
@@ -500,8 +501,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
 .seitenkopf{display:flex;align-items:center;gap:10px;padding:48px 90px 10px 0}
 .seitenkopf .section-title{margin:0;flex:1;min-width:0}
-.zurueck{position:fixed;top:calc(var(--topbar-h,58px) + 18px);
-  right:max(14px,calc((100vw - 580px) / 2 + 14px));z-index:19;
+.zurueck{position:absolute;top:calc(100% + 18px);
+  right:max(14px,calc((100vw - 580px) / 2 + 14px));z-index:-1;
   display:inline-flex;align-items:center;text-decoration:none;
   background:rgba(255,255,255,.41);border:var(--bw) solid var(--ink);border-radius:16px;
   -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);

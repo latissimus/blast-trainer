@@ -326,6 +326,12 @@ function setNavActive(view) {
 async function routeView() {
   if (aktiveAnsicht === 'log') logScrollY = window.scrollY;
   cleanupActive();
+  // Pull-down und Zurueck-Chip muessen physisch am Sticky-Header haengen.
+  // Auf iOS wandert der Header beim Gummiband nach unten, fixed Elemente aber
+  // nicht – dadurch erschienen sie im Header. Vor dem Ansichtswechsel alte
+  // angedockte Elemente entfernen; die neue Ansicht wird unten neu angedockt.
+  app.querySelectorAll('.topbar > .som-pull-clip, .topbar > .zurueck')
+    .forEach((el) => el.remove());
   const view = document.getElementById('view');
   if (!view) return;
   let hash = (location.hash.replace('#', '') || 'log');
@@ -359,6 +365,13 @@ async function routeView() {
     view.innerHTML = `<div class="wrap" style="padding-top:20px"><div class="msg err">Fehler: ${e.message}</div></div>`;
   }
   if (token !== routeToken) return;
+  const topbar = app.querySelector('.topbar');
+  if (topbar) {
+    const pull = view.querySelector('.som-pull-clip');
+    const zurueck = view.querySelector('.zurueck');
+    if (pull) topbar.appendChild(pull);
+    if (zurueck) topbar.appendChild(zurueck);
+  }
   aktiveAnsicht = hash;
   const zielY = hash === 'log' ? logScrollY : 0;
   requestAnimationFrame(() => {
