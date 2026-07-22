@@ -484,8 +484,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .erstblock.mit-som-hinweis{padding-top:14px}
 /* Die violette Retro-Lasche sitzt am Sticky-Header und parkt vollstaendig
    dahinter. Beim Herunterziehen wird sie zugleich breiter und laenger. */
-.som-tab{position:absolute;z-index:0;top:calc(100% + 3px);left:50%;width:60px;height:20px;overflow:hidden;
-  transform:translate(-50%,calc(-100% - 7px));background:#67318F;border:var(--bw) solid var(--ink);border-top:0;
+.som-tab{position:absolute;z-index:0;top:calc(100% + 2px);left:50%;width:60px;height:20px;overflow:hidden;
+  transform:translate(-50%,-26px);background:#67318F;border:var(--bw) solid var(--ink);border-top:0;
   border-radius:0 0 9px 9px;pointer-events:none;
   transition:transform .22s ease,width .22s ease,height .22s ease}
 .som-tab.gezogen{width:96px;height:46px;transform:translate(-50%,0);pointer-events:auto}
@@ -499,8 +499,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    die Lasche wieder unsichtbar hinter dem Header. */
 .som-tab.peek{animation:som-tab-peek 1.55s ease both}
 @keyframes som-tab-peek{
-  0%,30%,62%,100%{width:60px;height:20px;transform:translate(-50%,calc(-100% - 7px))}
-  14%,46%{width:68px;height:24px;transform:translate(-50%,-18%)}
+  0%,30%,62%,100%{width:60px;height:20px;transform:translate(-50%,-26px)}
+  14%,46%{width:68px;height:24px;transform:translate(-50%,0)}
 }
 #view{transition:padding-top .22s ease}
 #view.som-gezogen{padding-top:46px}
