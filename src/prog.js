@@ -21,8 +21,24 @@ export async function mountProg(container, { userId }) {
       <h1 class="section-title">📈 Progression</h1>
       <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
     </div>
+    <div class="som-statuskopf prog-statuskopf">
+      <p class="prog-info-titel">Heavy-Progression</p>
+      <button class="som-info-knopf" id="prog-info-knopf" type="button" aria-expanded="false" aria-controls="prog-info">i</button>
+    </div>
+    <div class="som-kurzhilfe" id="prog-info" hidden>
+      <p>Muskelaufbau folgt der <b>progressiven Überlastung</b>: Wächst die Leistung über die Wochen nicht, fehlt dem Körper der Grund, sich anzupassen. Volumen, Technik und Ernährung unterstützen diesen Prozess.</p>
+      <p>Gezeigt wird das <b>geschätzte 1RM nach Epley</b> aus deinem besten Satz je Woche. Dadurch zählen sowohl mehr Gewicht als auch mehr Wiederholungen bei gleichem Gewicht.</p>
+      <p>Ausgewertet werden nur <b>Heavy-Sätze</b>. Pump- und Cluster-Sätze sind nicht als vergleichbarer Leistungstest gedacht.</p>
+    </div>
     <div id="prog-inhalt"></div>`;
   container.appendChild(wrap);
+
+  const info = wrap.querySelector('#prog-info');
+  const infoKnopf = wrap.querySelector('#prog-info-knopf');
+  infoKnopf.onclick = () => {
+    info.hidden = !info.hidden;
+    infoKnopf.setAttribute('aria-expanded', info.hidden ? 'false' : 'true');
+  };
 
   let payload = null;
   const lokal = readLog(userId);

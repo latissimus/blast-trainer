@@ -306,8 +306,6 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   padding:7px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
 .chip.stretch{background:var(--pink)}
 .chip.rest{background:var(--surface);font-family:var(--mono);font-weight:700}
-.chip.rest:active{background:var(--mr)}
-:root[data-theme="dark"] .chip.rest:active{background:#AEDCF6;color:#0A0A0A}
 .chip.rest:disabled{opacity:.55}
 
 .ex{border-top:2px dashed var(--ink);padding:12px 13px}
@@ -375,10 +373,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .addnote{background:var(--surface2);border:2px dashed var(--ink);color:var(--muted);
   width:100%;padding:9px;border-radius:var(--r);font-size:13px;font-weight:800;font-family:var(--display);
   font-style:italic;text-transform:uppercase}
-.addnote:active{background:var(--pink);color:var(--ink)}
 .exnote{width:100%;background:var(--surface2);border:2px dashed var(--ink);border-radius:var(--r);color:var(--ink);
   font-family:var(--mono);font-size:14.5px;padding:9px 10px;resize:vertical;min-height:46px;line-height:1.4}
-.exnote:focus{outline:none;border-style:solid;border-color:var(--pink)}
+.exnote:focus{outline:none}
 
 /* ---------- Volume ---------- */
 
@@ -396,7 +393,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    beruehrt die rechte untere Ecke den Bildschirmrand. */
 .ctrlbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
   padding:8px 7px max(6px, calc(env(safe-area-inset-bottom) - 6px));
-  background:linear-gradient(180deg,rgba(177,231,255,0),var(--bg) 55%)}
+  background:linear-gradient(180deg,transparent,
+    color-mix(in srgb,var(--bg) 55%,transparent) 55%,
+    color-mix(in srgb,var(--bg) 70%,transparent))}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
    auf. Der Schatten liegt ausserhalb und wird davon nicht beschnitten. */
@@ -414,7 +413,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    backdrop-filter, dann zeichnet er nicht mehr die Seite dahinter. */
 .ctrlbar .inner{position:relative;max-width:580px;margin:0 auto;display:flex;gap:4px;padding:5px}
 .ctrlbar .inner::before{content:'';position:absolute;inset:0;z-index:-1;
-  background:rgba(255,255,255,.31);
+  background:rgba(255,255,255,.23);
   -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);
   /* Ohne Schlagschatten (testweise). Er war der Grund fuer die 7px Polster an
      .ctrlbar – ohne ihn koennte die Leiste wieder breiter werden. */
@@ -447,7 +446,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* Das Menue rechts. Flieder mit demselben Dreiecksmuster wie die
    Set-O-Meter-Seite – es hebt sich damit von den vier Einstellfeldern ab:
    Die aendern den Inhalt der Seite, dieses wechselt die Seite. */
-:root[data-theme="dark"] .ctrlbar .inner::before{background:rgba(30,33,42,.31)}
+:root[data-theme="dark"] .ctrlbar .inner::before{background:rgba(30,33,42,.23)}
 .ci.menue{background:var(--lila);color:var(--lila-ink);flex:0 0 62px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15'%3E%3Cpath d='M7.5 4l3.2 5.4H4.3z' fill='%230B1B44' fill-opacity='.13'/%3E%3C/svg%3E");
   background-position:center}
@@ -537,10 +536,13 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-stat b{margin-top:3px;font-size:16px;line-height:1;color:var(--ink)}
 .som-info-knopf{flex:0 0 auto;width:28px;height:28px;padding:0;border:var(--bw) solid var(--ink);border-radius:50%;
   align-self:center;background:var(--prio);color:#fff;font-family:var(--mono);font-size:13px;font-weight:800}
-.som-kurzhilfe{margin:0 0 9px;padding:10px 11px;background:var(--prio-soft);border:var(--bw) solid var(--ink);
+.som-kurzhilfe{margin:0 0 9px;padding:10px 11px;background:var(--surface);border:var(--bw) solid var(--ink);
   border-radius:var(--r);font-size:11.5px;line-height:1.45;color:var(--ink)}
 .som-kurzhilfe p{margin:0 0 7px}
 .som-kurzhilfe p:last-child{margin-bottom:0}
+.prog-statuskopf{align-items:center}
+.prog-info-titel{flex:1;margin:0;padding:2px 4px;font-family:var(--display);font-style:italic;
+  font-size:13px;font-weight:700;text-transform:uppercase;color:var(--ink)}
 .som-legende{display:flex;gap:13px;margin:0 3px 9px;font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase}
 .som-legende span{display:flex;align-items:center;gap:5px}
 .som-legende i{display:inline-block;width:17px;height:7px;border-radius:999px;border:1px solid var(--ink)}

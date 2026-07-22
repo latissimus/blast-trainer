@@ -14,15 +14,7 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
   const karte = document.createElement('div');
   karte.className = 'card';
   karte.innerHTML = `${titel ? `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">${titel}</h2>` : ''}
-    <div id="fs-inhalt"><div class="mess-leer">lädt…</div></div>
-    <details class="mess-neu"><summary>Warum das der wichtigste Wert ist</summary>
-      <p class="mess-hinweis">Muskelaufbau folgt der <b>progressiven Überlastung</b>: Wächst die Leistung über die Wochen nicht,
-        fehlt dem Körper der Grund, sich anzupassen. Alles andere — Volumen, Technik, Ernährung — zahlt erst darauf ein.
-        Darum ist diese Kurve der ehrlichste Marker, den die App hat.</p>
-      <p class="mess-hinweis" style="margin-top:8px">Gezeigt wird das <b>geschätzte 1RM</b> (Epley) deines besten Satzes je Woche.
-        So zählt beides: mehr Gewicht <i>und</i> mehr Wiederholungen bei gleichem Gewicht.
-        Nur Heavy-Sätze — Pump und Cluster sind nicht zum Messen von Fortschritt gedacht.</p>
-    </details>`;
+    <div id="fs-inhalt"><div class="mess-leer">lädt…</div></div>`;
   wrap.appendChild(karte);
 
   const inhalt = karte.querySelector('#fs-inhalt');
