@@ -82,7 +82,7 @@ export function pumpMoeglichkeiten(payload, woche, konto) {
         const erlaubt = exDef.konten || blk.konten || [];
         if (erlaubt.includes(konto)) treffer.push({
           key: slotKey(tag, blk.id, xi), tag, blockId: blk.id, xi,
-          mus: blk.mus, tier, anzahl: targetSets(blk, tier),
+          mus: blk.mus, tier, anzahl: targetSets(blk, tier), erlaubt,
         });
       });
     });
@@ -136,10 +136,20 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
       ergebnisse[ziel] = { status: 'spender-fehlt', modus: 'tausch', zielFeld, spender };
       return;
     }
-    const echterSpender = bestesFeld(felder.filter((f) =>
+    // Eine freie Wahl speichert den konkreten Pumpplatz. Dadurch bleibt z. B.
+    // "Rücken" derselbe Spender, egal ob dort später Lat oder oberer Rücken
+    // als konkrete Übung gewählt wird.
+    const festBelegt = cfg.spenderFeld ? bestesFeld(felder.filter((f) =>
+      f.key === cfg.spenderFeld && f.tag === zielFeld.tag && f.key !== zielFeld.key &&
+      f.anzahl + (delta[f.key] || 0) > 0)) : null;
+    const festLeer = cfg.spenderFeld && !festBelegt ? bestesFeld(pumpMoeglichkeiten(payload, woche, spender).filter((f) =>
+      f.key === cfg.spenderFeld && f.tag === zielFeld.tag && f.key !== zielFeld.key &&
+      !belegteFelder.has(f.key) && !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key) &&
+      f.anzahl + (delta[f.key] || 0) > 0)) : null;
+    const echterSpender = festBelegt || bestesFeld(felder.filter((f) =>
       f.tag === zielFeld.tag && f.konto === spender && f.key !== zielFeld.key &&
       f.anzahl + (delta[f.key] || 0) > 0));
-    const freierSpender = bestesFeld(pumpMoeglichkeiten(payload, woche, spender).filter((f) =>
+    const freierSpender = festLeer || bestesFeld(pumpMoeglichkeiten(payload, woche, spender).filter((f) =>
       f.tag === zielFeld.tag && f.key !== zielFeld.key && !belegteFelder.has(f.key) &&
       !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key) &&
       f.anzahl + (delta[f.key] || 0) > 0));
@@ -154,7 +164,8 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
     delta[spenderFeld.key] = (delta[spenderFeld.key] || 0) - 1;
     ergebnisse[ziel] = {
       status: 'aktiv', modus: 'tausch', zielFeld, spenderFeld, spender,
-      vorgemerkt: vorgemerkt || !echterSpender,
+      spenderName: cfg.spenderName || spender,
+      vorgemerkt: vorgemerkt || !felder.includes(spenderFeld),
     };
   });
 
@@ -162,7 +173,7 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
 }
 
 // Vorschlaege sind keine automatische Entscheidung. Viel bereits geplante
-// direkte+indirekte Arbeit steht oben; bei Gleichstand das groessere Pumpfeld.
+// direkte+indirekte Arbeit steht oben; danach direkte Arbeit und Feldgroesse.
 // Die UI zeigt die Gruende, der Nutzer bestaetigt den Spender selbst.
 export function spenderKandidaten(payload, woche, ziel, wochenwerte = {}, katalog = KATALOG) {
   const felder = pumpFelder(payload, woche, katalog);
@@ -183,7 +194,10 @@ export function spenderKandidaten(payload, woche, ziel, wochenwerte = {}, katalo
   });
   const bestehend = prioritaetsAnpassungen(probePayload, woche, katalog).delta;
 
-  const proKonto = new Map();
+  const konten = wochenwerte.konten || {};
+  const direkt = wochenwerte.direkt || {};
+  const indirekt = wochenwerte.indirekt || {};
+  const proFeld = new Map();
   KONTEN.forEach((konto) => {
     if (konto === ziel || gueltigePrio(prios[konto])) return;
     const echt = bestesFeld(felder.filter((f) => f.tag === zielFeld.tag && f.konto === konto && f.key !== zielFeld.key));
@@ -193,30 +207,40 @@ export function spenderKandidaten(payload, woche, ziel, wochenwerte = {}, katalo
     if (!f) return;
     const verfuegbar = f.anzahl + (bestehend[f.key] || 0);
     if (verfuegbar <= 0) return;
-    proKonto.set(konto, { ...f, konto, name: f.name || 'Pumpfeld noch leer', verfuegbar });
+    const kandidat = {
+      ...f, konto, name: f.name || 'Pumpfeld noch leer', verfuegbar,
+      wert: konten[konto] || 0, direkt: direkt[konto] || 0, indirekt: indirekt[konto] || 0,
+    };
+    const alt = proFeld.get(f.key);
+    if (!alt || kandidat.wert > alt.wert ||
+      (kandidat.wert === alt.wert && kandidat.direkt > alt.direkt)) proFeld.set(f.key, kandidat);
   });
 
-  const konten = wochenwerte.konten || {};
-  const direkt = wochenwerte.direkt || {};
-  const indirekt = wochenwerte.indirekt || {};
-  const liste = [...proKonto.values()].map((f) => ({
+  const blockName = (f) => {
+    if (f.name !== 'Pumpfeld noch leer') return f.konto;
+    const erlaubt = f.erlaubt || [];
+    if (erlaubt.length === 2 && erlaubt.includes('Lat') && erlaubt.includes('Oberer Rücken')) return 'Rücken';
+    if (erlaubt.length === 1) return erlaubt[0];
+    return f.mus;
+  };
+  const liste = [...proFeld.values()].map((f) => ({
     konto: f.konto, tag: f.tag, mus: f.mus, name: f.name,
-    verfuegbar: f.verfuegbar,
-    wert: konten[f.konto] || 0,
-    direkt: direkt[f.konto] || 0,
-    indirekt: indirekt[f.konto] || 0,
+    key: f.key, label: blockName(f), verfuegbar: f.verfuegbar,
+    wert: f.wert, direkt: f.direkt, indirekt: f.indirekt,
   }));
-  const max = Math.max(0, ...liste.map((e) => e.wert));
-  liste.forEach((e) => {
+  const sortierteListe = liste.sort((a, b) =>
+    b.wert - a.wert || b.direkt - a.direkt || b.verfuegbar - a.verfuegbar ||
+    KONTEN.indexOf(a.konto) - KONTEN.indexOf(b.konto));
+  const max = Math.max(0, ...sortierteListe.map((e) => e.wert));
+  sortierteListe.forEach((e, index) => {
     e.viel = max > 0 && e.wert >= max * 0.75;
     e.gruende = [
       'Pump · gleiche Einheit',
-      ...(e.viel ? ['viel Wochenvolumen'] : []),
+      ...(index === 0 && max > 0 ? ['höchste Wochenarbeit'] : e.viel ? ['viel Wochenarbeit'] : []),
+      ...(e.name === 'Pumpfeld noch leer' ? ['Block noch frei'] : []),
     ];
   });
-  return liste.sort((a, b) =>
-    b.wert - a.wert || b.verfuegbar - a.verfuegbar ||
-    KONTEN.indexOf(a.konto) - KONTEN.indexOf(b.konto));
+  return sortierteListe;
 }
 
 export { slotKey };

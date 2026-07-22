@@ -75,11 +75,11 @@ export async function mountMeter(container, { userId }) {
     if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt && ergebnis.modus === 'plus')
       return 'Aktiv: Der Zusatzsatz steht im passenden Pumpfeld bereit; die Übung kannst du später wählen.';
     if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt)
-      return `Aktiv vorgemerkt: +1 im Pumpfeld, −1 ${ergebnis.spender} in derselben Einheit.`;
+      return `Aktiv vorgemerkt: +1 im Pumpfeld, −1 ${ergebnis.spenderName || ergebnis.spender} in derselben Einheit.`;
     if (ergebnis.status === 'aktiv' && ergebnis.modus === 'plus')
       return `Aktiv: +1 Satz bei ${ergebnis.zielFeld.mus}.`;
     if (ergebnis.status === 'aktiv')
-      return `Aktiv: +1 bei ${ergebnis.zielFeld.mus}, −1 ${ergebnis.spender} in derselben Einheit.`;
+      return `Aktiv: +1 bei ${ergebnis.zielFeld.mus}, −1 ${ergebnis.spenderName || ergebnis.spender} in derselben Einheit.`;
     if (ergebnis.status === 'spender-fehlt' && !cfg?.spender)
       return 'Wähle noch einen Pump-Spender aus derselben Einheit.';
     if (ergebnis.status === 'spender-fehlt')
@@ -87,8 +87,13 @@ export async function mountMeter(container, { userId }) {
     return 'Vorgemerkt: Die Priorität greift, sobald die passende Pump-Übung gewählt ist.';
   }
 
-  function donorVon(konto, prios) {
-    return KONTEN.filter((ziel) => prios[ziel]?.modus === 'tausch' && prios[ziel]?.spender === konto);
+  function donorVon(konto, prioErgebnisse) {
+    return KONTEN.filter((ziel) => {
+      const ergebnis = prioErgebnisse[ziel];
+      if (ergebnis?.status !== 'aktiv' || ergebnis.modus !== 'tausch') return false;
+      return ergebnis.spenderFeld?.konto === konto ||
+        (!ergebnis.spenderFeld?.konto && ergebnis.spender === konto);
+    });
   }
 
   function basisWerte() {
@@ -102,11 +107,13 @@ export async function mountMeter(container, { userId }) {
     const prios = prioritaetenVon(payload);
     const cfg = prios[konto];
     const ergebnis = prioErgebnisse[konto];
-    const spenderFuer = donorVon(konto, prios);
+    const spenderFuer = donorVon(konto, prioErgebnisse);
     const hatPumpplatz = pumpMoeglichkeiten(payload, woche, konto).length > 0;
-    const kandidaten = cfg?.modus === 'tausch'
-      ? spenderKandidaten(payload, woche, konto, basisWerte()).slice(0, 3)
+    const alleKandidaten = cfg?.modus === 'tausch'
+      ? spenderKandidaten(payload, woche, konto, basisWerte())
       : [];
+    const kandidaten = alleKandidaten.slice(0, 3);
+    const istGewaehlt = (k) => cfg?.spenderFeld ? cfg.spenderFeld === k.key : cfg?.spender === k.konto;
     const zeigeModus = modusOffen || !!cfg;
 
     return `<div class="som-inline-editor">
@@ -123,12 +130,19 @@ export async function mountMeter(container, { userId }) {
           <button type="button" data-modus="plus" class="${cfg?.modus === 'plus' ? 'on' : ''}"><b>Aufschlagen</b><small>+1 gesamt</small></button>
         </div>
         ${cfg?.modus === 'tausch' ? `<div class="som-spender">
-          <span class="som-ed-label">Bis zu 3 sinnvolle Vorschläge</span>
-          ${kandidaten.length ? kandidaten.map((k) => `<button type="button" class="som-spender-wahl${cfg.spender === k.konto ? ' on' : ''}" data-spender="${html(k.konto)}">
-            <span><b>${html(k.konto)}</b><small>${html(k.name)}</small></span>
+          <span class="som-ed-label">Empfohlen · meiste Wochenarbeit zuerst</span>
+          ${kandidaten.length ? kandidaten.map((k) => `<button type="button" class="som-spender-wahl${istGewaehlt(k) ? ' on' : ''}"
+            data-spender="${html(k.konto)}" data-spender-feld="${html(k.key)}" data-spender-name="${html(k.label)}">
+            <span><b>${html(k.label)}</b><small>${html(k.name)}</small></span>
             <span class="som-spender-zahlen">${k.direkt} direkt · ${k.indirekt} indirekt</span>
             <em>${k.gruende.map(html).join(' · ')}</em>
           </button>`).join('') : '<p class="som-hinweis">Kein verfügbares, nicht priorisiertes Pumpfeld in derselben Einheit.</p>'}
+          ${alleKandidaten.length ? `<label class="som-spender-frei"><span class="som-ed-label">Oder frei wählen</span>
+            <select data-spender-frei>
+              <option value="">Pumpblock auswählen…</option>
+              ${alleKandidaten.map((k) => `<option value="${html(k.key)}" data-konto="${html(k.konto)}" data-name="${html(k.label)}"${istGewaehlt(k) ? ' selected' : ''}>${html(k.label)} · ${html(k.name)}</option>`).join('')}
+            </select>
+          </label>` : ''}
         </div>` : ''}
       </div>` : ''}
     </div>`;
@@ -156,11 +170,9 @@ export async function mountMeter(container, { userId }) {
     const { konten, ohneZuordnung, unbekannte, gesamt, prioritaet } = werte;
     const prios = prioritaetenVon(payload);
     const aktiv = Object.keys(prios).filter((k) => prios[k]).length;
-    const gesamtText = (Math.round(gesamt * 10) / 10).toString().replace('.', ',');
     lage.innerHTML = `
       <span class="som-stat"><small>Woche</small><b>${woche}</b></span>
-      <span class="som-stat"><small>Prioritäten</small><b>${aktiv}</b></span>
-      <span class="som-stat"><small>Volumen</small><b>${gesamtText}</b></span>`;
+      <span class="som-stat"><small>Prioritäten</small><b>${aktiv}</b></span>`;
 
     const sortiertNachVolumen = sortiert(konten);
     const priorisiert = sortiertNachVolumen.filter((r) => prios[r.konto]);
@@ -204,21 +216,31 @@ export async function mountMeter(container, { userId }) {
         if (b.dataset.modus === 'tausch') {
           const alt = payload.volumen.prioritaet[ausgewaehlt];
           payload.volumen.prioritaet[ausgewaehlt] = {
-            modus: 'tausch', spender: alt?.modus === 'tausch' ? (alt.spender || null) : null,
+            modus: 'tausch',
+            spender: alt?.modus === 'tausch' ? (alt.spender || null) : null,
+            spenderFeld: alt?.modus === 'tausch' ? (alt.spenderFeld || null) : null,
+            spenderName: alt?.modus === 'tausch' ? (alt.spenderName || null) : null,
           };
         } else payload.volumen.prioritaet[ausgewaehlt] = { modus: 'plus' };
         modusOffen = false;
         speichern(springtNachOben);
       };
     });
-    body.querySelectorAll('[data-spender]').forEach((b) => {
-      b.onclick = () => {
-        Object.values(payload.volumen.prioritaet).forEach((p) => {
-          if (p?.modus === 'tausch' && p.spender === ausgewaehlt) p.spender = null;
-        });
-        payload.volumen.prioritaet[ausgewaehlt] = { modus: 'tausch', spender: b.dataset.spender };
-        speichern();
+    const spenderSetzen = (spender, spenderFeld, spenderName) => {
+      Object.values(payload.volumen.prioritaet).forEach((p) => {
+        if (p?.modus === 'tausch' && p.spender === ausgewaehlt) p.spender = null;
+      });
+      payload.volumen.prioritaet[ausgewaehlt] = {
+        modus: 'tausch', spender, spenderFeld, spenderName,
       };
+      speichern();
+    };
+    body.querySelectorAll('[data-spender]').forEach((b) => {
+      b.onclick = () => spenderSetzen(b.dataset.spender, b.dataset.spenderFeld, b.dataset.spenderName);
+    });
+    body.querySelector('[data-spender-frei]')?.addEventListener('change', (e) => {
+      const option = e.target.selectedOptions[0];
+      if (option?.value) spenderSetzen(option.dataset.konto, option.value, option.dataset.name);
     });
   }
 

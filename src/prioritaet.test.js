@@ -9,6 +9,7 @@ import { KONTEN } from './katalog.js';
 const K = [
   { n: 'Brustpumpe', haupt: 'Brust', neben: ['Vordere Schulter'], typ: 'Iso' },
   { n: 'Rückenpumpe', haupt: 'Oberer Rücken', neben: ['Bizeps'], typ: 'Iso' },
+  { n: 'Latpumpe', haupt: 'Lat', neben: ['Bizeps'], typ: 'Iso' },
   { n: 'Seitheben', haupt: 'Seitliche Schulter', neben: [], typ: 'Iso' },
   { n: 'Crunch', haupt: 'Abs', neben: [], typ: 'Iso' },
   { n: 'Reverse Curls', haupt: 'Unterarme', neben: ['Bizeps'], typ: 'Iso' },
@@ -66,6 +67,17 @@ describe('Priorisierung – Wirkung', () => {
     expect(r.ergebnisse.Unterarme.vorgemerkt).toBe(true);
   });
 
+  it('behält einen frei gewählten Rücken-Pumpplatz bei einem späteren Übungswechsel', () => {
+    const p = payload(1);
+    p.data['UK-A'][1].p_bk.names[1] = 'Latpumpe';
+    p.volumen.prioritaet.Unterarme = {
+      modus: 'tausch', spender: 'Oberer Rücken', spenderFeld: 'UK-A|p_bk|1', spenderName: 'Rücken',
+    };
+    const r = prioritaetsAnpassungen(p, 1, K);
+    expect(r.delta['UK-A|p_bk|1']).toBe(-1);
+    expect(r.ergebnisse.Unterarme.spenderName).toBe('Rücken');
+  });
+
   it('stellt den Zusatzsatz bereit, obwohl die Zielübung noch fehlt', () => {
     const p = payload(1);
     p.data['UK-A'][1].p_arm.names[0] = '';
@@ -106,7 +118,7 @@ describe('Priorisierung – Planung', () => {
     expect(r[0].konto).toBe('Seitliche Schulter');
     expect(r.some((e) => e.konto === 'Brust')).toBe(false);
     expect(r[0].gruende).toContain('Pump · gleiche Einheit');
-    expect(r[0].gruende).toContain('viel Wochenvolumen');
+    expect(r[0].gruende).toContain('höchste Wochenarbeit');
   });
 
   it('kann Spender schon vor der Wahl der Zielübung vorschlagen', () => {
@@ -130,5 +142,18 @@ describe('Priorisierung – Planung', () => {
     const r = spenderKandidaten(p, 1, 'Unterarme', {}, K);
     expect(r.map((e) => e.konto)).toContain('Abs');
     expect(r.find((e) => e.konto === 'Abs').name).toBe('Pumpfeld noch leer');
+  });
+
+  it('fasst ein leeres gemeinsames Rückenfeld als Rücken zusammen', () => {
+    const p = payload(1);
+    p.data['UK-A'][1] = {};
+    const r = spenderKandidaten(p, 1, 'Unterarme', {
+      konten: { 'Oberer Rücken': 12, Lat: 8 },
+      direkt: { 'Oberer Rücken': 8, Lat: 6 }, indirekt: {},
+    }, K);
+    const ruecken = r.filter((e) => e.key === 'UK-A|p_bk|1');
+    expect(ruecken).toHaveLength(1);
+    expect(ruecken[0].label).toBe('Rücken');
+    expect(ruecken[0].konto).toBe('Oberer Rücken');
   });
 });
