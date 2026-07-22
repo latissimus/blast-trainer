@@ -364,7 +364,9 @@ async function routeView() {
     } else if (hash === 'prog') {
       await mountProg(view, { userId: session.user.id });
     } else if (hash === 'notizbuch') {
-      await mountNotizbuch(view, { userId: session.user.id });
+      // Die Huelle und der lokale Spiegel erscheinen sofort; der Serverstand
+      // wird innerhalb der Seite nachgeladen und blockiert den Wechsel nicht.
+      mountNotizbuch(view, { userId: session.user.id });
     } else if (hash === 'admin') {
       const v = await mountAdmin(view, { session });
       guard(v);
@@ -380,7 +382,12 @@ async function routeView() {
     if (pull) {
       topbar.appendChild(pull);
       if (pull.dataset.peek === 'true') requestAnimationFrame(() => {
-        if (token === routeToken) pull.classList.add('peek');
+        if (token !== routeToken) return;
+        pull.classList.add('peek');
+        // animation-fill-mode wuerde den Peek-Zustand sonst am Element halten.
+        // Beim ersten manuellen Ziehen konkurrierte er dann mit der Transition
+        // und liess Breite/Hoehe scheinbar in einem Sprung entstehen.
+        pull.addEventListener('animationend', () => pull.classList.remove('peek'), { once: true });
       });
     }
     if (zurueck) topbar.appendChild(zurueck);

@@ -76,7 +76,7 @@ export function verlinke(text) {
 // ---- Seite -----------------------------------------------------------------
 
 
-export async function mountNotizbuch(container, { userId }) {
+export function mountNotizbuch(container, { userId }) {
   container.innerHTML = '';
   const wrap = document.createElement('div');
   wrap.className = 'wrap pad-bottom';
@@ -345,5 +345,8 @@ export async function mountNotizbuch(container, { userId }) {
     };
   }
 
-  await laden();
+  // Nicht auf den Server warten, bevor main.js den Seitenwechsel abschliessen
+  // kann. laden() zeichnet einen vorhandenen lokalen Spiegel synchron bis zum
+  // ersten await und ersetzt ihn spaeter still durch den aktuellen Serverstand.
+  laden();
 }
