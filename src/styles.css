@@ -113,7 +113,7 @@ a{color:var(--navy)}
 /* Eigene Deckflaeche zwischen Lasche und Header-Inhalt: So kann die Lasche
    innerhalb der Kopfzeile hochfahren, ohne jemals vor Logo oder Avatar zu
    erscheinen. Sichtbar ist ausschliesslich der Teil unterhalb der Kontur. */
-.topbar::after{content:"";position:absolute;z-index:1;left:0;right:0;top:0;bottom:var(--bw);
+.topbar::after{content:"";position:absolute;z-index:1;left:0;right:0;top:0;bottom:0;
   background:var(--bg);pointer-events:none}
 .topbar .wrap{position:relative;z-index:2;display:flex;align-items:center;gap:10px}
 /* LOGMAN-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
@@ -500,7 +500,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-tab.peek{animation:som-tab-peek 2.6s ease-in-out both}
 @keyframes som-tab-peek{
   0%,6%,30%,38%,62%,100%{width:60px;height:20px;transform:translate(-50%,-26px)}
-  14%,22%,46%,54%{width:70px;height:28px;transform:translate(-50%,4px)}
+  14%,22%,46%,54%{width:70px;height:28px;transform:translate(-50%,0)}
 }
 #view{transition:padding-top .22s ease}
 #view.som-gezogen{padding-top:46px}
