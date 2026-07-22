@@ -73,6 +73,12 @@ export async function mountMeter(container, { userId }) {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[c]);
 
+  function springeZumEditor() {
+    requestAnimationFrame(() => editor.querySelector('.som-editor')?.scrollIntoView({
+      behavior: 'smooth', block: 'start',
+    }));
+  }
+
   function statusText(ergebnis, cfg) {
     if (!ergebnis) return '';
     if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt && ergebnis.modus === 'plus')
@@ -127,7 +133,6 @@ export async function mountMeter(container, { userId }) {
         <div class="som-werte">
           <div><b>${werte.direkt[konto] || 0}</b><span>Direkte Sätze</span><small>${html(konto)} ist Hauptziel</small></div>
           <div><b>${werte.indirekt[konto] || 0}</b><span>Indirekte Sätze</span><small>${html(konto)} arbeitet mit</small></div>
-          <div><b>${werte.konten[konto] || 0}</b><span>Zusammen</span><small>direkt + ½ indirekt</small></div>
         </div>
         ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
         ${spenderFuer.length ? `<p class="som-prio-status">Gibt je 1 Satz ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
@@ -158,7 +163,12 @@ export async function mountMeter(container, { userId }) {
     editor.querySelector('.som-ed-zu').onclick = () => { ausgewaehlt = null; schritt = null; render(); };
     editor.querySelectorAll('[data-prio]').forEach((b) => {
       b.onclick = () => {
-        if (b.dataset.prio === 'setzen') { schritt = 'modus'; render(); return; }
+        if (b.dataset.prio === 'setzen') {
+          schritt = 'modus';
+          render();
+          springeZumEditor();
+          return;
+        }
         delete payload.volumen.prioritaet[konto];
         schritt = null;
         speichern();
@@ -178,6 +188,7 @@ export async function mountMeter(container, { userId }) {
           };
           schritt = 'spender';
           speichern();
+          springeZumEditor();
           return;
         }
         payload.volumen.prioritaet[konto] = { modus: 'plus' };
@@ -232,6 +243,7 @@ export async function mountMeter(container, { userId }) {
         const cfg = prios[ausgewaehlt];
         schritt = cfg?.modus === 'tausch' && !cfg.spender ? 'spender' : null;
         render();
+        springeZumEditor();
       };
     });
     renderEditor({ konten, direkt, indirekt }, prioritaet);

@@ -21,8 +21,8 @@ import { istDeload, tageDerWoche, tierVon, prioritaetsAnpassungen, slotKey } fro
 //   Hauptspieler  1,0
 //   Nebenspieler  0,5
 // Indirekte Saetze werden im Detail als ganze Saetze ausgewiesen, fuer den
-// Vergleichsbalken und "Zusammen" aber mit 0,5 gewichtet. So bleibt die Anzeige
-// lesbar (ein mitarbeitender Satz = 1), ohne indirekte und direkte Arbeit in der
+// Vergleichsbalken aber mit 0,5 gewichtet. So bleibt die Anzeige lesbar
+// (ein mitarbeitender Satz = 1), ohne indirekte und direkte Arbeit in der
 // Gesamtbelastung gleichzusetzen.
 //
 // Ein Cluster (6×4) zählt als EIN Satz, so wie ihn die App auch sonst zählt.

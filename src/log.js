@@ -3,7 +3,7 @@ import { readLog, writeLog, mergePayload } from './localstore.js';
 import { TPL, LEGACY, TIER_NAMES } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
-import { auswahlGruppen, imKatalog, eintragVon } from './auswahl.js';
+import { auswahlGruppen, imKatalog } from './auswahl.js';
 import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
@@ -259,11 +259,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     ${readOnly ? '' : `<button class="som-pull-hinweis" id="lg-som-hinweis" type="button" aria-label="Set-O-Meter hervorziehen">
       <span class="pf" aria-hidden="true">↓</span>
     </button>
-    <div class="som-pull" id="lg-som-pull" aria-hidden="true">
-      <a class="som-pull-link" href="#meter">
-        <span><b>Set-O-Meter</b><small>Volumen prüfen und Muskeln priorisieren</small></span>
-        <i aria-hidden="true">›</i>
-      </a>
+    <div class="som-pull-clip" id="lg-som-pull" aria-hidden="true">
+      <div class="som-pull">
+        <a class="som-pull-link" href="#meter">
+          <span><b>Set-O-Meter</b><small>Volumen prüfen und Muskeln priorisieren</small></span>
+          <i aria-hidden="true">›</i>
+        </a>
+      </div>
     </div>`}
     <div id="lg-content" class="erstblock${readOnly ? '' : ' mit-som-hinweis'}"></div>
     <div class="volbar" id="lg-vol"></div>
@@ -295,7 +297,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     somPull.classList.toggle('offen', offen);
     somPull.classList.remove('zieht');
     somPull.style.removeProperty('--som-zug');
-    somPull.style.removeProperty('opacity');
+    somPull.style.removeProperty('--som-sicht');
     somPull.setAttribute('aria-hidden', offen ? 'false' : 'true');
     somPull.inert = !offen;
   };
@@ -316,7 +318,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (!somOffen && dy > 0) {
       somDistanz = Math.min(78, dy * .75);
       somPull.style.setProperty('--som-zug', somDistanz + 'px');
-      somPull.style.opacity = String(Math.min(1, somDistanz / 44));
+      somPull.style.setProperty('--som-sicht', String(Math.min(1, somDistanz / 44)));
     }
   };
   const somTouchEnd = () => {
@@ -640,11 +642,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const names = freeEx ? null : dayNames(state.day, blk);
       const effRest = effType === 'mr' ? MR_REST : (effType === 'pump' ? 60 : blk.rest);
       const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
-      // Der erste Arm-Slot ist normalerweise Bizeps. Wird dort eine Uebung mit
-      // Hauptkonto Unterarme gewaehlt, soll das nur im Log sofort erkennbar sein;
-      // die neutralen Muskelkonten des Set-O-Meters bleiben unveraendert.
-      const armHaupt = blk.id === 'p_arm' ? eintragVon(entry.names?.[0])?.haupt : null;
-      const blockMus = armHaupt === 'Unterarme' ? 'Bizeps/Unterarme + Trizeps' : blk.mus;
+      const blockMus = blk.mus;
 
       const el = document.createElement('div'); el.className = 'block';
       const cues = [];

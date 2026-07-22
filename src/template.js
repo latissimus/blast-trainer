@@ -42,7 +42,7 @@ export const TPL = {
       ex: [{ n: '', konten: ['Brust'] }, { n: '', konten: ['Lat', 'Oberer Rücken'] }] },
     { id: 'p_da', mus: 'Schultern + Abs', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter', 'Abs'], type: 'pump', sets: [1, 2, 3], rest: 60, reps: '15–25', free: 1,
       ex: [{ n: '', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'] }, { n: '', konten: ['Abs'] }] },
-    { id: 'p_arm', mus: 'Bi + Tri',   konten: ['Bizeps', 'Trizeps', 'Unterarme'], type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, stretch: 1,
+    { id: 'p_arm', mus: 'Bi/Untera. + Tri', konten: ['Bizeps', 'Trizeps', 'Unterarme'], type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, stretch: 1,
       // Unterarme laufen beim Bizeps mit: Reverse und Hammercurls gehoeren dorthin.
       ex: [{ n: '', konten: ['Bizeps', 'Unterarme'] }, { n: '', konten: ['Trizeps'] }] },  ] },
   'OK-B': { short: 'OK · Heavy', sub: 'Oberkörper Heavy · Unterkörper Pump', rot: 'B', blocks: [
@@ -65,7 +65,7 @@ export const TPL = {
       ex: [{ n: '', konten: ['Brust'] }, { n: '', konten: ['Lat', 'Oberer Rücken'] }] },
     { id: 'p_da', mus: 'Schultern + Abs', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter', 'Abs'], type: 'pump', sets: [1, 2, 3], rest: 60, reps: '15–25', free: 1,
       ex: [{ n: '', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'] }, { n: '', konten: ['Abs'] }] },
-    { id: 'p_arm', mus: 'Bi + Tri',   konten: ['Bizeps', 'Trizeps', 'Unterarme'], type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, stretch: 1,
+    { id: 'p_arm', mus: 'Bi/Untera. + Tri', konten: ['Bizeps', 'Trizeps', 'Unterarme'], type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, stretch: 1,
       // Unterarme laufen beim Bizeps mit: Reverse und Hammercurls gehoeren dorthin.
       ex: [{ n: '', konten: ['Bizeps', 'Unterarme'] }, { n: '', konten: ['Trizeps'] }] },  ] },
   'MRs': { short: 'Clusters', sub: '6×4 · ~15RM · 10 s zwischen Minisätzen', rot: '*', blocks: [

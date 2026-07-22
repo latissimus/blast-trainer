@@ -40,6 +40,8 @@ let authMode = 'login';     // 'login' | 'signup'
 let recovery = false;       // aus der Zuruecksetzen-Mail gekommen: neues Passwort faellig
 let splash = false;         // frisch eingeloggt: einmal das Logo zeigen
 let topbarObserver = null;   // liefert Unterseiten die echte Sticky-Header-Hoehe
+let aktiveAnsicht = null;    // fuer die Rueckkehr an dieselbe Stelle im Log
+let logScrollY = 0;
 
 // Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
 // Fehler). In der App selbst bleibt es draussen: Dort willst du eintragen, nicht
@@ -204,6 +206,8 @@ function navAvatar() {
 
 /* ------------------------------------------------------------ app chrome */
 function renderChrome() {
+  aktiveAnsicht = null;
+  logScrollY = 0;
   const isAdmin = profile?.role === 'admin';
   app.innerHTML = `
     <header class="topbar">
@@ -320,6 +324,7 @@ function setNavActive(view) {
 }
 
 async function routeView() {
+  if (aktiveAnsicht === 'log') logScrollY = window.scrollY;
   cleanupActive();
   const view = document.getElementById('view');
   if (!view) return;
@@ -353,6 +358,12 @@ async function routeView() {
   } catch (e) {
     view.innerHTML = `<div class="wrap" style="padding-top:20px"><div class="msg err">Fehler: ${e.message}</div></div>`;
   }
+  if (token !== routeToken) return;
+  aktiveAnsicht = hash;
+  const zielY = hash === 'log' ? logScrollY : 0;
+  requestAnimationFrame(() => {
+    if (token === routeToken) window.scrollTo({ top: zielY, behavior: 'instant' });
+  });
 }
 
 // Begruessung nach dem Einloggen: nur das Logo, das aufzieht.

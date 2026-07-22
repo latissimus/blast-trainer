@@ -398,10 +398,10 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ctrlbar .inner{position:relative;max-width:580px;margin:0 auto;display:flex;gap:4px;padding:5px}
 .ctrlbar .inner::before{content:'';position:absolute;inset:0;z-index:-1;
   background:rgba(255,255,255,.31);
-  -webkit-backdrop-filter:blur(7px) saturate(1.25);backdrop-filter:blur(7px) saturate(1.25);
+  -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);
   /* Ohne Schlagschatten (testweise). Er war der Grund fuer die 7px Polster an
      .ctrlbar – ohne ihn koennte die Leiste wieder breiter werden. */
-  border:var(--bw) solid var(--ink);border-radius:16px}
+  border:0;border-radius:16px}
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;padding:8px 2px;
   border:0;border-radius:11px;background:none;color:var(--ink);cursor:pointer}
@@ -475,13 +475,17 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-pull-hinweis{display:flex;align-items:center;justify-content:center;width:100%;height:32px;
   margin:0;background:transparent;border:0;color:var(--muted);opacity:.72}
 .som-pull-hinweis .pf{font-family:var(--mono);font-size:16px;font-weight:800;line-height:1}
-.som-pull{position:fixed;z-index:19;top:var(--topbar-h,58px);left:50%;width:min(calc(100vw - 28px),552px);
-  transform:translate(-50%,calc(-100% - 8px + var(--som-zug,0px)));opacity:0;
-  transition:transform .2s ease,opacity .16s ease;pointer-events:none}
-.som-pull.zieht{transition:none}
-.som-pull.offen{transform:translate(-50%,8px);opacity:1;pointer-events:auto}
+.som-pull-clip{position:fixed;z-index:19;top:var(--topbar-h,58px);left:0;right:0;bottom:0;
+  overflow:hidden;pointer-events:none}
+.som-pull{position:absolute;top:0;left:50%;width:min(calc(100vw - 14px),590px);
+  transform:translate(-50%,calc(-100% - 8px + var(--som-zug,0px)));opacity:var(--som-sicht,0);
+  transition:transform .2s ease,opacity .16s ease}
+.som-pull-clip.zieht .som-pull{transition:none}
+.som-pull-clip.offen .som-pull{transform:translate(-50%,8px);opacity:1;pointer-events:auto}
 .som-pull-link{display:flex;align-items:center;gap:10px;padding:10px 12px;text-decoration:none;
-  background:var(--surface2);color:var(--ink);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
+  background:rgba(255,255,255,.31);color:var(--ink);border:0;border-radius:16px;
+  -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25)}
+:root[data-theme="dark"] .som-pull-link{background:rgba(30,33,42,.31)}
 .som-pull-link>span{flex:1;min-width:0}
 .som-pull-link b{display:block;font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:14px}
 .som-pull-link small{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-top:2px}
@@ -489,7 +493,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 
 /* Kopf der Unterseiten: Titel links, Rueckweg rechts. Der Chip ist der
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
-.seitenkopf{display:flex;align-items:center;gap:10px;padding:68px 90px 10px 0}
+.seitenkopf{display:flex;align-items:center;gap:10px;padding:48px 90px 10px 0}
 .seitenkopf .section-title{margin:0;flex:1;min-width:0}
 .zurueck{position:fixed;top:calc(var(--topbar-h,58px) + 18px);
   right:max(14px,calc((100vw - 580px) / 2 + 14px));z-index:19;
@@ -544,14 +548,14 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    soll der Balkenvergleich sichtbar bleiben, weil genau daraus die
    Umverteilungsentscheidung entsteht. */
 .som-editor{margin-top:14px;background:var(--surface);border:var(--bw) solid var(--ink);
-  border-radius:var(--r-karte);padding:16px}
+  border-radius:var(--r-karte);padding:16px;scroll-margin-top:calc(var(--topbar-h,58px) + 66px)}
 .som-ed-kopf{display:flex;align-items:flex-start;gap:10px}
 .som-ed-kopf>div{flex:1;min-width:0}
 .som-ed-label{display:block;font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
 .som-ed-kopf h2{font-size:23px;margin-top:3px;overflow-wrap:anywhere}
 .som-ed-zu{flex:0 0 auto;width:34px;height:34px;border:var(--bw) solid var(--ink);border-radius:50%;
   background:var(--surface2);color:var(--ink);font-size:20px;line-height:1}
-.som-werte{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}
+.som-werte{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:12px 0}
 .som-werte>div{min-width:0;background:var(--surface2);border:1.5px solid var(--ink);border-radius:var(--r);padding:8px 7px}
 .som-werte b{display:block;font-family:var(--mono);font-size:18px;color:var(--navy)}
 .som-werte span{display:block;font-size:10px;font-weight:800;margin-top:2px}
