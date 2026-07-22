@@ -22,6 +22,9 @@
      einen Blick unterscheiden. Wie die anderen Akzente in beiden Themes gleich. */
   --lila:#DFBAFF;
   --lila-ink:#2A1240;   /* Symbol auf Flieder – in beiden Themes derselbe Kontrast */
+  --prio:#67318F;       /* Set-O-Lasche und Prioritaetsplanung */
+  --prio-soft:#EADDF3;
+  --prio-wash:rgba(103,49,143,.14);
   --up:#12A150;
   --green:#154C2B;  /* MR-Badge und abgelaufener Timer – dieselbe Optik */
   --down:#E8785B;
@@ -74,6 +77,8 @@
   --up:#28C46B;        /* nur aufgehellt: das Original war auf dunkel zu satt */
   --green:#1E6E3C;
   --hold:#E0A93C;
+  --prio-soft:#362641;
+  --prio-wash:rgba(201,164,223,.16);
 
   /* Logo: Das gedeckte Navy verschwindet auf dunklem Grund, die Kontur waere
      weg. Dunkles Blau bleibt als Kontur, ist aber vom Hintergrund abgesetzt. */
@@ -485,7 +490,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* Die violette Retro-Lasche sitzt am Sticky-Header und parkt vollstaendig
    dahinter. Beim Herunterziehen wird sie zugleich breiter und laenger. */
 .som-tab{position:absolute;z-index:0;top:calc(100% + 2px);left:50%;width:60px;height:20px;overflow:hidden;
-  transform:translate(-50%,-26px);background:#67318F;border:var(--bw) solid var(--ink);border-top:0;
+  transform:translate(-50%,-26px);background:var(--prio);border:var(--bw) solid var(--ink);border-top:0;
   border-radius:0 0 9px 9px;pointer-events:none;
   transition:transform .22s ease,width .22s ease,height .22s ease}
 .som-tab.gezogen{width:96px;height:46px;transform:translate(-50%,0);pointer-events:auto}
@@ -531,9 +536,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-stat small{font-size:8px;line-height:1.1;font-weight:800;color:var(--muted);text-transform:uppercase}
 .som-stat b{margin-top:3px;font-size:16px;line-height:1;color:var(--ink)}
 .som-info-knopf{flex:0 0 auto;width:28px;height:28px;padding:0;border:var(--bw) solid var(--ink);border-radius:50%;
-  align-self:center;background:#67318F;color:#fff;font-family:var(--mono);font-size:13px;font-weight:800}
-.som-kurzhilfe{margin:0 0 9px;padding:10px 11px;background:#FFB3D6;border:var(--bw) solid var(--ink);
-  border-radius:var(--r);font-size:11.5px;line-height:1.45;color:#141414}
+  align-self:center;background:var(--prio);color:#fff;font-family:var(--mono);font-size:13px;font-weight:800}
+.som-kurzhilfe{margin:0 0 9px;padding:10px 11px;background:var(--prio-soft);border:var(--bw) solid var(--ink);
+  border-radius:var(--r);font-size:11.5px;line-height:1.45;color:var(--ink)}
 .som-kurzhilfe p{margin:0 0 7px}
 .som-kurzhilfe p:last-child{margin-bottom:0}
 .som-legende{display:flex;gap:13px;margin:0 3px 9px;font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase}
@@ -545,11 +550,11 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-gruppe{display:flex;align-items:center;gap:8px;margin:9px 2px 1px;font-family:var(--display);font-style:italic;
   font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .som-gruppe:not(.prio)::after{content:"";flex:1;border-top:2px dashed var(--ink);opacity:.45}
-.som-gruppe.prio{width:max-content;padding:3px 8px;background:var(--pink);border:1.5px solid var(--ink);
-  border-radius:999px;color:#141414}
+.som-gruppe.prio{width:max-content;padding:3px 8px;background:var(--prio);border:1.5px solid var(--ink);
+  border-radius:999px;color:#fff}
 .som-muskel{overflow:hidden;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
 .som-muskel.priorisiert{border-color:var(--ink)}
-.som-muskel.priorisiert>.som-zeile{background:rgba(255,105,174,.12)}
+.som-muskel.priorisiert>.som-zeile{background:linear-gradient(90deg,var(--prio-soft) 0%,var(--prio-wash) 58%,transparent 100%)}
 .som-muskel.offen{background:var(--surface2)}
 .som-zeile{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 10px;width:100%;padding:10px 12px;
   background:transparent;border:0;color:var(--ink);text-align:left}
@@ -558,7 +563,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-zeile-fuss{grid-column:2;grid-row:1;justify-content:flex-end}
 .som-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--display);
   font-style:italic;font-weight:700;font-size:15px;text-transform:uppercase}
-.som-prio-marke{flex:0 0 auto;padding:2px 6px;border-radius:999px;background:var(--pink);color:#141414;
+.som-prio-marke{flex:0 0 auto;padding:2px 6px;border-radius:999px;background:var(--prio);color:#fff;
   font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
 .som-track{grid-column:1/-1;grid-row:2;display:flex;width:100%;height:9px;background:var(--surface2);
   border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
@@ -575,16 +580,16 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-indirekt-quellen>span{display:block;margin-bottom:5px;font-size:8.5px;font-weight:800;
   text-transform:uppercase;letter-spacing:.06em}
 .som-indirekt-quellen>div{display:flex;flex-wrap:wrap;gap:4px}
-.som-indirekt-quellen small{display:inline-flex;gap:4px;padding:3px 6px;background:var(--surface);
-  border:1px solid var(--ink);border-radius:999px;font-size:8.5px;line-height:1.2;color:var(--muted)}
-.som-indirekt-quellen small b{color:var(--ink)}
+.som-indirekt-quellen small{display:inline-flex;gap:4px;padding:3px 6px;background:var(--prio-soft);
+  border:1px solid var(--prio);border-radius:999px;font-size:8.5px;line-height:1.2;color:var(--ink)}
+.som-indirekt-quellen small b{color:var(--prio)}
 .som-prio-status{font-size:11.5px;line-height:1.45;margin:10px 0 0;padding:8px 9px;
-  border-left:4px solid var(--pink);background:var(--surface)}
+  border-left:4px solid var(--prio);background:var(--surface)}
 .som-prio-status.neutral{border-left-color:var(--muted)}
 .som-prio-toggle{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:42px;margin-top:10px;
-  border:var(--bw) solid var(--ink);border-radius:var(--r);background:#67318F;color:#fff;
+  border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--prio);color:#fff;
   font-family:var(--display);font-style:italic;font-weight:700;text-transform:uppercase;font-size:13px}
-.som-prio-toggle.on{background:#67318F;color:#fff}
+.som-prio-toggle.on{background:var(--prio);color:#fff}
 .som-prio-toggle:disabled{opacity:.35;cursor:not-allowed}
 .som-inline-plan{margin-top:11px}
 .som-ed-label{display:block;margin-bottom:6px;font-size:9px;color:var(--muted);font-weight:800;
@@ -593,14 +598,14 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-modusseg button{min-width:0;padding:8px 6px;border:0;border-right:var(--bw) solid var(--ink);
   background:var(--surface);color:var(--ink)}
 .som-modusseg button:last-child{border-right:0}
-.som-modusseg button.on{background:#67318F;color:#fff}
+.som-modusseg button.on{background:var(--prio);color:#fff}
 .som-modusseg b,.som-modusseg small{display:block}
 .som-modusseg b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:12px}
 .som-modusseg small{margin-top:2px;font-size:8.5px;opacity:.75}
 .som-spender{margin-top:12px}
 .som-spender-wahl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;margin-top:6px;padding:8px 9px;
   text-align:left;background:var(--surface);color:var(--ink);border:1.5px solid var(--ink);border-radius:var(--r)}
-.som-spender-wahl.on{border-color:var(--ink);background:#67318F;color:#fff}
+.som-spender-wahl.on{border-color:var(--ink);background:var(--prio);color:#fff}
 .som-spender-wahl.on small,.som-spender-wahl.on .som-spender-zahlen{color:rgba(255,255,255,.78)}
 .som-spender-wahl.on em{color:#fff}
 .som-spender-wahl span:first-child{min-width:0}
@@ -608,8 +613,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-spender-wahl b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:12px}
 .som-spender-wahl small{margin-top:1px;font-size:9.5px;color:var(--muted)}
 .som-spender-zahlen{align-self:center;font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap}
-.som-spender-wahl em{grid-column:1/-1;font-style:normal;font-size:8.5px;font-weight:800;color:#B21F65;text-transform:uppercase}
-:root[data-theme="dark"] .som-spender-wahl em{color:#FF8DC2}
+.som-spender-wahl em{grid-column:1/-1;font-style:normal;font-size:8.5px;font-weight:800;color:var(--prio);text-transform:uppercase}
+:root[data-theme="dark"] .som-spender-wahl em{color:#CDA7E6}
 .som-spender-frei{display:block;margin-top:10px}
 .som-spender-frei select{width:100%;min-height:40px;padding:8px 34px 8px 10px;background:var(--surface);
   border:var(--bw) solid var(--ink);border-radius:var(--r);color:var(--ink);font-family:var(--mono);
@@ -621,8 +626,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* Direkt am Uebungsfeld sichtbar: Der Satz stammt aus der Prioritaetsplanung. */
 .volrolle{display:inline-flex;align-items:center;flex:0 0 auto;border:1px solid var(--ink);border-radius:999px;
   padding:2px 6px;font-size:9px;font-weight:800;text-transform:uppercase;white-space:nowrap}
-.volrolle.prio{background:var(--pink);color:#141414}
-.volrolle.minus{background:var(--surface2);color:var(--muted)}
+.volrolle.prio{background:var(--prio);color:#fff}
+.volrolle.minus{background:var(--prio-soft);border-color:var(--prio);color:var(--ink)}
 
 .volbar{background:var(--navy);color:#fff;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);padding:14px 15px;margin-bottom:14px}
 .volbar h3{margin:0 0 4px;font-size:13px;color:#fff}
