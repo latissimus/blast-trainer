@@ -807,12 +807,12 @@ body[data-seite="meter"],body[data-seite="notizbuch"]{
    Polster seitlich 12px statt der dort gemessenen 18px: Mit 18px war die
    Mindestbreite zweier Knoepfe groesser als die Zeile, sie stapelten sich
    statt nebeneinander zu sitzen. */
-.nb-leiste{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
-.nb-chip{flex:1 1 120px;font-family:var(--display);font-style:italic;font-weight:700;
-  font-size:18px;text-transform:uppercase;letter-spacing:.01em;
+.nb-leiste{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.nb-chip{flex:1 1 105px;min-height:44px;font-family:var(--display);font-style:italic;font-weight:700;
+  font-size:16px;text-transform:uppercase;letter-spacing:.01em;
   color:var(--ink);background:var(--bg);
   border:var(--bw) solid var(--ink);border-radius:var(--r);
-  padding:13px 12px;text-align:center;white-space:nowrap;cursor:pointer}
+  padding:9px 10px;text-align:center;white-space:nowrap;cursor:pointer}
 .nb-chip.pink{background:var(--pink)}
 
 /* Leseansicht – der einzige Ort, an dem Links anklickbar sind. */
