@@ -42,6 +42,7 @@ let splash = false;         // frisch eingeloggt: einmal das Logo zeigen
 let topbarObserver = null;   // liefert Unterseiten die echte Sticky-Header-Hoehe
 let aktiveAnsicht = null;    // fuer die Rueckkehr an dieselbe Stelle im Log
 let logScrollY = 0;
+let somPeekGezeigt = false;   // pro App-Start genau ein kurzer Hinweis
 
 // Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
 // Fehler). In der App selbst bleibt es draussen: Dort willst du eintragen, nicht
@@ -208,6 +209,7 @@ function navAvatar() {
 function renderChrome() {
   aktiveAnsicht = null;
   logScrollY = 0;
+  somPeekGezeigt = false;
   const isAdmin = profile?.role === 'admin';
   app.innerHTML = `
     <header class="topbar">
@@ -324,7 +326,6 @@ function setNavActive(view) {
 }
 
 async function routeView() {
-  const vorherigeAnsicht = aktiveAnsicht;
   if (aktiveAnsicht === 'log') logScrollY = window.scrollY;
   cleanupActive();
   // Set-O-Lasche und Zurueck-Chip muessen physisch am Sticky-Header haengen.
@@ -346,10 +347,12 @@ async function routeView() {
   view.innerHTML = '';
   try {
     if (hash === 'log') {
+      const zeigeSomPeek = !somPeekGezeigt;
+      somPeekGezeigt = true;
       const v = await mountLog(view, {
         userId: session.user.id,
         readOnly: false,
-        zeigeSomPeek: !!vorherigeAnsicht && vorherigeAnsicht !== 'log',
+        zeigeSomPeek,
       });
       guard(v);
     } else if (hash === 'profile') {

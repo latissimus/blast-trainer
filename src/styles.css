@@ -499,8 +499,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    die Lasche wieder unsichtbar hinter dem Header. */
 .som-tab.peek{animation:som-tab-peek 1.55s ease both}
 @keyframes som-tab-peek{
-  0%,30%,62%,100%{width:60px;height:20px;transform:translate(-50%,-26px)}
-  14%,46%{width:68px;height:24px;transform:translate(-50%,0)}
+  0%,6%,30%,38%,62%,100%{width:60px;height:20px;transform:translate(-50%,-26px)}
+  14%,22%,46%,54%{width:68px;height:24px;transform:translate(-50%,0)}
 }
 #view{transition:padding-top .22s ease}
 #view.som-gezogen{padding-top:46px}
