@@ -1,6 +1,6 @@
 import { TPL } from './template.js';
 import { KATALOG, KONTEN } from './katalog.js';
-import { targetSets, setsForExercise, effTypeOf, exOf } from './saetze.js';
+import { targetSets, setsForExercise, exOf } from './saetze.js';
 import { istDeload, tageDerWoche, tierVon, prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 
 // Set-O-Meter: Wie viele Arbeitssätze hat in dieser Woche welcher Muskel
@@ -83,11 +83,8 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
         const name = (namen[xi] || '').trim();
         if (!name) return;                      // noch nicht gewaehlt
 
-        // Zusatzsaetze gibt es nur bei Pump – wie im Log.
-        const extra = effTypeOf(blk, tier) === 'pump'
-          ? ((eintragBlock.extra || [])[xi] || 0) : 0;
         const anzahl = Math.max(0,
-          (frei ? targetSets(blk, tier) : setsForExercise(blk, tier, xi)) + extra +
+          (frei ? targetSets(blk, tier) : setsForExercise(blk, tier, xi)) +
           (prio.delta[slotKey(tag, blk.id, xi)] || 0));
         if (!anzahl) return;
 

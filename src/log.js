@@ -68,7 +68,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     notes: p.notes || {}, // gemeinsame Notizen pro Tag/Übung
     mem: p.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
     datum: p.datum || {},  // Tag|Woche -> ISO-Datum der Einheit
-    volumen: p.volumen || {}, // Muskel-Prioritaeten und Erhalt-Markierungen
+    volumen: { prioritaet: p.volumen?.prioritaet || {} }, // Muskel-Prioritaeten
   };
   migrateData();
 
@@ -230,8 +230,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const entry = cell[blk.id];
       exOf(blk, tier).forEach((_, xi) => {
         const basis = blk.type === 'load' ? setsForExercise(blk, tier, xi) : targetSets(blk, tier);
-        const extra = (effTypeOf(blk, tier) === 'pump' && entry && entry.extra && entry.extra[xi]) || 0;
-        const cnt = Math.max(0, basis + extra + (prio.delta[slotKey(day, blk.id, xi)] || 0));
+        const cnt = Math.max(0, basis + (prio.delta[slotKey(day, blk.id, xi)] || 0));
         tgtTotal += cnt;
         const arr = (entry && entry.sets && entry.sets[xi]) || [];
         (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) done++; });
@@ -257,6 +256,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // die Beschreibung des Tages. Dadurch faengt der erste Trainingsblock
   // unmittelbar unter der Kopfleiste an, statt nach drei Reihen Bedienelementen.
   wrap.innerHTML = `
+    ${readOnly ? '' : `<a class="som-einstieg" href="#meter">
+      <span class="som-einstieg-icon">🎯</span>
+      <span><b>Set-O-Meter</b><small>Wochenvolumen prüfen und Muskeln priorisieren</small></span>
+      <i aria-hidden="true">›</i>
+    </a>`}
     <div id="lg-content" class="erstblock"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
@@ -650,14 +654,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
         // Anzahl Sätze: Pump-Paare sind Supersets und Cluster-Felder eigenständig -> jede Übung
         // bekommt die volle Zahl. Nur Heavy wird im Wechsel auf Comp/Iso aufgeteilt.
         const geplant = freeEx ? targetSets(blk, tier) : setsForExercise(blk, tier, xi);
-        // Zusatzsätze: nur bei Pump. Heavy und Cluster bleiben fest – das eine ist
-        // die Messlatte der Progression, das andere ein durchgetakteter Ablauf.
-        // Pump ist die billige Währung: Wer mehr für einen Muskel tun will, holt
-        // sich das Volumen hier, ohne die Erholung zu belasten wie ein schwerer Satz.
-        const darfExtra = !readOnly && effType === 'pump';
-        entry.extra = entry.extra || [];
         const prioDelta = prio.delta[slotKey(state.day, blk.id, xi)] || 0;
-        const count = Math.max(0, geplant + (darfExtra ? (entry.extra[xi] || 0) : 0) + prioDelta);
+        const count = Math.max(0, geplant + prioDelta);
         if (prioDelta) {
           const vc = document.createElement('span');
           vc.className = 'volrolle ' + (prioDelta > 0 ? 'prio' : 'minus');
@@ -684,32 +682,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
           exDiv.appendChild(prevLine);
           for (let si = 0; si < count; si++) exDiv.appendChild(effType === 'mr' ? mrRow(entry, xi, si, blk, prevLine) : pumpMrRow(entry, xi, si, prevLine, memKind));
 
-          if (darfExtra) {
-            const leiste = document.createElement('div');
-            leiste.className = 'extrabar';
-            const plus = document.createElement('button');
-            plus.type = 'button'; plus.className = 'extra';
-            plus.textContent = '+ Satz';
-            plus.onclick = () => {
-              entry.extra[xi] = (entry.extra[xi] || 0) + 1;
-              queuePersist(); renderDay();
-            };
-            leiste.appendChild(plus);
-            if (entry.extra[xi] > 0) {
-              const minus = document.createElement('button');
-              minus.type = 'button'; minus.className = 'extra weg';
-              minus.textContent = '− Satz';
-              // Nimmt den letzten Zusatzsatz samt Inhalt weg. Ihn stehen zu lassen
-              // hiesse, dass er weiterzaehlt, obwohl er nicht mehr sichtbar ist.
-              minus.onclick = () => {
-                entry.extra[xi] -= 1;
-                entry.sets[xi].pop();
-                queuePersist(); renderDay();
-              };
-              leiste.appendChild(minus);
-            }
-            exDiv.appendChild(leiste);
-          }
         } else {
           const prevSets = (prev && prev.data[blk.id] && prev.data[blk.id].sets && prev.data[blk.id].sets[xi]) ? prev.data[blk.id].sets[xi] : null;
           renderPrev(prevLine, prevSets, entry.sets[xi].slice(0, count), prev ? prev.week : null);
@@ -779,11 +751,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
       let sets = 0;
       let blockTgt = 0;
       exOf(blk, tier).forEach((_, xi) => {
-        // Zusatzsaetze zaehlen mit: Sie sind Arbeit, auch wenn sie ueber dem Plan
-        // liegen. Sonst traegt man drei Saetze ein und der Balken ruehrt sich nicht.
         const basis = blk.type === 'load' ? setsForExercise(blk, tier, xi) : targetSets(blk, tier);
-        const extra = (effTypeOf(blk, tier) === 'pump' && entry && entry.extra && entry.extra[xi]) || 0;
-        const cnt = Math.max(0, basis + extra + (prio.delta[slotKey(state.day, blk.id, xi)] || 0));
+        const cnt = Math.max(0, basis + (prio.delta[slotKey(state.day, blk.id, xi)] || 0));
         blockTgt += cnt;
         const arr = (entry && entry.sets && entry.sets[xi]) || [];
         (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) sets++; });
@@ -803,11 +772,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const tgt = targetSets(blk, tier);
       let blockTgt = 0;
       exOf(blk, tier).forEach((_, xi) => {
-        // Zusatzsaetze zaehlen mit: Sie sind Arbeit, auch wenn sie ueber dem Plan
-        // liegen. Sonst traegt man drei Saetze ein und der Balken ruehrt sich nicht.
         const basis = blk.type === 'load' ? setsForExercise(blk, tier, xi) : targetSets(blk, tier);
-        const extra = (effTypeOf(blk, tier) === 'pump' && entry && entry.extra && entry.extra[xi]) || 0;
-        const cnt = Math.max(0, basis + extra + (prio.delta[slotKey(state.day, blk.id, xi)] || 0));
+        const cnt = Math.max(0, basis + (prio.delta[slotKey(state.day, blk.id, xi)] || 0));
         blockTgt += cnt;
         const arr = (entry && entry.sets && entry.sets[xi]) || [];
         (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) sets++; });

@@ -28,7 +28,6 @@ export function tierVon(payload, tag, woche) {
 
 const volumenVon = (payload) => (payload && payload.volumen) || {};
 export const prioritaetenVon = (payload) => volumenVon(payload).prioritaet || {};
-export const erhaltVon = (payload) => volumenVon(payload).erhalt || {};
 
 function katalogIndex(katalog) {
   return new Map((katalog || KATALOG).map((e) => [klein(e.n), e]));
@@ -58,11 +57,10 @@ export function pumpFelder(payload, woche, katalog = KATALOG) {
         const name = String(namen[xi] || '').trim();
         const eintrag = idx.get(klein(name));
         if (!eintrag) return;
-        const extra = ((eintragBlock.extra || [])[xi] || 0);
         felder.push({
           key: slotKey(tag, blk.id, xi), tag, blockId: blk.id, xi,
           mus: blk.mus, name, konto: eintrag.haupt, neben: eintrag.neben || [],
-          tier, anzahl: targetSets(blk, tier) + extra,
+          tier, anzahl: targetSets(blk, tier),
           erlaubt: exDef.konten || blk.konten || [],
         });
       });
@@ -83,7 +81,10 @@ export function pumpMoeglichkeiten(payload, woche, konto) {
       if (blk.type !== 'pump' || !targetSets(blk, tier)) return;
       exOf(blk, tier).forEach((exDef, xi) => {
         const erlaubt = exDef.konten || blk.konten || [];
-        if (erlaubt.includes(konto)) treffer.push({ tag, blockId: blk.id, xi, mus: blk.mus, tier });
+        if (erlaubt.includes(konto)) treffer.push({
+          key: slotKey(tag, blk.id, xi), tag, blockId: blk.id, xi,
+          mus: blk.mus, tier, anzahl: targetSets(blk, tier),
+        });
       });
     });
   });
@@ -111,6 +112,11 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
     if (!gueltigePrio(cfg)) return;
     const zielFeld = bestesFeld(felder.filter((f) => f.konto === ziel));
     if (!zielFeld) {
+      const moeglich = pumpMoeglichkeiten(payload, woche, ziel);
+      if (moeglich.length && !moeglich.some((f) => f.tier >= 1)) {
+        ergebnisse[ziel] = { status: 'level-i', modus: cfg.modus, zielFeld: bestesFeld(moeglich) };
+        return;
+      }
       ergebnisse[ziel] = { status: 'ziel-fehlt', modus: cfg.modus };
       return;
     }
@@ -148,16 +154,19 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
   return { delta, ergebnisse };
 }
 
-// Vorschlaege sind keine automatische Entscheidung. Erst "Erhalt", dann viel
-// bereits geplante direkte+indirekte Arbeit; bei Gleichstand das groessere
-// Pumpfeld. Die UI zeigt die Gruende, der Nutzer bestaetigt den Spender selbst.
+// Vorschlaege sind keine automatische Entscheidung. Viel bereits geplante
+// direkte+indirekte Arbeit steht oben; bei Gleichstand das groessere Pumpfeld.
+// Die UI zeigt die Gruende, der Nutzer bestaetigt den Spender selbst.
 export function spenderKandidaten(payload, woche, ziel, wochenwerte = {}, katalog = KATALOG) {
   const felder = pumpFelder(payload, woche, katalog);
-  const zielFeld = bestesFeld(felder.filter((f) => f.konto === ziel && f.tier >= 1));
+  // Eine Prioritaet darf vor der Uebungswahl entstehen. Ist noch kein echtes
+  // Zielfeld befuellt, reicht der vorgesehene Pumpplatz, um dieselbe Einheit
+  // fuer die Spendervorschlaege zu bestimmen.
+  const zielFeld = bestesFeld(felder.filter((f) => f.konto === ziel && f.tier >= 1)) ||
+    bestesFeld(pumpMoeglichkeiten(payload, woche, ziel).filter((f) => f.tier >= 1));
   if (!zielFeld) return [];
 
   const prios = prioritaetenVon(payload);
-  const erhalt = erhaltVon(payload);
   // Beim Aendern einer vorhandenen Umverteilung ihren bisherigen Abzug zuerst
   // herausnehmen, sonst saehe derselbe Spender kuenstlich knapper aus.
   const ohneZiel = Object.assign({}, prios);
@@ -185,20 +194,18 @@ export function spenderKandidaten(payload, woche, ziel, wochenwerte = {}, katalo
     wert: konten[f.konto] || 0,
     direkt: direkt[f.konto] || 0,
     indirekt: indirekt[f.konto] || 0,
-    erhalt: !!erhalt[f.konto],
   }));
   const max = Math.max(0, ...liste.map((e) => e.wert));
   liste.forEach((e) => {
     e.viel = max > 0 && e.wert >= max * 0.75;
     e.gruende = [
       'Pump · gleiche Einheit',
-      ...(e.erhalt ? ['Erhalt'] : []),
       ...(e.viel ? ['viel Wochenvolumen'] : []),
     ];
   });
   return liste.sort((a, b) =>
-    Number(b.erhalt) - Number(a.erhalt) || b.wert - a.wert ||
-    b.verfuegbar - a.verfuegbar || KONTEN.indexOf(a.konto) - KONTEN.indexOf(b.konto));
+    b.wert - a.wert || b.verfuegbar - a.verfuegbar ||
+    KONTEN.indexOf(a.konto) - KONTEN.indexOf(b.konto));
 }
 
 export { slotKey };

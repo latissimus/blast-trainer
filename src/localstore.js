@@ -124,7 +124,7 @@ export function mergePayload(srv, loc) {
     tier: Object.assign({}, srv.tier, loc.tier),
     rot: Object.assign({}, srv.rot, loc.rot),
     datum: Object.assign({}, srv.datum, loc.datum),
-    // Prioritaet/Erhalt bilden eine zusammenhaengende Planungsentscheidung.
+    // Die Prioritaeten bilden eine zusammenhaengende Planungsentscheidung.
     // Liegt lokal eine Fassung vor, muss auch das Entfernen eines Eintrags
     // erhalten bleiben; ein Object.assign wuerde geloeschte Server-Schluessel
     // sonst wieder auferstehen lassen.

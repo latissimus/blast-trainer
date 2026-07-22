@@ -469,6 +469,14 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Stand vorher auf 22px, damit der Anfang der Liste als Anfang liest – im
    Gebrauch wirkte der Sonderabstand aber nur wie ein Versehen. */
 .erstblock{padding-top:14px}
+.som-einstieg{display:flex;align-items:center;gap:10px;margin-top:14px;padding:11px 12px;
+  background:var(--lila);color:var(--lila-ink);border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
+  text-decoration:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15'%3E%3Cpath d='M7.5 4l3.2 5.4H4.3z' fill='%230B1B44' fill-opacity='.10'/%3E%3C/svg%3E")}
+.som-einstieg-icon{font-size:23px;flex:0 0 auto}
+.som-einstieg>span:nth-child(2){flex:1;min-width:0}
+.som-einstieg b{display:block;font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:15px}
+.som-einstieg small{display:block;font-size:10.5px;font-weight:700;margin-top:2px}
+.som-einstieg i{font-family:var(--mono);font-style:normal;font-size:24px;font-weight:800}
 
 /* Kopf der Unterseiten: Titel links, Rueckweg rechts. Der Chip ist der
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
@@ -481,10 +489,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .zurueck .pf{font-family:var(--mono);font-style:normal;font-size:16px;margin-right:3px;line-height:1}
 
 /* ---------- Set-O-Meter ----------
-   Liegt in einem Overlay wie die FAQ, geoeffnet ueber den schwebenden Knopf in
-   der Speicherleiste. Frueher stand es oben im Log – dann musste man beim
-   Eintragen der Pump-Saetze jedes Mal hochscrollen, um nachzusehen, wofuer man
-   sie ueberhaupt waehlt. */
+   Eigene Planungsseite, erreichbar ueber den prominenten Einstieg im Log und
+   das App-Menue. */
 /* Weiss wie jede andere Karte der App. Frueher hellblau, weil sie auf dem
    fliederfarbenen Blatt lag – auf der hellblauen Seite waere sie unsichtbar. */
 .som-karte{background:var(--surface);border:var(--bw) solid var(--ink);border-radius:12px;
@@ -492,11 +498,20 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* Im Dark-Mode waere ein vollflaechiges Flieder eine Leuchtreklame. Derselbe
    Farbton, nur tief – die Zuordnung zum Knopf bleibt, das Auge auch. */
 :root[data-theme="dark"] .som-karte{background:var(--surface)}
+.som-intro{background:var(--navy);color:#fff;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
+  padding:14px 15px;margin-bottom:12px}
+.som-intro>b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:17px}
+.som-intro p{font-size:12.5px;line-height:1.45;margin:5px 0 11px;color:#DCE5FF}
+.som-schritte{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.som-schritte span{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;line-height:1.2}
+.som-schritte i{display:inline-flex;align-items:center;justify-content:center;flex:0 0 20px;width:20px;height:20px;
+  border-radius:50%;background:var(--pink);color:#141414;font-family:var(--mono);font-style:normal;font-size:11px}
 .som-lage{margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--muted)}
 .som-zeile{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13.5px;width:100%;
   background:transparent;border:0;color:var(--ink);text-align:left}
 .som-waehlbar{border-radius:var(--r);padding-left:4px;padding-right:4px}
 .som-waehlbar.on{background:var(--surface2)}
+.som-waehlbar:active{background:var(--surface2)}
 /* 122px ist gemessen, nicht geschaetzt: "Seitl. Schulter" braucht 113px und
    stiess bei 112 an. Der Rest der Zeile gibt entsprechend nach. */
 /* 130px statt 122: Bei 14px braucht der laengste Name ("Seitl. Schulter")
@@ -509,7 +524,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Navy traegt in beiden Themes (im Dark-Mode aufgehellt, siehe Variablen). */
 .som-track{flex:1;height:9px;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:999px;overflow:hidden}
 .som-fill{display:block;height:100%;background:var(--navy);transition:width .18s}
+.som-pfeil{flex:0 0 auto;font-family:var(--mono);font-size:20px;font-weight:800;color:var(--navy);line-height:1}
 .som-hinweis{margin:10px 0 0;font-size:12px;line-height:1.45;color:var(--muted)}
+.som-hinweis-oben{margin:0 0 9px;padding-bottom:9px;border-bottom:2px dashed var(--ink)}
 .som-speicher{min-height:18px;margin:8px 2px 0;text-align:center;font-size:11px;color:var(--muted)}
 
 /* Muskelplanung unter dem Meter. Kein Dialog ueber dem Bild: Beim Auswaehlen
@@ -523,17 +540,20 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-ed-kopf h2{font-size:23px;margin-top:3px;overflow-wrap:anywhere}
 .som-ed-zu{flex:0 0 auto;width:34px;height:34px;border:var(--bw) solid var(--ink);border-radius:50%;
   background:var(--surface2);color:var(--ink);font-size:20px;line-height:1}
-.som-ed-stand{font-size:12px;color:var(--muted);margin:9px 0 12px}
+.som-werte{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}
+.som-werte>div{min-width:0;background:var(--surface2);border:1.5px solid var(--ink);border-radius:var(--r);padding:8px 7px}
+.som-werte b{display:block;font-family:var(--mono);font-size:18px;color:var(--navy)}
+.som-werte span{display:block;font-size:10px;font-weight:800;margin-top:2px}
+.som-werte small{display:block;font-size:8.5px;line-height:1.3;color:var(--muted);margin-top:3px}
 .som-prio-status{font-size:12.5px;line-height:1.45;margin:8px 0;padding:9px 10px;
   border-left:4px solid var(--pink);background:var(--surface2)}
-.som-rollen{display:grid;grid-template-columns:repeat(3,1fr);border:var(--bw) solid var(--ink);
-  border-radius:var(--r);overflow:hidden;margin-top:12px}
-.som-rollen button{border:0;border-right:var(--bw) solid var(--ink);background:var(--surface);
-  color:var(--ink);padding:10px 4px;font-family:var(--display);font-style:italic;font-weight:700;
-  text-transform:uppercase;font-size:12px}
-.som-rollen button:last-child{border-right:0}
-.som-rollen button.on{background:var(--navy);color:#fff}
-.som-rollen button:disabled{opacity:.35;cursor:not-allowed}
+.som-prio-aktionen{display:flex;gap:7px;margin-top:12px}
+.som-prio-setzen,.som-prio-entfernen{border:var(--bw) solid var(--ink);border-radius:var(--r);padding:10px 11px;
+  font-family:var(--display);font-style:italic;font-weight:700;text-transform:uppercase;font-size:12px}
+.som-prio-setzen{flex:1;background:var(--pink);color:#141414}
+.som-prio-setzen.on{background:var(--navy);color:#fff}
+.som-prio-setzen:disabled{opacity:.35;cursor:not-allowed}
+.som-prio-entfernen{flex:0 0 auto;background:var(--surface2);color:var(--muted)}
 .som-frage{border-top:2px dashed var(--ink);margin-top:15px;padding-top:13px}
 .som-frage h3{font-size:14px;margin:0 0 9px}
 .som-wahl{display:block;width:100%;text-align:left;background:var(--surface2);color:var(--ink);
@@ -543,21 +563,11 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-wahl small{display:block;font-size:9.5px;color:var(--navy);font-weight:800;text-transform:uppercase;margin-top:5px}
 .som-zurueck{margin-top:11px;background:transparent;border:0;color:var(--navy);font-size:12px;font-weight:800;padding:4px}
 
-/* Direkt am Uebungsfeld sichtbar: Der Satz stammt aus der Planung, nicht vom
-   manuellen +Satz-Knopf. */
+/* Direkt am Uebungsfeld sichtbar: Der Satz stammt aus der Prioritaetsplanung. */
 .volrolle{display:inline-flex;align-items:center;flex:0 0 auto;border:1px solid var(--ink);border-radius:999px;
   padding:2px 6px;font-size:9px;font-weight:800;text-transform:uppercase;white-space:nowrap}
 .volrolle.prio{background:var(--pink);color:#141414}
 .volrolle.minus{background:var(--surface2);color:var(--muted)}
-
-/* Zusatzsätze bei Pump. Bewusst klein und unauffällig: Der Regelfall ist die
-   Satzzahl aus der Vorlage, das hier ist die Ausnahme für einen Muskel, dem
-   man mehr geben will. */
-.extrabar{display:flex;gap:7px;margin-top:9px}
-.extra{background:var(--surface2);border:var(--bw) solid var(--ink);border-radius:var(--r);
-  padding:5px 11px;font-size:12px;font-weight:800;font-family:var(--mono);color:var(--ink);
-  cursor:pointer}
-.extra.weg{color:var(--muted)}
 
 .volbar{background:var(--navy);color:#fff;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);padding:14px 15px;margin-bottom:14px}
 .volbar h3{margin:0 0 4px;font-size:13px;color:#fff}

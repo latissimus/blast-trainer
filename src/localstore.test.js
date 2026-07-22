@@ -106,12 +106,11 @@ describe('mergePayload – Pool und Einstellungen', () => {
 
   it('uebernimmt die lokale Muskelplanung als zusammenhaengende Entscheidung', () => {
     const m = mergePayload(
-      { volumen: { prioritaet: { Brust: { modus: 'plus' } }, erhalt: { Abs: true } } },
-      { volumen: { prioritaet: { Unterarme: { modus: 'tausch', spender: 'Abs' } }, erhalt: { Abs: true } } },
+      { volumen: { prioritaet: { Brust: { modus: 'plus' } } } },
+      { volumen: { prioritaet: { Unterarme: { modus: 'tausch', spender: 'Abs' } } } },
     );
     expect(m.volumen).toEqual({
       prioritaet: { Unterarme: { modus: 'tausch', spender: 'Abs' } },
-      erhalt: { Abs: true },
     });
   });
 
@@ -135,7 +134,7 @@ describe('mergePayload – Vollstaendigkeit', () => {
       rot: { 3: 'B' },
       mem: { 'pump|x': { w: '20' } },
       datum: { 'UK-A|3': '2026-07-19' },
-      volumen: { prioritaet: { Unterarme: { modus: 'plus' } }, erhalt: {} },
+      volumen: { prioritaet: { Unterarme: { modus: 'plus' } } },
       v: 3,
     };
     const m = mergePayload(p, {});

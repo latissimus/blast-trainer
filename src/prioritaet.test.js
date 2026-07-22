@@ -26,7 +26,7 @@ function payload(tier = 1) {
         p_arm: { names: ['Reverse Curls', 'Trizepsdrücken'], sets: [[], []] },
       } },
     },
-    volumen: { prioritaet: {}, erhalt: {} },
+    volumen: { prioritaet: {} },
   };
 }
 
@@ -41,6 +41,7 @@ describe('Priorisierung – Wirkung', () => {
 
   it('wirkt auf Level I noch nicht', () => {
     const p = payload(0);
+    p.data['UK-A'][1].p_arm.names[0] = '';
     p.volumen.prioritaet.Unterarme = { modus: 'plus' };
     const r = prioritaetsAnpassungen(p, 1, K);
     expect(r.delta).toEqual({});
@@ -64,6 +65,15 @@ describe('Priorisierung – Wirkung', () => {
     expect(r.delta).toEqual({});
     expect(r.ergebnisse.Unterarme.status).toBe('spender-fehlt');
   });
+
+  it('merkt eine Priorität vor, obwohl die Zielübung noch fehlt', () => {
+    const p = payload(1);
+    p.data['UK-A'][1].p_arm.names[0] = '';
+    p.volumen.prioritaet.Unterarme = { modus: 'plus' };
+    const r = prioritaetsAnpassungen(p, 1, K);
+    expect(r.delta).toEqual({});
+    expect(r.ergebnisse.Unterarme.status).toBe('ziel-fehlt');
+  });
 });
 
 describe('Priorisierung – Planung', () => {
@@ -74,17 +84,26 @@ describe('Priorisierung – Planung', () => {
     });
   });
 
-  it('ordnet Erhalt vor hohem Volumen und schließt andere Prioritäten aus', () => {
+  it('ordnet hohes Gesamtvolumen zuerst und schließt andere Prioritäten aus', () => {
     const p = payload(1);
-    p.volumen.erhalt.Abs = true;
     p.volumen.prioritaet.Brust = { modus: 'plus' };
     const r = spenderKandidaten(p, 1, 'Unterarme', {
       konten: { Brust: 20, 'Oberer Rücken': 12, 'Seitliche Schulter': 14, Abs: 4, Trizeps: 10 },
       direkt: { Abs: 4 }, indirekt: { Abs: 0 },
     }, K);
-    expect(r[0].konto).toBe('Abs');
+    expect(r[0].konto).toBe('Seitliche Schulter');
     expect(r.some((e) => e.konto === 'Brust')).toBe(false);
     expect(r[0].gruende).toContain('Pump · gleiche Einheit');
-    expect(r[0].gruende).toContain('Erhalt');
+    expect(r[0].gruende).toContain('viel Wochenvolumen');
+  });
+
+  it('kann Spender schon vor der Wahl der Zielübung vorschlagen', () => {
+    const p = payload(1);
+    p.data['UK-A'][1].p_arm.names[0] = '';
+    const r = spenderKandidaten(p, 1, 'Unterarme', {
+      konten: { Abs: 8, Trizeps: 6 }, direkt: { Abs: 8, Trizeps: 6 }, indirekt: {},
+    }, K);
+    expect(r.map((e) => e.konto)).toContain('Abs');
+    expect(r.every((e) => e.tag === 'UK-A')).toBe(true);
   });
 });

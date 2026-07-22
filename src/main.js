@@ -299,7 +299,7 @@ function setNavActive(view) {
   // bleibt hellblau. Setzt --bg um, damit Kopfleiste und Bedienleiste von selbst
   // mitgehen, statt jede Flaeche einzeln umfaerben zu muessen.
   document.body.dataset.seite = view;
-  const namen = { log: 'Log', faq: 'FAQ', meter: 'Meter', prog: 'Prog', notizbuch: 'Notizbuch', admin: 'Admin', profile: 'Profil' };
+  const namen = { log: 'Log', faq: 'FAQ', meter: 'Set-O', prog: 'Prog', notizbuch: 'Notizbuch', admin: 'Admin', profile: 'Profil' };
   app.querySelector('#app-menue-l').textContent = namen[view] || 'Log';
   // Die vier Log-Felder bleiben auf jeder Seite sichtbar, damit die Leiste
   // ueberall gleich aussieht. Ohne gemountetes Log sind sie stillgelegt (siehe

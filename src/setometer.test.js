@@ -96,7 +96,7 @@ describe('zaehleWoche – Wochen und Tage', () => {
   });
 });
 
-describe('zaehleWoche – Pump und Zusatzsätze', () => {
+describe('zaehleWoche – Pump', () => {
   const pump = (extra) => ({
     data: { 'OK-A': { 1: { p_calf: { names: ['Wadenheben'], sets: [[]], ...(extra ? { extra } : {}) } } } },
   });
@@ -105,12 +105,12 @@ describe('zaehleWoche – Pump und Zusatzsätze', () => {
     expect(zaehleWoche(pump(), 1, K).konten['Waden']).toBe(2);   // p_calf Level III = 2
   });
 
-  it('rechnet Zusatzsätze mit', () => {
-    expect(zaehleWoche(pump([3]), 1, K).konten['Waden']).toBe(5);
+  it('ignoriert alte manuelle Pump-Zusatzsätze', () => {
+    expect(zaehleWoche(pump([3]), 1, K).konten['Waden']).toBe(2);
   });
 
   it('ignoriert Zusatzsätze bei Cluster-Blöcken', () => {
-    // Zusatzsätze gibt es nur bei Pump – ein Wert an einem mr-Block wäre Altlast.
+    // Alte extra-Werte sind nur noch Altlasten und duerfen den Plan nicht aendern.
     const p = { data: { MRs: { 1: { m_ch: { names: ['Bankdrücken'], sets: [[]], extra: [5] } } } } };
     expect(zaehleWoche(p, 1, K).konten['Brust']).toBe(2);
   });
