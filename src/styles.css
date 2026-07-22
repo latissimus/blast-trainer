@@ -497,10 +497,10 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-tab.gezogen .som-tab-ziel small{opacity:1;transition-delay:.08s}
 /* Zwei kurze Hinweise nach der Rueckkehr aus einer Unterseite; danach liegt
    die Lasche wieder unsichtbar hinter dem Header. */
-.som-tab.peek{animation:som-tab-peek 1.55s ease both}
+.som-tab.peek{animation:som-tab-peek 2.6s ease-in-out both}
 @keyframes som-tab-peek{
   0%,6%,30%,38%,62%,100%{width:60px;height:20px;transform:translate(-50%,-26px)}
-  14%,22%,46%,54%{width:68px;height:24px;transform:translate(-50%,0)}
+  14%,22%,46%,54%{width:70px;height:28px;transform:translate(-50%,4px)}
 }
 #view{transition:padding-top .22s ease}
 #view.som-gezogen{padding-top:46px}
