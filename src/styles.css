@@ -391,9 +391,12 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    max-width, die greift dort nie.
    UNTERGRENZE sind 7px: Der Schlagschatten steht 4px nach rechts, darunter
    beruehrt die rechte untere Ecke den Bildschirmrand. */
-.ctrlbar{position:fixed;left:0;right:0;bottom:0;z-index:30;
-  padding:8px 7px max(6px, calc(env(safe-area-inset-bottom) - 6px));
-  background:linear-gradient(180deg,rgba(177,231,255,0),var(--bg) 55%)}
+.ctrlbar{--ctrlbar-bottom:max(6px, calc(env(safe-area-inset-bottom) - 6px));
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  padding:8px 7px var(--ctrlbar-bottom);
+  background:linear-gradient(180deg,
+    transparent 0 calc(100% - var(--ctrlbar-bottom)),
+    var(--bg) calc(100% - var(--ctrlbar-bottom)))}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
    auf. Der Schatten liegt ausserhalb und wird davon nicht beschnitten. */
