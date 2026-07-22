@@ -522,49 +522,60 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* ---------- Set-O-Meter ----------
    Eigene Planungsseite, erreichbar ueber den prominenten Einstieg im Log und
    das App-Menue. */
-.som-statuskopf{display:flex;align-items:center;gap:9px;margin-bottom:8px}
-.som-lage{display:flex;align-items:baseline;gap:8px;flex:1;margin:0;font-family:var(--mono);color:var(--muted)}
-.som-lage b{font-size:15px;color:var(--ink)}
-.som-lage span{font-size:11px;font-weight:700}
+.som-statuskopf{display:flex;align-items:stretch;gap:8px;margin-bottom:8px;padding:8px;
+  background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
+.som-lage{display:grid;grid-template-columns:repeat(3,1fr);gap:0;flex:1;margin:0;font-family:var(--mono)}
+.som-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:1px 8px;
+  border-right:1.5px solid var(--ink)}
+.som-stat:last-child{border-right:0}
+.som-stat small{font-size:8px;line-height:1.1;font-weight:800;color:var(--muted);text-transform:uppercase}
+.som-stat b{margin-top:3px;font-size:16px;line-height:1;color:var(--ink)}
 .som-info-knopf{flex:0 0 auto;width:28px;height:28px;padding:0;border:var(--bw) solid var(--ink);border-radius:50%;
-  background:var(--surface);color:var(--ink);font-family:var(--mono);font-size:13px;font-weight:800}
-.som-kurzhilfe{margin:0 0 9px;padding:9px 11px;background:var(--surface);border:var(--bw) solid var(--ink);
-  border-radius:var(--r);font-size:11.5px;line-height:1.45;color:var(--muted)}
+  align-self:center;background:var(--surface2);color:var(--ink);font-family:var(--mono);font-size:13px;font-weight:800}
+.som-kurzhilfe{margin:0 0 9px;padding:10px 11px;background:#FFB3D6;border:var(--bw) solid var(--ink);
+  border-radius:var(--r);font-size:11.5px;line-height:1.45;color:#141414}
 .som-legende{display:flex;gap:13px;margin:0 3px 9px;font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase}
 .som-legende span{display:flex;align-items:center;gap:5px}
 .som-legende i{display:inline-block;width:17px;height:7px;border-radius:999px;border:1px solid var(--ink)}
 .som-legende i.direkt{background:var(--navy)}
 .som-legende i.indirekt{background:#AEDCF6}
-.som-liste{display:grid;gap:7px}
-.som-gruppe{margin:7px 2px 0;font-family:var(--display);font-style:italic;font-size:11px;font-weight:700;
-  text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.som-liste{display:grid;gap:6px}
+.som-gruppe{display:flex;align-items:center;gap:8px;margin:9px 2px 1px;font-family:var(--display);font-style:italic;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.som-gruppe:not(.prio)::after{content:"";flex:1;border-top:2px dashed var(--ink);opacity:.45}
+.som-gruppe.prio{width:max-content;padding:3px 8px;background:var(--pink);border:1.5px solid var(--ink);
+  border-radius:999px;color:#141414}
 .som-muskel{overflow:hidden;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
-.som-muskel.priorisiert{border-color:#67318F}
+.som-muskel.priorisiert{border-color:var(--ink)}
+.som-muskel.priorisiert>.som-zeile{background:rgba(255,105,174,.12)}
 .som-muskel.offen{background:var(--surface2)}
-.som-zeile{display:grid;grid-template-columns:1fr;gap:7px;width:100%;padding:10px 12px;
+.som-zeile{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 10px;width:100%;padding:10px 12px;
   background:transparent;border:0;color:var(--ink);text-align:left}
 .som-zeile-kopf,.som-zeile-fuss{display:flex;align-items:center;gap:7px;min-width:0}
+.som-zeile-kopf{grid-column:1;grid-row:1}
+.som-zeile-fuss{grid-column:2;grid-row:1;justify-content:flex-end}
 .som-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--display);
   font-style:italic;font-weight:700;font-size:15px;text-transform:uppercase}
-.som-prio-marke{flex:0 0 auto;padding:2px 6px;border-radius:999px;background:#67318F;color:#fff;
+.som-prio-marke{flex:0 0 auto;padding:2px 6px;border-radius:999px;background:var(--pink);color:#141414;
   font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
-.som-track{display:flex;width:100%;height:10px;background:var(--surface);border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
+.som-track{grid-column:1/-1;grid-row:2;display:flex;width:100%;height:9px;background:var(--surface2);
+  border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
 .som-fill-direkt,.som-fill-indirekt{display:block;height:100%;transition:width .18s ease}
 .som-fill-direkt{background:var(--navy)}
 .som-fill-indirekt{background:#AEDCF6;border-left:1px solid rgba(10,10,10,.4)}
-.som-zahlen{flex:1;font-size:10.5px;color:var(--muted);font-weight:700}
+.som-zahlen{font-size:9.5px;color:var(--muted);font-weight:700;white-space:nowrap}
 .som-zahlen b{font-family:var(--mono);font-size:11px;color:var(--ink)}
 .som-pfeil{flex:0 0 auto;font-family:var(--mono);font-size:17px;font-weight:800;color:var(--muted);line-height:1;
   transition:transform .16s ease}
 .som-muskel.offen .som-pfeil{transform:rotate(180deg)}
 .som-inline-editor{padding:0 12px 12px;border-top:2px dashed var(--ink)}
 .som-prio-status{font-size:11.5px;line-height:1.45;margin:10px 0 0;padding:8px 9px;
-  border-left:4px solid #67318F;background:var(--surface)}
+  border-left:4px solid var(--pink);background:var(--surface)}
 .som-prio-status.neutral{border-left-color:var(--muted)}
 .som-prio-toggle{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:42px;margin-top:10px;
   border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface);color:var(--ink);
   font-family:var(--display);font-style:italic;font-weight:700;text-transform:uppercase;font-size:13px}
-.som-prio-toggle.on{background:#67318F;color:#fff}
+.som-prio-toggle.on{background:var(--pink);color:#141414}
 .som-prio-toggle:disabled{opacity:.35;cursor:not-allowed}
 .som-inline-plan{margin-top:11px}
 .som-ed-label{display:block;margin-bottom:6px;font-size:9px;color:var(--muted);font-weight:800;
@@ -573,20 +584,21 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-modusseg button{min-width:0;padding:8px 6px;border:0;border-right:var(--bw) solid var(--ink);
   background:var(--surface);color:var(--ink)}
 .som-modusseg button:last-child{border-right:0}
-.som-modusseg button.on{background:#67318F;color:#fff}
+.som-modusseg button.on{background:var(--pink);color:#141414}
 .som-modusseg b,.som-modusseg small{display:block}
 .som-modusseg b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:12px}
 .som-modusseg small{margin-top:2px;font-size:8.5px;opacity:.75}
 .som-spender{margin-top:12px}
 .som-spender-wahl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;margin-top:6px;padding:8px 9px;
   text-align:left;background:var(--surface);color:var(--ink);border:1.5px solid var(--ink);border-radius:var(--r)}
-.som-spender-wahl.on{border-color:#67318F}
+.som-spender-wahl.on{border-color:var(--pink)}
 .som-spender-wahl span:first-child{min-width:0}
 .som-spender-wahl b,.som-spender-wahl small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .som-spender-wahl b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:12px}
 .som-spender-wahl small{margin-top:1px;font-size:9.5px;color:var(--muted)}
 .som-spender-zahlen{align-self:center;font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap}
-.som-spender-wahl em{grid-column:1/-1;font-style:normal;font-size:8.5px;font-weight:800;color:#67318F;text-transform:uppercase}
+.som-spender-wahl em{grid-column:1/-1;font-style:normal;font-size:8.5px;font-weight:800;color:#B21F65;text-transform:uppercase}
+:root[data-theme="dark"] .som-spender-wahl em{color:#FF8DC2}
 .som-hinweis{margin:10px 0 0;font-size:12px;line-height:1.45;color:var(--muted)}
 .som-hinweis-oben{margin:0 0 2px;padding:9px 10px;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r)}
 .som-speicher{min-height:18px;margin:8px 2px 0;text-align:center;font-size:11px;color:var(--muted)}
@@ -646,7 +658,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 
    Das Dreiecksmuster ist dasselbe wie auf dem Menue-Feld und haelt die
    grossen Flaechen davon ab, leer zu wirken. */
-body[data-seite="meter"]{--bg:#20CAF4;--surface:#72DDF5;--surface2:#A8ECFA}
+/* Set-O bleibt bewusst im Kernsystem der App: derselbe hellblaue Grund und
+   dieselben weissen Karten wie im Log, Pink markiert nur aktive Planung. */
+body[data-seite="meter"]{--bg:#B1E7FF;--surface:#FFFFFF;--surface2:#EAF4FC}
 body[data-seite="prog"]{--bg:#D9BBF7}
 body[data-seite="faq"]{--bg:#FBE7A4}
 body[data-seite="profile"]{--bg:#BFE7D2}
@@ -658,7 +672,7 @@ body[data-seite="profile"]{--bg:#BFE7D2}
    hier der alte Wert #AEDCF6 und blieb nach der Farbanpassung zurueck. */
 body[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
 
-:root[data-theme="dark"] body[data-seite="meter"]{--bg:#063E4B;--surface:#0F6375;--surface2:#167A8F}
+:root[data-theme="dark"] body[data-seite="meter"]{--bg:#0B0D12;--surface:#191C24;--surface2:#232733}
 /* Dunkel: derselbe Aufbau, nur umgekehrt – blaeulicher Grund, hellere Flaechen. */
 :root[data-theme="dark"] body[data-seite="notizbuch"]{--bg:#101A2B;--surface:#1C2637;--surface2:#1C2637}
 :root[data-theme="dark"] body[data-seite="prog"]{--bg:#2A1B45}
@@ -672,9 +686,10 @@ body[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
    Beide liegen ton-in-ton in der Tintenfarbe statt in einem festen Lila –
    so tragen sie jeden Seitengrund und kippen im Dark-Mode von selbst mit.
    Welches Muster eine Seite bekommt, ist unten eine Zeile. */
-body[data-seite="prog"],
+body[data-seite="meter"],body[data-seite="prog"],
 body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   background-image:var(--muster-dreieck);background-size:auto}
+:root[data-theme="dark"] body[data-seite="meter"],
 :root[data-theme="dark"] body[data-seite="prog"],
 :root[data-theme="dark"] body[data-seite="faq"],
 :root[data-theme="dark"] body[data-seite="profile"],
@@ -688,14 +703,6 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 :root[data-theme="dark"] body[data-seite="prog"],
 :root[data-theme="dark"] body[data-seite="notizbuch"]{
   background-image:var(--muster-tropfen-dunkel)}
-
-/* Cyanfarbener Retro-Sunburst nach dem Referenzbild: harte schwarze Konturen
-   liegen auf hellen, flächigen Blautönen; keine modernen Schatten. */
-body[data-seite="meter"]{
-  background-image:repeating-conic-gradient(from -14deg at 50% 46%,rgba(255,255,255,.14) 0 14deg,rgba(0,94,145,.05) 14deg 28deg);
-  background-size:100% 100%;background-attachment:fixed}
-:root[data-theme="dark"] body[data-seite="meter"]{
-  background-image:repeating-conic-gradient(from -14deg at 50% 46%,rgba(255,255,255,.045) 0 14deg,rgba(0,0,0,.07) 14deg 28deg)}
 
 /* ---------- FAQ- und Meter-Seite ---------- */
 .src{font-size:12px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:var(--bw) solid var(--ink);padding-top:10px}

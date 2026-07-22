@@ -145,7 +145,7 @@ export async function mountMeter(container, { userId }) {
       <button type="button" class="som-zeile" data-konto="${html(r.konto)}" aria-expanded="${offen ? 'true' : 'false'}">
         <span class="som-zeile-kopf"><span class="som-name">${html(zeigName(r.konto))}</span>${prio ? '<span class="som-prio-marke">Priorität</span>' : ''}</span>
         <span class="som-track"><span class="som-fill-direkt" style="width:${direktBreite}%"></span><span class="som-fill-indirekt" style="width:${indirektBreite}%"></span></span>
-        <span class="som-zeile-fuss"><span class="som-zahlen"><b>${direkt}</b> direkte · <b>${indirekt}</b> indirekte Sätze</span><span class="som-pfeil" aria-hidden="true">⌄</span></span>
+        <span class="som-zeile-fuss"><span class="som-zahlen"><b>${direkt}</b> direkt · <b>${indirekt}</b> indirekt</span><span class="som-pfeil" aria-hidden="true">⌄</span></span>
       </button>
       ${offen ? inlineEditor(r.konto, werte, prioErgebnisse) : ''}
     </div>`;
@@ -156,7 +156,11 @@ export async function mountMeter(container, { userId }) {
     const { konten, ohneZuordnung, unbekannte, gesamt, prioritaet } = werte;
     const prios = prioritaetenVon(payload);
     const aktiv = Object.keys(prios).filter((k) => prios[k]).length;
-    lage.innerHTML = `<b>Woche ${woche}</b><span>${aktiv} Priorität${aktiv === 1 ? '' : 'en'} aktiv</span>`;
+    const gesamtText = (Math.round(gesamt * 10) / 10).toString().replace('.', ',');
+    lage.innerHTML = `
+      <span class="som-stat"><small>Woche</small><b>${woche}</b></span>
+      <span class="som-stat"><small>Prioritäten</small><b>${aktiv}</b></span>
+      <span class="som-stat"><small>Volumen</small><b>${gesamtText}</b></span>`;
 
     const sortiertNachVolumen = sortiert(konten);
     const priorisiert = sortiertNachVolumen.filter((r) => prios[r.konto]);
@@ -164,12 +168,12 @@ export async function mountMeter(container, { userId }) {
     const max = Math.max(1, ...sortiertNachVolumen.map((r) =>
       (werte.direkt[r.konto] || 0) + (werte.indirekt[r.konto] || 0) * .5));
 
-    const gruppe = (titel, reihen) => reihen.length
-      ? `<p class="som-gruppe">${titel}</p>${reihen.map((r) => reihe(r, max, werte, prioritaet, prios)).join('')}`
+    const gruppe = (titel, reihen, klasse = '') => reihen.length
+      ? `<p class="som-gruppe${klasse ? ` ${klasse}` : ''}">${titel}</p>${reihen.map((r) => reihe(r, max, werte, prioritaet, prios)).join('')}`
       : '';
     body.innerHTML = (gesamt === 0
       ? '<p class="som-hinweis som-hinweis-oben">Noch keine Übung gewählt. Prioritäten kannst du trotzdem bereits festlegen.</p>'
-      : '') + gruppe('Priorisiert', priorisiert) + gruppe(priorisiert.length ? 'Alle Muskeln' : 'Muskeln', uebrig)
+      : '') + gruppe('Priorisiert', priorisiert, 'prio') + gruppe(priorisiert.length ? 'Alle Muskeln' : 'Muskeln', uebrig)
       + (ohneZuordnung ? `<p class="som-hinweis">Nicht zugeordnet: ${unbekannte.map((u) => `<b>${html(u)}</b>`).join(', ') || 'Übung ohne Namen'}.</p>` : '');
 
     body.querySelectorAll('[data-konto]').forEach((b) => {
