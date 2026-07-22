@@ -102,7 +102,7 @@ a{color:var(--navy)}
 .wrap{max-width:580px;margin:0 auto;padding:0 14px}
 
 /* ---------- Top bar / nav ---------- */
-.topbar{position:sticky;top:0;z-index:20;background:var(--bg);
+.topbar{position:sticky;top:0;z-index:20;isolation:isolate;background:var(--bg);
   border-bottom:var(--bw) solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
 .topbar .wrap{display:flex;align-items:center;gap:10px}
 /* LOGMAN-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
@@ -477,20 +477,18 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   margin:0;background:transparent;border:0;color:var(--muted);opacity:.72}
 .som-pull-hinweis .pf{font-family:var(--mono);font-size:16px;font-weight:800;line-height:1}
 .som-pull-clip{position:fixed;z-index:19;top:var(--topbar-h,58px);left:0;right:0;bottom:0;
-  overflow:hidden;pointer-events:none}
-.som-pull{position:absolute;top:0;left:50%;width:min(calc(100vw - 14px),590px);
+  overflow:hidden;-webkit-clip-path:inset(0);clip-path:inset(0);contain:paint;pointer-events:none}
+.som-pull{position:absolute;top:0;left:50%;width:min(calc(100vw - 56px),360px);
   transform:translate(-50%,calc(-100% - 8px + var(--som-zug,0px)));opacity:var(--som-sicht,0);
   transition:transform .2s ease,opacity .16s ease}
 .som-pull-clip.zieht .som-pull{transition:none}
 .som-pull-clip.offen .som-pull{transform:translate(-50%,8px);opacity:1;pointer-events:auto}
 .som-pull-link{display:flex;align-items:center;gap:10px;padding:10px 12px;text-decoration:none;
-  background:rgba(255,255,255,.41);color:var(--ink);border:var(--bw) solid var(--ink);border-radius:16px;
-  -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25)}
-:root[data-theme="dark"] .som-pull-link{background:rgba(30,33,42,.41)}
+  background:#67318F;color:#fff;border:var(--bw) solid var(--ink);border-radius:16px}
 .som-pull-link>span{flex:1;min-width:0}
 .som-pull-link b{display:block;font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:14px}
-.som-pull-link small{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-top:2px}
-.som-pull-link i{font-family:var(--mono);font-style:normal;font-size:23px;font-weight:800;color:var(--muted)}
+.som-pull-link small{display:block;font-size:10px;color:#fff;font-weight:700;margin-top:2px}
+.som-pull-link i{font-family:var(--mono);font-style:normal;font-size:23px;font-weight:800;color:#fff}
 
 /* Kopf der Unterseiten: Titel links, Rueckweg rechts. Der Chip ist der
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
