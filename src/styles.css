@@ -104,6 +104,12 @@ a{color:var(--navy)}
 /* ---------- Top bar / nav ---------- */
 .topbar{position:sticky;top:0;z-index:20;isolation:isolate;background:var(--bg);
   border-bottom:var(--bw) solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
+/* Beim iOS-Gummiband wandert der Sticky-Header kurz nach unten, waehrend
+   fixed Elemente am Viewport bleiben. Diese unsichtbare Fortsetzung deckt
+   den Bereich oberhalb des Headers ab, damit Set-O-Meter und Zurueck-Chip
+   dort auch bei starkem Herunterziehen nicht hervorscheinen. */
+.topbar::before{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:100%;
+  height:100vh;background:var(--bg);pointer-events:none}
 .topbar .wrap{display:flex;align-items:center;gap:10px}
 /* LOGMAN-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
    Kein Layout-Effekt (Kontur/Schatten ändern die Header-Höhe nicht). */
