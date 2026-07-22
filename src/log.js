@@ -256,11 +256,15 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // die Beschreibung des Tages. Dadurch faengt der erste Trainingsblock
   // unmittelbar unter der Kopfleiste an, statt nach drei Reihen Bedienelementen.
   wrap.innerHTML = `
-    ${readOnly ? '' : `<a class="som-einstieg" href="#meter">
-      <span class="som-einstieg-icon">🎯</span>
-      <span><b>Set-O-Meter</b><small>Wochenvolumen prüfen und Muskeln priorisieren</small></span>
-      <i aria-hidden="true">›</i>
-    </a>`}
+    ${readOnly ? '' : `<button class="som-pull-hinweis" id="lg-som-hinweis" type="button" aria-label="Set-O-Meter hervorziehen">
+      <span class="pf" aria-hidden="true">↓</span>
+    </button>
+    <div class="som-pull" id="lg-som-pull" aria-hidden="true">
+      <a class="som-pull-link" href="#meter">
+        <span><b>Set-O-Meter</b><small>Volumen prüfen und Muskeln priorisieren</small></span>
+        <i aria-hidden="true">›</i>
+      </a>
+    </div>`}
     <div id="lg-content" class="erstblock"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
@@ -276,6 +280,61 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const volEl = wrap.querySelector('#lg-vol');
   const phaseEl = document.querySelector('#app-phase');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
+
+  // Pull-down-Einstieg zum Set-O-Meter. Die Karte sitzt unter dem Sticky-Header
+  // und wird nur am Seitenanfang durch Herunterziehen sichtbar. Der kleine
+  // Pfeil ist zugleich eine tastaturbedienbare Alternative zur Geste.
+  const somPull = wrap.querySelector('#lg-som-pull');
+  const somHinweis = wrap.querySelector('#lg-som-hinweis');
+  let somStartY = null;
+  let somDistanz = 0;
+  let somOffen = false;
+  const setSomOffen = (offen) => {
+    if (!somPull) return;
+    somOffen = offen;
+    somPull.classList.toggle('offen', offen);
+    somPull.classList.remove('zieht');
+    somPull.style.removeProperty('--som-zug');
+    somPull.style.removeProperty('opacity');
+    somPull.setAttribute('aria-hidden', offen ? 'false' : 'true');
+    somPull.inert = !offen;
+  };
+  const somTouchStart = (e) => {
+    if (window.scrollY > 1 || !e.touches?.length) return;
+    somStartY = e.touches[0].clientY;
+    somDistanz = 0;
+    somPull?.classList.add('zieht');
+  };
+  const somTouchMove = (e) => {
+    if (somStartY == null || !e.touches?.length || !somPull) return;
+    const dy = e.touches[0].clientY - somStartY;
+    if (somOffen && dy < -12) {
+      setSomOffen(false);
+      somStartY = null;
+      return;
+    }
+    if (!somOffen && dy > 0) {
+      somDistanz = Math.min(78, dy * .75);
+      somPull.style.setProperty('--som-zug', somDistanz + 'px');
+      somPull.style.opacity = String(Math.min(1, somDistanz / 44));
+    }
+  };
+  const somTouchEnd = () => {
+    if (somStartY == null) return;
+    if (!somOffen) setSomOffen(somDistanz >= 42);
+    somStartY = null;
+    somDistanz = 0;
+  };
+  const somScroll = () => { if (window.scrollY > 2 && somOffen) setSomOffen(false); };
+  if (somPull && somHinweis) {
+    somPull.inert = true;
+    somHinweis.onclick = () => setSomOffen(!somOffen);
+    wrap.addEventListener('touchstart', somTouchStart, { passive: true });
+    wrap.addEventListener('touchmove', somTouchMove, { passive: true });
+    wrap.addEventListener('touchend', somTouchEnd, { passive: true });
+    wrap.addEventListener('touchcancel', somTouchEnd, { passive: true });
+    window.addEventListener('scroll', somScroll, { passive: true });
+  }
 
   // ---- untere Bedienleiste -----------------------------------------
   // Woche, Tag, Level und Datum. Alle vier stellt man einmal zu Beginn der
@@ -920,6 +979,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       clearInterval(timerId);
       clearInterval(retryId);
       window.removeEventListener('online', retrySync);
+      window.removeEventListener('scroll', somScroll);
       // Die Felder bleiben sichtbar, damit die Leiste auf jeder Seite gleich
       // aussieht – aber sie sind ohne Log wirkungslos und werden stillgelegt.
       const slots = document.querySelector('#app-slots');

@@ -3,7 +3,7 @@
 // erzeugt diese Datei daraus neu (prebuild).
 //
 // haupt = Hauptspieler (zählt im Wochenkonto voll), neben = Nebenspieler
-// (zählt halb), typ = Comp/Iso (entscheidet, in welchem Slot die Übung steht).
+// (wird als indirekter Satz ausgewiesen), typ = Comp/Iso (entscheidet, in welchem Slot die Übung steht).
 
 export const KONTEN = [
   "Brust",

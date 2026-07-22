@@ -79,7 +79,6 @@ export async function mountMeter(container, { userId }) {
       return `Aktiv: +1 Satz bei ${ergebnis.zielFeld.mus}.`;
     if (ergebnis.status === 'aktiv')
       return `Aktiv: +1 bei ${ergebnis.zielFeld.mus}, −1 ${ergebnis.spender} in derselben Einheit.`;
-    if (ergebnis.status === 'level-i') return 'Pausiert: Der passende Pump-Tag steht auf Level I.';
     if (ergebnis.status === 'ziel-fehlt' && cfg?.modus === 'plus')
       return 'Vorgemerkt: Der Zusatzsatz erscheint, sobald du eine passende Pump-Übung gewählt hast.';
     if (ergebnis.status === 'ziel-fehlt' && cfg?.spender)
@@ -105,7 +104,7 @@ export async function mountMeter(container, { userId }) {
     const ergebnis = prioErgebnisse[konto];
     const spenderFuer = donorVon(konto, prios);
     const moeglich = pumpMoeglichkeiten(payload, woche, konto);
-    const levelOk = moeglich.some((m) => m.tier >= 1);
+    const hatPumpplatz = moeglich.length > 0;
 
     const basisPayload = Object.assign({}, payload, {
       volumen: Object.assign({}, payload.volumen, { prioritaet: {} }),
@@ -123,17 +122,17 @@ export async function mountMeter(container, { userId }) {
         </div>
         <div class="som-werte">
           <div><b>${werte.direkt[konto] || 0}</b><span>Direkte Sätze</span><small>${html(konto)} ist Hauptziel</small></div>
-          <div><b>${werte.indirekt[konto] || 0}</b><span>Indirekte Sätze</span><small>${html(konto)} arbeitet mit · zählt halb</small></div>
+          <div><b>${werte.indirekt[konto] || 0}</b><span>Indirekte Sätze</span><small>${html(konto)} arbeitet mit</small></div>
           <div><b>${werte.konten[konto] || 0}</b><span>Zusammen</span><small>direkt + indirekt</small></div>
         </div>
         ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
         ${spenderFuer.length ? `<p class="som-prio-status">Gibt je 1 Satz ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
         <div class="som-prio-aktionen">
-          <button type="button" class="som-prio-setzen${cfg ? ' on' : ''}" data-prio="setzen" ${!levelOk ? 'disabled' : ''}>${cfg ? 'Priorität ändern' : 'Priorität setzen'}</button>
+          <button type="button" class="som-prio-setzen${cfg ? ' on' : ''}" data-prio="setzen" ${!hatPumpplatz ? 'disabled' : ''}>${cfg ? 'Priorität ändern' : 'Priorität setzen'}</button>
           ${cfg ? '<button type="button" class="som-prio-entfernen" data-prio="entfernen">Priorität entfernen</button>' : ''}
         </div>
-        ${!levelOk ? '<p class="som-hinweis">Priorisierung ist erst ab Level II möglich.</p>' : ''}
-        ${levelOk && !cfg ? `<p class="som-hinweis">Du kannst die Priorität schon jetzt setzen. Die passende Pump-Übung wählst du anschließend im Log.</p>` : ''}
+        ${!hatPumpplatz ? '<p class="som-hinweis">Für diesen Muskel gibt es in dieser Woche keinen regulären Pumpplatz.</p>' : ''}
+        ${hatPumpplatz && !cfg ? `<p class="som-hinweis">Du kannst die Priorität schon jetzt setzen. Die passende Pump-Übung wählst du anschließend im Log.</p>` : ''}
         ${schritt === 'modus' ? `
           <div class="som-frage">
             <h3>Wie soll der Satz eingeplant werden?</h3>

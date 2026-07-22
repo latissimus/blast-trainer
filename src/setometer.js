@@ -20,10 +20,9 @@ import { istDeload, tageDerWoche, tierVon, prioritaetsAnpassungen, slotKey } fro
 // GEZÄHLT WIRD PRO SATZ:
 //   Hauptspieler  1,0
 //   Nebenspieler  0,5
-// Die halbe Wertung indirekter Arbeit folgt Pelland et al. (2025). Sie ist
-// bereits die Umrechnung: Im Balken wird beides zusammengefuehrt. Der
-// Planungseditor zeigt direkt/indirekt zusaetzlich getrennt, damit ein
-// Spendervorschlag nachvollziehbar bleibt.
+// Direkte und indirekte Saetze werden beide als ein Satz ausgewiesen. Die
+// getrennte Beschriftung sagt bereits, welche Rolle der Muskel dabei hatte;
+// eine zusaetzliche Halbierung wuerde die Anzeige unnoetig verkomplizieren.
 //
 // Ein Cluster (6×4) zählt als EIN Satz, so wie ihn die App auch sonst zählt.
 
@@ -100,8 +99,8 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
         direkt[eintrag.haupt] += anzahl;
         eintrag.neben.forEach((nb) => {
           if (konten[nb] !== undefined) {
-            konten[nb] += anzahl * 0.5;
-            indirekt[nb] += anzahl * 0.5;
+            konten[nb] += anzahl;
+            indirekt[nb] += anzahl;
           }
         });
       });

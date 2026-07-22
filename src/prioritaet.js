@@ -3,8 +3,8 @@ import { KATALOG, KONTEN } from './katalog.js';
 import { targetSets, exOf } from './saetze.js';
 
 // Muskel-Priorisierung ist eine PLANUNGSREGEL ueber dem Tages-Level:
-// Level I bleibt ein reduzierter Tag, ab Level II bekommt genau ein geeignetes
-// Pumpfeld pro Zielmuskel einen Satz mehr. Bei einer Umverteilung wird der Satz
+// Auf jedem Level bekommt genau ein geeignetes Pumpfeld pro Zielmuskel einen
+// Satz mehr. Bei einer Umverteilung wird der Satz
 // nur dann vergeben, wenn in derselben Einheit auch ein gewaehltes Pumpfeld den
 // Satz abgeben kann. So wird aus einer fehlenden Spender-Uebung nie still ein
 // Volumenaufschlag.
@@ -112,16 +112,7 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
     if (!gueltigePrio(cfg)) return;
     const zielFeld = bestesFeld(felder.filter((f) => f.konto === ziel));
     if (!zielFeld) {
-      const moeglich = pumpMoeglichkeiten(payload, woche, ziel);
-      if (moeglich.length && !moeglich.some((f) => f.tier >= 1)) {
-        ergebnisse[ziel] = { status: 'level-i', modus: cfg.modus, zielFeld: bestesFeld(moeglich) };
-        return;
-      }
       ergebnisse[ziel] = { status: 'ziel-fehlt', modus: cfg.modus };
-      return;
-    }
-    if (zielFeld.tier < 1) {
-      ergebnisse[ziel] = { status: 'level-i', modus: cfg.modus, zielFeld };
       return;
     }
 
@@ -162,8 +153,8 @@ export function spenderKandidaten(payload, woche, ziel, wochenwerte = {}, katalo
   // Eine Prioritaet darf vor der Uebungswahl entstehen. Ist noch kein echtes
   // Zielfeld befuellt, reicht der vorgesehene Pumpplatz, um dieselbe Einheit
   // fuer die Spendervorschlaege zu bestimmen.
-  const zielFeld = bestesFeld(felder.filter((f) => f.konto === ziel && f.tier >= 1)) ||
-    bestesFeld(pumpMoeglichkeiten(payload, woche, ziel).filter((f) => f.tier >= 1));
+  const zielFeld = bestesFeld(felder.filter((f) => f.konto === ziel)) ||
+    bestesFeld(pumpMoeglichkeiten(payload, woche, ziel));
   if (!zielFeld) return [];
 
   const prios = prioritaetenVon(payload);

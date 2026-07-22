@@ -39,6 +39,7 @@ let routeToken = 0;         // guards against stale async mounts
 let authMode = 'login';     // 'login' | 'signup'
 let recovery = false;       // aus der Zuruecksetzen-Mail gekommen: neues Passwort faellig
 let splash = false;         // frisch eingeloggt: einmal das Logo zeigen
+let topbarObserver = null;   // liefert Unterseiten die echte Sticky-Header-Hoehe
 
 // Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
 // Fehler). In der App selbst bleibt es draussen: Dort willst du eintragen, nicht
@@ -255,6 +256,18 @@ function renderChrome() {
   app.querySelectorAll('nav [data-view]').forEach((b) => {
     b.onclick = () => { location.hash = b.dataset.view; };
   });
+
+  // Der Zurueck-zum-Log-Chip schwebt auf Unterseiten direkt unter dem Header.
+  // Seine Position folgt der echten Headerhoehe (inkl. iPhone-Safe-Area), statt
+  // sie mit einem geraetabhaengigen Pixelwert zu erraten.
+  topbarObserver?.disconnect();
+  const topbar = app.querySelector('.topbar');
+  const schreibeTopbarHoehe = () => {
+    document.documentElement.style.setProperty('--topbar-h', topbar.offsetHeight + 'px');
+  };
+  schreibeTopbarHoehe();
+  topbarObserver = new ResizeObserver(schreibeTopbarHoehe);
+  topbarObserver.observe(topbar);
 
   // Das Menue unten rechts. Inzwischen sind alle Ziele eigene Seiten – auch das
   // Set-O-Meter, das frueher ein Fenster ueber dem Log war.

@@ -31,7 +31,7 @@ function payload(tier = 1) {
 }
 
 describe('Priorisierung – Wirkung', () => {
-  it('schlägt ab Level II genau einen Pump-Satz auf', () => {
+  it('schlägt genau einen Pump-Satz auf', () => {
     const p = payload(1);
     p.volumen.prioritaet.Unterarme = { modus: 'plus' };
     const r = prioritaetsAnpassungen(p, 1, K);
@@ -39,13 +39,12 @@ describe('Priorisierung – Wirkung', () => {
     expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
   });
 
-  it('wirkt auf Level I noch nicht', () => {
+  it('wirkt auch auf Level I', () => {
     const p = payload(0);
-    p.data['UK-A'][1].p_arm.names[0] = '';
     p.volumen.prioritaet.Unterarme = { modus: 'plus' };
     const r = prioritaetsAnpassungen(p, 1, K);
-    expect(r.delta).toEqual({});
-    expect(r.ergebnisse.Unterarme.status).toBe('level-i');
+    expect(r.delta['UK-A|p_arm|0']).toBe(1);
+    expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
   });
 
   it('verteilt atomar innerhalb derselben Einheit um', () => {

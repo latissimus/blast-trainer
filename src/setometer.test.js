@@ -37,10 +37,10 @@ describe('zaehleWoche – Plan statt Eingetragenes', () => {
     expect(zaehleWoche(heavyBrust(['Bankdrücken', '']), 1, K).konten['Brust']).toBe(2);
   });
 
-  it('wertet Nebenspieler halb', () => {
+  it('weist indirekte Sätze voll aus', () => {
     const { konten } = zaehleWoche(heavyBrust(['Bankdrücken', '']), 1, K);
-    expect(konten['Trizeps']).toBe(1);
-    expect(konten['Vordere Schulter']).toBe(1);
+    expect(konten['Trizeps']).toBe(2);
+    expect(konten['Vordere Schulter']).toBe(2);
   });
 
   it('folgt dem eingestellten Level', () => {
@@ -128,6 +128,17 @@ describe('zaehleWoche – Pump', () => {
     expect(direkt.Bizeps).toBe(2);  // p_arm Level II: 1 + Prioritaet
     expect(direkt.Brust).toBe(1);   // p_bk Level II: 2 - Umverteilung
     expect(konten.Bizeps).toBeGreaterThan(direkt.Bizeps); // Rudern wirkt weiter indirekt
+  });
+
+  it('erhöht auch auf Level I das gewählte Pumpfeld um einen Satz', () => {
+    const p = {
+      tier: { 'UK-A|1': 0 },
+      data: { 'UK-A': { 1: {
+        p_arm: { names: ['Curls', ''], sets: [[], []] },
+      } } },
+      volumen: { prioritaet: { Bizeps: { modus: 'plus' } } },
+    };
+    expect(zaehleWoche(p, 1, K).direkt.Bizeps).toBe(2);
   });
 });
 

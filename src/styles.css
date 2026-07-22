@@ -469,20 +469,30 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Stand vorher auf 22px, damit der Anfang der Liste als Anfang liest – im
    Gebrauch wirkte der Sonderabstand aber nur wie ein Versehen. */
 .erstblock{padding-top:14px}
-.som-einstieg{display:flex;align-items:center;gap:10px;margin-top:14px;padding:11px 12px;
-  background:var(--lila);color:var(--lila-ink);border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
-  text-decoration:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15'%3E%3Cpath d='M7.5 4l3.2 5.4H4.3z' fill='%230B1B44' fill-opacity='.10'/%3E%3C/svg%3E")}
-.som-einstieg-icon{font-size:23px;flex:0 0 auto}
-.som-einstieg>span:nth-child(2){flex:1;min-width:0}
-.som-einstieg b{display:block;font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:15px}
-.som-einstieg small{display:block;font-size:10.5px;font-weight:700;margin-top:2px}
-.som-einstieg i{font-family:var(--mono);font-style:normal;font-size:24px;font-weight:800}
+/* Dezenter Hinweis auf den versteckten Set-O-Meter-Einstieg. Die Karte selbst
+   sitzt hinter dem Sticky-Header und kommt nur per Pull-down oder Pfeiltipp vor. */
+.som-pull-hinweis{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:34px;
+  margin:2px 0 0;background:transparent;border:0;color:var(--muted);opacity:.72}
+.som-pull-hinweis .pf{font-family:var(--mono);font-size:16px;font-weight:800;line-height:1}
+.som-pull{position:fixed;z-index:19;top:var(--topbar-h,58px);left:50%;width:min(calc(100vw - 28px),552px);
+  transform:translate(-50%,calc(-100% - 8px + var(--som-zug,0px)));opacity:0;
+  transition:transform .2s ease,opacity .16s ease;pointer-events:none}
+.som-pull.zieht{transition:none}
+.som-pull.offen{transform:translate(-50%,8px);opacity:1;pointer-events:auto}
+.som-pull-link{display:flex;align-items:center;gap:10px;padding:10px 12px;text-decoration:none;
+  background:var(--surface2);color:var(--ink);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
+.som-pull-link>span{flex:1;min-width:0}
+.som-pull-link b{display:block;font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:14px}
+.som-pull-link small{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-top:2px}
+.som-pull-link i{font-family:var(--mono);font-style:normal;font-size:23px;font-weight:800;color:var(--muted)}
 
 /* Kopf der Unterseiten: Titel links, Rueckweg rechts. Der Chip ist der
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
-.seitenkopf{display:flex;align-items:center;gap:10px;padding:18px 0 10px}
+.seitenkopf{display:flex;align-items:center;gap:10px;padding:18px 90px 10px 0}
 .seitenkopf .section-title{margin:0;flex:1;min-width:0}
-.zurueck{flex:0 0 auto;display:inline-flex;align-items:center;text-decoration:none;
+.zurueck{position:fixed;top:calc(var(--topbar-h,58px) + 18px);
+  right:max(14px,calc((100vw - 580px) / 2 + 14px));z-index:19;
+  display:inline-flex;align-items:center;text-decoration:none;
   background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r);
   color:var(--ink);padding:8px 12px;
   font-family:var(--display);font-style:italic;font-weight:700;font-size:13px;text-transform:uppercase}
