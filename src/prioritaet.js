@@ -96,6 +96,29 @@ function bestesFeld(felder) {
   return [...felder].sort((a, b) => b.anzahl - a.anzahl || a.key.localeCompare(b.key))[0] || null;
 }
 
+// Die Log-Ueberschrift darf nie als Spendername durchrutschen: Kombibloecke
+// haben mehrere eigenstaendige Felder. Die feste Feldzuordnung migriert auch
+// alte gespeicherte Namen wie "Schultern + Abs" automatisch.
+function pumpFeldName(f) {
+  const festeNamen = {
+    'p_bk|0': 'Brust', 'p_bk|1': 'Rücken',
+    'p_da|0': 'Schulter', 'p_da|1': 'Abs',
+    'p_arm|0': 'Bizeps/Unterarme', 'p_arm|1': 'Trizeps',
+  };
+  const fest = festeNamen[`${f.blockId}|${f.xi}`];
+  if (fest) return fest;
+  if (f.blockId === 'p_gh' && f.tier > 0) return f.xi === 0 ? 'Quads' : 'Hams/Glutes';
+
+  const erlaubt = f.erlaubt || [];
+  const genau = (...konten) => erlaubt.length === konten.length && konten.every((k) => erlaubt.includes(k));
+  if (genau('Lat', 'Oberer Rücken')) return 'Rücken';
+  if (genau('Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter')) return 'Schulter';
+  if (genau('Bizeps', 'Unterarme')) return 'Bizeps/Unterarme';
+  if (genau('Hams', 'Glutes')) return 'Hams/Glutes';
+  if (erlaubt.length === 1) return erlaubt[0];
+  return f.name && f.name !== 'Pumpfeld noch leer' ? f.konto : f.mus;
+}
+
 /**
  * Abgeleitete Satzverschiebungen fuer die aktuelle Woche.
  * @returns {{ delta: Record<string, number>, ergebnisse: Record<string, object> }}
@@ -164,7 +187,7 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
     delta[spenderFeld.key] = (delta[spenderFeld.key] || 0) - 1;
     ergebnisse[ziel] = {
       status: 'aktiv', modus: 'tausch', zielFeld, spenderFeld, spender,
-      spenderName: cfg.spenderName || spender,
+      spenderName: cfg.spenderFeld ? pumpFeldName(spenderFeld) : (cfg.spenderName || spender),
       vorgemerkt: vorgemerkt || !felder.includes(spenderFeld),
     };
   });
@@ -216,19 +239,9 @@ export function spenderKandidaten(payload, woche, ziel, wochenwerte = {}, katalo
       (kandidat.wert === alt.wert && kandidat.direkt > alt.direkt)) proFeld.set(f.key, kandidat);
   });
 
-  const blockName = (f) => {
-    const erlaubt = f.erlaubt || [];
-    const genau = (...konten) => erlaubt.length === konten.length && konten.every((k) => erlaubt.includes(k));
-    if (genau('Lat', 'Oberer Rücken')) return 'Rücken';
-    if (genau('Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter')) return 'Schulter';
-    if (genau('Bizeps', 'Unterarme')) return 'Bizeps/Unterarme';
-    if (genau('Hams', 'Glutes')) return 'Hams/Glutes';
-    if (erlaubt.length === 1) return erlaubt[0];
-    return f.name !== 'Pumpfeld noch leer' ? f.konto : f.mus;
-  };
   const liste = [...proFeld.values()].map((f) => ({
     konto: f.konto, tag: f.tag, mus: f.mus, name: f.name,
-    key: f.key, label: blockName(f), verfuegbar: f.verfuegbar,
+    key: f.key, label: pumpFeldName(f), verfuegbar: f.verfuegbar,
     wert: f.wert, direkt: f.direkt, indirekt: f.indirekt,
   }));
   const sortierteListe = liste.sort((a, b) =>

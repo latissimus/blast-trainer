@@ -162,5 +162,16 @@ describe('Priorisierung – Planung', () => {
     const r = spenderKandidaten(p, 1, 'Unterarme', {}, K);
     expect(r.find((e) => e.key === 'UK-A|p_da|0')?.label).toBe('Schulter');
     expect(r.find((e) => e.key === 'UK-A|p_da|1')?.label).toBe('Abs');
+    expect(r.map((e) => e.label)).not.toContain('Schultern + Abs');
+    expect(r.map((e) => e.label)).not.toContain('Bi/Untera. + Tri');
+  });
+
+  it('ersetzt einen alten kombinierten Spendernamen anhand des Feldes', () => {
+    const p = payload(1);
+    p.volumen.prioritaet.Brust = {
+      modus: 'tausch', spender: 'Seitliche Schulter',
+      spenderFeld: 'UK-A|p_da|0', spenderName: 'Schultern + Abs',
+    };
+    expect(prioritaetsAnpassungen(p, 1, K).ergebnisse.Brust.spenderName).toBe('Schulter');
   });
 });
