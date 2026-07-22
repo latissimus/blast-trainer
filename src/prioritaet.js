@@ -217,11 +217,14 @@ export function spenderKandidaten(payload, woche, ziel, wochenwerte = {}, katalo
   });
 
   const blockName = (f) => {
-    if (f.name !== 'Pumpfeld noch leer') return f.konto;
     const erlaubt = f.erlaubt || [];
-    if (erlaubt.length === 2 && erlaubt.includes('Lat') && erlaubt.includes('Oberer Rücken')) return 'Rücken';
+    const genau = (...konten) => erlaubt.length === konten.length && konten.every((k) => erlaubt.includes(k));
+    if (genau('Lat', 'Oberer Rücken')) return 'Rücken';
+    if (genau('Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter')) return 'Schulter';
+    if (genau('Bizeps', 'Unterarme')) return 'Bizeps/Unterarme';
+    if (genau('Hams', 'Glutes')) return 'Hams/Glutes';
     if (erlaubt.length === 1) return erlaubt[0];
-    return f.mus;
+    return f.name !== 'Pumpfeld noch leer' ? f.konto : f.mus;
   };
   const liste = [...proFeld.values()].map((f) => ({
     konto: f.konto, tag: f.tag, mus: f.mus, name: f.name,

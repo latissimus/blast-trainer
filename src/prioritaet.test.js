@@ -144,9 +144,8 @@ describe('Priorisierung – Planung', () => {
     expect(r.find((e) => e.konto === 'Abs').name).toBe('Pumpfeld noch leer');
   });
 
-  it('fasst ein leeres gemeinsames Rückenfeld als Rücken zusammen', () => {
+  it('fasst Lat und oberen Rücken unabhängig von der Übungswahl als Rücken zusammen', () => {
     const p = payload(1);
-    p.data['UK-A'][1] = {};
     const r = spenderKandidaten(p, 1, 'Unterarme', {
       konten: { 'Oberer Rücken': 12, Lat: 8 },
       direkt: { 'Oberer Rücken': 8, Lat: 6 }, indirekt: {},
@@ -155,5 +154,13 @@ describe('Priorisierung – Planung', () => {
     expect(ruecken).toHaveLength(1);
     expect(ruecken[0].label).toBe('Rücken');
     expect(ruecken[0].konto).toBe('Oberer Rücken');
+  });
+
+  it('bietet Schulter und Abs aus dem gemeinsamen Log-Block getrennt an', () => {
+    const p = payload(1);
+    p.data['UK-A'][1] = {};
+    const r = spenderKandidaten(p, 1, 'Unterarme', {}, K);
+    expect(r.find((e) => e.key === 'UK-A|p_da|0')?.label).toBe('Schulter');
+    expect(r.find((e) => e.key === 'UK-A|p_da|1')?.label).toBe('Abs');
   });
 });
