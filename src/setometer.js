@@ -20,9 +20,10 @@ import { istDeload, tageDerWoche, tierVon, prioritaetsAnpassungen, slotKey } fro
 // GEZÄHLT WIRD PRO SATZ:
 //   Hauptspieler  1,0
 //   Nebenspieler  0,5
-// Direkte und indirekte Saetze werden beide als ein Satz ausgewiesen. Die
-// getrennte Beschriftung sagt bereits, welche Rolle der Muskel dabei hatte;
-// eine zusaetzliche Halbierung wuerde die Anzeige unnoetig verkomplizieren.
+// Indirekte Saetze werden im Detail als ganze Saetze ausgewiesen, fuer den
+// Vergleichsbalken und "Zusammen" aber mit 0,5 gewichtet. So bleibt die Anzeige
+// lesbar (ein mitarbeitender Satz = 1), ohne indirekte und direkte Arbeit in der
+// Gesamtbelastung gleichzusetzen.
 //
 // Ein Cluster (6×4) zählt als EIN Satz, so wie ihn die App auch sonst zählt.
 
@@ -99,7 +100,7 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
         direkt[eintrag.haupt] += anzahl;
         eintrag.neben.forEach((nb) => {
           if (konten[nb] !== undefined) {
-            konten[nb] += anzahl;
+            konten[nb] += anzahl * 0.5;
             indirekt[nb] += anzahl;
           }
         });

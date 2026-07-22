@@ -38,9 +38,11 @@ describe('zaehleWoche – Plan statt Eingetragenes', () => {
   });
 
   it('weist indirekte Sätze voll aus', () => {
-    const { konten } = zaehleWoche(heavyBrust(['Bankdrücken', '']), 1, K);
-    expect(konten['Trizeps']).toBe(2);
-    expect(konten['Vordere Schulter']).toBe(2);
+    const { konten, indirekt } = zaehleWoche(heavyBrust(['Bankdrücken', '']), 1, K);
+    expect(indirekt['Trizeps']).toBe(2);
+    expect(indirekt['Vordere Schulter']).toBe(2);
+    expect(konten['Trizeps']).toBe(1);
+    expect(konten['Vordere Schulter']).toBe(1);
   });
 
   it('folgt dem eingestellten Level', () => {

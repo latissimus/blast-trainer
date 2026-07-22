@@ -230,7 +230,7 @@ const inhalt = `// GENERIERT von scripts/gen-katalog.mjs – nicht von Hand änd
 // erzeugt diese Datei daraus neu (prebuild).
 //
 // haupt = Hauptspieler (zählt im Wochenkonto voll), neben = Nebenspieler
-// (wird als indirekter Satz ausgewiesen), typ = Comp/Iso (entscheidet, in welchem Slot die Übung steht).
+// (Anzeige als 1 indirekter Satz, Gesamtgewichtung 0,5), typ = Comp/Iso (entscheidet, in welchem Slot die Übung steht).
 
 export const KONTEN = [
 ${KONTEN.map((k) => `  ${JSON.stringify(k)},`).join('\n')}

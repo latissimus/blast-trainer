@@ -69,8 +69,8 @@ export function pumpFelder(payload, woche, katalog = KATALOG) {
   return felder;
 }
 
-// Schon vor der Uebungswahl ist damit bekannt, an welchem Tag ein Muskel einen
-// regulaeren Pumpplatz haben kann. Die UI nutzt das fuer die Level-I-Sperre.
+// Schon vor der Uebungswahl ist damit bekannt, an welchem Tag und in welchem
+// leeren Feld ein Muskel einen regulaeren Pumpplatz haben kann.
 export function pumpMoeglichkeiten(payload, woche, konto) {
   const treffer = [];
   tageDerWoche(payload, woche).forEach((tag) => {
@@ -106,19 +106,26 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
   const prioritaet = prioritaetenVon(payload);
   const delta = {};
   const ergebnisse = {};
+  const belegteFelder = new Set(felder.map((f) => f.key));
+  const reservierteZiele = new Set();
 
   KONTEN.forEach((ziel) => {
     const cfg = prioritaet[ziel];
     if (!gueltigePrio(cfg)) return;
-    const zielFeld = bestesFeld(felder.filter((f) => f.konto === ziel));
+    const echtesZiel = bestesFeld(felder.filter((f) => f.konto === ziel));
+    const freiesZiel = bestesFeld(pumpMoeglichkeiten(payload, woche, ziel).filter((f) =>
+      !belegteFelder.has(f.key) && !reservierteZiele.has(f.key)));
+    const zielFeld = echtesZiel || freiesZiel;
     if (!zielFeld) {
       ergebnisse[ziel] = { status: 'ziel-fehlt', modus: cfg.modus };
       return;
     }
+    reservierteZiele.add(zielFeld.key);
+    const vorgemerkt = !echtesZiel;
 
     if (cfg.modus === 'plus') {
       delta[zielFeld.key] = (delta[zielFeld.key] || 0) + 1;
-      ergebnisse[ziel] = { status: 'aktiv', modus: 'plus', zielFeld };
+      ergebnisse[ziel] = { status: 'aktiv', modus: 'plus', zielFeld, vorgemerkt };
       return;
     }
 
@@ -139,7 +146,7 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
 
     delta[zielFeld.key] = (delta[zielFeld.key] || 0) + 1;
     delta[spenderFeld.key] = (delta[spenderFeld.key] || 0) - 1;
-    ergebnisse[ziel] = { status: 'aktiv', modus: 'tausch', zielFeld, spenderFeld, spender };
+    ergebnisse[ziel] = { status: 'aktiv', modus: 'tausch', zielFeld, spenderFeld, spender, vorgemerkt };
   });
 
   return { delta, ergebnisse };

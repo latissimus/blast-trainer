@@ -3,7 +3,7 @@ import { readLog, writeLog, mergePayload } from './localstore.js';
 import { TPL, LEGACY, TIER_NAMES } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
-import { auswahlGruppen, imKatalog } from './auswahl.js';
+import { auswahlGruppen, imKatalog, eintragVon } from './auswahl.js';
 import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
@@ -265,7 +265,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         <i aria-hidden="true">›</i>
       </a>
     </div>`}
-    <div id="lg-content" class="erstblock"></div>
+    <div id="lg-content" class="erstblock${readOnly ? '' : ' mit-som-hinweis'}"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
     <div id="lg-pool" hidden></div>`;
@@ -640,6 +640,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const names = freeEx ? null : dayNames(state.day, blk);
       const effRest = effType === 'mr' ? MR_REST : (effType === 'pump' ? 60 : blk.rest);
       const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
+      // Der erste Arm-Slot ist normalerweise Bizeps. Wird dort eine Uebung mit
+      // Hauptkonto Unterarme gewaehlt, soll das nur im Log sofort erkennbar sein;
+      // die neutralen Muskelkonten des Set-O-Meters bleiben unveraendert.
+      const armHaupt = blk.id === 'p_arm' ? eintragVon(entry.names?.[0])?.haupt : null;
+      const blockMus = armHaupt === 'Unterarme' ? 'Bizeps/Unterarme + Trizeps' : blk.mus;
 
       const el = document.createElement('div'); el.className = 'block';
       const cues = [];
@@ -650,13 +655,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
       el.innerHTML = `
         <div class="bhead">
-          <span class="mus">${blk.mus}</span>
+          <span class="mus">${blockMus}</span>
           <span class="badge b-${effType}">${TYPE_LABEL[effType] || effType}</span>
           <span class="target" data-tgt="${blk.id}">Sätze <b>${tgt}</b></span>
         </div>
         <div class="cue">${cues.join('')}</div>`;
       // Muskelname mitgeben: Die Mitteilung soll sagen, wovon die Pause war.
-      if (!readOnly) el.querySelectorAll('.chip.rest').forEach((b) => (b.onclick = () => startTimer(Number(b.dataset.rest), blk.mus)));
+      if (!readOnly) el.querySelectorAll('.chip.rest').forEach((b) => (b.onclick = () => startTimer(Number(b.dataset.rest), blockMus)));
 
       exOf(blk, tier).forEach((exDef, xi) => {
         const exDiv = document.createElement('div'); exDiv.className = 'ex';

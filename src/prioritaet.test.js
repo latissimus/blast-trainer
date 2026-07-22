@@ -65,12 +65,24 @@ describe('Priorisierung – Wirkung', () => {
     expect(r.ergebnisse.Unterarme.status).toBe('spender-fehlt');
   });
 
-  it('merkt eine Priorität vor, obwohl die Zielübung noch fehlt', () => {
+  it('stellt den Zusatzsatz bereit, obwohl die Zielübung noch fehlt', () => {
     const p = payload(1);
     p.data['UK-A'][1].p_arm.names[0] = '';
     p.volumen.prioritaet.Unterarme = { modus: 'plus' };
     const r = prioritaetsAnpassungen(p, 1, K);
-    expect(r.delta).toEqual({});
+    expect(r.delta['UK-A|p_arm|0']).toBe(1);
+    expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
+    expect(r.ergebnisse.Unterarme.vorgemerkt).toBe(true);
+  });
+
+  it('stapelt zwei Prioritäten nicht in dasselbe leere Pumpfeld', () => {
+    const p = payload(1);
+    p.data['UK-A'][1].p_arm.names[0] = '';
+    p.volumen.prioritaet.Bizeps = { modus: 'plus' };
+    p.volumen.prioritaet.Unterarme = { modus: 'plus' };
+    const r = prioritaetsAnpassungen(p, 1, K);
+    expect(r.delta['UK-A|p_arm|0']).toBe(1);
+    expect(r.ergebnisse.Bizeps.status).toBe('aktiv');
     expect(r.ergebnisse.Unterarme.status).toBe('ziel-fehlt');
   });
 });

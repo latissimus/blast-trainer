@@ -75,6 +75,10 @@ export async function mountMeter(container, { userId }) {
 
   function statusText(ergebnis, cfg) {
     if (!ergebnis) return '';
+    if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt && ergebnis.modus === 'plus')
+      return `Aktiv: Der zusätzliche Satz steht im passenden Pumpfeld bereit; die Übung kannst du später wählen.`;
+    if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt)
+      return `Aktiv vorgemerkt: +1 im passenden Pumpfeld, −1 ${ergebnis.spender} in derselben Einheit.`;
     if (ergebnis.status === 'aktiv' && ergebnis.modus === 'plus')
       return `Aktiv: +1 Satz bei ${ergebnis.zielFeld.mus}.`;
     if (ergebnis.status === 'aktiv')
@@ -123,7 +127,7 @@ export async function mountMeter(container, { userId }) {
         <div class="som-werte">
           <div><b>${werte.direkt[konto] || 0}</b><span>Direkte Sätze</span><small>${html(konto)} ist Hauptziel</small></div>
           <div><b>${werte.indirekt[konto] || 0}</b><span>Indirekte Sätze</span><small>${html(konto)} arbeitet mit</small></div>
-          <div><b>${werte.konten[konto] || 0}</b><span>Zusammen</span><small>direkt + indirekt</small></div>
+          <div><b>${werte.konten[konto] || 0}</b><span>Zusammen</span><small>direkt + ½ indirekt</small></div>
         </div>
         ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
         ${spenderFuer.length ? `<p class="som-prio-status">Gibt je 1 Satz ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
