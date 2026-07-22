@@ -476,26 +476,22 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Stand vorher auf 22px, damit der Anfang der Liste als Anfang liest – im
    Gebrauch wirkte der Sonderabstand aber nur wie ein Versehen. */
 .erstblock{padding-top:14px}
-.erstblock.mit-som-hinweis{padding-top:0}
-/* Dezenter Hinweis auf den versteckten Set-O-Meter-Einstieg. Die Karte selbst
-   sitzt hinter dem Sticky-Header und kommt nur per Pull-down oder Pfeiltipp vor. */
-.som-pull-hinweis{display:flex;align-items:center;justify-content:center;width:100%;height:32px;
-  margin:0;background:transparent;border:0;color:var(--muted);opacity:.72}
-.som-pull-hinweis .pf{font-family:var(--mono);font-size:16px;font-weight:800;line-height:1}
-.som-pull-clip{position:absolute;z-index:-1;top:100%;left:0;right:0;bottom:auto;
-  height:calc(100vh - var(--topbar-h,58px));height:calc(100dvh - var(--topbar-h,58px));
-  overflow:hidden;-webkit-clip-path:inset(0);clip-path:inset(0);contain:paint;pointer-events:none}
-.som-pull{position:absolute;top:0;left:50%;width:min(calc(100vw - 72px),330px);
-  transform:translate(-50%,calc(-100% - 8px + var(--som-zug,0px)));opacity:var(--som-sicht,0);
-  transition:transform .2s ease,opacity .16s ease}
-.som-pull-clip.zieht .som-pull{transition:none}
-.som-pull-clip.offen .som-pull{transform:translate(-50%,8px);opacity:1;pointer-events:auto}
-.som-pull-link{display:flex;align-items:center;gap:10px;padding:13px 14px;text-decoration:none;
-  background:#67318F;color:#fff;border:var(--bw) solid var(--ink);border-radius:16px}
-.som-pull-link>span{flex:1;min-width:0}
-.som-pull-link b{display:block;font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:14px}
-.som-pull-link small{display:block;font-size:10px;color:#fff;font-weight:700;margin-top:2px}
-.som-pull-link i{font-family:var(--mono);font-style:normal;font-size:23px;font-weight:800;color:#fff}
+.erstblock.mit-som-hinweis{padding-top:38px}
+/* Schmale violette Lasche direkt am Header. Sie bleibt nur 28px hoch und
+   gibt den eigentlichen Link erst nach einem Tipp frei. */
+.som-tab{position:absolute;z-index:-1;top:100%;left:50%;width:76px;height:28px;
+  display:flex;align-items:stretch;overflow:hidden;transform:translateX(-50%);
+  background:#67318F;border:var(--bw) solid var(--ink);border-top:0;border-radius:0 0 12px 12px;
+  transition:width .18s ease}
+.som-tab.offen{width:210px}
+.som-tab-toggle,.som-tab-ziel{flex:0 0 auto;height:100%;display:inline-flex;align-items:center;justify-content:center;
+  border:0;background:transparent;color:#fff;font-family:var(--display);font-style:italic;font-weight:700;
+  text-transform:uppercase;font-size:11px;white-space:nowrap}
+.som-tab-toggle{width:74px;padding:0 9px}
+.som-tab-ziel{width:132px;gap:7px;padding:0 8px;text-decoration:none;border-left:1px solid rgba(255,255,255,.45);
+  opacity:0;transition:opacity .1s ease}
+.som-tab.offen .som-tab-ziel{opacity:1;transition-delay:.06s}
+.som-tab-ziel i{font-family:var(--mono);font-style:normal;font-size:16px;line-height:1}
 
 /* Kopf der Unterseiten: Titel links, Rueckweg rechts. Der Chip ist der
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
@@ -514,77 +510,74 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* ---------- Set-O-Meter ----------
    Eigene Planungsseite, erreichbar ueber den prominenten Einstieg im Log und
    das App-Menue. */
-/* Weiss wie jede andere Karte der App. Frueher hellblau, weil sie auf dem
-   fliederfarbenen Blatt lag – auf der hellblauen Seite waere sie unsichtbar. */
-.som-karte{background:var(--surface);border:var(--bw) solid var(--ink);border-radius:12px;
-  padding:13px 14px}
-/* Im Dark-Mode waere ein vollflaechiges Flieder eine Leuchtreklame. Derselbe
-   Farbton, nur tief – die Zuordnung zum Knopf bleibt, das Auge auch. */
-:root[data-theme="dark"] .som-karte{background:var(--surface)}
-.som-intro{background:var(--navy);color:#fff;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
-  padding:14px 15px;margin-bottom:12px}
-.som-intro>b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:17px}
-.som-intro p{font-size:12.5px;line-height:1.45;margin:5px 0 11px;color:#DCE5FF}
-.som-schritte{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.som-schritte span{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;line-height:1.2}
-.som-schritte i{display:inline-flex;align-items:center;justify-content:center;flex:0 0 20px;width:20px;height:20px;
-  border-radius:50%;background:var(--pink);color:#141414;font-family:var(--mono);font-style:normal;font-size:11px}
-.som-lage{margin-left:auto;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--muted)}
-.som-zeile{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:13.5px;width:100%;
+.som-statuskopf{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.som-lage{display:flex;align-items:baseline;gap:8px;flex:1;margin:0;font-family:var(--mono);color:var(--muted)}
+.som-lage b{font-size:15px;color:var(--ink)}
+.som-lage span{font-size:11px;font-weight:700}
+.som-info-knopf{flex:0 0 auto;width:28px;height:28px;padding:0;border:var(--bw) solid var(--ink);border-radius:50%;
+  background:var(--surface);color:var(--ink);font-family:var(--mono);font-size:13px;font-weight:800}
+.som-kurzhilfe{margin:0 0 9px;padding:9px 11px;background:var(--surface);border:var(--bw) solid var(--ink);
+  border-radius:var(--r);font-size:11.5px;line-height:1.45;color:var(--muted)}
+.som-legende{display:flex;gap:13px;margin:0 3px 9px;font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase}
+.som-legende span{display:flex;align-items:center;gap:5px}
+.som-legende i{display:inline-block;width:17px;height:7px;border-radius:999px;border:1px solid var(--ink)}
+.som-legende i.direkt{background:var(--navy)}
+.som-legende i.indirekt{background:#AEDCF6}
+.som-liste{display:grid;gap:7px}
+.som-gruppe{margin:7px 2px 0;font-family:var(--display);font-style:italic;font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.som-muskel{overflow:hidden;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
+.som-muskel.priorisiert{border-color:#67318F;box-shadow:inset 4px 0 0 #67318F}
+.som-muskel.offen{background:var(--surface2)}
+.som-zeile{display:grid;grid-template-columns:1fr;gap:7px;width:100%;padding:10px 12px;
   background:transparent;border:0;color:var(--ink);text-align:left}
-.som-waehlbar{border-radius:var(--r);padding-left:4px;padding-right:4px}
-.som-waehlbar.on{background:var(--surface2)}
-.som-waehlbar:active{background:var(--surface2)}
-/* 122px ist gemessen, nicht geschaetzt: "Seitl. Schulter" braucht 113px und
-   stiess bei 112 an. Der Rest der Zeile gibt entsprechend nach. */
-/* 130px statt 122: Bei 14px braucht der laengste Name ("Seitl. Schulter")
-   126px – bei 122 wurde er abgeschnitten. */
-.som-name{flex:0 0 130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-weight:600;font-size:14px}
-.som-name small{display:block;overflow:hidden;text-overflow:ellipsis;font-size:9.5px;line-height:1.25;
-  color:var(--navy);font-weight:800;text-transform:uppercase;letter-spacing:.02em}
-/* Eine Farbe, kein Zielbalken, keine Zahl. Das Ding vergleicht die Gruppen
-   miteinander und sagt sonst nichts – jede zweite Farbe waere eine Wertung.
-   Navy traegt in beiden Themes (im Dark-Mode aufgehellt, siehe Variablen). */
-.som-track{flex:1;height:9px;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:999px;overflow:hidden}
-.som-fill{display:block;height:100%;background:var(--navy);transition:width .18s}
-.som-pfeil{flex:0 0 auto;font-family:var(--mono);font-size:20px;font-weight:800;color:var(--navy);line-height:1}
+.som-zeile-kopf,.som-zeile-fuss{display:flex;align-items:center;gap:7px;min-width:0}
+.som-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--display);
+  font-style:italic;font-weight:700;font-size:15px;text-transform:uppercase}
+.som-prio-marke{flex:0 0 auto;padding:2px 6px;border-radius:999px;background:#67318F;color:#fff;
+  font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.som-track{display:flex;width:100%;height:10px;background:var(--surface);border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
+.som-fill-direkt,.som-fill-indirekt{display:block;height:100%;transition:width .18s ease}
+.som-fill-direkt{background:var(--navy)}
+.som-fill-indirekt{background:#AEDCF6;border-left:1px solid rgba(10,10,10,.4)}
+.som-zahlen{flex:1;font-size:10.5px;color:var(--muted);font-weight:700}
+.som-zahlen b{font-family:var(--mono);font-size:11px;color:var(--ink)}
+.som-pfeil{flex:0 0 auto;font-family:var(--mono);font-size:17px;font-weight:800;color:var(--muted);line-height:1;
+  transition:transform .16s ease}
+.som-muskel.offen .som-pfeil{transform:rotate(180deg)}
+.som-inline-editor{padding:0 12px 12px;border-top:2px dashed var(--ink)}
+.som-prio-status{font-size:11.5px;line-height:1.45;margin:10px 0 0;padding:8px 9px;
+  border-left:4px solid #67318F;background:var(--surface)}
+.som-prio-status.neutral{border-left-color:var(--muted)}
+.som-prio-toggle{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:42px;margin-top:10px;
+  border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface);color:var(--ink);
+  font-family:var(--display);font-style:italic;font-weight:700;text-transform:uppercase;font-size:13px}
+.som-prio-toggle.on{background:#67318F;color:#fff}
+.som-prio-toggle:disabled{opacity:.35;cursor:not-allowed}
+.som-inline-plan{margin-top:11px}
+.som-ed-label{display:block;margin-bottom:6px;font-size:9px;color:var(--muted);font-weight:800;
+  text-transform:uppercase;letter-spacing:.06em}
+.som-modusseg{display:grid;grid-template-columns:1fr 1fr;overflow:hidden;border:var(--bw) solid var(--ink);border-radius:var(--r)}
+.som-modusseg button{min-width:0;padding:8px 6px;border:0;border-right:var(--bw) solid var(--ink);
+  background:var(--surface);color:var(--ink)}
+.som-modusseg button:last-child{border-right:0}
+.som-modusseg button.on{background:#67318F;color:#fff}
+.som-modusseg b,.som-modusseg small{display:block}
+.som-modusseg b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:12px}
+.som-modusseg small{margin-top:2px;font-size:8.5px;opacity:.75}
+.som-spender{margin-top:12px}
+.som-spender-wahl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;margin-top:6px;padding:8px 9px;
+  text-align:left;background:var(--surface);color:var(--ink);border:1.5px solid var(--ink);border-radius:var(--r)}
+.som-spender-wahl.on{border-color:#67318F;box-shadow:inset 3px 0 0 #67318F}
+.som-spender-wahl span:first-child{min-width:0}
+.som-spender-wahl b,.som-spender-wahl small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.som-spender-wahl b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:12px}
+.som-spender-wahl small{margin-top:1px;font-size:9.5px;color:var(--muted)}
+.som-spender-zahlen{align-self:center;font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap}
+.som-spender-wahl em{grid-column:1/-1;font-style:normal;font-size:8.5px;font-weight:800;color:#67318F;text-transform:uppercase}
 .som-hinweis{margin:10px 0 0;font-size:12px;line-height:1.45;color:var(--muted)}
-.som-hinweis-oben{margin:0 0 9px;padding-bottom:9px;border-bottom:2px dashed var(--ink)}
+.som-hinweis-oben{margin:0 0 2px;padding:9px 10px;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r)}
 .som-speicher{min-height:18px;margin:8px 2px 0;text-align:center;font-size:11px;color:var(--muted)}
-
-/* Muskelplanung unter dem Meter. Kein Dialog ueber dem Bild: Beim Auswaehlen
-   soll der Balkenvergleich sichtbar bleiben, weil genau daraus die
-   Umverteilungsentscheidung entsteht. */
-.som-editor{margin-top:14px;background:var(--surface);border:var(--bw) solid var(--ink);
-  border-radius:var(--r-karte);padding:16px;scroll-margin-top:calc(var(--topbar-h,58px) + 66px)}
-.som-ed-kopf{display:flex;align-items:flex-start;gap:10px}
-.som-ed-kopf>div{flex:1;min-width:0}
-.som-ed-label{display:block;font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
-.som-ed-kopf h2{font-size:23px;margin-top:3px;overflow-wrap:anywhere}
-.som-ed-zu{flex:0 0 auto;width:34px;height:34px;border:var(--bw) solid var(--ink);border-radius:50%;
-  background:var(--surface2);color:var(--ink);font-size:20px;line-height:1}
-.som-werte{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:12px 0}
-.som-werte>div{min-width:0;background:var(--surface2);border:1.5px solid var(--ink);border-radius:var(--r);padding:8px 7px}
-.som-werte b{display:block;font-family:var(--mono);font-size:18px;color:var(--navy)}
-.som-werte span{display:block;font-size:10px;font-weight:800;margin-top:2px}
-.som-werte small{display:block;font-size:8.5px;line-height:1.3;color:var(--muted);margin-top:3px}
-.som-prio-status{font-size:12.5px;line-height:1.45;margin:8px 0;padding:9px 10px;
-  border-left:4px solid var(--pink);background:var(--surface2)}
-.som-prio-aktionen{display:flex;gap:7px;margin-top:12px}
-.som-prio-setzen,.som-prio-entfernen{border:var(--bw) solid var(--ink);border-radius:var(--r);padding:10px 11px;
-  font-family:var(--display);font-style:italic;font-weight:700;text-transform:uppercase;font-size:12px}
-.som-prio-setzen{flex:1;background:var(--pink);color:#141414}
-.som-prio-setzen.on{background:var(--navy);color:#fff}
-.som-prio-setzen:disabled{opacity:.35;cursor:not-allowed}
-.som-prio-entfernen{flex:0 0 auto;background:var(--surface2);color:var(--muted)}
-.som-frage{border-top:2px dashed var(--ink);margin-top:15px;padding-top:13px}
-.som-frage h3{font-size:14px;margin:0 0 9px}
-.som-wahl{display:block;width:100%;text-align:left;background:var(--surface2);color:var(--ink);
-  border:var(--bw) solid var(--ink);border-radius:var(--r);padding:10px 11px;margin-top:8px}
-.som-wahl b{display:block;font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:14px}
-.som-wahl span{display:block;font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
-.som-wahl small{display:block;font-size:9.5px;color:var(--navy);font-weight:800;text-transform:uppercase;margin-top:5px}
-.som-zurueck{margin-top:11px;background:transparent;border:0;color:var(--navy);font-size:12px;font-weight:800;padding:4px}
 
 /* Direkt am Uebungsfeld sichtbar: Der Satz stammt aus der Prioritaetsplanung. */
 .volrolle{display:inline-flex;align-items:center;flex:0 0 auto;border:1px solid var(--ink);border-radius:999px;

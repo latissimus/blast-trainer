@@ -258,16 +258,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // die Beschreibung des Tages. Dadurch faengt der erste Trainingsblock
   // unmittelbar unter der Kopfleiste an, statt nach drei Reihen Bedienelementen.
   wrap.innerHTML = `
-    ${readOnly ? '' : `<button class="som-pull-hinweis" id="lg-som-hinweis" type="button" aria-label="Set-O-Meter hervorziehen">
-      <span class="pf" aria-hidden="true">↓</span>
-    </button>
-    <div class="som-pull-clip" id="lg-som-pull" aria-hidden="true">
-      <div class="som-pull">
-        <a class="som-pull-link" href="#meter">
-          <span><b>Set-O-Meter</b><small>Volumen prüfen und Muskeln priorisieren</small></span>
-          <i aria-hidden="true">›</i>
-        </a>
-      </div>
+    ${readOnly ? '' : `<div class="som-tab" id="lg-som-tab">
+      <button class="som-tab-toggle" type="button" aria-expanded="false" aria-controls="lg-som-ziel">Set-O</button>
+      <a class="som-tab-ziel" id="lg-som-ziel" href="#meter" tabindex="-1">Meter öffnen <i aria-hidden="true">›</i></a>
     </div>`}
     <div id="lg-content" class="erstblock${readOnly ? '' : ' mit-som-hinweis'}"></div>
     <div class="volbar" id="lg-vol"></div>
@@ -285,59 +278,17 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const phaseEl = document.querySelector('#app-phase');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
 
-  // Pull-down-Einstieg zum Set-O-Meter. Die Karte sitzt unter dem Sticky-Header
-  // und wird nur am Seitenanfang durch Herunterziehen sichtbar. Der kleine
-  // Pfeil ist zugleich eine tastaturbedienbare Alternative zur Geste.
-  const somPull = wrap.querySelector('#lg-som-pull');
-  const somHinweis = wrap.querySelector('#lg-som-hinweis');
-  let somStartY = null;
-  let somDistanz = 0;
-  let somOffen = false;
-  const setSomOffen = (offen) => {
-    if (!somPull) return;
-    somOffen = offen;
-    somPull.classList.toggle('offen', offen);
-    somPull.classList.remove('zieht');
-    somPull.style.removeProperty('--som-zug');
-    somPull.style.removeProperty('--som-sicht');
-    somPull.setAttribute('aria-hidden', offen ? 'false' : 'true');
-    somPull.inert = !offen;
-  };
-  const somTouchStart = (e) => {
-    if (window.scrollY > 1 || !e.touches?.length) return;
-    somStartY = e.touches[0].clientY;
-    somDistanz = 0;
-    somPull?.classList.add('zieht');
-  };
-  const somTouchMove = (e) => {
-    if (somStartY == null || !e.touches?.length || !somPull) return;
-    const dy = e.touches[0].clientY - somStartY;
-    if (somOffen && dy < -12) {
-      setSomOffen(false);
-      somStartY = null;
-      return;
-    }
-    if (!somOffen && dy > 0) {
-      somDistanz = Math.min(78, dy * .75);
-      somPull.style.setProperty('--som-zug', somDistanz + 'px');
-      somPull.style.setProperty('--som-sicht', String(Math.min(1, somDistanz / 44)));
-    }
-  };
-  const somTouchEnd = () => {
-    if (somStartY == null) return;
-    if (!somOffen) setSomOffen(somDistanz >= 42);
-    somStartY = null;
-    somDistanz = 0;
-  };
-  const somScroll = () => { if (window.scrollY > 2 && somOffen) setSomOffen(false); };
-  if (somPull && somHinweis) {
-    somPull.inert = true;
-    somHinweis.onclick = () => setSomOffen(!somOffen);
-    wrap.addEventListener('touchstart', somTouchStart, { passive: true });
-    wrap.addEventListener('touchmove', somTouchMove, { passive: true });
-    wrap.addEventListener('touchend', somTouchEnd, { passive: true });
-    wrap.addEventListener('touchcancel', somTouchEnd, { passive: true });
-    window.addEventListener('scroll', somScroll, { passive: true });
+  // Kleine Lasche statt Pull-down-Karte: Ein Tipp verbreitert sie, der dann
+  // sichtbare Link oeffnet das Set-O-Meter.
+  const somTab = wrap.querySelector('#lg-som-tab');
+  if (somTab) {
+    const toggle = somTab.querySelector('.som-tab-toggle');
+    const ziel = somTab.querySelector('.som-tab-ziel');
+    toggle.onclick = () => {
+      const offen = somTab.classList.toggle('offen');
+      toggle.setAttribute('aria-expanded', offen ? 'true' : 'false');
+      ziel.tabIndex = offen ? 0 : -1;
+    };
   }
 
   // ---- untere Bedienleiste -----------------------------------------
@@ -1000,7 +951,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
       clearInterval(timerId);
       clearInterval(retryId);
       window.removeEventListener('online', retrySync);
-      window.removeEventListener('scroll', somScroll);
       // Die Felder bleiben sichtbar, damit die Leiste auf jeder Seite gleich
       // aussieht – aber sie sind ohne Log wirkungslos und werden stillgelegt.
       const slots = document.querySelector('#app-slots');

@@ -8,19 +8,7 @@ import {
   spenderKandidaten,
 } from './prioritaet.js';
 
-// Set-O-Meter als eigene Seite.
-//
-// Frueher ein Fenster ueber dem Log. Als Seite hat es den Platz, den die
-// Balkenliste und die Progressionskurve zusammen brauchen – und es verhaelt
-// sich wie das FAQ, statt eine dritte Sorte Oberflaeche zu sein.
-//
-// Die Daten kommen aus dem LOKALEN SPIEGEL, nicht vom Server: Das Log schreibt
-// ihn bei jeder Eingabe, er ist also immer aktuell und auch im Funkloch da.
-// Der Server ist nur der Rueckfall fuer das erste Oeffnen auf einem neuen Geraet.
-
-// Der Pfeil steht aufrecht in Monospace – wie frueher im Wochenfeld. In der
-// kursiven Display-Schrift wirkte er duenn und kippte nach rechts, also gegen
-// die Richtung, in die er zeigt.
+// Der Pfeil steht aufrecht in Monospace – wie in der unteren Bedienleiste.
 export function zurueckChip() {
   return `<a class="zurueck" href="#log"><span class="pf">←</span> Log</a>`;
 }
@@ -34,20 +22,24 @@ export async function mountMeter(container, { userId }) {
       <h1 class="section-title">🎯 Set-O-Meter</h1>
       ${zurueckChip()}
     </div>
-    <section class="som-intro">
-      <b>Plane hier dein Wochenvolumen.</b>
-      <p>Tippe unten auf einen Muskel, setze ihn auf Priorität und entscheide anschließend zwischen Umverteilen und Aufschlagen.</p>
-      <div class="som-schritte"><span><i>1</i> Muskel antippen</span><span><i>2</i> Priorität setzen</span><span><i>3</i> Art wählen</span></div>
-    </section>
-    <p class="som-lage" id="som-lage"></p>
-    <div class="som-karte"><div class="som-body" id="som-body">lädt…</div></div>
-    <div id="som-editor"></div>
+    <div class="som-statuskopf">
+      <p class="som-lage" id="som-lage"></p>
+      <button class="som-info-knopf" id="som-info-knopf" type="button" aria-expanded="false" aria-controls="som-info">i</button>
+    </div>
+    <div class="som-kurzhilfe" id="som-info" hidden>
+      Das Meter zeigt dein geplantes Wochenvolumen. Tippe einen Muskel an, um ihn direkt hier zu priorisieren.
+      Indirekte Arbeit wird mit 0,5 gewichtet.
+    </div>
+    <div class="som-legende" aria-label="Balkenlegende">
+      <span><i class="direkt"></i> Direkte Arbeit</span><span><i class="indirekt"></i> Indirekte Arbeit</span>
+    </div>
+    <div class="som-liste" id="som-body">lädt…</div>
     <p class="som-speicher" id="som-speicher" aria-live="polite"></p>`;
   container.appendChild(wrap);
 
   let payload = null;
   const lokal = readLog(userId);
-  if (lokal && lokal.payload) payload = lokal.payload;
+  if (lokal?.payload) payload = lokal.payload;
   else {
     try {
       const { data } = await supabase
@@ -57,196 +49,172 @@ export async function mountMeter(container, { userId }) {
       payload = {};
     }
   }
-
   payload.volumen = { prioritaet: payload.volumen?.prioritaet || {} };
 
-  const woche = payload.week || 1;
+  const woche = Math.min(7, Math.max(1, Number(payload.week) || 1));
   const lage = wrap.querySelector('#som-lage');
   const body = wrap.querySelector('#som-body');
-  const editor = wrap.querySelector('#som-editor');
   const speicher = wrap.querySelector('#som-speicher');
+  const info = wrap.querySelector('#som-info');
+  const infoKnopf = wrap.querySelector('#som-info-knopf');
   let ausgewaehlt = null;
-  let schritt = null;
+  let modusOffen = false;
   let revision = 0;
 
   const html = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[c]);
 
-  function springeZumEditor() {
-    requestAnimationFrame(() => editor.querySelector('.som-editor')?.scrollIntoView({
-      behavior: 'smooth', block: 'start',
-    }));
-  }
+  infoKnopf.onclick = () => {
+    info.hidden = !info.hidden;
+    infoKnopf.setAttribute('aria-expanded', info.hidden ? 'false' : 'true');
+  };
 
   function statusText(ergebnis, cfg) {
     if (!ergebnis) return '';
     if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt && ergebnis.modus === 'plus')
-      return `Aktiv: Der zusätzliche Satz steht im passenden Pumpfeld bereit; die Übung kannst du später wählen.`;
+      return 'Aktiv: Der Zusatzsatz steht im passenden Pumpfeld bereit; die Übung kannst du später wählen.';
     if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt)
-      return `Aktiv vorgemerkt: +1 im passenden Pumpfeld, −1 ${ergebnis.spender} in derselben Einheit.`;
+      return `Aktiv vorgemerkt: +1 im Pumpfeld, −1 ${ergebnis.spender} in derselben Einheit.`;
     if (ergebnis.status === 'aktiv' && ergebnis.modus === 'plus')
       return `Aktiv: +1 Satz bei ${ergebnis.zielFeld.mus}.`;
     if (ergebnis.status === 'aktiv')
       return `Aktiv: +1 bei ${ergebnis.zielFeld.mus}, −1 ${ergebnis.spender} in derselben Einheit.`;
-    if (ergebnis.status === 'ziel-fehlt' && cfg?.modus === 'plus')
-      return 'Vorgemerkt: Der Zusatzsatz erscheint, sobald du eine passende Pump-Übung gewählt hast.';
-    if (ergebnis.status === 'ziel-fehlt' && cfg?.spender)
-      return `Vorgemerkt: +1 greift, sobald die Zielübung gewählt ist; −1 bleibt für ${cfg.spender} reserviert.`;
-    if (ergebnis.status === 'ziel-fehlt')
-      return 'Vorgemerkt: Wähle später eine passende Pump-Übung und einen Spender derselben Einheit.';
     if (ergebnis.status === 'spender-fehlt' && !cfg?.spender)
-      return 'Umverteilung vorgemerkt: Wähle noch einen passenden Pump-Spender derselben Einheit.';
+      return 'Wähle noch einen Pump-Spender aus derselben Einheit.';
     if (ergebnis.status === 'spender-fehlt')
-      return 'Pausiert: Der gewählte Spender ist in derselben Einheit derzeit nicht verfügbar.';
-    return '';
+      return 'Pausiert: Der gewählte Spender ist derzeit nicht verfügbar.';
+    return 'Vorgemerkt: Die Priorität greift, sobald die passende Pump-Übung gewählt ist.';
   }
 
   function donorVon(konto, prios) {
     return KONTEN.filter((ziel) => prios[ziel]?.modus === 'tausch' && prios[ziel]?.spender === konto);
   }
 
-  function renderEditor(werte, prioErgebnisse) {
-    if (!ausgewaehlt) { editor.innerHTML = ''; return; }
-    const konto = ausgewaehlt;
+  function basisWerte() {
+    return zaehleWoche({
+      ...payload,
+      volumen: { ...payload.volumen, prioritaet: {} },
+    }, woche);
+  }
+
+  function inlineEditor(konto, werte, prioErgebnisse) {
     const prios = prioritaetenVon(payload);
     const cfg = prios[konto];
     const ergebnis = prioErgebnisse[konto];
     const spenderFuer = donorVon(konto, prios);
-    const moeglich = pumpMoeglichkeiten(payload, woche, konto);
-    const hatPumpplatz = moeglich.length > 0;
-
-    const basisPayload = Object.assign({}, payload, {
-      volumen: Object.assign({}, payload.volumen, { prioritaet: {} }),
-    });
-    const basisWerte = zaehleWoche(basisPayload, woche);
-    const kandidaten = schritt === 'spender'
-      ? spenderKandidaten(payload, woche, konto, basisWerte)
+    const hatPumpplatz = pumpMoeglichkeiten(payload, woche, konto).length > 0;
+    const kandidaten = cfg?.modus === 'tausch'
+      ? spenderKandidaten(payload, woche, konto, basisWerte()).slice(0, 3)
       : [];
+    const zeigeModus = modusOffen || !!cfg;
 
-    editor.innerHTML = `
-      <section class="som-editor">
-        <div class="som-ed-kopf">
-          <div><span class="som-ed-label">Muskel planen</span><h2>${html(konto)}</h2></div>
-          <button class="som-ed-zu" type="button" aria-label="Schließen">×</button>
+    return `<div class="som-inline-editor">
+      ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
+      ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt je 1 Satz ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
+      <button type="button" class="som-prio-toggle${cfg ? ' on' : ''}" data-prio-toggle ${!hatPumpplatz ? ' disabled' : ''}>
+        <span aria-hidden="true">${cfg ? '✓' : '○'}</span> ${cfg ? 'Priorität aktiv' : 'Als Priorität setzen'}
+      </button>
+      ${!hatPumpplatz ? '<p class="som-hinweis">Für diesen Muskel gibt es in dieser Woche keinen regulären Pumpplatz.</p>' : ''}
+      ${zeigeModus && hatPumpplatz ? `<div class="som-inline-plan">
+        <span class="som-ed-label">Zusatzsatz planen</span>
+        <div class="som-modusseg" role="group" aria-label="Art der Priorisierung">
+          <button type="button" data-modus="tausch" class="${cfg?.modus === 'tausch' ? 'on' : ''}"><b>Umverteilen</b><small>−1 anderswo</small></button>
+          <button type="button" data-modus="plus" class="${cfg?.modus === 'plus' ? 'on' : ''}"><b>Aufschlagen</b><small>+1 gesamt</small></button>
         </div>
-        <div class="som-werte">
-          <div><b>${werte.direkt[konto] || 0}</b><span>Direkte Sätze</span><small>${html(konto)} ist Hauptziel</small></div>
-          <div><b>${werte.indirekt[konto] || 0}</b><span>Indirekte Sätze</span><small>${html(konto)} arbeitet mit</small></div>
-        </div>
-        ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
-        ${spenderFuer.length ? `<p class="som-prio-status">Gibt je 1 Satz ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
-        <div class="som-prio-aktionen">
-          <button type="button" class="som-prio-setzen${cfg ? ' on' : ''}" data-prio="setzen" ${!hatPumpplatz ? 'disabled' : ''}>${cfg ? 'Priorität ändern' : 'Priorität setzen'}</button>
-          ${cfg ? '<button type="button" class="som-prio-entfernen" data-prio="entfernen">Priorität entfernen</button>' : ''}
-        </div>
-        ${!hatPumpplatz ? '<p class="som-hinweis">Für diesen Muskel gibt es in dieser Woche keinen regulären Pumpplatz.</p>' : ''}
-        ${hatPumpplatz && !cfg ? `<p class="som-hinweis">Du kannst die Priorität schon jetzt setzen. Die passende Pump-Übung wählst du anschließend im Log.</p>` : ''}
-        ${schritt === 'modus' ? `
-          <div class="som-frage">
-            <h3>Wie soll der Satz eingeplant werden?</h3>
-            <button type="button" class="som-wahl" data-modus="tausch"><b>Umverteilen</b><span>+1 hier, −1 in einem Pumpfeld derselben Einheit</span></button>
-            <button type="button" class="som-wahl" data-modus="plus"><b>Aufschlagen</b><span>Gesamtvolumen bewusst um 1 Satz erhöhen</span></button>
-          </div>` : ''}
-        ${schritt === 'spender' ? `
-          <div class="som-frage">
-            <h3>Welcher Muskel gibt einen Satz ab?</h3>
-            ${kandidaten.length ? kandidaten.map((k) => `
-              <button type="button" class="som-wahl" data-spender="${html(k.konto)}">
-                <b>${html(k.konto)}</b><span>${html(k.name)} · direkte Sätze ${k.direkt} · indirekte Sätze ${k.indirekt}</span>
-                <small>${k.gruende.map(html).join(' · ')}</small>
-              </button>`).join('') : '<p class="som-hinweis">Keine passende nicht priorisierte Pump-Übung mit verfügbarem Satz in derselben Einheit.</p>'}
-            <button type="button" class="som-zurueck" data-zurueck="modus">← Andere Art wählen</button>
-          </div>` : ''}
-      </section>`;
+        ${cfg?.modus === 'tausch' ? `<div class="som-spender">
+          <span class="som-ed-label">Bis zu 3 sinnvolle Vorschläge</span>
+          ${kandidaten.length ? kandidaten.map((k) => `<button type="button" class="som-spender-wahl${cfg.spender === k.konto ? ' on' : ''}" data-spender="${html(k.konto)}">
+            <span><b>${html(k.konto)}</b><small>${html(k.name)}</small></span>
+            <span class="som-spender-zahlen">${k.direkt} direkt · ${k.indirekt} indirekt</span>
+            <em>${k.gruende.map(html).join(' · ')}</em>
+          </button>`).join('') : '<p class="som-hinweis">Keine verfügbare, nicht priorisierte Pump-Übung in derselben Einheit.</p>'}
+        </div>` : ''}
+      </div>` : ''}
+    </div>`;
+  }
 
-    editor.querySelector('.som-ed-zu').onclick = () => { ausgewaehlt = null; schritt = null; render(); };
-    editor.querySelectorAll('[data-prio]').forEach((b) => {
-      b.onclick = () => {
-        if (b.dataset.prio === 'setzen') {
-          schritt = 'modus';
-          render();
-          springeZumEditor();
-          return;
-        }
-        delete payload.volumen.prioritaet[konto];
-        schritt = null;
-        speichern();
-      };
-    });
-    editor.querySelectorAll('[data-modus]').forEach((b) => {
-      b.onclick = () => {
-        // Ein Muskel kann nicht gleichzeitig Prioritaet und Spender sein.
-        Object.values(payload.volumen.prioritaet).forEach((p) => {
-          if (p?.modus === 'tausch' && p.spender === konto) p.spender = null;
-        });
-        if (b.dataset.modus === 'tausch') {
-          const bisher = payload.volumen.prioritaet[konto];
-          payload.volumen.prioritaet[konto] = {
-            modus: 'tausch',
-            spender: bisher?.modus === 'tausch' ? (bisher.spender || null) : null,
-          };
-          schritt = 'spender';
-          speichern();
-          springeZumEditor();
-          return;
-        }
-        payload.volumen.prioritaet[konto] = { modus: 'plus' };
-        schritt = null;
-        speichern();
-      };
-    });
-    editor.querySelectorAll('[data-spender]').forEach((b) => {
-      b.onclick = () => {
-        Object.values(payload.volumen.prioritaet).forEach((p) => {
-          if (p?.modus === 'tausch' && p.spender === konto) p.spender = null;
-        });
-        payload.volumen.prioritaet[konto] = { modus: 'tausch', spender: b.dataset.spender };
-        schritt = null;
-        speichern();
-      };
-    });
-    editor.querySelector('[data-zurueck]')?.addEventListener('click', () => { schritt = 'modus'; render(); });
+  function reihe(r, max, werte, prioErgebnisse, prios) {
+    const direkt = werte.direkt[r.konto] || 0;
+    const indirekt = werte.indirekt[r.konto] || 0;
+    const direktBreite = (direkt / max) * 100;
+    const indirektBreite = ((indirekt * .5) / max) * 100;
+    const prio = !!prios[r.konto];
+    const offen = ausgewaehlt === r.konto;
+    return `<div class="som-muskel${prio ? ' priorisiert' : ''}${offen ? ' offen' : ''}">
+      <button type="button" class="som-zeile" data-konto="${html(r.konto)}" aria-expanded="${offen ? 'true' : 'false'}">
+        <span class="som-zeile-kopf"><span class="som-name">${html(zeigName(r.konto))}</span>${prio ? '<span class="som-prio-marke">Priorität</span>' : ''}</span>
+        <span class="som-track"><span class="som-fill-direkt" style="width:${direktBreite}%"></span><span class="som-fill-indirekt" style="width:${indirektBreite}%"></span></span>
+        <span class="som-zeile-fuss"><span class="som-zahlen"><b>${direkt}</b> direkte · <b>${indirekt}</b> indirekte Sätze</span><span class="som-pfeil" aria-hidden="true">⌄</span></span>
+      </button>
+      ${offen ? inlineEditor(r.konto, werte, prioErgebnisse) : ''}
+    </div>`;
   }
 
   function render() {
-    const { konten, direkt, indirekt, ohneZuordnung, unbekannte, gesamt, prioritaet } = zaehleWoche(payload, woche);
+    const werte = zaehleWoche(payload, woche);
+    const { konten, ohneZuordnung, unbekannte, gesamt, prioritaet } = werte;
     const prios = prioritaetenVon(payload);
+    const aktiv = Object.keys(prios).filter((k) => prios[k]).length;
+    lage.innerHTML = `<b>Woche ${woche}</b><span>${aktiv} Priorität${aktiv === 1 ? '' : 'en'} aktiv</span>`;
 
-    lage.textContent = gesamt === 0
-      ? 'Woche ' + woche + ' · noch keine Übung gewählt'
-      : 'Woche ' + woche + ' · geplant aus Level, Übungswahl und Priorität';
+    const sortiertNachVolumen = sortiert(konten);
+    const priorisiert = sortiertNachVolumen.filter((r) => prios[r.konto]);
+    const uebrig = sortiertNachVolumen.filter((r) => !prios[r.konto]);
+    const max = Math.max(1, ...sortiertNachVolumen.map((r) =>
+      (werte.direkt[r.konto] || 0) + (werte.indirekt[r.konto] || 0) * .5));
 
-    const reihen = sortiert(konten);
-    const max = reihen[0].wert || 1;
+    const gruppe = (titel, reihen) => reihen.length
+      ? `<p class="som-gruppe">${titel}</p>${reihen.map((r) => reihe(r, max, werte, prioritaet, prios)).join('')}`
+      : '';
     body.innerHTML = (gesamt === 0
       ? '<p class="som-hinweis som-hinweis-oben">Noch keine Übung gewählt. Prioritäten kannst du trotzdem bereits festlegen.</p>'
-      : '') + reihen.map((r) => {
-        const spenderFuer = donorVon(r.konto, prios);
-        const tags = [
-          ...(prios[r.konto] ? ['Priorität'] : []),
-          ...(spenderFuer.length ? ['−1 für ' + spenderFuer.join(', ')] : []),
-        ];
-        return `<button type="button" class="som-zeile som-waehlbar${ausgewaehlt === r.konto ? ' on' : ''}" data-konto="${html(r.konto)}" aria-label="${html(r.konto)} planen">
-          <span class="som-name">${zeigName(r.konto)}${tags.length ? `<small>${tags.map(html).join(' · ')}</small>` : ''}</span>
-          <span class="som-track"><span class="som-fill" style="width:${(r.wert / max) * 100}%"></span></span>
-          <span class="som-pfeil" aria-hidden="true">›</span>
-        </button>`;
-      }).join('')
-        + (ohneZuordnung
-          ? `<p class="som-hinweis">Nicht im Bild: Sätze mit einer Übung, die nicht im Katalog steht
-             (${unbekannte.map((u) => `<b>${html(u)}</b>`).join(', ') || 'ohne Namen'}).</p>`
-          : '');
+      : '') + gruppe('Priorisiert', priorisiert) + gruppe(priorisiert.length ? 'Alle Muskeln' : 'Muskeln', uebrig)
+      + (ohneZuordnung ? `<p class="som-hinweis">Nicht zugeordnet: ${unbekannte.map((u) => `<b>${html(u)}</b>`).join(', ') || 'Übung ohne Namen'}.</p>` : '');
+
     body.querySelectorAll('[data-konto]').forEach((b) => {
       b.onclick = () => {
-        ausgewaehlt = b.dataset.konto;
-        const cfg = prios[ausgewaehlt];
-        schritt = cfg?.modus === 'tausch' && !cfg.spender ? 'spender' : null;
+        const konto = b.dataset.konto;
+        ausgewaehlt = ausgewaehlt === konto ? null : konto;
+        modusOffen = false;
         render();
-        springeZumEditor();
       };
     });
-    renderEditor({ konten, direkt, indirekt }, prioritaet);
+    body.querySelector('[data-prio-toggle]')?.addEventListener('click', () => {
+      const cfg = prios[ausgewaehlt];
+      if (cfg) {
+        delete payload.volumen.prioritaet[ausgewaehlt];
+        modusOffen = false;
+        speichern();
+      } else {
+        modusOffen = true;
+        render();
+      }
+    });
+    body.querySelectorAll('[data-modus]').forEach((b) => {
+      b.onclick = () => {
+        Object.values(payload.volumen.prioritaet).forEach((p) => {
+          if (p?.modus === 'tausch' && p.spender === ausgewaehlt) p.spender = null;
+        });
+        if (b.dataset.modus === 'tausch') {
+          const alt = payload.volumen.prioritaet[ausgewaehlt];
+          payload.volumen.prioritaet[ausgewaehlt] = {
+            modus: 'tausch', spender: alt?.modus === 'tausch' ? (alt.spender || null) : null,
+          };
+        } else payload.volumen.prioritaet[ausgewaehlt] = { modus: 'plus' };
+        modusOffen = false;
+        speichern();
+      };
+    });
+    body.querySelectorAll('[data-spender]').forEach((b) => {
+      b.onclick = () => {
+        Object.values(payload.volumen.prioritaet).forEach((p) => {
+          if (p?.modus === 'tausch' && p.spender === ausgewaehlt) p.spender = null;
+        });
+        payload.volumen.prioritaet[ausgewaehlt] = { modus: 'tausch', spender: b.dataset.spender };
+        speichern();
+      };
+    });
   }
 
   async function speichern() {
@@ -262,7 +230,7 @@ export async function mountMeter(container, { userId }) {
     try {
       const { error } = await supabase.from('training_logs').upsert(
         { user_id: userId, payload, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id' }
+        { onConflict: 'user_id' },
       );
       if (error) throw error;
       if (rev === revision) {
