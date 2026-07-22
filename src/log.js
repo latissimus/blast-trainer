@@ -260,7 +260,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   wrap.innerHTML = `
     ${readOnly ? '' : `<div class="som-tab" id="lg-som-tab">
       <button class="som-tab-toggle" type="button" aria-expanded="false" aria-controls="lg-som-ziel">Set-O</button>
-      <a class="som-tab-ziel" id="lg-som-ziel" href="#meter" tabindex="-1">Meter öffnen <i aria-hidden="true">›</i></a>
+      <a class="som-tab-ziel" id="lg-som-ziel" href="#meter" tabindex="-1">Öffnen</a>
     </div>`}
     <div id="lg-content" class="erstblock${readOnly ? '' : ' mit-som-hinweis'}"></div>
     <div class="volbar" id="lg-vol"></div>
@@ -278,8 +278,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const phaseEl = document.querySelector('#app-phase');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
 
-  // Kleine Lasche statt Pull-down-Karte: Ein Tipp verbreitert sie, der dann
-  // sichtbare Link oeffnet das Set-O-Meter.
+  // Kleine Lasche statt Pull-down-Karte: Ein Tipp verlaengert sie nach unten.
+  // Weil sie im Seitenfluss bleibt, schiebt sie die Trainingsbloecke sanft mit.
   const somTab = wrap.querySelector('#lg-som-tab');
   if (somTab) {
     const toggle = somTab.querySelector('.som-tab-toggle');

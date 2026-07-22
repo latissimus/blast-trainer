@@ -476,22 +476,21 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Stand vorher auf 22px, damit der Anfang der Liste als Anfang liest – im
    Gebrauch wirkte der Sonderabstand aber nur wie ein Versehen. */
 .erstblock{padding-top:14px}
-.erstblock.mit-som-hinweis{padding-top:38px}
-/* Schmale violette Lasche direkt am Header. Sie bleibt nur 28px hoch und
-   gibt den eigentlichen Link erst nach einem Tipp frei. */
-.som-tab{position:absolute;z-index:-1;top:100%;left:50%;width:76px;height:28px;
-  display:flex;align-items:stretch;overflow:hidden;transform:translateX(-50%);
-  background:#67318F;border:var(--bw) solid var(--ink);border-top:0;border-radius:0 0 12px 12px;
-  transition:width .18s ease}
-.som-tab.offen{width:210px}
-.som-tab-toggle,.som-tab-ziel{flex:0 0 auto;height:100%;display:inline-flex;align-items:center;justify-content:center;
+.erstblock.mit-som-hinweis{padding-top:8px}
+/* Winzige violette Retro-Lasche im Seitenfluss. Beim Tipp waechst nur ihre
+   Hoehe; dadurch rutscht der Inhalt mit, statt von einem Overlay verdeckt zu
+   werden. Harte Kontur, volle Farbe, kein moderner Glas- oder Schatteneffekt. */
+.som-tab{position:relative;width:58px;height:20px;margin:0 auto;
+  display:flex;flex-direction:column;align-items:stretch;overflow:hidden;
+  background:#67318F;border:var(--bw) solid var(--ink);border-top:0;border-radius:0 0 8px 8px;
+  transition:height .2s ease}
+.som-tab.offen{height:40px}
+.som-tab-toggle,.som-tab-ziel{flex:0 0 20px;width:100%;display:inline-flex;align-items:center;justify-content:center;
   border:0;background:transparent;color:#fff;font-family:var(--display);font-style:italic;font-weight:700;
-  text-transform:uppercase;font-size:11px;white-space:nowrap}
-.som-tab-toggle{width:74px;padding:0 9px}
-.som-tab-ziel{width:132px;gap:7px;padding:0 8px;text-decoration:none;border-left:1px solid rgba(255,255,255,.45);
+  text-transform:uppercase;font-size:9px;white-space:nowrap;padding:0 4px}
+.som-tab-ziel{text-decoration:none;border-top:1px solid rgba(255,255,255,.45);
   opacity:0;transition:opacity .1s ease}
 .som-tab.offen .som-tab-ziel{opacity:1;transition-delay:.06s}
-.som-tab-ziel i{font-family:var(--mono);font-style:normal;font-size:16px;line-height:1}
 
 /* Kopf der Unterseiten: Titel links, Rueckweg rechts. Der Chip ist der
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
@@ -527,7 +526,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-gruppe{margin:7px 2px 0;font-family:var(--display);font-style:italic;font-size:11px;font-weight:700;
   text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .som-muskel{overflow:hidden;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
-.som-muskel.priorisiert{border-color:#67318F;box-shadow:inset 4px 0 0 #67318F}
+.som-muskel.priorisiert{border-color:#67318F}
 .som-muskel.offen{background:var(--surface2)}
 .som-zeile{display:grid;grid-template-columns:1fr;gap:7px;width:100%;padding:10px 12px;
   background:transparent;border:0;color:var(--ink);text-align:left}
@@ -568,7 +567,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .som-spender{margin-top:12px}
 .som-spender-wahl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;margin-top:6px;padding:8px 9px;
   text-align:left;background:var(--surface);color:var(--ink);border:1.5px solid var(--ink);border-radius:var(--r)}
-.som-spender-wahl.on{border-color:#67318F;box-shadow:inset 3px 0 0 #67318F}
+.som-spender-wahl.on{border-color:#67318F}
 .som-spender-wahl span:first-child{min-width:0}
 .som-spender-wahl b,.som-spender-wahl small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .som-spender-wahl b{font-family:var(--display);font-style:italic;text-transform:uppercase;font-size:12px}
@@ -634,8 +633,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 
    Das Dreiecksmuster ist dasselbe wie auf dem Menue-Feld und haelt die
    grossen Flaechen davon ab, leer zu wirken. */
-body[data-seite="meter"]{--bg:#D9BBF7}
-body[data-seite="prog"]{--bg:#F7C9DE}
+body[data-seite="meter"]{--bg:#20CAF4;--surface:#72DDF5;--surface2:#A8ECFA}
+body[data-seite="prog"]{--bg:#D9BBF7}
 body[data-seite="faq"]{--bg:#FBE7A4}
 body[data-seite="profile"]{--bg:#BFE7D2}
 /* Hellblauer Grund, weisse Flaechen. Anders als die uebrigen Seiten setzt diese
@@ -646,10 +645,10 @@ body[data-seite="profile"]{--bg:#BFE7D2}
    hier der alte Wert #AEDCF6 und blieb nach der Farbanpassung zurueck. */
 body[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
 
-:root[data-theme="dark"] body[data-seite="meter"]{--bg:#2A1B45}
+:root[data-theme="dark"] body[data-seite="meter"]{--bg:#063E4B;--surface:#0F6375;--surface2:#167A8F}
 /* Dunkel: derselbe Aufbau, nur umgekehrt – blaeulicher Grund, hellere Flaechen. */
 :root[data-theme="dark"] body[data-seite="notizbuch"]{--bg:#101A2B;--surface:#1C2637;--surface2:#1C2637}
-:root[data-theme="dark"] body[data-seite="prog"]{--bg:#3A1B2B}
+:root[data-theme="dark"] body[data-seite="prog"]{--bg:#2A1B45}
 :root[data-theme="dark"] body[data-seite="faq"]{--bg:#332B14}
 :root[data-theme="dark"] body[data-seite="profile"]{--bg:#143024}
 
@@ -660,10 +659,9 @@ body[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
    Beide liegen ton-in-ton in der Tintenfarbe statt in einem festen Lila –
    so tragen sie jeden Seitengrund und kippen im Dark-Mode von selbst mit.
    Welches Muster eine Seite bekommt, ist unten eine Zeile. */
-body[data-seite="meter"],body[data-seite="prog"],
+body[data-seite="prog"],
 body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   background-image:var(--muster-dreieck);background-size:auto}
-:root[data-theme="dark"] body[data-seite="meter"],
 :root[data-theme="dark"] body[data-seite="prog"],
 :root[data-theme="dark"] body[data-seite="faq"],
 :root[data-theme="dark"] body[data-seite="profile"],
@@ -671,13 +669,20 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   background-image:var(--muster-dreieck-dunkel)}
 :root[data-theme="dark"] body[data-seite="log"]{background-image:none}
 
-/* Tropfenmuster – aktuell auf Set-O-Meter und Notizbuch. Umstellen heisst:
-   Seitennamen zwischen den beiden Bloecken verschieben. */
-body[data-seite="meter"],body[data-seite="notizbuch"]{
+/* Der bisherige Set-O-Hintergrund liegt jetzt auf Progression und Notizbuch. */
+body[data-seite="prog"],body[data-seite="notizbuch"]{
   background-image:var(--muster-tropfen);background-size:112px}
-:root[data-theme="dark"] body[data-seite="meter"],
+:root[data-theme="dark"] body[data-seite="prog"],
 :root[data-theme="dark"] body[data-seite="notizbuch"]{
   background-image:var(--muster-tropfen-dunkel)}
+
+/* Cyanfarbener Retro-Sunburst nach dem Referenzbild: harte schwarze Konturen
+   liegen auf hellen, flächigen Blautönen; keine modernen Schatten. */
+body[data-seite="meter"]{
+  background-image:repeating-conic-gradient(from -14deg at 50% 46%,rgba(255,255,255,.14) 0 14deg,rgba(0,94,145,.05) 14deg 28deg);
+  background-size:100% 100%;background-attachment:fixed}
+:root[data-theme="dark"] body[data-seite="meter"]{
+  background-image:repeating-conic-gradient(from -14deg at 50% 46%,rgba(255,255,255,.045) 0 14deg,rgba(0,0,0,.07) 14deg 28deg)}
 
 /* ---------- FAQ- und Meter-Seite ---------- */
 .src{font-size:12px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:var(--bw) solid var(--ink);padding-top:10px}

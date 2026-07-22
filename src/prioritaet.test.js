@@ -56,13 +56,14 @@ describe('Priorisierung – Wirkung', () => {
     });
   });
 
-  it('schlägt bei fehlendem Spender nicht versehentlich auf', () => {
+  it('reserviert den Spenderplatz schon vor der Übungswahl', () => {
     const p = payload(1);
     p.data['UK-A'][1].p_da.names[1] = '';
     p.volumen.prioritaet.Unterarme = { modus: 'tausch', spender: 'Abs' };
     const r = prioritaetsAnpassungen(p, 1, K);
-    expect(r.delta).toEqual({});
-    expect(r.ergebnisse.Unterarme.status).toBe('spender-fehlt');
+    expect(r.delta).toEqual({ 'UK-A|p_arm|0': 1, 'UK-A|p_da|1': -1 });
+    expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
+    expect(r.ergebnisse.Unterarme.vorgemerkt).toBe(true);
   });
 
   it('stellt den Zusatzsatz bereit, obwohl die Zielübung noch fehlt', () => {
@@ -116,5 +117,18 @@ describe('Priorisierung – Planung', () => {
     }, K);
     expect(r.map((e) => e.konto)).toContain('Abs');
     expect(r.every((e) => e.tag === 'UK-A')).toBe(true);
+  });
+
+  it('bietet Umverteilung auch ganz ohne eingetragene Übungen an', () => {
+    const p = payload(1);
+    p.data['UK-A'][1] = {};
+    p.volumen.prioritaet.Unterarme = { modus: 'tausch', spender: 'Abs' };
+    expect(prioritaetsAnpassungen(p, 1, K).delta).toEqual({
+      'UK-A|p_arm|0': 1,
+      'UK-A|p_da|1': -1,
+    });
+    const r = spenderKandidaten(p, 1, 'Unterarme', {}, K);
+    expect(r.map((e) => e.konto)).toContain('Abs');
+    expect(r.find((e) => e.konto === 'Abs').name).toBe('Pumpfeld noch leer');
   });
 });

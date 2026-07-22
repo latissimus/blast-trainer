@@ -330,7 +330,9 @@ async function routeView() {
   // Auf iOS wandert der Header beim Gummiband nach unten, fixed Elemente aber
   // nicht – dadurch erschienen sie im Header. Vor dem Ansichtswechsel alte
   // angedockte Elemente entfernen; die neue Ansicht wird unten neu angedockt.
-  app.querySelectorAll('.topbar > .som-tab, .topbar > .zurueck')
+  // Die Set-O-Lasche bleibt im Seitenfluss, damit ihr Aufklappen den Log-Inhalt
+  // wirklich nach unten schiebt.
+  app.querySelectorAll('.topbar > .zurueck')
     .forEach((el) => el.remove());
   const view = document.getElementById('view');
   if (!view) return;
@@ -367,9 +369,7 @@ async function routeView() {
   if (token !== routeToken) return;
   const topbar = app.querySelector('.topbar');
   if (topbar) {
-    const pull = view.querySelector('.som-tab');
     const zurueck = view.querySelector('.zurueck');
-    if (pull) topbar.appendChild(pull);
     if (zurueck) topbar.appendChild(zurueck);
   }
   aktiveAnsicht = hash;

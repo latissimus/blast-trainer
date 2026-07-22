@@ -128,7 +128,7 @@ export async function mountMeter(container, { userId }) {
             <span><b>${html(k.konto)}</b><small>${html(k.name)}</small></span>
             <span class="som-spender-zahlen">${k.direkt} direkt · ${k.indirekt} indirekt</span>
             <em>${k.gruende.map(html).join(' · ')}</em>
-          </button>`).join('') : '<p class="som-hinweis">Keine verfügbare, nicht priorisierte Pump-Übung in derselben Einheit.</p>'}
+          </button>`).join('') : '<p class="som-hinweis">Kein verfügbares, nicht priorisiertes Pumpfeld in derselben Einheit.</p>'}
         </div>` : ''}
       </div>` : ''}
     </div>`;
@@ -193,6 +193,7 @@ export async function mountMeter(container, { userId }) {
     });
     body.querySelectorAll('[data-modus]').forEach((b) => {
       b.onclick = () => {
+        const springtNachOben = !payload.volumen.prioritaet[ausgewaehlt];
         Object.values(payload.volumen.prioritaet).forEach((p) => {
           if (p?.modus === 'tausch' && p.spender === ausgewaehlt) p.spender = null;
         });
@@ -203,7 +204,7 @@ export async function mountMeter(container, { userId }) {
           };
         } else payload.volumen.prioritaet[ausgewaehlt] = { modus: 'plus' };
         modusOffen = false;
-        speichern();
+        speichern(springtNachOben);
       };
     });
     body.querySelectorAll('[data-spender]').forEach((b) => {
@@ -217,12 +218,23 @@ export async function mountMeter(container, { userId }) {
     });
   }
 
-  async function speichern() {
+  async function speichern(scrollAusgleich = false) {
+    const vorherTop = scrollAusgleich
+      ? body.querySelector('.som-muskel.offen')?.getBoundingClientRect().top
+      : null;
     const rev = ++revision;
     const lokalJetzt = readLog(userId);
     writeLog(userId, payload, true, !!lokalJetzt?.replace);
     speicher.textContent = 'Auf diesem Gerät gespeichert · synchronisiert…';
     render();
+    // Wird die offene Box durch ihre neue Prioritaet an den Listenanfang
+    // sortiert, folgt der Viewport um genau dieselbe Strecke nach oben.
+    if (Number.isFinite(vorherTop)) requestAnimationFrame(() => {
+      const nachher = body.querySelector('.som-muskel.offen');
+      if (!nachher) return;
+      const delta = nachher.getBoundingClientRect().top - vorherTop;
+      if (Math.abs(delta) > 1) window.scrollBy({ top: delta, behavior: 'smooth' });
+    });
     if (!navigator.onLine) {
       speicher.textContent = 'Auf diesem Gerät gespeichert · wartet auf Verbindung';
       return;

@@ -4,10 +4,9 @@ import { targetSets, exOf } from './saetze.js';
 
 // Muskel-Priorisierung ist eine PLANUNGSREGEL ueber dem Tages-Level:
 // Auf jedem Level bekommt genau ein geeignetes Pumpfeld pro Zielmuskel einen
-// Satz mehr. Bei einer Umverteilung wird der Satz
-// nur dann vergeben, wenn in derselben Einheit auch ein gewaehltes Pumpfeld den
-// Satz abgeben kann. So wird aus einer fehlenden Spender-Uebung nie still ein
-// Volumenaufschlag.
+// Satz mehr. Bei einer Umverteilung werden Ziel- und Spenderfeld schon vor der
+// Uebungswahl verbindlich reserviert. So bleibt die Bilanz immer +1/−1 und aus
+// einer noch leeren Spender-Uebung wird nie still ein Volumenaufschlag.
 
 const klein = (s) => String(s || '').trim().toLowerCase();
 const slotKey = (tag, blockId, xi) => `${tag}|${blockId}|${xi}`;
@@ -108,6 +107,7 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
   const ergebnisse = {};
   const belegteFelder = new Set(felder.map((f) => f.key));
   const reservierteZiele = new Set();
+  const reservierteSpender = new Set();
 
   KONTEN.forEach((ziel) => {
     const cfg = prioritaet[ziel];
@@ -136,17 +136,26 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
       ergebnisse[ziel] = { status: 'spender-fehlt', modus: 'tausch', zielFeld, spender };
       return;
     }
-    const spenderFeld = bestesFeld(felder.filter((f) =>
+    const echterSpender = bestesFeld(felder.filter((f) =>
       f.tag === zielFeld.tag && f.konto === spender && f.key !== zielFeld.key &&
       f.anzahl + (delta[f.key] || 0) > 0));
+    const freierSpender = bestesFeld(pumpMoeglichkeiten(payload, woche, spender).filter((f) =>
+      f.tag === zielFeld.tag && f.key !== zielFeld.key && !belegteFelder.has(f.key) &&
+      !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key) &&
+      f.anzahl + (delta[f.key] || 0) > 0));
+    const spenderFeld = echterSpender || freierSpender;
     if (!spenderFeld) {
       ergebnisse[ziel] = { status: 'spender-fehlt', modus: 'tausch', zielFeld, spender };
       return;
     }
+    reservierteSpender.add(spenderFeld.key);
 
     delta[zielFeld.key] = (delta[zielFeld.key] || 0) + 1;
     delta[spenderFeld.key] = (delta[spenderFeld.key] || 0) - 1;
-    ergebnisse[ziel] = { status: 'aktiv', modus: 'tausch', zielFeld, spenderFeld, spender, vorgemerkt };
+    ergebnisse[ziel] = {
+      status: 'aktiv', modus: 'tausch', zielFeld, spenderFeld, spender,
+      vorgemerkt: vorgemerkt || !echterSpender,
+    };
   });
 
   return { delta, ergebnisse };
@@ -175,12 +184,16 @@ export function spenderKandidaten(payload, woche, ziel, wochenwerte = {}, katalo
   const bestehend = prioritaetsAnpassungen(probePayload, woche, katalog).delta;
 
   const proKonto = new Map();
-  felder.forEach((f) => {
-    if (f.tag !== zielFeld.tag || f.konto === ziel || gueltigePrio(prios[f.konto])) return;
+  KONTEN.forEach((konto) => {
+    if (konto === ziel || gueltigePrio(prios[konto])) return;
+    const echt = bestesFeld(felder.filter((f) => f.tag === zielFeld.tag && f.konto === konto && f.key !== zielFeld.key));
+    const frei = bestesFeld(pumpMoeglichkeiten(payload, woche, konto).filter((f) =>
+      f.tag === zielFeld.tag && f.key !== zielFeld.key && !felder.some((belegt) => belegt.key === f.key)));
+    const f = echt || frei;
+    if (!f) return;
     const verfuegbar = f.anzahl + (bestehend[f.key] || 0);
     if (verfuegbar <= 0) return;
-    const alt = proKonto.get(f.konto);
-    if (!alt || verfuegbar > alt.verfuegbar) proKonto.set(f.konto, { ...f, verfuegbar });
+    proKonto.set(konto, { ...f, konto, name: f.name || 'Pumpfeld noch leer', verfuegbar });
   });
 
   const konten = wochenwerte.konten || {};
