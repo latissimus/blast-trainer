@@ -232,17 +232,22 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       Object.values(bloecke || {}).some((namen) => (namen || []).some((n) => String(n || '').trim())));
   let einstiegSichtbar = !readOnly && !state.meta.einstiegErledigt && !hatNutzdaten();
   let tutorialAktiv = !readOnly && !!state.meta.tutorialAktiv;
-  let tutorialSchritt = Math.min(4, Math.max(0, Number(state.meta.tutorialSchritt) || 0));
+  const gespeicherterTutorialSchritt = Number(state.meta.tutorialSchritt);
+  let tutorialSchritt = Number.isFinite(gespeicherterTutorialSchritt)
+    ? Math.min(4, Math.max(-1, gespeicherterTutorialSchritt))
+    : -1;
+  let tutorialFx = null;
+  let tutorialFxTimer = [];
 
   // Aus dem FAQ kann das Tutorial auch spaeter erneut gestartet werden.
   try {
     if (!readOnly && sessionStorage.getItem('blast:tutorial-start') === '1') {
       sessionStorage.removeItem('blast:tutorial-start');
       tutorialAktiv = true;
-      tutorialSchritt = 0;
+      tutorialSchritt = -1;
       einstiegSichtbar = false;
       state.meta.tutorialAktiv = true;
-      state.meta.tutorialSchritt = 0;
+      state.meta.tutorialSchritt = -1;
       state.meta.einstiegErledigt = true;
       state.week = TUTORIAL_SETUP[0].week;
       state.day = TUTORIAL_SETUP[0].day;
@@ -316,8 +321,9 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     tutorialAktiv = true;
     einstiegSichtbar = false;
     if (schritt < TUTORIAL_SETUP.length) {
-      state.week = TUTORIAL_SETUP[schritt].week;
-      state.day = TUTORIAL_SETUP[schritt].day;
+      const ziel = TUTORIAL_SETUP[Math.max(0, schritt)];
+      state.week = ziel.week;
+      state.day = ziel.day;
       setTier(state.day, state.week, 1);
     } else {
       state.week = 1;
@@ -339,18 +345,47 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     state.week = 1;
     state.day = 'OK-A';
     einstiegSichtbar = false;
+    if (tutorialDunkel) tutorialDunkel.hidden = true;
     queuePersist();
     renderAll();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+  function tutorialStartAnimation() {
+    if (tutorialFx) return;
+    tutorialFx = document.createElement('div');
+    tutorialFx.className = 'tutorial-startfx';
+    tutorialFx.setAttribute('role', 'status');
+    tutorialFx.setAttribute('aria-live', 'polite');
+    tutorialFx.innerHTML = `
+      <div class="tutorial-startfx-strahlen" aria-hidden="true"></div>
+      <div class="tutorial-startfx-inhalt">
+        <small>Heavy-Setup komplett</small>
+        <b>Los geht's!</b>
+        <span>Woche 1 · Tag 1</span>
+      </div>`;
+    document.body.appendChild(tutorialFx);
+    requestAnimationFrame(() => tutorialFx?.classList.add('an'));
+    const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    tutorialFxTimer.push(setTimeout(() => tutorialBeenden(false), reduziert ? 280 : 1100));
+    tutorialFxTimer.push(setTimeout(() => {
+      tutorialFx?.remove();
+      tutorialFx = null;
+    }, reduziert ? 500 : 1650));
+  }
   function tutorialScrollen() {
-    if (!tutorialAktiv) return;
+    if (!tutorialAktiv || tutorialSchritt < 0) return;
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      const ziel = contentEl.querySelector('.tutorial-ziel');
-      if (!ziel) return;
-      ziel.scrollIntoView({
+      const ziel = contentEl.querySelector('.tutorial-aktiv');
+      const karte = contentEl.querySelector('.log-tutorial');
+      if (!ziel || !karte) return;
+      const kopfHoehe = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--topbar-h'),
+      ) || 0;
+      const zielOben = kopfHoehe + 8 + karte.offsetHeight + 10;
+      const scrollZiel = Math.max(0, window.scrollY + ziel.getBoundingClientRect().top - zielOben);
+      window.scrollTo({
+        top: scrollZiel,
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        block: 'center',
       });
     }));
   }
@@ -401,6 +436,12 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
   picker.className = 'ex-picker';
   picker.setAttribute('aria-label', 'Übung auswählen');
   document.body.appendChild(picker);
+  const tutorialDunkel = document.createElement('div');
+  tutorialDunkel.className = 'tutorial-dimmer';
+  tutorialDunkel.hidden = !tutorialAktiv;
+  tutorialDunkel.setAttribute('aria-hidden', 'true');
+  tutorialDunkel.onclick = () => tutorialScrollen();
+  document.body.appendChild(tutorialDunkel);
 
   function oeffneUebungswahl({ titel, gruppen, aktuell, onSelect }) {
     picker.innerHTML = '';
@@ -782,6 +823,7 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     const cell = ensureCell();
     const prev = prevFilled(state.day, state.week);
     contentEl.innerHTML = '';
+    tutorialDunkel.hidden = !tutorialAktiv;
 
     const tage = daysOfWeek(state.week);
     const tagNummer = Math.max(0, tage.indexOf(state.day)) + 1;
@@ -810,7 +852,7 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
         state.meta.einstiegErledigt = true;
         state.meta.tutorialErledigt = false;
         einstiegSichtbar = false;
-        tutorialZielSetzen(0);
+        tutorialZielSetzen(-1);
         tutorialSpeichernUndZeichnen();
       };
       einstieg.querySelector('.log-einstieg-skip').onclick = () => tutorialBeenden(true);
@@ -821,7 +863,37 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     if (tutorialAktiv) {
       const karte = document.createElement('section');
       karte.className = 'log-tutorial';
-      if (tutorialSchritt < TUTORIAL_SETUP.length) {
+      if (tutorialSchritt < 0) {
+        karte.classList.add('log-tutorial-basics');
+        karte.innerHTML = `
+          <div class="log-tutorial-kopf">
+            <span>Kurz erklärt</span>
+            <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
+          </div>
+          <h2>So funktioniert dein Plan</h2>
+          <p class="log-tutorial-lead">Einmal verstehen, dann einfach trainieren.</p>
+          <div class="tutorial-basics">
+            <div class="tutorial-basic">
+              <b>6</b><span><strong>Wochen</strong>A und B wechseln sich ab</span>
+            </div>
+            <div class="tutorial-basic">
+              <b>H</b><span><strong>Heavy festlegen</strong>einmal in Woche 1 und 2</span>
+            </div>
+            <div class="tutorial-basic">
+              <b>P+C</b><span><strong>Pump & Cluster</strong>in jeder Einheit frei wählbar</span>
+            </div>
+          </div>
+          <p><b>Woche 1 ist deine A-Auswahl</b> für Woche 1, 3 und 5.
+            <b>Woche 2 ist deine B-Auswahl</b> für Woche 2, 4 und 6.
+            Die App übernimmt deine Heavy-Übungen danach automatisch.</p>
+          <button type="button" class="log-tutorial-weiter" data-tutorial-beginnen>
+            Heavy-Setup starten →
+          </button>`;
+        karte.querySelector('[data-tutorial-beginnen]').onclick = () => {
+          tutorialZielSetzen(0);
+          tutorialSpeichernUndZeichnen();
+        };
+      } else if (tutorialSchritt < TUTORIAL_SETUP.length) {
         const schritt = TUTORIAL_SETUP[tutorialSchritt];
         tutorialStatus = heavyAuswahlStatus(tpl, tier);
         const fertig = tutorialStatus.offen.length === 0;
@@ -829,6 +901,9 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
           <div class="log-tutorial-kopf">
             <span>Setup ${tutorialSchritt + 1} / 4</span>
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
+          </div>
+          <div class="tutorial-fortschritt" aria-hidden="true">
+            ${TUTORIAL_SETUP.map((_, i) => `<i class="${i <= tutorialSchritt ? 'an' : ''}"></i>`).join('')}
           </div>
           <h2>${schritt.titel} · Heavy</h2>
           <p>Wähle alle Heavy-Übungen dieses Tages. Diese <b>${schritt.gruppe.startsWith('A') ? 'A-Auswahl' : 'B-Auswahl'}</b>
@@ -858,7 +933,7 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
             <button type="button" class="log-tutorial-weiter" data-tutorial-fertig>Tutorial abschließen</button>
             <a href="#faq">FAQ öffnen</a>
           </div>`;
-        karte.querySelector('[data-tutorial-fertig]').onclick = () => tutorialBeenden(false);
+        karte.querySelector('[data-tutorial-fertig]').onclick = tutorialStartAnimation;
       }
       karte.querySelector('[data-tutorial-zu]').onclick = () => {
         if (confirm('Tutorial beenden? Du kannst es später im FAQ erneut starten.')) tutorialBeenden(true);
@@ -970,9 +1045,10 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
           nameIn.textContent = nameIn.value || 'Übung wählen…';
         };
         tonAnpassen();
-        if (tutorialAktiv && tutorialSchritt < TUTORIAL_SETUP.length &&
+        if (tutorialAktiv && tutorialSchritt >= 0 && tutorialSchritt < TUTORIAL_SETUP.length &&
             effType === 'load' && !nameIn.value && !tutorialWahlMarkiert) {
           nameIn.classList.add('tutorial-ziel');
+          el.classList.add('tutorial-aktiv');
           tutorialWahlMarkiert = true;
         }
         hd.appendChild(nameIn); exDiv.appendChild(hd);
@@ -1051,6 +1127,7 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       contentEl.appendChild(el);
     });
     if (tutorialAktiv && tutorialSchritt === TUTORIAL_SETUP.length) {
+      contentEl.querySelector('.block')?.classList.add('tutorial-aktiv');
       contentEl.querySelector('.setrow')?.classList.add('tutorial-ziel');
     }
     renderVolume(cell, tpl, tier);
@@ -1298,6 +1375,11 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       // Der Punkt gehoert dem Log – ausserhalb gibt es nichts zu synchronisieren.
       if (saveStateEl) saveStateEl.hidden = true;
       picker.remove();
+      tutorialDunkel.remove();
+      tutorialFxTimer.forEach(clearTimeout);
+      tutorialFxTimer = [];
+      tutorialFx?.remove();
+      tutorialFx = null;
     },
   };
 }

@@ -562,23 +562,42 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .log-einstieg a{grid-column:1/-1;font-size:11px;font-weight:700;color:var(--ink);
   text-underline-offset:2px;text-align:center}
 
-/* Gefuehrtes Heavy-Setup. Die Karte bleibt beim automatischen Scrollen unter
-   dem Header sichtbar; der pinke Rahmen markiert jeweils genau das Feld, das
-   als naechstes dran ist. */
-.log-tutorial{position:sticky;top:calc(var(--topbar-h) + 8px);z-index:12;
-  margin-bottom:12px;padding:12px;background:rgba(255,255,255,.94);
-  border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
-  box-shadow:4px 4px 0 rgba(11,27,68,.18);
+/* Gefuehrtes Heavy-Setup. Die Karte ist genauso breit wie die untere
+   Bedienleiste. Der feste Dimmer liegt ueber der restlichen App; nur Karte und
+   der gerade erklaerte Muskelblock werden darueber angehoben. */
+.tutorial-dimmer{position:fixed;inset:0;z-index:35;background:rgba(5,10,24,.72);
+  -webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);
+  touch-action:pan-y}
+.tutorial-dimmer[hidden]{display:none}
+.log-tutorial{position:sticky;top:calc(var(--topbar-h) + 8px);z-index:42;
+  width:min(580px,calc(100vw - 14px));margin:0 0 12px 50%;padding:12px;
+  transform:translateX(-50%);background-color:rgba(255,255,255,.97);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Cpath d='M9 5l3.2 5.5H5.8z' fill='%23693398' fill-opacity='.045'/%3E%3C/svg%3E");
+  border:var(--bw) solid var(--ink);border-radius:16px;
   -webkit-backdrop-filter:blur(8px) saturate(1.15);backdrop-filter:blur(8px) saturate(1.15)}
-:root[data-theme="dark"] .log-tutorial{background:rgba(30,33,42,.94)}
+:root[data-theme="dark"] .log-tutorial{background-color:rgba(30,33,42,.97)}
 .log-tutorial-kopf{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.log-tutorial-kopf span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--prio)}
+.log-tutorial-kopf span{padding:4px 7px;border-radius:999px;background:var(--prio);
+  color:#fff;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
 .log-tutorial-kopf button{width:28px;height:28px;padding:0;border:var(--bw) solid var(--ink);
   border-radius:50%;background:var(--surface2);color:var(--ink);font-size:18px;line-height:1}
 .log-tutorial h2{margin:1px 0 6px;font-family:var(--display);font-style:italic;
   font-size:17px;text-transform:uppercase}
 .log-tutorial p{margin:0 0 7px;color:var(--muted);font-size:11.5px;line-height:1.45}
 .log-tutorial p b{color:var(--ink)}
+.log-tutorial-lead{font-weight:700}
+.tutorial-fortschritt{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:7px 0 8px}
+.tutorial-fortschritt i{height:4px;border:1px solid var(--prio);background:transparent}
+.tutorial-fortschritt i.an{background:var(--prio)}
+.tutorial-basics{display:grid;gap:6px;margin:9px 0}
+.tutorial-basic{display:flex;align-items:center;gap:9px;padding:7px 8px;
+  border:1.5px solid var(--ink);border-radius:10px;background:var(--prio-wash)}
+.tutorial-basic>b{display:flex;align-items:center;justify-content:center;flex:0 0 38px;height:34px;
+  border:2px solid var(--ink);border-radius:8px;background:var(--prio);color:#fff;
+  font-family:var(--display);font-style:italic;font-size:16px}
+.tutorial-basic span{display:flex;flex-direction:column;min-width:0;color:var(--muted);
+  font-size:10.5px;line-height:1.3}
+.tutorial-basic strong{color:var(--ink);font-size:11.5px;text-transform:uppercase}
 .log-tutorial-stand{padding:6px 8px;background:var(--prio-wash);border-left:4px solid var(--prio)}
 .log-tutorial-weiter{width:100%;padding:9px;border:var(--bw) solid var(--ink);border-radius:var(--r);
   background:var(--pink);color:var(--ink);font-family:var(--display);font-style:italic;
@@ -586,9 +605,36 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .log-tutorial-weiter[data-offen]{background:var(--prio);color:#fff}
 .log-tutorial-ende{display:grid;gap:7px;margin-top:9px}
 .log-tutorial-ende a{text-align:center;color:var(--ink);font-size:11px;font-weight:700;text-underline-offset:2px}
+.block.tutorial-aktiv{position:relative;z-index:41;outline:4px solid var(--pink);outline-offset:3px}
 .tutorial-ziel{position:relative;z-index:2;outline:4px solid var(--pink)!important;outline-offset:3px;
   animation:tutorialPuls 1.3s ease-in-out infinite}
 @keyframes tutorialPuls{0%,100%{outline-color:var(--pink)}50%{outline-color:var(--prio)}}
+
+/* Kurzer violetter Retro-Abschluss statt eines weiteren Hinweisfensters. */
+.tutorial-startfx{position:fixed;inset:0;z-index:100;display:grid;place-items:center;
+  overflow:hidden;background:var(--prio);color:#fff;opacity:0;transform:scaleY(.02);
+  pointer-events:auto}
+.tutorial-startfx::before{content:"";position:absolute;inset:0;opacity:.18;
+  background:repeating-linear-gradient(0deg,transparent 0 5px,#fff 6px 7px)}
+.tutorial-startfx-strahlen{position:absolute;inset:-20%;opacity:.22;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='42'%3E%3Cpath d='M21 5l12 21H9z' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E");
+  transform:rotate(-8deg) scale(1.2)}
+.tutorial-startfx.an{animation:tutorialStartEin .28s steps(4,end) forwards}
+.tutorial-startfx-inhalt{position:relative;display:flex;flex-direction:column;align-items:center;
+  gap:9px;padding:24px;text-align:center;opacity:0}
+.tutorial-startfx.an .tutorial-startfx-inhalt{animation:tutorialStartText 1.25s .18s steps(4,end) both}
+.tutorial-startfx small,.tutorial-startfx span{font-family:var(--mono);font-weight:800;
+  text-transform:uppercase;letter-spacing:.08em}
+.tutorial-startfx small{font-size:11px}
+.tutorial-startfx b{font-family:var(--display);font-style:italic;font-size:clamp(42px,15vw,76px);
+  line-height:.9;text-transform:uppercase;text-shadow:4px 4px 0 var(--ink)}
+.tutorial-startfx span{padding:7px 10px;border:2px solid #fff;font-size:12px}
+@keyframes tutorialStartEin{to{opacity:1;transform:scaleY(1)}}
+@keyframes tutorialStartText{
+  0%{opacity:0;transform:scale(1.35)}
+  25%,75%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(.92)}
+}
 
 /* Erst nach einer vollstaendigen Einheit. Der Nutzer entscheidet selbst, ob
    er wechselt; die App bietet nur den naechsten offenen Tag an. */
