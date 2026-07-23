@@ -245,7 +245,7 @@ function renderChrome() {
             <select id="lg-woche" aria-label="Woche" disabled></select></label>
           <label class="ci"><span class="wert" id="ci-tag-w">Tag 1</span><span class="lbl" id="ci-tag-l">—</span>
             <select id="lg-tag" aria-label="Tag" disabled></select></label>
-          <label class="ci"><span class="wert" id="ci-lvl-w">III</span><span class="lbl" id="ci-lvl-l">Level</span>
+          <label class="ci"><span class="wert" id="ci-lvl-w">II</span><span class="lbl" id="ci-lvl-l">Standard</span>
             <select id="lg-tier" aria-label="Level" disabled>
               <option value="0">Kompakt · weniger Volumen</option>
               <option value="1">Standard · normales Volumen</option>
@@ -318,11 +318,17 @@ function setNavActive(view) {
   // bleibt hellblau. Setzt --bg um, damit Kopfleiste und Bedienleiste von selbst
   // mitgehen, statt jede Flaeche einzeln umfaerben zu muessen.
   document.body.dataset.seite = view;
+  // Die vier Trainingsfelder wirken nur im Log. Auf Unterseiten bleibt unten
+  // deshalb nur das Menue sichtbar; inaktive Felder sehen sonst bedienbar aus
+  // und nehmen auf dem Telefon fast die ganze Breite ein.
+  document.querySelector('.ctrlbar')?.classList.toggle(
+    'nur-menue',
+    view !== 'log' && view !== 'admin',
+  );
   const namen = { log: 'Log', faq: 'FAQ', meter: 'Set-O', prog: 'Prog', notizbuch: 'Notizbuch', admin: 'Admin', profile: 'Profil' };
   app.querySelector('#app-menue-l').textContent = namen[view] || 'Log';
-  // Die vier Log-Felder bleiben auf jeder Seite sichtbar, damit die Leiste
-  // ueberall gleich aussieht. Ohne gemountetes Log sind sie stillgelegt (siehe
-  // destroy() in log.js) – sie zeigen dann den zuletzt gesehenen Stand.
+  // Auf Unterseiten bleibt nur das Menue sichtbar. Die Log-Felder behalten
+  // intern ihren letzten Stand, bis das Log wieder gemountet wird.
 }
 
 async function routeView() {

@@ -135,6 +135,7 @@ describe('mergePayload – Vollstaendigkeit', () => {
       mem: { 'pump|x': { w: '20' } },
       datum: { 'UK-A|3': '2026-07-19' },
       volumen: { prioritaet: { Unterarme: { modus: 'plus' } } },
+      meta: { einstiegErledigt: true },
       v: 3,
     };
     const m = mergePayload(p, {});
@@ -148,5 +149,13 @@ describe('mergePayload – Vollstaendigkeit', () => {
     );
     expect(m.datum['OK-A|1']).toBe('2026-07-02');
     expect(m.datum['OK-A|2']).toBe('2026-07-08');
+  });
+
+  it('behaelt den abgeschlossenen Schnellstart nach Offline-Arbeit', () => {
+    const m = mergePayload(
+      { meta: { einstiegErledigt: false, serverHinweis: true } },
+      { meta: { einstiegErledigt: true } },
+    );
+    expect(m.meta).toEqual({ einstiegErledigt: true, serverHinweis: true });
   });
 });

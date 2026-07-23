@@ -46,6 +46,21 @@ export function auswahlGruppen(konten, rolle, zuletzt = [], katalog = KATALOG) {
   return gruppen;
 }
 
+// Filtert die bereits sinnvoll sortierten Gruppen fuer den Suchdialog. Dadurch
+// bleiben "Zuletzt benutzt" und die Muskel-Reihenfolge auch waehrend der Suche
+// erhalten. Umlaute/Schreibweise spielen keine Rolle.
+export function sucheAuswahlGruppen(gruppen, suchtext) {
+  const teile = klein(suchtext).split(/\s+/).filter(Boolean);
+  if (!teile.length) return gruppen;
+  return (gruppen || []).map((gruppe) => ({
+    ...gruppe,
+    eintraege: (gruppe.eintraege || []).filter((e) => {
+      const name = klein(e.n);
+      return teile.every((teil) => name.includes(teil));
+    }),
+  })).filter((gruppe) => gruppe.eintraege.length);
+}
+
 export const imKatalog = (name, katalog = KATALOG) =>
   !!klein(name) && katalog.some((e) => klein(e.n) === klein(name));
 

@@ -318,6 +318,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    in beiden Themes zum Rest passt; das rechte padding haelt ihm den Platz frei. */
 .exname{width:100%;min-width:0;flex:1 1 190px;background:var(--surface2);border:var(--bw) solid var(--ink);border-radius:var(--r);
   color:var(--ink);font-size:16px;font-weight:700;padding:9px 26px 9px 10px;font-family:var(--ui);
+  text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   appearance:none;-webkit-appearance:none;cursor:pointer;
   /* Gezeichnetes Chevron statt zweier CSS-Farbverlaeufe. Die Verlauf-Loesung
      ergab ein hartes Dreieck, das bei groesseren Radien und duennen Raendern
@@ -339,6 +340,37 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* Die Klappliste zeichnet das System. Ohne diese Zeile stuende sie im
    Dark-Mode auf manchen Geraeten schwarz auf schwarz. */
 .exname option,.exname optgroup{background:var(--surface2);color:var(--ink)}
+
+/* Durchsuchbarer Uebungswaehler. Ein Dialog statt 199 Eintraegen im
+   System-Scrollrad; die Treffer bleiben nach "zuletzt" und Muskel gruppiert. */
+.ex-picker{width:min(560px,calc(100vw - 18px));max-height:min(78vh,720px);margin:auto;
+  padding:0;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
+  background:var(--surface);color:var(--ink);overflow:hidden}
+.ex-picker::backdrop{background:rgba(5,10,24,.72);backdrop-filter:blur(2px)}
+.ex-picker-schale{display:flex;flex-direction:column;max-height:min(78vh,720px);padding:12px}
+.ex-picker-kopf{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ex-picker-kopf>div{display:flex;flex-direction:column;min-width:0;flex:1}
+.ex-picker-kopf small{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted)}
+.ex-picker-kopf b{font-family:var(--display);font-style:italic;font-size:18px;text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-picker-zu{flex:0 0 36px;width:36px;height:36px;padding:0;border:var(--bw) solid var(--ink);
+  border-radius:50%;background:var(--surface2);color:var(--ink);font-size:20px;font-weight:800}
+.ex-picker-suche{width:100%;padding:11px 12px;border:var(--bw) solid var(--ink);border-radius:var(--r);
+  background:var(--surface2);color:var(--ink);font:700 16px var(--ui)}
+.ex-picker-suche:focus{outline:none;border-color:var(--pink)}
+.ex-picker-liste{overflow:auto;-webkit-overflow-scrolling:touch;margin-top:8px;padding-right:2px}
+.ex-picker-gruppe{position:sticky;top:0;z-index:1;margin:8px 0 4px;padding:5px 7px;
+  background:var(--surface);border-bottom:2px dashed var(--ink);
+  font-family:var(--display);font-style:italic;font-size:10px;font-weight:700;
+  text-transform:uppercase;color:var(--muted)}
+.ex-picker-option{display:block;width:100%;padding:11px 10px;border:0;border-bottom:1px solid var(--faint);
+  background:transparent;color:var(--ink);text-align:left;font:700 14px/1.3 var(--ui)}
+.ex-picker-option.gewaehlt{background:var(--prio-soft);color:var(--prio)}
+.ex-picker-option.gewaehlt::before{content:"✓ ";font-weight:900}
+.ex-picker-kein{padding:28px 12px;text-align:center;color:var(--muted);font-size:14px}
+.ex-picker-leeren{margin-top:10px;padding:9px;border:2px dashed var(--ink);border-radius:var(--r);
+  background:transparent;color:var(--muted);font-family:var(--display);font-style:italic;
+  font-weight:700;text-transform:uppercase}
 /* "zuletzt: 60 kg × 8" – die wichtigste Lesezeile im Log, direkt vor dem
    naechsten Satz. Stand auf 12px und war damit kleiner als alles andere,
    was man waehrend der Einheit liest. */
@@ -471,6 +503,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    ebenfalls verschwindet. Dunkelgruen haelt den Unterschied zum Lauf. */
 :root[data-theme="dark"] .ctrlbar.timer-an .timerfeld.done{color:#0E5B30}
 .ctrlbar.timer-an .slots,.ctrlbar.timer-an .menue{display:none}
+.ctrlbar.nur-menue .slots{display:none}
+.ctrlbar.nur-menue .inner{max-width:104px}
+.ctrlbar.nur-menue .ci.menue{flex:1 1 auto}
 /* Das × liegt absolut rechts und zaehlt nicht zur Breite – sonst waere die
    Zahl um dessen halbe Breite nach links verschoben statt wirklich mittig. */
 .timerfeld{position:relative;flex:1;display:flex;align-items:center;justify-content:center;
@@ -489,6 +524,39 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Gebrauch wirkte der Sonderabstand aber nur wie ein Versehen. */
 .erstblock{padding-top:14px}
 .erstblock.mit-som-hinweis{padding-top:14px}
+
+/* Kompakter Tageskopf: beantwortet vor dem ersten Block drei Fragen, ohne eine
+   weitere Bedienzeile zu bauen – wo bin ich, welches Level, was trainiere ich? */
+.log-tageskopf{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:9px 12px;
+  background:rgba(255,255,255,.48);border:var(--bw) solid var(--ink);border-radius:var(--r)}
+:root[data-theme="dark"] .log-tageskopf{background:rgba(30,33,42,.48)}
+.log-tageskopf>div{display:flex;flex-direction:column;min-width:0}
+.log-tageskopf small{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted);
+  letter-spacing:.04em}
+.log-tageskopf b{margin-top:2px;font-size:12.5px;line-height:1.3;color:var(--ink)}
+
+/* Einmaliger Schnellstart. Er erklaert nur die erste Eingabe; Set-O,
+   A/B-Rotation und Hintergrundwissen bleiben bewusst im FAQ. */
+.log-einstieg{margin-bottom:12px;padding:13px;background:var(--surface);border:var(--bw) solid var(--ink);
+  border-radius:var(--r-karte)}
+.log-einstieg-kicker{margin:0 0 8px;font-family:var(--display);font-style:italic;font-weight:700;
+  text-transform:uppercase;font-size:17px}
+.log-einstieg ol{margin:0;padding-left:21px;color:var(--muted);font-size:13px;line-height:1.65}
+.log-einstieg ol li::marker{font-weight:800;color:var(--prio)}
+.log-einstieg>div{display:flex;align-items:center;gap:10px;margin-top:11px}
+.log-einstieg-los{flex:1;padding:10px;border:var(--bw) solid var(--ink);border-radius:var(--r);
+  background:var(--pink);color:var(--ink);font-family:var(--display);font-style:italic;
+  font-weight:700;text-transform:uppercase}
+.log-einstieg a{font-size:11px;font-weight:700;color:var(--ink);text-underline-offset:2px;text-align:center}
+
+/* Erst nach einer vollstaendigen Einheit. Der Nutzer entscheidet selbst, ob
+   er wechselt; die App bietet nur den naechsten offenen Tag an. */
+.log-weiter{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+  margin:0 0 12px;padding:10px 12px;border:var(--bw) solid var(--ink);border-radius:var(--r);
+  background:var(--green);color:#fff;text-align:left}
+.log-weiter span{font-size:9px;font-weight:800;text-transform:uppercase;opacity:.8}
+.log-weiter b{font-family:var(--display);font-style:italic;font-size:12px;text-transform:uppercase;text-align:right}
+.chip-hilfe{border-style:dashed;color:var(--muted)}
 /* Die violette Retro-Lasche sitzt am Sticky-Header und parkt vollstaendig
    dahinter. Beim Herunterziehen wird sie zugleich breiter und laenger. */
 .som-tab{position:absolute;z-index:0;top:calc(100% + 2px);left:50%;width:60px;height:20px;overflow:hidden;
@@ -543,6 +611,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   border-radius:var(--r);font-size:11.5px;line-height:1.45;color:var(--ink)}
 .som-kurzhilfe p{margin:0 0 7px}
 .som-kurzhilfe p:last-child{margin-bottom:0}
+.som-einfach{margin:0 0 9px;padding:9px 11px;border:2px dashed var(--ink);border-radius:var(--r);
+  background:var(--surface);color:var(--muted);font-size:11.5px;line-height:1.45}
+.som-einfach b{color:var(--ink)}
 .prog-statuskopf{align-items:center}
 .prog-info-titel{flex:1;margin:0;padding:2px 4px;font-family:var(--display);font-style:italic;
   font-size:13px;font-weight:700;text-transform:uppercase;color:var(--ink)}
@@ -771,6 +842,13 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .avatar-fallback{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-style:italic;font-weight:700;font-size:34px;color:var(--navy)}
 .role-tag{display:inline-block;background:var(--pink);border:var(--bw) solid var(--ink);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;text-transform:uppercase;font-family:var(--display);font-style:italic;margin-top:4px}
 .role-tag.admin{background:var(--mr)}
+.profile-hinweis{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5}
+.profile-gefahr{margin-top:18px;padding-top:15px;border-top:2px dashed var(--ink)}
+.profile-gefahr p{margin:0 0 10px;color:var(--muted);font-size:12.5px;line-height:1.45}
+.profile-gefahr p b{color:var(--ink);font-family:var(--display);font-style:italic;
+  text-transform:uppercase;font-size:14px}
+.btn-danger{background:#FFE0D8;color:var(--down)}
+.profile-daten-status{min-height:17px;margin-top:8px;color:var(--muted);font-size:11.5px;text-align:center}
 
 /* ---------- Admin ---------- */
 .cust-row{display:flex;align-items:center;gap:12px;padding:12px;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;width:100%;text-align:left}

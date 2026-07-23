@@ -57,6 +57,19 @@ export const writeProfile = (uid, profile) => safeSet(PROFILE_KEY(uid), profile)
 export const readNotizen = (uid) => safeGet(NOTIZ_KEY(uid));
 export const writeNotizen = (uid, notizen) => safeSet(NOTIZ_KEY(uid), notizen);
 
+// Nach einer Kontoloeschung duerfen auf einem gemeinsam genutzten Geraet weder
+// Trainingsdaten noch Profil/Notizen des geloeschten Kontos zurueckbleiben.
+export function clearUserData(uid) {
+  try {
+    localStorage.removeItem(LOG_KEY(uid));
+    localStorage.removeItem(PROFILE_KEY(uid));
+    localStorage.removeItem(NOTIZ_KEY(uid));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 // ---- Zusammenfuehren -------------------------------------------------------
 // Nur noetig, wenn lokal ungespeicherte Aenderungen liegen UND der Server
 // zwischenzeitlich etwas anderes hat (z.B. am Rechner eingetragen).
@@ -131,6 +144,9 @@ export function mergePayload(srv, loc) {
     volumen: loc.volumen !== undefined ? loc.volumen : (srv.volumen || {}),
     // Uebungs-Pool: Vereinigung, nichts wird verworfen.
     mem: Object.assign({}, srv.mem, loc.mem),
+    // Phasenuebergreifende Oberflaechen-Zustaende, z.B. ob der einmalige
+    // Schnellstart bereits abgeschlossen wurde.
+    meta: Object.assign({}, srv.meta, loc.meta),
     v: 3,
   };
 }

@@ -26,6 +26,9 @@ export async function mountMeter(container, { userId }) {
       <p class="som-lage" id="som-lage"></p>
       <button class="som-info-knopf" id="som-info-knopf" type="button" aria-expanded="false" aria-controls="som-info">i</button>
     </div>
+    <p class="som-einfach"><b>Optional:</b> Ohne Änderung bleibt dein Plan vollständig.
+      Für eine Priorität: <b>1.</b> Muskel öffnen · <b>2.</b> Art wählen ·
+      <b>3.</b> bei Umverteilung einen Spender bestätigen.</p>
     <div class="som-kurzhilfe" id="som-info" hidden>
       <p><b>Direkte Arbeit:</b> Der Muskel ist das Hauptziel der Übung.</p>
       <p><b>Indirekte Arbeit:</b> Der Muskel arbeitet als unterstützender Nebenmuskel mit, während eine andere Muskelgruppe das Hauptziel ist – zum Beispiel der Trizeps beim Bankdrücken oder der Bizeps beim Rudern.</p>
@@ -124,18 +127,19 @@ export async function mountMeter(container, { userId }) {
       </div></div>` : ''}
       ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
       ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt je 1 Satz ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
+      <span class="som-ed-label">1 · Muskel priorisieren</span>
       <button type="button" class="som-prio-toggle${cfg ? ' on' : ''}" data-prio-toggle ${!hatPumpplatz ? ' disabled' : ''}>
         <span aria-hidden="true">${cfg ? '✓' : '○'}</span> ${cfg ? 'Priorität aktiv' : 'Als Priorität setzen'}
       </button>
       ${!hatPumpplatz ? '<p class="som-hinweis">Für diesen Muskel gibt es in dieser Woche keinen regulären Pumpplatz.</p>' : ''}
       ${zeigeModus && hatPumpplatz ? `<div class="som-inline-plan">
-        <span class="som-ed-label">Zusatzsatz planen</span>
+        <span class="som-ed-label">2 · Art wählen</span>
         <div class="som-modusseg" role="group" aria-label="Art der Priorisierung">
           <button type="button" data-modus="tausch" class="${cfg?.modus === 'tausch' ? 'on' : ''}"><b>Umverteilen</b><small>−1 anderswo</small></button>
           <button type="button" data-modus="plus" class="${cfg?.modus === 'plus' ? 'on' : ''}"><b>Aufschlagen</b><small>+1 gesamt</small></button>
         </div>
         ${cfg?.modus === 'tausch' ? `<div class="som-spender">
-          <span class="som-ed-label">Empfohlen · meiste Wochenarbeit zuerst</span>
+          <span class="som-ed-label">3 · Spender bestätigen · meiste Wochenarbeit zuerst</span>
           ${kandidaten.length ? kandidaten.map((k) => `<button type="button" class="som-spender-wahl${istGewaehlt(k) ? ' on' : ''}"
             data-spender="${html(k.konto)}" data-spender-feld="${html(k.key)}" data-spender-name="${html(k.label)}">
             <span><b>${html(k.label)}</b><small>${html(k.name)}</small></span>

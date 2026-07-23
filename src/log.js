@@ -3,7 +3,7 @@ import { readLog, writeLog, mergePayload } from './localstore.js';
 import { TPL, LEGACY, TIER_NAMES } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
-import { auswahlGruppen, imKatalog } from './auswahl.js';
+import { auswahlGruppen, sucheAuswahlGruppen, imKatalog } from './auswahl.js';
 import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
@@ -13,6 +13,7 @@ const MR_REST = 120;
 // Anzeige-Labels der Set-Typen. Die internen Keys (load/pump/mr) bleiben, damit
 // gespeicherte Logs gueltig bleiben – nur die Beschriftung wechselt.
 const TYPE_LABEL = { load: 'HEAVY', pump: 'PUMP', mr: 'CLUSTER' };
+const LEVEL_LABEL = ['Kompakt', 'Standard', 'Voll'];
 
 /* ------------------------------------------------------------------
    Mount the LOGMAN log (v2: Level, A/B-Wochen, Rollen, Pausen-Timer)
@@ -71,6 +72,7 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     mem: p.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
     datum: p.datum || {},  // Tag|Woche -> ISO-Datum der Einheit
     volumen: { prioritaet: p.volumen?.prioritaet || {} }, // Muskel-Prioritaeten
+    meta: p.meta || {},    // phasenuebergreifende Oberflaechen-Zustaende
   };
   migrateData();
 
@@ -96,7 +98,7 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     saveStateEl.title = title;
   }
   function payloadOut() {
-    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, mem: state.mem, datum: state.datum, volumen: state.volumen, v: 3 };
+    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, mem: state.mem, datum: state.datum, volumen: state.volumen, meta: state.meta, v: 3 };
   }
   // Lokal vormerken, ohne ein gesetztes replace-Kennzeichen zu verlieren:
   // Es darf erst fallen, wenn der Server den Stand wirklich hat.
@@ -218,6 +220,11 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     return Object.values(cell).some((b) => ((b && b.sets) || []).some((arr) => (arr || []).some((s) => s && (s.w || s.r))));
   }
   const dayHasData = (day, week) => cellHasData((state.data[day] || {})[week]);
+  const hatNutzdaten = () =>
+    Object.values(state.data).some((wochen) => Object.values(wochen || {}).some(cellHasData)) ||
+    Object.values(state.ex).some((bloecke) =>
+      Object.values(bloecke || {}).some((namen) => (namen || []).some((n) => String(n || '').trim())));
+  let einstiegSichtbar = !readOnly && !state.meta.einstiegErledigt && !hatNutzdaten();
   // Fortschritt einer Einheit fuer den Punkt auf dem Tab. Zaehlt wie die Volumen-Leiste,
   // damit Punkt und "X / Y ARBEITSSÄTZE" nie widersprechen.
   function dayProgress(day, week) {
@@ -239,6 +246,28 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       });
     });
     return { any: done > 0, met: tgtTotal > 0 && done >= tgtTotal };
+  }
+  function lokalesDatum() {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }
+  // Nach einer vollstaendigen Einheit nur den naechsten sinnvollen Schritt
+  // anbieten, nie automatisch umschalten. Nach Woche 6 bleibt die bewusste
+  // Wahl "neue Phase oder Deload" unangetastet.
+  function naechsteEinheit() {
+    if (!dayProgress(state.day, state.week).met) return null;
+    const letzteWoche = isCruise(state.week) ? 7 : 6;
+    for (let week = state.week; week <= letzteWoche; week++) {
+      const tage = daysOfWeek(week);
+      const start = week === state.week ? tage.indexOf(state.day) + 1 : 0;
+      for (let i = Math.max(0, start); i < tage.length; i++) {
+        if (!dayProgress(tage[i], week).met) {
+          return { week, day: tage[i], tagNummer: i + 1 };
+        }
+      }
+    }
+    return null;
   }
   function prevFilled(day, week) {
     const d = state.data[day] || {};
@@ -278,6 +307,76 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
   const volEl = wrap.querySelector('#lg-vol');
   const phaseEl = document.querySelector('#app-phase');
   const phaseResetEl = wrap.querySelector('#lg-phasereset');
+
+  // Ein gemeinsamer, durchsuchbarer Uebungswaehler statt bis zu 199 Eintraegen
+  // im nativen Scrollrad. Der Dialog wird fuer jedes Feld wiederverwendet und
+  // liegt ausserhalb der Trainingskarten, damit deren Neuzeichnen ihn nicht
+  // mitten in einer Auswahl entfernt.
+  const picker = document.createElement('dialog');
+  picker.className = 'ex-picker';
+  picker.setAttribute('aria-label', 'Übung auswählen');
+  document.body.appendChild(picker);
+
+  function oeffneUebungswahl({ titel, gruppen, aktuell, onSelect }) {
+    picker.innerHTML = '';
+    const schale = document.createElement('div');
+    schale.className = 'ex-picker-schale';
+    schale.innerHTML = `
+      <div class="ex-picker-kopf">
+        <div><small>Übung auswählen</small><b></b></div>
+        <button type="button" class="ex-picker-zu" aria-label="Schließen">×</button>
+      </div>
+      <input class="ex-picker-suche" type="search" placeholder="Übung suchen…" autocomplete="off">
+      <div class="ex-picker-liste"></div>
+      ${aktuell ? '<button type="button" class="ex-picker-leeren">Auswahl löschen</button>' : ''}`;
+    schale.querySelector('.ex-picker-kopf b').textContent = titel;
+    picker.appendChild(schale);
+    const suche = schale.querySelector('.ex-picker-suche');
+    const liste = schale.querySelector('.ex-picker-liste');
+
+    const schliessen = () => {
+      if (picker.open) picker.close();
+      else picker.removeAttribute('open');
+    };
+    schale.querySelector('.ex-picker-zu').onclick = schliessen;
+    picker.onclick = (e) => { if (e.target === picker) schliessen(); };
+
+    const waehlen = (name) => {
+      schliessen();
+      onSelect(name);
+    };
+    const zeichneListe = () => {
+      liste.innerHTML = '';
+      const treffer = sucheAuswahlGruppen(gruppen, suche.value);
+      if (!treffer.length) {
+        const leer = document.createElement('p');
+        leer.className = 'ex-picker-kein';
+        leer.textContent = 'Keine passende Übung gefunden.';
+        liste.appendChild(leer);
+        return;
+      }
+      treffer.forEach((gruppe) => {
+        const ueberschrift = document.createElement('p');
+        ueberschrift.className = 'ex-picker-gruppe';
+        ueberschrift.textContent = gruppe.label;
+        liste.appendChild(ueberschrift);
+        gruppe.eintraege.forEach((eintrag) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'ex-picker-option' + (eintrag.n === aktuell ? ' gewaehlt' : '');
+          b.textContent = eintrag.n;
+          b.onclick = () => waehlen(eintrag.n);
+          liste.appendChild(b);
+        });
+      });
+    };
+    suche.oninput = zeichneListe;
+    schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
+    zeichneListe();
+    if (typeof picker.showModal === 'function') picker.showModal();
+    else picker.setAttribute('open', '');
+    requestAnimationFrame(() => suche.focus());
+  }
 
   // Die Lasche haengt spaeter physisch am Sticky-Header (main.js). Ein Zug nach
   // unten am Seitenanfang holt sie hervor; erst echtes Hochscrollen schliesst
@@ -424,7 +523,7 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     tierSeg.value = String(tier);
     tierSeg.disabled = cruise;                    // Level im Deload gesperrt (I)
     lvlWert.textContent = TIER_NAMES[tier];
-    ctrl.querySelector('#ci-lvl-l').textContent = cruise ? 'fest' : 'Level';
+    ctrl.querySelector('#ci-lvl-l').textContent = cruise ? 'fest' : LEVEL_LABEL[tier];
 
     const dat = state.datum[state.day + '|' + state.week] || '';
     datumEl.value = dat;
@@ -468,6 +567,8 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     if (blk.type === 'load') {
       const rirF = document.createElement('div'); rirF.className = 'fld rir';
       const rirIn = document.createElement('input'); rirIn.type = 'text'; rirIn.inputMode = 'numeric'; rirIn.value = s.rir || ''; rirIn.placeholder = 'RIR';
+      rirIn.setAttribute('aria-label', 'RIR – mögliche Wiederholungen übrig');
+      rirIn.title = 'RIR = mögliche Wiederholungen übrig';
       rirIn.disabled = readOnly; rirF.appendChild(rirIn); row.appendChild(rirF);
       if (!readOnly) rirIn.oninput = () => { s.rir = rirIn.value; queuePersist(); };
     }
@@ -597,11 +698,66 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     const prev = prevFilled(state.day, state.week);
     contentEl.innerHTML = '';
 
+    const tage = daysOfWeek(state.week);
+    const tagNummer = Math.max(0, tage.indexOf(state.day)) + 1;
+    const tageskopf = document.createElement('section');
+    tageskopf.className = 'log-tageskopf';
+    tageskopf.innerHTML = `
+      <div>
+        <small>Woche ${state.week} · Tag ${tagNummer} · ${LEVEL_LABEL[tier]}</small>
+        <b>${tpl.sub}</b>
+      </div>`;
+    contentEl.appendChild(tageskopf);
+
+    if (einstiegSichtbar) {
+      const einstieg = document.createElement('section');
+      einstieg.className = 'log-einstieg';
+      einstieg.innerHTML = `
+        <p class="log-einstieg-kicker">Dein erstes Training</p>
+        <ol>
+          <li>Übung auswählen</li>
+          <li>Gewicht und Wiederholungen eintragen</li>
+          <li>RIR eintragen – mögliche Wiederholungen übrig</li>
+        </ol>
+        <div>
+          <button type="button" class="log-einstieg-los">Training beginnen</button>
+          <a href="#faq">Wie funktioniert LOGMAN?</a>
+        </div>`;
+      einstieg.querySelector('.log-einstieg-los').onclick = () => {
+        state.meta.einstiegErledigt = true;
+        einstiegSichtbar = false;
+        const key = state.day + '|' + state.week;
+        if (!state.datum[key]) state.datum[key] = lokalesDatum();
+        queuePersist();
+        renderAll();
+      };
+      contentEl.appendChild(einstieg);
+    }
+
+    const naechste = naechsteEinheit();
+    if (!readOnly && naechste) {
+      const weiter = document.createElement('button');
+      weiter.type = 'button';
+      weiter.className = 'log-weiter';
+      weiter.innerHTML = `<span>Diese Einheit ist vollständig</span><b>Weiter mit Woche ${naechste.week} · Tag ${naechste.tagNummer} →</b>`;
+      weiter.onclick = () => {
+        state.week = naechste.week;
+        state.day = naechste.day;
+        const key = state.day + '|' + state.week;
+        if (!state.datum[key]) state.datum[key] = lokalesDatum();
+        queuePersist();
+        renderAll();
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      };
+      contentEl.appendChild(weiter);
+    }
+
     // Frueher hing hier je Block eine datalist fuer die Tipp-Hilfe am Rechner.
     // Mit der Katalog-Auswahl gibt es nichts mehr zu tippen – das <select>
     // bringt seine Liste selbst mit, auf iOS als Auswahlrad.
     wrap.querySelector('#lg-pool').innerHTML = '';
 
+    let rirHinweisOffen = true;
     tpl.blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
       if (tgt === 0) return;   // Block bei diesem Tier nicht dabei (z.B. optionale MRs bei Tier I)
@@ -620,7 +776,13 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
 
       const el = document.createElement('div'); el.className = 'block';
       const cues = [];
-      if (effType === 'load') cues.push('<span class="chip">' + effReps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');
+      if (effType === 'load') {
+        cues.push('<span class="chip">' + effReps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');
+        if (rirHinweisOffen) {
+          cues.push('<span class="chip chip-hilfe">RIR = Wdh. übrig</span>');
+          rirHinweisOffen = false;
+        }
+      }
       if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · leicht</span>', '<span class="chip">versagensnah · Partials optional</span>');
       if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
       cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + (effRest >= 60 ? (effRest / 60) + ' min' : effRest + ' s') + '</button>');
@@ -646,43 +808,34 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
         // zweite Uebung. Welche Uebungen ein Feld anbietet, entscheiden die
         // Konten des Blocks und (bei Heavy) Comp/Iso.
         //
-        // Natives <select> statt eigener Liste: iOS zeigt es als Auswahlrad,
-        // es funktioniert offline und ohne Tastatur. Die <optgroup> sind noetig,
-        // weil manche Felder lang werden – "Brust + Rücken" bietet ueber 60.
+        // Suchdialog statt langem Auswahlrad: Manche Felder bieten mehr als 60
+        // Uebungen. Zuletzt Benutztes und Muskelgruppen bleiben trotzdem als
+        // Reihenfolge erhalten.
         const aktuell = (freeEx ? entry.names[xi] : names[xi]) || '';
-        const nameIn = document.createElement('select');
+        const nameIn = document.createElement('button');
+        nameIn.type = 'button';
         nameIn.className = 'exname';
         nameIn.disabled = readOnly;
-
-        const leerOpt = document.createElement('option');
-        leerOpt.value = ''; leerOpt.textContent = 'Übung wählen…';
-        nameIn.appendChild(leerOpt);
 
         // Zuletzt Benutztes nach oben – nur bei Pump und Cluster, denn nur die
         // rotieren frei. Heavy behaelt seine Uebung ohnehin ueber die Rotation.
         const zuletzt = freeEx ? recentNames(baseMR ? 'mr' : 'pump', blk.id).map((r) => r.n) : [];
         // Feld schlaegt Block: Bei "Brust + Rücken" bietet das erste Feld nur
         // Brust an, das zweite nur Rücken – statt beide Male alles.
-        auswahlGruppen(exDef.konten || blk.konten, exDef.r || null, zuletzt).forEach((g) => {
-          const og = document.createElement('optgroup'); og.label = g.label;
-          g.eintraege.forEach((e) => {
-            const o = document.createElement('option'); o.value = e.n; o.textContent = e.n;
-            og.appendChild(o);
-          });
-          nameIn.appendChild(og);
-        });
+        const gruppen = auswahlGruppen(exDef.konten || blk.konten, exDef.r || null, zuletzt);
 
         // Ein Name aus einem alten Log, den der Katalog nicht (mehr) kennt:
         // sichtbar lassen und als solchen kennzeichnen, statt ihn stumm zu
         // verschlucken. Streicht jemand eine Zeile aus der Excel, wuerde sonst
         // rueckwirkend die Beschriftung schon geloggter Saetze verschwinden.
         if (aktuell && !imKatalog(aktuell)) {
-          const og = document.createElement('optgroup'); og.label = 'Nicht im Katalog';
-          const o = document.createElement('option'); o.value = aktuell; o.textContent = aktuell;
-          og.appendChild(o); nameIn.appendChild(og);
+          gruppen.push({ label: 'Nicht im Katalog', eintraege: [{ n: aktuell }] });
         }
         nameIn.value = aktuell;
-        const tonAnpassen = () => nameIn.classList.toggle('leer', !nameIn.value);
+        const tonAnpassen = () => {
+          nameIn.classList.toggle('leer', !nameIn.value);
+          nameIn.textContent = nameIn.value || 'Übung wählen…';
+        };
         tonAnpassen();
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
@@ -702,16 +855,25 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
         while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
 
         const memKind = baseMR ? 'mr' : 'pump';
-        if (!readOnly) nameIn.onchange = () => {
-          if (freeEx) { entry.names[xi] = nameIn.value; renderMem(prevLine, entry.names[xi], memKind); }
-          else { names[xi] = nameIn.value; }
-          tonAnpassen();
-          queuePersist();
-          // Eine Pump-Wahl kann eine gespeicherte Prioritaet oder deren Spender
-          // aktivieren/deaktivieren. Die Satzzahl muss deshalb sofort neu
-          // berechnet werden, nicht erst beim naechsten Seitenwechsel.
-          if (freeEx) renderDay();
-        };
+        if (!readOnly) nameIn.onclick = () => oeffneUebungswahl({
+          titel: blockMus,
+          gruppen,
+          aktuell: nameIn.value,
+          onSelect: (wert) => {
+            nameIn.value = wert;
+            if (freeEx) { entry.names[xi] = wert; renderMem(prevLine, entry.names[xi], memKind); }
+            else { names[xi] = wert; }
+            tonAnpassen();
+            state.meta.einstiegErledigt = true;
+            einstiegSichtbar = false;
+            contentEl.querySelector('.log-einstieg')?.remove();
+            queuePersist();
+            // Eine Pump-Wahl kann eine gespeicherte Prioritaet oder deren Spender
+            // aktivieren/deaktivieren. Die Satzzahl muss deshalb sofort neu
+            // berechnet werden, nicht erst beim naechsten Seitenwechsel.
+            if (freeEx) renderDay();
+          },
+        });
 
         if (freeEx) {
           renderMem(prevLine, entry.names[xi], memKind);
@@ -781,7 +943,8 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein Pump- und Cluster-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
     // Pool retten, bevor die Wochendaten fallen. Neuere Werte gewinnen.
     state.mem = Object.assign({}, state.mem, harvestMem(state.data));
-    state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {}; state.datum = {}; state.volumen = {};
+    state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {}; state.datum = {};
+    state.volumen = { prioritaet: {} };
     state.week = 1; state.day = 'OK-A';
     clearTimeout(saveTimer);
     // Leeren ist eine Absicht: Dieser Stand ersetzt den Server, auch wenn der
@@ -978,8 +1141,8 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       window.removeEventListener('scroll', somScrollFn);
       window.removeEventListener('wheel', somWheelFn);
       container.classList.remove('som-gezogen');
-      // Die Felder bleiben sichtbar, damit die Leiste auf jeder Seite gleich
-      // aussieht – aber sie sind ohne Log wirkungslos und werden stillgelegt.
+      // Die App-Huelle blendet die Felder auf Unterseiten aus; stilllegen wir
+      // sie trotzdem, damit kein verdecktes natives Element reagieren kann.
       const slots = document.querySelector('#app-slots');
       if (slots) slots.querySelectorAll('select,input').forEach((el) => { el.disabled = true; });
       const t = document.querySelector('#app-timer');
@@ -990,6 +1153,7 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       if (ph) ph.hidden = true;
       // Der Punkt gehoert dem Log – ausserhalb gibt es nichts zu synchronisieren.
       if (saveStateEl) saveStateEl.hidden = true;
+      picker.remove();
     },
   };
 }

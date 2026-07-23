@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { passende, auswahlGruppen, imKatalog, eintragVon } from './auswahl.js';
+import { passende, auswahlGruppen, sucheAuswahlGruppen, imKatalog, eintragVon } from './auswahl.js';
 import { KATALOG, KONTEN } from './katalog.js';
 import { TPL } from './template.js';
 
@@ -62,6 +62,25 @@ describe('auswahlGruppen', () => {
   it('lässt leere Gruppen weg', () => {
     const g = auswahlGruppen(['Brust', 'Waden'], 'Comp', [], K);
     expect(g.map((x) => x.label)).toEqual(['Brust']);
+  });
+});
+
+describe('sucheAuswahlGruppen', () => {
+  const gruppen = auswahlGruppen(['Brust', 'Lat'], null, [], K);
+
+  it('findet unabhängig von Großschreibung und mit mehreren Wörtern', () => {
+    const treffer = sucheAuswahlGruppen(gruppen, 'comp lat');
+    expect(treffer.flatMap((g) => g.eintraege.map((e) => e.n))).toEqual(['C Comp Lat']);
+  });
+
+  it('behält bei leerer Suche Gruppen und Reihenfolge', () => {
+    expect(sucheAuswahlGruppen(gruppen, '')).toEqual(gruppen);
+  });
+
+  it('entfernt leere Gruppen', () => {
+    expect(sucheAuswahlGruppen(gruppen, 'iso')).toEqual([
+      { label: 'Brust', eintraege: [K[1]] },
+    ]);
   });
 });
 

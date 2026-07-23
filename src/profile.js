@@ -2,6 +2,7 @@ import { supabase } from './supabase.js';
 import { signOut } from './auth.js';
 import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
+import { readLog, readNotizen, clearUserData } from './localstore.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -45,6 +46,18 @@ function avatarNode(profile, email) {
   div.className = 'avatar avatar-fallback';
   div.textContent = initials(profile.full_name, email);
   return div;
+}
+
+function downloadJson(name, daten) {
+  const blob = new Blob([JSON.stringify(daten, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export function mountProfile(container, { session, profile, onProfileUpdated }) {
@@ -198,6 +211,95 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   });
   thCard.appendChild(seg);
   wrap.appendChild(thCard);
+
+  // --- Eigene Daten -------------------------------------------------------
+  // Bewusst unten im Profil statt im Hauptmenue: wichtig fuer Kontrolle und
+  // Datenschutz, aber keine Handlung waehrend des Trainings.
+  const dataCard = document.createElement('div');
+  dataCard.className = 'card profile-daten';
+  dataCard.innerHTML = `
+    <h2 class="section-title" style="font-size:18px;margin:0 0 6px">Meine Daten</h2>
+    <p class="profile-hinweis">Exportiert Profil, Trainingslog und Notizen als JSON-Datei.</p>
+    <button class="btn btn-block" type="button" data-export>Daten exportieren</button>
+    <div class="profile-gefahr">
+      <p><b>Account löschen</b><br>Entfernt Account, Trainingsdaten und Notizbuch endgültig.</p>
+      <button class="btn btn-block btn-danger" type="button" data-account-weg>Account und Daten löschen</button>
+    </div>
+    <div class="profile-daten-status" aria-live="polite"></div>`;
+  wrap.appendChild(dataCard);
+
+  const datenStatus = dataCard.querySelector('.profile-daten-status');
+  dataCard.querySelector('[data-export]').onclick = async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    datenStatus.textContent = 'Export wird erstellt…';
+    try {
+      const lokalLog = readLog(session.user.id)?.payload || null;
+      const lokalNotizen = readNotizen(session.user.id) || null;
+      const [logRes, notizRes] = await Promise.all([
+        supabase.from('training_logs').select('payload, updated_at').eq('user_id', session.user.id).maybeSingle(),
+        supabase.from('notizen').select('id, titel, text, bilder, created_at, updated_at').order('updated_at', { ascending: false }),
+      ]);
+      if (logRes.error && !lokalLog) throw logRes.error;
+      if (notizRes.error && !lokalNotizen) throw notizRes.error;
+      const heute = new Date().toISOString().slice(0, 10);
+      downloadJson(`logman-export-${heute}.json`, {
+        exportiert_am: new Date().toISOString(),
+        profil: {
+          id: session.user.id,
+          email,
+          name: profile.full_name || '',
+          rolle: profile.role,
+          darstellung: getTheme(),
+        },
+        training: logRes.data || (lokalLog ? { payload: lokalLog, lokal: true } : null),
+        notizen: notizRes.data || lokalNotizen || [],
+      });
+      datenStatus.textContent = 'Export heruntergeladen.';
+    } catch (err) {
+      datenStatus.textContent = 'Export fehlgeschlagen. Bitte Verbindung prüfen.';
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  dataCard.querySelector('[data-account-weg]').onclick = async (e) => {
+    const bestaetigung = prompt('Der Account und alle Daten werden endgültig gelöscht.\n\nTippe LÖSCHEN zum Bestätigen:');
+    if (bestaetigung !== 'LÖSCHEN') return;
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    datenStatus.textContent = 'Account wird gelöscht…';
+    let bilderEntfernt = false;
+    try {
+      // Vor dem Entfernen der separat gespeicherten Bilder pruefen, ob die
+      // serverseitige Loeschfunktion bereits ausgerollt und erreichbar ist.
+      const { error: bereitFehler } = await supabase.rpc('delete_own_account', { nur_pruefen: true });
+      if (bereitFehler) throw bereitFehler;
+      // Storage-Objekte haben keinen Fremdschluessel zu auth.users und muessen
+      // deshalb vor dem Account geloescht werden. Tabellenzeilen fallen danach
+      // ueber ON DELETE CASCADE.
+      const { data: notizen, error: notizFehler } = await supabase
+        .from('notizen').select('bilder').eq('user_id', session.user.id);
+      if (notizFehler) throw notizFehler;
+      const bilder = (notizen || []).flatMap((n) => Array.isArray(n.bilder) ? n.bilder : []);
+      if (bilder.length) {
+        const { error: bildFehler } = await supabase.storage.from('notizbuch').remove(bilder);
+        if (bildFehler) throw bildFehler;
+        bilderEntfernt = true;
+      }
+      const { error } = await supabase.rpc('delete_own_account', { nur_pruefen: false });
+      if (error) throw error;
+      clearUserData(session.user.id);
+      await supabase.auth.signOut({ scope: 'local' });
+      location.hash = '';
+      location.reload();
+    } catch (err) {
+      btn.disabled = false;
+      datenStatus.textContent = bilderEntfernt
+        ? 'Der Account blieb bestehen; Notizbuchbilder wurden bereits entfernt.'
+        : 'Löschen fehlgeschlagen. Es wurden keine Kontodaten gelöscht.';
+    }
+  };
 
   // --- Abmelden ----------------------------------------------------------
   // Frueher stand der Knopf dauerhaft in der Kopfleiste. Dort war er staendig
