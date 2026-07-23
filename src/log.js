@@ -28,7 +28,7 @@ const TUTORIAL_SETUP = [
      readOnly  – true for the admin viewing a customer (no editing/saving)
    Returns { destroy } to remove the sticky save bar on nav.
    ------------------------------------------------------------------ */
-export async function mountLog(container, { userId, readOnly = false, zeigeSomPeek = false }) {
+export async function mountLog(container, { userId, readOnly = false }) {
   // Local-first laden: Der Server ist die Sicherungskopie, nicht die Voraussetzung.
   // Nur wenn lokal ungespeicherte Aenderungen liegen, wird zusammengefuehrt –
   // sonst gewinnt der Server (sein Stand ist dann identisch mit dem lokalen).
@@ -238,6 +238,8 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     : -1;
   let tutorialFx = null;
   let tutorialFxTimer = [];
+  let tutorialLetzterBlock = null;
+  let tutorialScrollAufFeld = false;
 
   // Aus dem FAQ kann das Tutorial auch spaeter erneut gestartet werden.
   try {
@@ -320,6 +322,8 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     state.meta.tutorialSchritt = schritt;
     tutorialAktiv = true;
     einstiegSichtbar = false;
+    tutorialLetzterBlock = null;
+    tutorialScrollAufFeld = false;
     if (schritt < TUTORIAL_SETUP.length) {
       const ziel = TUTORIAL_SETUP[Math.max(0, schritt)];
       state.week = ziel.week;
@@ -366,16 +370,18 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     document.body.appendChild(tutorialFx);
     requestAnimationFrame(() => tutorialFx?.classList.add('an'));
     const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    tutorialFxTimer.push(setTimeout(() => tutorialBeenden(false), reduziert ? 280 : 1100));
+    tutorialFxTimer.push(setTimeout(() => tutorialBeenden(false), reduziert ? 500 : 2850));
     tutorialFxTimer.push(setTimeout(() => {
       tutorialFx?.remove();
       tutorialFx = null;
-    }, reduziert ? 500 : 1650));
+    }, reduziert ? 700 : 3250));
   }
   function tutorialScrollen() {
     if (!tutorialAktiv || tutorialSchritt < 0) return;
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      const ziel = contentEl.querySelector('.tutorial-aktiv');
+      const ziel = tutorialScrollAufFeld
+        ? contentEl.querySelector('.tutorial-scrollziel')
+        : contentEl.querySelector('.tutorial-aktiv');
       const karte = contentEl.querySelector('.log-tutorial');
       if (!ziel || !karte) return;
       const kopfHoehe = parseFloat(
@@ -407,12 +413,7 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
   // die Beschreibung des Tages. Dadurch faengt der erste Trainingsblock
   // unmittelbar unter der Kopfleiste an, statt nach drei Reihen Bedienelementen.
   wrap.innerHTML = `
-    ${readOnly ? '' : `<div class="som-tab" id="lg-som-tab"${zeigeSomPeek ? ' data-peek="true"' : ''}>
-      <a class="som-tab-ziel" id="lg-som-ziel" href="#meter" tabindex="-1" aria-label="Set-O-Mat öffnen">
-        <span>Set-O</span><small>Öffnen</small>
-      </a>
-    </div>`}
-    <div id="lg-content" class="erstblock${readOnly ? '' : ' mit-som-hinweis'}"></div>
+    <div id="lg-content" class="erstblock"></div>
     <div class="volbar" id="lg-vol"></div>
     <div id="lg-phasereset"></div>
     <div id="lg-pool" hidden></div>`;
@@ -502,39 +503,6 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     if (typeof picker.showModal === 'function') picker.showModal();
     else picker.setAttribute('open', '');
     requestAnimationFrame(() => suche.focus());
-  }
-
-  // Die Lasche haengt spaeter physisch am Sticky-Header (main.js). Ein Zug nach
-  // unten am Seitenanfang holt sie hervor; erst echtes Hochscrollen schliesst
-  // sie wieder. Die ganze sichtbare Flaeche ist der Link zum Set-O-Mat.
-  const somTab = wrap.querySelector('#lg-som-tab');
-  let somTouchStart = null;
-  let somOffen = false;
-  const setSomOffen = (offen) => {
-    if (!somTab || somOffen === offen) return;
-    somOffen = offen;
-    somTab.classList.remove('peek');
-    somTab.classList.toggle('gezogen', offen);
-    container.classList.toggle('som-gezogen', offen);
-    somTab.querySelector('.som-tab-ziel').tabIndex = offen ? 0 : -1;
-  };
-  const somTouchStartFn = (e) => {
-    somTouchStart = window.scrollY <= 1 ? e.touches[0]?.clientY ?? null : null;
-  };
-  const somTouchMoveFn = (e) => {
-    if (somTouchStart == null) return;
-    const y = e.touches[0]?.clientY;
-    if (Number.isFinite(y) && y - somTouchStart > 16) setSomOffen(true);
-  };
-  const somTouchEndFn = () => { somTouchStart = null; };
-  const somScrollFn = () => { if (somOffen && window.scrollY > 12) setSomOffen(false); };
-  const somWheelFn = (e) => { if (window.scrollY <= 1 && e.deltaY < -8) setSomOffen(true); };
-  if (somTab) {
-    window.addEventListener('touchstart', somTouchStartFn, { passive: true });
-    window.addEventListener('touchmove', somTouchMoveFn, { passive: true });
-    window.addEventListener('touchend', somTouchEndFn, { passive: true });
-    window.addEventListener('scroll', somScrollFn, { passive: true });
-    window.addEventListener('wheel', somWheelFn, { passive: true });
   }
 
   // ---- untere Bedienleiste -----------------------------------------
@@ -841,8 +809,9 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       einstieg.className = 'log-einstieg';
       einstieg.innerHTML = `
         <p class="log-einstieg-kicker">LOGMAN einrichten</p>
-        <p class="log-einstieg-text">Das kurze Tutorial führt dich automatisch durch
-          die Heavy-Übungen für Woche 1 und 2 und zeigt danach die Satzeingabe.</p>
+        <p class="log-einstieg-text">Das kurze Tutorial erklärt zuerst den Plan.
+          Danach legst du die Übungen fest, die sich automatisch wiederholen,
+          und lernst die Satzeingabe.</p>
         <div>
           <button type="button" class="log-einstieg-los">Tutorial starten</button>
           <button type="button" class="log-einstieg-skip">Überspringen</button>
@@ -871,23 +840,26 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
           </div>
           <h2>So funktioniert dein Plan</h2>
-          <p class="log-tutorial-lead">Einmal verstehen, dann einfach trainieren.</p>
+          <p class="log-tutorial-lead">Du trainierst sechs Wochen mit drei Satzarten.</p>
           <div class="tutorial-basics">
             <div class="tutorial-basic">
               <b>6</b><span><strong>Wochen</strong>A und B wechseln sich ab</span>
             </div>
             <div class="tutorial-basic">
-              <b>H</b><span><strong>Heavy festlegen</strong>einmal in Woche 1 und 2</span>
+              <b>H</b><span><strong>Heavy</strong>schwerere Arbeit · Übungen einmal festlegen</span>
             </div>
             <div class="tutorial-basic">
-              <b>P+C</b><span><strong>Pump & Cluster</strong>in jeder Einheit frei wählbar</span>
+              <b>P+C</b><span><strong>Pump & Cluster</strong>zwei weitere Satzarten · Übungen frei</span>
+            </div>
+            <div class="tutorial-basic">
+              <b>C/I</b><span><strong>Comp & Iso</strong>große Mehrgelenksübung · gezielte Einzelmuskelübung</span>
             </div>
           </div>
           <p><b>Woche 1 ist deine A-Auswahl</b> für Woche 1, 3 und 5.
             <b>Woche 2 ist deine B-Auswahl</b> für Woche 2, 4 und 6.
             Die App übernimmt deine Heavy-Übungen danach automatisch.</p>
           <button type="button" class="log-tutorial-weiter" data-tutorial-beginnen>
-            Heavy-Setup starten →
+            Heavy-Auswahl starten <span class="tutorial-pf">→</span>
           </button>`;
         karte.querySelector('[data-tutorial-beginnen]').onclick = () => {
           tutorialZielSetzen(0);
@@ -908,9 +880,13 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
           <h2>${schritt.titel} · Heavy</h2>
           <p>Wähle alle Heavy-Übungen dieses Tages. Diese <b>${schritt.gruppe.startsWith('A') ? 'A-Auswahl' : 'B-Auswahl'}</b>
             übernimmt die App automatisch in alle ${schritt.week === 1 ? 'ungeraden Wochen 1, 3 und 5' : 'geraden Wochen 2, 4 und 6'}.</p>
+          <p class="log-tutorial-typen"><b>Comp</b> = große Mehrgelenksübung ·
+            <b>Iso</b> = gezielte Einzelmuskelübung</p>
           <p class="log-tutorial-stand"><b>${tutorialStatus.gewaehlt} / ${tutorialStatus.gesamt}</b> Heavy-Übungen gewählt</p>
           <button type="button" class="log-tutorial-weiter" data-tutorial-weiter ${fertig ? '' : 'data-offen'}>
-            ${fertig ? `Weiter: ${schritt.folgt} →` : 'Zur nächsten fehlenden Übung ↓'}
+            ${fertig
+              ? `Weiter: ${schritt.folgt} <span class="tutorial-pf">→</span>`
+              : 'Zur nächsten fehlenden Übung <span class="tutorial-pf">↓</span>'}
           </button>`;
         karte.querySelector('[data-tutorial-weiter]').onclick = () => {
           if (!fertig) { tutorialScrollen(); return; }
@@ -1047,7 +1023,10 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
         tonAnpassen();
         if (tutorialAktiv && tutorialSchritt >= 0 && tutorialSchritt < TUTORIAL_SETUP.length &&
             effType === 'load' && !nameIn.value && !tutorialWahlMarkiert) {
+          tutorialScrollAufFeld = tutorialLetzterBlock === blk.id;
+          tutorialLetzterBlock = blk.id;
           nameIn.classList.add('tutorial-ziel');
+          hd.classList.add('tutorial-scrollziel');
           el.classList.add('tutorial-aktiv');
           tutorialWahlMarkiert = true;
         }
@@ -1356,12 +1335,6 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       clearInterval(timerId);
       clearInterval(retryId);
       window.removeEventListener('online', retrySync);
-      window.removeEventListener('touchstart', somTouchStartFn);
-      window.removeEventListener('touchmove', somTouchMoveFn);
-      window.removeEventListener('touchend', somTouchEndFn);
-      window.removeEventListener('scroll', somScrollFn);
-      window.removeEventListener('wheel', somWheelFn);
-      container.classList.remove('som-gezogen');
       // Die App-Huelle blendet die Felder auf Unterseiten aus; stilllegen wir
       // sie trotzdem, damit kein verdecktes natives Element reagieren kann.
       const slots = document.querySelector('#app-slots');

@@ -508,11 +508,11 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ctrlbar.nur-menue .inner{max-width:104px;padding:0;pointer-events:auto}
 .ctrlbar.nur-menue .inner::before,.ctrlbar.nur-menue .inner::after{display:none}
 .ctrlbar.nur-menue .ci.menue{flex:1 1 auto;min-height:54px;
-  background-color:rgba(217,187,247,.82);
+  background-color:rgba(217,187,247,.58);
   border:var(--bw) solid var(--ink);border-radius:15px;
-  -webkit-backdrop-filter:blur(8px) saturate(1.25);backdrop-filter:blur(8px) saturate(1.25)}
+  -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25)}
 :root[data-theme="dark"] .ctrlbar.nur-menue .ci.menue{
-  background-color:rgba(89,68,126,.82);color:#fff}
+  background-color:rgba(89,68,126,.58);color:#fff}
 :root[data-theme="dark"] .ctrlbar.nur-menue .ci.menue .lbl{color:#fff}
 /* Das × liegt absolut rechts und zaehlt nicht zur Breite – sonst waere die
    Zahl um dessen halbe Breite nach links verschoben statt wirklich mittig. */
@@ -531,7 +531,6 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Stand vorher auf 22px, damit der Anfang der Liste als Anfang liest – im
    Gebrauch wirkte der Sonderabstand aber nur wie ein Versehen. */
 .erstblock{padding-top:14px}
-.erstblock.mit-som-hinweis{padding-top:14px}
 
 /* Kompakter Tageskopf: beantwortet vor dem ersten Block drei Fragen, ohne eine
    weitere Bedienzeile zu bauen – wo bin ich, welches Level, was trainiere ich? */
@@ -548,18 +547,18 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .log-einstieg{margin-bottom:12px;padding:13px;background:var(--surface);border:var(--bw) solid var(--ink);
   border-radius:var(--r-karte)}
 .log-einstieg-kicker{margin:0 0 8px;font-family:var(--display);font-style:italic;font-weight:700;
-  text-transform:uppercase;font-size:17px}
+  text-transform:uppercase;font-size:19px}
 .log-einstieg ol{margin:0;padding-left:21px;color:var(--muted);font-size:13px;line-height:1.65}
 .log-einstieg ol li::marker{font-weight:800;color:var(--prio)}
-.log-einstieg-text{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.log-einstieg-text{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
 .log-einstieg>div{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;margin-top:11px}
-.log-einstieg-los{flex:1;padding:10px;border:var(--bw) solid var(--ink);border-radius:var(--r);
+.log-einstieg-los{flex:1;padding:11px;border:var(--bw) solid var(--ink);border-radius:var(--r);
   background:var(--pink);color:var(--ink);font-family:var(--display);font-style:italic;
-  font-weight:700;text-transform:uppercase}
-.log-einstieg-skip{padding:10px;border:var(--bw) solid var(--ink);border-radius:var(--r);
+  font-size:14px;font-weight:700;text-transform:uppercase}
+.log-einstieg-skip{padding:11px;border:var(--bw) solid var(--ink);border-radius:var(--r);
   background:var(--surface2);color:var(--ink);font-family:var(--display);font-style:italic;
-  font-weight:700;text-transform:uppercase}
-.log-einstieg a{grid-column:1/-1;font-size:11px;font-weight:700;color:var(--ink);
+  font-size:14px;font-weight:700;text-transform:uppercase}
+.log-einstieg a{grid-column:1/-1;font-size:12px;font-weight:700;color:var(--ink);
   text-underline-offset:2px;text-align:center}
 
 /* Gefuehrtes Heavy-Setup. Die Karte ist genauso breit wie die untere
@@ -578,33 +577,35 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 :root[data-theme="dark"] .log-tutorial{background-color:rgba(30,33,42,.97)}
 .log-tutorial-kopf{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .log-tutorial-kopf span{padding:4px 7px;border-radius:999px;background:var(--prio);
-  color:#fff;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
-.log-tutorial-kopf button{width:28px;height:28px;padding:0;border:var(--bw) solid var(--ink);
-  border-radius:50%;background:var(--surface2);color:var(--ink);font-size:18px;line-height:1}
+  color:#fff;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.log-tutorial-kopf button{width:32px;height:32px;padding:0;border:var(--bw) solid var(--ink);
+  border-radius:50%;background:var(--surface2);color:var(--ink);font-size:20px;line-height:1}
 .log-tutorial h2{margin:1px 0 6px;font-family:var(--display);font-style:italic;
-  font-size:17px;text-transform:uppercase}
-.log-tutorial p{margin:0 0 7px;color:var(--muted);font-size:11.5px;line-height:1.45}
+  font-size:20px;text-transform:uppercase}
+.log-tutorial p{margin:0 0 9px;color:var(--muted);font-size:13px;line-height:1.45}
 .log-tutorial p b{color:var(--ink)}
 .log-tutorial-lead{font-weight:700}
 .tutorial-fortschritt{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:7px 0 8px}
 .tutorial-fortschritt i{height:4px;border:1px solid var(--prio);background:transparent}
 .tutorial-fortschritt i.an{background:var(--prio)}
 .tutorial-basics{display:grid;gap:6px;margin:9px 0}
-.tutorial-basic{display:flex;align-items:center;gap:9px;padding:7px 8px;
+.tutorial-basic{display:flex;align-items:center;gap:10px;padding:8px 9px;
   border:1.5px solid var(--ink);border-radius:10px;background:var(--prio-wash)}
-.tutorial-basic>b{display:flex;align-items:center;justify-content:center;flex:0 0 38px;height:34px;
+.tutorial-basic>b{display:flex;align-items:center;justify-content:center;flex:0 0 43px;height:38px;
   border:2px solid var(--ink);border-radius:8px;background:var(--prio);color:#fff;
-  font-family:var(--display);font-style:italic;font-size:16px}
+  font-family:var(--display);font-style:italic;font-size:18px}
 .tutorial-basic span{display:flex;flex-direction:column;min-width:0;color:var(--muted);
-  font-size:10.5px;line-height:1.3}
-.tutorial-basic strong{color:var(--ink);font-size:11.5px;text-transform:uppercase}
-.log-tutorial-stand{padding:6px 8px;background:var(--prio-wash);border-left:4px solid var(--prio)}
-.log-tutorial-weiter{width:100%;padding:9px;border:var(--bw) solid var(--ink);border-radius:var(--r);
+  font-size:12px;line-height:1.35}
+.tutorial-basic strong{color:var(--ink);font-size:13px;text-transform:uppercase}
+.log-tutorial-typen{padding:7px 8px;border:1.5px dashed var(--ink);background:var(--surface2)}
+.log-tutorial-stand{padding:8px 9px;background:var(--prio-wash);border-left:4px solid var(--prio)}
+.log-tutorial-weiter{width:100%;padding:11px;border:var(--bw) solid var(--ink);border-radius:var(--r);
   background:var(--pink);color:var(--ink);font-family:var(--display);font-style:italic;
-  font-weight:700;text-transform:uppercase}
+  font-size:15px;font-weight:700;text-transform:uppercase}
+.tutorial-pf{font-family:var(--mono);font-style:normal;font-size:19px;margin-left:3px;line-height:1}
 .log-tutorial-weiter[data-offen]{background:var(--prio);color:#fff}
-.log-tutorial-ende{display:grid;gap:7px;margin-top:9px}
-.log-tutorial-ende a{text-align:center;color:var(--ink);font-size:11px;font-weight:700;text-underline-offset:2px}
+.log-tutorial-ende{display:grid;gap:9px;margin-top:11px}
+.log-tutorial-ende a{text-align:center;color:var(--ink);font-size:13px;font-weight:700;text-underline-offset:2px}
 .block.tutorial-aktiv{position:relative;z-index:41;outline:4px solid var(--pink);outline-offset:3px}
 .tutorial-ziel{position:relative;z-index:2;outline:4px solid var(--pink)!important;outline-offset:3px;
   animation:tutorialPuls 1.3s ease-in-out infinite}
@@ -621,8 +622,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   transform:rotate(-8deg) scale(1.2)}
 .tutorial-startfx.an{animation:tutorialStartEin .28s steps(4,end) forwards}
 .tutorial-startfx-inhalt{position:relative;display:flex;flex-direction:column;align-items:center;
-  gap:9px;padding:24px;text-align:center;opacity:0}
-.tutorial-startfx.an .tutorial-startfx-inhalt{animation:tutorialStartText 1.25s .18s steps(4,end) both}
+  gap:20px;padding:30px;text-align:center;opacity:0}
+.tutorial-startfx.an .tutorial-startfx-inhalt{animation:tutorialStartText 2.75s .18s cubic-bezier(.16,.84,.32,1) both}
 .tutorial-startfx small,.tutorial-startfx span{font-family:var(--mono);font-weight:800;
   text-transform:uppercase;letter-spacing:.08em}
 .tutorial-startfx small{font-size:11px}
@@ -631,9 +632,10 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .tutorial-startfx span{padding:7px 10px;border:2px solid #fff;font-size:12px}
 @keyframes tutorialStartEin{to{opacity:1;transform:scaleY(1)}}
 @keyframes tutorialStartText{
-  0%{opacity:0;transform:scale(1.35)}
-  25%,75%{opacity:1;transform:scale(1)}
-  100%{opacity:0;transform:scale(.92)}
+  0%{opacity:0;transform:scale(.72)}
+  12%{opacity:1;transform:scale(1)}
+  82%{opacity:1;transform:scale(1.24)}
+  100%{opacity:0;transform:scale(1.28)}
 }
 
 /* Erst nach einer vollstaendigen Einheit. Der Nutzer entscheidet selbst, ob
@@ -644,29 +646,6 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .log-weiter span{font-size:9px;font-weight:800;text-transform:uppercase;opacity:.8}
 .log-weiter b{font-family:var(--display);font-style:italic;font-size:12px;text-transform:uppercase;text-align:right}
 .chip-hilfe{border-style:dashed;color:var(--muted)}
-/* Die violette Retro-Lasche sitzt am Sticky-Header und parkt vollstaendig
-   dahinter. Beim Herunterziehen wird sie zugleich breiter und laenger. */
-.som-tab{position:absolute;z-index:0;top:calc(100% + 2px);left:50%;width:60px;height:20px;overflow:hidden;
-  transform:translate(-50%,-26px);background:var(--prio);border:var(--bw) solid var(--ink);border-top:0;
-  border-radius:0 0 9px 9px;pointer-events:none;
-  transition:transform .22s ease,width .22s ease,height .22s ease}
-.som-tab.gezogen{width:96px;height:46px;transform:translate(-50%,0);pointer-events:auto}
-.som-tab-ziel{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:1px;padding:3px 6px;background:transparent;color:#fff;text-decoration:none;
-  font-family:var(--display);font-style:italic;font-weight:700;text-transform:uppercase;white-space:nowrap}
-.som-tab-ziel span{font-size:12px;line-height:1}
-.som-tab-ziel small{font-size:9px;line-height:1;opacity:0;transition:opacity .12s ease}
-.som-tab.gezogen .som-tab-ziel small{opacity:1;transition-delay:.08s}
-/* Zwei kurze Hinweise nach der Rueckkehr aus einer Unterseite; danach liegt
-   die Lasche wieder unsichtbar hinter dem Header. */
-.som-tab.peek{animation:som-tab-peek 2.6s ease-in-out both}
-@keyframes som-tab-peek{
-  0%,6%,30%,38%,62%,100%{width:60px;height:20px;transform:translate(-50%,-26px)}
-  14%,22%,46%,54%{width:70px;height:28px;transform:translate(-50%,0)}
-}
-#view{transition:padding-top .22s ease}
-#view.som-gezogen{padding-top:46px}
-
 /* Kopf der Unterseiten: Titel links, Rueckweg rechts. Der Chip ist der
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
 .seitenkopf{display:flex;align-items:center;gap:10px;padding:48px 90px 10px 0}
@@ -682,8 +661,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .zurueck .pf{font-family:var(--mono);font-style:normal;font-size:16px;margin-right:3px;line-height:1}
 
 /* ---------- Set-O-Meter ----------
-   Eigene Planungsseite, erreichbar ueber den prominenten Einstieg im Log und
-   das App-Menue. */
+   Eigene Planungsseite, erreichbar ueber das App-Menue. */
 .som-statuskopf{display:flex;align-items:stretch;gap:8px;margin-bottom:8px;padding:8px;
   background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
 .som-lage{display:grid;grid-template-columns:repeat(2,1fr);gap:0;flex:1;margin:0;font-family:var(--mono)}

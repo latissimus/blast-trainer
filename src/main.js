@@ -42,7 +42,6 @@ let splash = false;         // frisch eingeloggt: einmal das Logo zeigen
 let topbarObserver = null;   // liefert Unterseiten die echte Sticky-Header-Hoehe
 let aktiveAnsicht = null;    // fuer die Rueckkehr an dieselbe Stelle im Log
 let logScrollY = 0;
-let somPeekGezeigt = false;   // pro App-Start genau ein kurzer Hinweis
 
 // Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
 // Fehler). In der App selbst bleibt es draussen: Dort willst du eintragen, nicht
@@ -209,7 +208,6 @@ function navAvatar() {
 function renderChrome() {
   aktiveAnsicht = null;
   logScrollY = 0;
-  somPeekGezeigt = false;
   const isAdmin = profile?.role === 'admin';
   app.innerHTML = `
     <header class="topbar">
@@ -334,11 +332,9 @@ function setNavActive(view) {
 async function routeView() {
   if (aktiveAnsicht === 'log') logScrollY = window.scrollY;
   cleanupActive();
-  // Set-O-Lasche und Zurueck-Chip muessen physisch am Sticky-Header haengen.
-  // Auf iOS wandert der Header beim Gummiband nach unten, fixed Elemente aber
-  // nicht – dadurch erschienen sie im Header. Vor dem Ansichtswechsel alte
-  // angedockte Elemente entfernen; die neue Ansicht wird unten neu angedockt.
-  app.querySelectorAll('.topbar > .som-tab, .topbar > .zurueck')
+  // Der Zurueck-Chip haengt physisch am Sticky-Header. Vor dem
+  // Ansichtswechsel alte angedockte Elemente entfernen.
+  app.querySelectorAll('.topbar > .zurueck')
     .forEach((el) => el.remove());
   const view = document.getElementById('view');
   if (!view) return;
@@ -353,12 +349,9 @@ async function routeView() {
   view.innerHTML = '';
   try {
     if (hash === 'log') {
-      const zeigeSomPeek = !somPeekGezeigt;
-      somPeekGezeigt = true;
       const v = await mountLog(view, {
         userId: session.user.id,
         readOnly: false,
-        zeigeSomPeek,
       });
       guard(v);
     } else if (hash === 'profile') {
@@ -383,19 +376,7 @@ async function routeView() {
   if (token !== routeToken) return;
   const topbar = app.querySelector('.topbar');
   if (topbar) {
-    const pull = view.querySelector('.som-tab');
     const zurueck = view.querySelector('.zurueck');
-    if (pull) {
-      topbar.appendChild(pull);
-      if (pull.dataset.peek === 'true') requestAnimationFrame(() => {
-        if (token !== routeToken) return;
-        pull.classList.add('peek');
-        // animation-fill-mode wuerde den Peek-Zustand sonst am Element halten.
-        // Beim ersten manuellen Ziehen konkurrierte er dann mit der Transition
-        // und liess Breite/Hoehe scheinbar in einem Sprung entstehen.
-        pull.addEventListener('animationend', () => pull.classList.remove('peek'), { once: true });
-      });
-    }
     if (zurueck) topbar.appendChild(zurueck);
   }
   aktiveAnsicht = hash;

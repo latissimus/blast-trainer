@@ -15,7 +15,7 @@ export function mountFaq(container) {
 
     <details class="faq" open><summary>Wie starte ich mein erstes Training?</summary>
       <div class="faq-a">
-        <p><b>Starte im Log das kurze Tutorial.</b> Es führt dich nacheinander durch die Heavy-Auswahl für Woche 1 und 2 und erklärt anschließend die Satzeingabe. Du kannst es jederzeit beenden.</p>
+        <p><b>Starte im Log das kurze Tutorial.</b> Es erklärt zuerst die drei Satzarten und führt dich danach durch die feste Übungsauswahl für Woche 1 und 2. Anschließend lernst du die Satzeingabe. Du kannst es jederzeit beenden.</p>
         <p>Einen Speichern-Knopf brauchst du nicht. Jede Eingabe wird sofort auf dem Gerät gesichert und bei Verbindung automatisch hochgeladen.</p>
         <a class="faq-tutorial-start" href="#log" data-tutorial-start>Tutorial starten</a>
       </div>
