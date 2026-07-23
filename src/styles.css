@@ -504,8 +504,16 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 :root[data-theme="dark"] .ctrlbar.timer-an .timerfeld.done{color:#0E5B30}
 .ctrlbar.timer-an .slots,.ctrlbar.timer-an .menue{display:none}
 .ctrlbar.nur-menue .slots{display:none}
-.ctrlbar.nur-menue .inner{max-width:104px}
-.ctrlbar.nur-menue .ci.menue{flex:1 1 auto}
+.ctrlbar.nur-menue{background:none;overflow:visible;pointer-events:none}
+.ctrlbar.nur-menue .inner{max-width:104px;padding:0;pointer-events:auto}
+.ctrlbar.nur-menue .inner::before,.ctrlbar.nur-menue .inner::after{display:none}
+.ctrlbar.nur-menue .ci.menue{flex:1 1 auto;min-height:54px;
+  background-color:rgba(217,187,247,.82);
+  border:var(--bw) solid var(--ink);border-radius:15px;
+  -webkit-backdrop-filter:blur(8px) saturate(1.25);backdrop-filter:blur(8px) saturate(1.25)}
+:root[data-theme="dark"] .ctrlbar.nur-menue .ci.menue{
+  background-color:rgba(89,68,126,.82);color:#fff}
+:root[data-theme="dark"] .ctrlbar.nur-menue .ci.menue .lbl{color:#fff}
 /* Das × liegt absolut rechts und zaehlt nicht zur Breite – sonst waere die
    Zahl um dessen halbe Breite nach links verschoben statt wirklich mittig. */
 .timerfeld{position:relative;flex:1;display:flex;align-items:center;justify-content:center;
@@ -543,11 +551,44 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   text-transform:uppercase;font-size:17px}
 .log-einstieg ol{margin:0;padding-left:21px;color:var(--muted);font-size:13px;line-height:1.65}
 .log-einstieg ol li::marker{font-weight:800;color:var(--prio)}
-.log-einstieg>div{display:flex;align-items:center;gap:10px;margin-top:11px}
+.log-einstieg-text{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.log-einstieg>div{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;margin-top:11px}
 .log-einstieg-los{flex:1;padding:10px;border:var(--bw) solid var(--ink);border-radius:var(--r);
   background:var(--pink);color:var(--ink);font-family:var(--display);font-style:italic;
   font-weight:700;text-transform:uppercase}
-.log-einstieg a{font-size:11px;font-weight:700;color:var(--ink);text-underline-offset:2px;text-align:center}
+.log-einstieg-skip{padding:10px;border:var(--bw) solid var(--ink);border-radius:var(--r);
+  background:var(--surface2);color:var(--ink);font-family:var(--display);font-style:italic;
+  font-weight:700;text-transform:uppercase}
+.log-einstieg a{grid-column:1/-1;font-size:11px;font-weight:700;color:var(--ink);
+  text-underline-offset:2px;text-align:center}
+
+/* Gefuehrtes Heavy-Setup. Die Karte bleibt beim automatischen Scrollen unter
+   dem Header sichtbar; der pinke Rahmen markiert jeweils genau das Feld, das
+   als naechstes dran ist. */
+.log-tutorial{position:sticky;top:calc(var(--topbar-h) + 8px);z-index:12;
+  margin-bottom:12px;padding:12px;background:rgba(255,255,255,.94);
+  border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
+  box-shadow:4px 4px 0 rgba(11,27,68,.18);
+  -webkit-backdrop-filter:blur(8px) saturate(1.15);backdrop-filter:blur(8px) saturate(1.15)}
+:root[data-theme="dark"] .log-tutorial{background:rgba(30,33,42,.94)}
+.log-tutorial-kopf{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.log-tutorial-kopf span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--prio)}
+.log-tutorial-kopf button{width:28px;height:28px;padding:0;border:var(--bw) solid var(--ink);
+  border-radius:50%;background:var(--surface2);color:var(--ink);font-size:18px;line-height:1}
+.log-tutorial h2{margin:1px 0 6px;font-family:var(--display);font-style:italic;
+  font-size:17px;text-transform:uppercase}
+.log-tutorial p{margin:0 0 7px;color:var(--muted);font-size:11.5px;line-height:1.45}
+.log-tutorial p b{color:var(--ink)}
+.log-tutorial-stand{padding:6px 8px;background:var(--prio-wash);border-left:4px solid var(--prio)}
+.log-tutorial-weiter{width:100%;padding:9px;border:var(--bw) solid var(--ink);border-radius:var(--r);
+  background:var(--pink);color:var(--ink);font-family:var(--display);font-style:italic;
+  font-weight:700;text-transform:uppercase}
+.log-tutorial-weiter[data-offen]{background:var(--prio);color:#fff}
+.log-tutorial-ende{display:grid;gap:7px;margin-top:9px}
+.log-tutorial-ende a{text-align:center;color:var(--ink);font-size:11px;font-weight:700;text-underline-offset:2px}
+.tutorial-ziel{position:relative;z-index:2;outline:4px solid var(--pink)!important;outline-offset:3px;
+  animation:tutorialPuls 1.3s ease-in-out infinite}
+@keyframes tutorialPuls{0%,100%{outline-color:var(--pink)}50%{outline-color:var(--prio)}}
 
 /* Erst nach einer vollstaendigen Einheit. Der Nutzer entscheidet selbst, ob
    er wechselt; die App bietet nur den naechsten offenen Tag an. */
@@ -835,6 +876,10 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .faq-a p{margin:0 0 8px;font-size:14px;color:var(--muted);line-height:1.55}
 .faq-a p:last-child{margin-bottom:0}
 .faq-a p b{color:var(--ink);font-weight:700}
+.faq-tutorial-start{display:block;margin-top:12px;padding:10px;border:var(--bw) solid var(--ink);
+  border-radius:var(--r);background:var(--pink);color:var(--ink);text-align:center;
+  font-family:var(--display);font-style:italic;font-weight:700;text-transform:uppercase;
+  text-decoration:none}
 
 /* ---------- Profile ---------- */
 .profile-top{display:flex;align-items:center;gap:16px;margin-bottom:20px}

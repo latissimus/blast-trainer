@@ -295,9 +295,14 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
       location.reload();
     } catch (err) {
       btn.disabled = false;
+      const serverFunktionFehlt =
+        err?.code === 'PGRST202' ||
+        /delete_own_account|could not find the function|schema cache/i.test(err?.message || '');
       datenStatus.textContent = bilderEntfernt
         ? 'Der Account blieb bestehen; Notizbuchbilder wurden bereits entfernt.'
-        : 'Löschen fehlgeschlagen. Es wurden keine Kontodaten gelöscht.';
+        : serverFunktionFehlt
+          ? 'Die Kontolöschung ist auf dem Server noch nicht aktiviert. Es wurden keine Daten gelöscht.'
+          : 'Der Account konnte nicht gelöscht werden. Es wurden keine Daten gelöscht. Bitte Verbindung prüfen und erneut versuchen.';
     }
   };
 

@@ -15,14 +15,15 @@ export function mountFaq(container) {
 
     <details class="faq" open><summary>Wie starte ich mein erstes Training?</summary>
       <div class="faq-a">
-        <p><b>Öffne Woche 1, Tag 1 und lass zunächst „Standard" gewählt.</b> Wähle im ersten Trainingsblock eine Übung und trage nach jedem Satz Gewicht, Wiederholungen und bei Heavy den RIR-Wert ein.</p>
+        <p><b>Starte im Log das kurze Tutorial.</b> Es führt dich nacheinander durch die Heavy-Auswahl für Woche 1 und 2 und erklärt anschließend die Satzeingabe. Du kannst es jederzeit beenden.</p>
         <p>Einen Speichern-Knopf brauchst du nicht. Jede Eingabe wird sofort auf dem Gerät gesichert und bei Verbindung automatisch hochgeladen.</p>
+        <a class="faq-tutorial-start" href="#log" data-tutorial-start>Tutorial starten</a>
       </div>
     </details>
 
     <details class="faq"><summary>Was muss ich pro Satz eintragen?</summary>
       <div class="faq-a">
-        <p><b>Gewicht und Wiederholungen.</b> Bei Heavy kommt RIR hinzu: Das sind die Wiederholungen, die mit sauberer Technik noch möglich gewesen wären. RIR 1 bedeutet also: Eine Wiederholung wäre noch gegangen.</p>
+        <p><b>Gewicht und Wiederholungen.</b> Bei Heavy kommt <b>RIR</b> hinzu. Das steht für <i>Reps in Reserve</i>, also <b>Wiederholungen in Reserve</b>: die Wiederholungen, die mit sauberer Technik noch möglich gewesen wären. RIR 1 bedeutet also: Eine Wiederholung wäre noch gegangen.</p>
         <p>Beim Cluster trägst du das Gewicht und die Wiederholungen im letzten der sechs Minisätze ein.</p>
       </div>
     </details>
@@ -99,7 +100,8 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Was bedeutet die A/B-Woche?</summary>
       <div class="faq-a">
-        <p>Heavy-Übungen wechseln zwischen <b>A in ungeraden</b> und <b>B in geraden Wochen</b>. Verglichen wird immer A mit A und B mit B. Du wählst beide Gruppen einmal; danach erscheinen sie automatisch wieder.</p>
+        <p>In <b>Woche 1</b> trägst du die Heavy-Übungen für <b>Tag 1 und Tag 2</b> ein. Diese A-Auswahl übernimmt die App automatisch in alle ungeraden Wochen: <b>Woche 1, 3 und 5</b>.</p>
+        <p>In <b>Woche 2</b> wählst du Heavy für <b>Tag 1 und Tag 2</b> ein zweites Mal. Diese B-Auswahl gilt automatisch für die geraden Wochen <b>2, 4 und 6</b>. Verglichen wird deshalb immer A mit A und B mit B.</p>
         <p>Pump- und Cluster-Übungen dürfen jede Woche frei wechseln. Zuletzt verwendete Übungen stehen im Suchdialog oben.</p>
       </div>
     </details>
@@ -121,7 +123,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Was zeigt die Progression?</summary>
       <div class="faq-a">
-        <p>Die Kurve zeigt den <b>Trend deiner Heavy-Leistung</b>. Dafür berechnet die App aus dem besten Heavy-Satz jeder vergleichbaren Woche ein geschätztes 1RM. Es ist eine Rechengröße, kein echter Maximalkrafttest und kein direkter Beweis für Muskelwachstum.</p>
+        <p>Die Kurve zeigt den <b>Trend deiner Heavy-Leistung</b>. Dafür berechnet die App aus dem besten Heavy-Satz jeder vergleichbaren Woche ein geschätztes <b>1RM</b>. Das steht für <i>One-Repetition Maximum</i>, also das geschätzte Gewicht für eine maximale Wiederholung. Es ist eine Rechengröße, kein echter Maximalkrafttest und kein direkter Beweis für Muskelwachstum.</p>
         <p>Einzelne schwächere Einheiten sind normal. Bleibt der Trend über <b>mehrere vergleichbare Einheiten</b> aus, prüfe zuerst Technik, Schlaf, Ernährung und Erholung. Erst danach ist ein Übungswechsel sinnvoll – nicht automatisch nach zwei Einheiten.</p>
       </div>
     </details>
@@ -130,6 +132,14 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p>Du entscheidest zwischen <b>„Weitertrainieren · neue Phase"</b> und standardmäßig <b>1 Woche Deload</b>. Im Deload sinken Volumen und Frequenz; danach beginnt die nächste Phase wieder auf Level II.</p>
         <p>Eine neue Phase leert Übungen, Gewichte, Wiederholungen, RIR und Übungsnotizen. Der Pump- und Cluster-Pool sowie das getrennte Notizbuch bleiben erhalten.</p>
+      </div>
+    </details>
+
+    <details class="faq"><summary>Was ist der Pump- und Cluster-Pool?</summary>
+      <div class="faq-a">
+        <p>Pump- und Cluster-Übungen dürfen frei rotieren. Deshalb merkt sich der <b>Pool zu jedem Übungsnamen</b> das zuletzt verwendete Gewicht und die Wiederholungen – unabhängig davon, an welchem Tag du die Übung wieder auswählst.</p>
+        <p>Gibt es einen Wert aus der laufenden Phase, zeigt die App die passende Woche an. Stammt der letzte Wert aus einer früheren Phase, steht daneben <b>„Pool"</b>, weil eine alte Wochennummer nach dem Neustart irreführend wäre.</p>
+        <p>Der Pool bleibt beim Start einer neuen Phase bewusst erhalten. Er gibt nur eine Orientierung für den Einstieg; Pump und Cluster werden nicht als eigene Progressionskurve bewertet.</p>
       </div>
     </details>
 
@@ -166,4 +176,7 @@ export function mountFaq(container) {
 
     <p class="src">Evidenz: Pelland et al. · Baz-Valle et al. · Schoenfeld et al. · Wolf/Schoenfeld · Bell et al. (Deload).</p>`;
   container.appendChild(wrap);
+  wrap.querySelector('[data-tutorial-start]')?.addEventListener('click', () => {
+    try { sessionStorage.setItem('blast:tutorial-start', '1'); } catch (e) { /* egal */ }
+  });
 }

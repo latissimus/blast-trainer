@@ -14,6 +14,12 @@ const MR_REST = 120;
 // gespeicherte Logs gueltig bleiben – nur die Beschriftung wechselt.
 const TYPE_LABEL = { load: 'HEAVY', pump: 'PUMP', mr: 'CLUSTER' };
 const LEVEL_LABEL = ['Kompakt', 'Standard', 'Voll'];
+const TUTORIAL_SETUP = [
+  { week: 1, day: 'OK-A', titel: 'Woche 1 · Tag 1', gruppe: 'A · ungerade Wochen', folgt: 'Woche 1 · Tag 2' },
+  { week: 1, day: 'UK-A', titel: 'Woche 1 · Tag 2', gruppe: 'A · ungerade Wochen', folgt: 'Woche 2 · Tag 1' },
+  { week: 2, day: 'OK-B', titel: 'Woche 2 · Tag 1', gruppe: 'B · gerade Wochen', folgt: 'Woche 2 · Tag 2' },
+  { week: 2, day: 'UK-B', titel: 'Woche 2 · Tag 2', gruppe: 'B · gerade Wochen', folgt: 'Satzeingabe' },
+];
 
 /* ------------------------------------------------------------------
    Mount the LOGMAN log (v2: Level, A/B-Wochen, Rollen, Pausen-Timer)
@@ -225,6 +231,23 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     Object.values(state.ex).some((bloecke) =>
       Object.values(bloecke || {}).some((namen) => (namen || []).some((n) => String(n || '').trim())));
   let einstiegSichtbar = !readOnly && !state.meta.einstiegErledigt && !hatNutzdaten();
+  let tutorialAktiv = !readOnly && !!state.meta.tutorialAktiv;
+  let tutorialSchritt = Math.min(4, Math.max(0, Number(state.meta.tutorialSchritt) || 0));
+
+  // Aus dem FAQ kann das Tutorial auch spaeter erneut gestartet werden.
+  try {
+    if (!readOnly && sessionStorage.getItem('blast:tutorial-start') === '1') {
+      sessionStorage.removeItem('blast:tutorial-start');
+      tutorialAktiv = true;
+      tutorialSchritt = 0;
+      einstiegSichtbar = false;
+      state.meta.tutorialAktiv = true;
+      state.meta.tutorialSchritt = 0;
+      state.meta.einstiegErledigt = true;
+      state.week = TUTORIAL_SETUP[0].week;
+      state.day = TUTORIAL_SETUP[0].day;
+    }
+  } catch (e) { /* sessionStorage darf den Log nicht aufhalten */ }
   // Fortschritt einer Einheit fuer den Punkt auf dem Tab. Zaehlt wie die Volumen-Leiste,
   // damit Punkt und "X / Y ARBEITSSÄTZE" nie widersprechen.
   function dayProgress(day, week) {
@@ -268,6 +291,68 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       }
     }
     return null;
+  }
+  function heavyAuswahlStatus(tpl, tier) {
+    const felder = [];
+    tpl.blocks.forEach((blk) => {
+      if (effTypeOf(blk, tier) !== 'load') return;
+      const namen = dayNames(state.day, blk);
+      exOf(blk, tier).forEach((_, xi) => felder.push({
+        name: namen[xi] || '',
+        blockId: blk.id,
+        xi,
+      }));
+    });
+    return {
+      gesamt: felder.length,
+      gewaehlt: felder.filter((f) => f.name.trim()).length,
+      offen: felder.filter((f) => !f.name.trim()),
+    };
+  }
+  function tutorialZielSetzen(schritt) {
+    tutorialSchritt = schritt;
+    state.meta.tutorialAktiv = true;
+    state.meta.tutorialSchritt = schritt;
+    tutorialAktiv = true;
+    einstiegSichtbar = false;
+    if (schritt < TUTORIAL_SETUP.length) {
+      state.week = TUTORIAL_SETUP[schritt].week;
+      state.day = TUTORIAL_SETUP[schritt].day;
+      setTier(state.day, state.week, 1);
+    } else {
+      state.week = 1;
+      state.day = 'OK-A';
+    }
+  }
+  function tutorialSpeichernUndZeichnen() {
+    queuePersist();
+    renderAll();
+  }
+  function tutorialBeenden(abgebrochen = false) {
+    tutorialAktiv = false;
+    tutorialSchritt = 0;
+    state.meta.tutorialAktiv = false;
+    state.meta.tutorialSchritt = 0;
+    state.meta.tutorialErledigt = true;
+    state.meta.tutorialAbgebrochen = abgebrochen;
+    state.meta.einstiegErledigt = true;
+    state.week = 1;
+    state.day = 'OK-A';
+    einstiegSichtbar = false;
+    queuePersist();
+    renderAll();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function tutorialScrollen() {
+    if (!tutorialAktiv) return;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const ziel = contentEl.querySelector('.tutorial-ziel');
+      if (!ziel) return;
+      ziel.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'center',
+      });
+    }));
   }
   function prevFilled(day, week) {
     const d = state.data[day] || {};
@@ -713,28 +798,75 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       const einstieg = document.createElement('section');
       einstieg.className = 'log-einstieg';
       einstieg.innerHTML = `
-        <p class="log-einstieg-kicker">Dein erstes Training</p>
-        <ol>
-          <li>Übung auswählen</li>
-          <li>Gewicht und Wiederholungen eintragen</li>
-          <li>RIR eintragen – mögliche Wiederholungen übrig</li>
-        </ol>
+        <p class="log-einstieg-kicker">LOGMAN einrichten</p>
+        <p class="log-einstieg-text">Das kurze Tutorial führt dich automatisch durch
+          die Heavy-Übungen für Woche 1 und 2 und zeigt danach die Satzeingabe.</p>
         <div>
-          <button type="button" class="log-einstieg-los">Training beginnen</button>
+          <button type="button" class="log-einstieg-los">Tutorial starten</button>
+          <button type="button" class="log-einstieg-skip">Überspringen</button>
           <a href="#faq">Wie funktioniert LOGMAN?</a>
         </div>`;
       einstieg.querySelector('.log-einstieg-los').onclick = () => {
         state.meta.einstiegErledigt = true;
+        state.meta.tutorialErledigt = false;
         einstiegSichtbar = false;
-        const key = state.day + '|' + state.week;
-        if (!state.datum[key]) state.datum[key] = lokalesDatum();
-        queuePersist();
-        renderAll();
+        tutorialZielSetzen(0);
+        tutorialSpeichernUndZeichnen();
       };
+      einstieg.querySelector('.log-einstieg-skip').onclick = () => tutorialBeenden(true);
       contentEl.appendChild(einstieg);
     }
 
-    const naechste = naechsteEinheit();
+    let tutorialStatus = null;
+    if (tutorialAktiv) {
+      const karte = document.createElement('section');
+      karte.className = 'log-tutorial';
+      if (tutorialSchritt < TUTORIAL_SETUP.length) {
+        const schritt = TUTORIAL_SETUP[tutorialSchritt];
+        tutorialStatus = heavyAuswahlStatus(tpl, tier);
+        const fertig = tutorialStatus.offen.length === 0;
+        karte.innerHTML = `
+          <div class="log-tutorial-kopf">
+            <span>Setup ${tutorialSchritt + 1} / 4</span>
+            <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
+          </div>
+          <h2>${schritt.titel} · Heavy</h2>
+          <p>Wähle alle Heavy-Übungen dieses Tages. Diese <b>${schritt.gruppe.startsWith('A') ? 'A-Auswahl' : 'B-Auswahl'}</b>
+            übernimmt die App automatisch in alle ${schritt.week === 1 ? 'ungeraden Wochen 1, 3 und 5' : 'geraden Wochen 2, 4 und 6'}.</p>
+          <p class="log-tutorial-stand"><b>${tutorialStatus.gewaehlt} / ${tutorialStatus.gesamt}</b> Heavy-Übungen gewählt</p>
+          <button type="button" class="log-tutorial-weiter" data-tutorial-weiter ${fertig ? '' : 'data-offen'}>
+            ${fertig ? `Weiter: ${schritt.folgt} →` : 'Zur nächsten fehlenden Übung ↓'}
+          </button>`;
+        karte.querySelector('[data-tutorial-weiter]').onclick = () => {
+          if (!fertig) { tutorialScrollen(); return; }
+          tutorialZielSetzen(tutorialSchritt + 1);
+          tutorialSpeichernUndZeichnen();
+        };
+      } else {
+        karte.innerHTML = `
+          <div class="log-tutorial-kopf">
+            <span>Satzeingabe</span>
+            <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
+          </div>
+          <h2>So protokollierst du Heavy</h2>
+          <p>Links steht die Satznummer. Danach trägst du <b>kg</b>,
+            <b>Wdh.</b> und <b>RIR</b> ein. RIR bedeutet <i>Reps in Reserve</i>,
+            also Wiederholungen in Reserve. RIR 1 heißt: Eine saubere Wiederholung wäre noch möglich gewesen.</p>
+          <p>Über der Übung zeigt dir LOGMAN beim nächsten vergleichbaren Training
+            die letzten Werte. Weitere Erklärungen findest du jederzeit im FAQ.</p>
+          <div class="log-tutorial-ende">
+            <button type="button" class="log-tutorial-weiter" data-tutorial-fertig>Tutorial abschließen</button>
+            <a href="#faq">FAQ öffnen</a>
+          </div>`;
+        karte.querySelector('[data-tutorial-fertig]').onclick = () => tutorialBeenden(false);
+      }
+      karte.querySelector('[data-tutorial-zu]').onclick = () => {
+        if (confirm('Tutorial beenden? Du kannst es später im FAQ erneut starten.')) tutorialBeenden(true);
+      };
+      contentEl.appendChild(karte);
+    }
+
+    const naechste = tutorialAktiv ? null : naechsteEinheit();
     if (!readOnly && naechste) {
       const weiter = document.createElement('button');
       weiter.type = 'button';
@@ -758,6 +890,7 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
     wrap.querySelector('#lg-pool').innerHTML = '';
 
     let rirHinweisOffen = true;
+    let tutorialWahlMarkiert = false;
     tpl.blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
       if (tgt === 0) return;   // Block bei diesem Tier nicht dabei (z.B. optionale MRs bei Tier I)
@@ -837,6 +970,11 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
           nameIn.textContent = nameIn.value || 'Übung wählen…';
         };
         tonAnpassen();
+        if (tutorialAktiv && tutorialSchritt < TUTORIAL_SETUP.length &&
+            effType === 'load' && !nameIn.value && !tutorialWahlMarkiert) {
+          nameIn.classList.add('tutorial-ziel');
+          tutorialWahlMarkiert = true;
+        }
         hd.appendChild(nameIn); exDiv.appendChild(hd);
 
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
@@ -864,14 +1002,16 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
             if (freeEx) { entry.names[xi] = wert; renderMem(prevLine, entry.names[xi], memKind); }
             else { names[xi] = wert; }
             tonAnpassen();
-            state.meta.einstiegErledigt = true;
-            einstiegSichtbar = false;
-            contentEl.querySelector('.log-einstieg')?.remove();
+            if (!tutorialAktiv) {
+              state.meta.einstiegErledigt = true;
+              einstiegSichtbar = false;
+              contentEl.querySelector('.log-einstieg')?.remove();
+            }
             queuePersist();
             // Eine Pump-Wahl kann eine gespeicherte Prioritaet oder deren Spender
             // aktivieren/deaktivieren. Die Satzzahl muss deshalb sofort neu
             // berechnet werden, nicht erst beim naechsten Seitenwechsel.
-            if (freeEx) renderDay();
+            if (freeEx || tutorialAktiv) renderDay();
           },
         });
 
@@ -910,7 +1050,11 @@ export async function mountLog(container, { userId, readOnly = false, zeigeSomPe
       });
       contentEl.appendChild(el);
     });
+    if (tutorialAktiv && tutorialSchritt === TUTORIAL_SETUP.length) {
+      contentEl.querySelector('.setrow')?.classList.add('tutorial-ziel');
+    }
     renderVolume(cell, tpl, tier);
+    tutorialScrollen();
 
     // Nach den sechs Belastungswochen bewusst entscheiden: direkt eine neue
     // Phase beginnen oder eine Woche deloaden. Im Deload bleibt nur noch der
