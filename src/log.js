@@ -241,6 +241,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
   let tutorialFxTimer = [];
   let tutorialLetzterBlock = null;
   let tutorialScrollAufFeld = false;
+  const tutorialThemeMeta = document.querySelector('meta[name="theme-color"]');
+  const appThemeFarbe = document.documentElement.dataset.theme === 'dark' ? '#12141A' : '#AEDCF6';
+  const tutorialThemeSetzen = (aktiv) => {
+    tutorialThemeMeta?.setAttribute('content', aktiv ? '#FFFFFF' : appThemeFarbe);
+  };
 
   // Aus dem FAQ kann das Tutorial auch spaeter erneut gestartet werden.
   try {
@@ -305,10 +310,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tpl.blocks.forEach((blk) => {
       if (effTypeOf(blk, tier) !== 'load') return;
       const namen = dayNames(state.day, blk);
-      exOf(blk, tier).forEach((_, xi) => felder.push({
+      exOf(blk, tier).forEach((exDef, xi) => felder.push({
         name: namen[xi] || '',
         blockId: blk.id,
         xi,
+        muskel: blk.mus,
+        rolle: exDef.r || '',
       }));
     });
     return {
@@ -368,9 +375,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         ${actionTitleSvg("LOS GEHT'S!")}
         <span>Woche 1 · Tag 1</span>
       </div>`;
-    const themeMeta = document.querySelector('meta[name="theme-color"]');
-    const themeFarbe = themeMeta?.getAttribute('content');
-    themeMeta?.setAttribute('content', '#B1E7FF');
+    tutorialThemeMeta?.setAttribute('content', '#B1E7FF');
     document.body.appendChild(tutorialFx);
     requestAnimationFrame(() => tutorialFx?.classList.add('an'));
     const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -380,7 +385,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tutorialFxTimer.push(setTimeout(() => {
       tutorialFx?.remove();
       tutorialFx = null;
-      if (themeFarbe) themeMeta?.setAttribute('content', themeFarbe);
+      tutorialThemeSetzen(false);
     }, reduziert ? 700 : 4200));
   }
   function tutorialScrollen() {
@@ -451,6 +456,33 @@ export async function mountLog(container, { userId, readOnly = false }) {
   tutorialDunkel.setAttribute('aria-hidden', 'true');
   tutorialDunkel.onclick = () => tutorialScrollen();
   document.body.appendChild(tutorialDunkel);
+  // Deckflaeche zwischen Displayoberkante und Tutorialkarte. Die aktive
+  // Muskelbox darf beim automatischen Scrollen weder seitlich noch oberhalb
+  // der Karte hervorschauen. Die Karte selbst liegt eine Ebene darueber.
+  const tutorialKopfmaske = document.createElement('div');
+  tutorialKopfmaske.className = 'tutorial-kopfmaske';
+  tutorialKopfmaske.hidden = !tutorialAktiv;
+  tutorialKopfmaske.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(tutorialKopfmaske);
+  let tutorialMaskenRaf = null;
+  function tutorialMaskeAktualisieren() {
+    tutorialMaskenRaf = null;
+    const karte = contentEl.querySelector('.log-tutorial');
+    if (!tutorialAktiv || !karte) {
+      tutorialKopfmaske.hidden = true;
+      if (!tutorialFx) tutorialThemeSetzen(false);
+      return;
+    }
+    tutorialKopfmaske.hidden = false;
+    tutorialThemeSetzen(true);
+    tutorialKopfmaske.style.height = `${Math.ceil(karte.getBoundingClientRect().bottom)}px`;
+  }
+  function tutorialMaskePlanen() {
+    if (tutorialMaskenRaf != null) return;
+    tutorialMaskenRaf = requestAnimationFrame(tutorialMaskeAktualisieren);
+  }
+  window.addEventListener('resize', tutorialMaskePlanen);
+  window.addEventListener('scroll', tutorialMaskePlanen, { passive: true });
 
   function oeffneUebungswahl({ titel, gruppen, aktuell, onSelect }) {
     picker.innerHTML = '';
@@ -884,6 +916,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const schritt = TUTORIAL_SETUP[tutorialSchritt];
         tutorialStatus = heavyAuswahlStatus(tpl, tier);
         const fertig = tutorialStatus.offen.length === 0;
+        const alsNaechstes = tutorialStatus.offen[0];
+        const naechsteAuswahl = alsNaechstes
+          ? `Jetzt ${alsNaechstes.muskel} ${alsNaechstes.rolle}-Übung wählen`
+          : '';
         karte.innerHTML = `
           <div class="log-tutorial-kopf">
             <span>Setup ${tutorialSchritt + 1} / 4</span>
@@ -901,7 +937,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
           <button type="button" class="log-tutorial-weiter" data-tutorial-weiter ${fertig ? '' : 'data-offen'}>
             ${fertig
               ? `Weiter: ${schritt.folgt} <span class="tutorial-pf">→</span>`
-              : 'Zur nächsten fehlenden Übung <span class="tutorial-pf">↓</span>'}
+              : `${naechsteAuswahl} <span class="tutorial-pf">↓</span>`}
           </button>`;
         karte.querySelector('[data-tutorial-weiter]').onclick = () => {
           if (!fertig) { tutorialScrollen(); return; }
@@ -1126,6 +1162,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       contentEl.querySelector('.setrow')?.classList.add('tutorial-ziel');
     }
     renderVolume(cell, tpl, tier);
+    tutorialMaskeAktualisieren();
     tutorialScrollen();
 
     // Nach den sechs Belastungswochen bewusst entscheiden: direkt eine neue
@@ -1259,6 +1296,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (saveStateEl) saveStateEl.hidden = true;
       picker.remove();
       tutorialDunkel.remove();
+      cancelAnimationFrame(tutorialMaskenRaf);
+      window.removeEventListener('resize', tutorialMaskePlanen);
+      window.removeEventListener('scroll', tutorialMaskePlanen);
+      tutorialKopfmaske.remove();
+      tutorialThemeSetzen(false);
       tutorialFxTimer.forEach(clearTimeout);
       tutorialFxTimer = [];
       tutorialFx?.remove();

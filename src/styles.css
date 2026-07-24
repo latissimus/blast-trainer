@@ -591,6 +591,9 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   -webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);
   touch-action:pan-y}
 .tutorial-dimmer[hidden]{display:none}
+.tutorial-kopfmaske{position:fixed;z-index:50;top:0;left:0;width:100vw;height:0;
+  background:#fff;pointer-events:none;transition:height .32s cubic-bezier(.22,.75,.3,1)}
+.tutorial-kopfmaske[hidden]{display:none}
 .log-tutorial{position:sticky;top:calc(env(safe-area-inset-top) + 3px);z-index:60;
   isolation:isolate;overflow:hidden;
   width:min(580px,calc(100vw - 14px));
@@ -598,7 +601,12 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   padding:17px;
   transform:translateX(-50%);background-color:#fff;
   border:var(--bw) solid var(--ink);border-radius:16px;
-  -webkit-backdrop-filter:none;backdrop-filter:none}
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  animation:tutorialKarteEin .28s cubic-bezier(.22,.75,.3,1) both}
+@keyframes tutorialKarteEin{
+  from{opacity:.82}
+  to{opacity:1}
+}
 .log-tutorial::before{content:"";position:absolute;z-index:0;inset:-18px;
   background:url(./assets/silhouette-navy.png) 0 0/62px 62px repeat;
   opacity:.06;pointer-events:none}
@@ -639,7 +647,8 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
 .tutorial-pf{font-family:var(--mono);font-style:normal;font-size:19px;margin-left:3px;line-height:1}
 .log-tutorial-weiter[data-offen]{background:var(--prio);color:#fff}
 .log-tutorial-ende{display:grid;gap:12px;margin-top:17px}
-.block.tutorial-aktiv{position:relative;z-index:41;outline:4px solid var(--pink);outline-offset:3px}
+.block.tutorial-aktiv{position:relative;z-index:41;outline:4px solid var(--pink);outline-offset:3px;
+  transition:outline-color .3s ease,transform .3s ease}
 .tutorial-ziel{position:relative;z-index:2;outline:4px solid var(--pink)!important;outline-offset:3px;
   animation:tutorialPuls 1.3s ease-in-out infinite}
 @keyframes tutorialPuls{0%,100%{outline-color:var(--pink)}50%{outline-color:var(--prio)}}
