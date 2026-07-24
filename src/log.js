@@ -6,6 +6,7 @@ import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
 import { auswahlGruppen, sucheAuswahlGruppen, imKatalog } from './auswahl.js';
 import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 import { startePause } from './pause.js';
+import { actionTitleSvg } from './brand.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
 // ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
@@ -364,9 +365,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
       <div class="tutorial-startfx-strahlen" aria-hidden="true"></div>
       <div class="tutorial-startfx-inhalt">
         <small>Heavy-Setup komplett</small>
-        <b>Los geht's!</b>
+        ${actionTitleSvg("LOS GEHT'S!")}
         <span>Woche 1 · Tag 1</span>
       </div>`;
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    const themeFarbe = themeMeta?.getAttribute('content');
+    themeMeta?.setAttribute('content', '#B1E7FF');
     document.body.appendChild(tutorialFx);
     requestAnimationFrame(() => tutorialFx?.classList.add('an'));
     const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -376,6 +380,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tutorialFxTimer.push(setTimeout(() => {
       tutorialFx?.remove();
       tutorialFx = null;
+      if (themeFarbe) themeMeta?.setAttribute('content', themeFarbe);
     }, reduziert ? 700 : 4200));
   }
   function tutorialScrollen() {

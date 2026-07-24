@@ -2,7 +2,7 @@ import './styles.css';
 import { supabase } from './supabase.js';
 import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } from './auth.js';
 import { readProfile, writeProfile } from './localstore.js';
-import { brandSvg } from './brand.js';
+import { brandSvg, actionTitleSvg } from './brand.js';
 import { getTheme, applyTheme } from './theme.js';
 import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
 import { mountLog, toast } from './log.js';
@@ -420,18 +420,44 @@ function showSplash() {
 function showWillkommen() {
   cleanupActive();
   localStorage.removeItem(WILLKOMMEN_EMAIL);
-  app.innerHTML = `
-    <div class="tutorial-startfx willkommen-fx" role="status" aria-live="polite">
+  app.innerHTML = '';
+  const fx = document.createElement('div');
+  fx.className = 'tutorial-startfx willkommen-fx';
+  fx.setAttribute('role', 'status');
+  fx.setAttribute('aria-live', 'polite');
+  fx.innerHTML = `
       <div class="tutorial-startfx-strahlen" aria-hidden="true"></div>
       <div class="tutorial-startfx-inhalt">
         <small>Dein Training. Klar geführt.</small>
-        <b>Willkommen!</b>
+        ${actionTitleSvg('STARTKLAR?')}
         <span>Als Nächstes richten wir deinen Plan ein</span>
-      </div>
-    </div>`;
-  requestAnimationFrame(() => app.querySelector('.willkommen-fx')?.classList.add('an'));
+      </div>`;
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  const themeFarbe = themeMeta?.getAttribute('content');
+  themeMeta?.setAttribute('content', '#B1E7FF');
+  document.body.appendChild(fx);
+  requestAnimationFrame(() => fx.classList.add('an'));
   const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  return new Promise((r) => setTimeout(r, reduziert ? 700 : 4050));
+  const bereit = new Promise((r) => setTimeout(r, reduziert ? 500 : 3250));
+  const fertig = new Promise((r) => setTimeout(() => {
+    fx.remove();
+    if (themeFarbe) themeMeta?.setAttribute('content', themeFarbe);
+    r();
+  }, reduziert ? 700 : 4200));
+  return { bereit, fertig };
+}
+
+function einstiegHervorheben() {
+  const karte = app.querySelector('.log-einstieg');
+  if (!karte) return;
+  document.body.classList.add('einstieg-fokus');
+  karte.classList.add('willkommen-fokus');
+  const beenden = () => {
+    document.body.classList.remove('einstieg-fokus');
+    karte.classList.remove('willkommen-fokus');
+  };
+  karte.addEventListener('click', beenden, { once: true });
+  setTimeout(beenden, 2700);
 }
 
 /* ------------------------------------------------------------ top-level render */
@@ -444,7 +470,8 @@ async function render() {
   // her, ohne dass der Nutzer danach noch einmal auf „Anmelden“ tippt.
   const wartendeAdresse = localStorage.getItem(WILLKOMMEN_EMAIL);
   if (wartendeAdresse && wartendeAdresse === session.user.email?.toLowerCase()) willkommen = true;
-  const splashFertig = willkommen ? showWillkommen() : (splash ? showSplash() : null);
+  const willkommenAblauf = willkommen ? showWillkommen() : null;
+  const splashFertig = !willkommenAblauf && splash ? showSplash() : null;
   splash = false;
   willkommen = false;
 
@@ -481,9 +508,17 @@ async function render() {
   // Splash stehen lassen, bis er seine 2 Sekunden hatte – auch wenn das Profil
   // laengst da ist. Die Fehlerpfade oben sind vorher raus, ein Fehler soll nicht
   // hinter dem Logo warten muessen.
-  if (splashFertig) await splashFertig;
+  if (willkommenAblauf) await willkommenAblauf.bereit;
+  else if (splashFertig) await splashFertig;
   renderChrome();
   await routeView();
+  if (willkommenAblauf) {
+    // Die Log-Seite liegt schon hinter der hellblauen Flaeche und folgt ihr
+    // leicht nach unten, sobald sie aus dem Bild faehrt.
+    app.classList.add('willkommen-nachzug');
+    setTimeout(() => app.classList.remove('willkommen-nachzug'), 1000);
+    willkommenAblauf.fertig.then(einstiegHervorheben);
+  }
 
   // Push-Abo im Hintergrund auffrischen. Ein Abo stirbt, wenn die App vom
   // Homescreen geloescht wird – ohne das hier bliebe die Datenbank auf toten

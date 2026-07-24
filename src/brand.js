@@ -42,3 +42,20 @@ export function brandSvg() {
   </g>
 </svg>`;
 }
+
+// Kurzer Aktionsschriftzug fuer die Vollbildanimationen. Dieselbe Schrift,
+// Kruemmung, Kontur und derselbe harte Versatz wie beim Logo – nur ohne Sterne,
+// damit kurze Aussagen auch auf einem schmalen iPhone ruhig bleiben.
+export function actionTitleSvg(text) {
+  const id = 'actionpath' + (++seq);
+  const path = `<textPath href="#${id}" startOffset="50%">${text}</textPath>`;
+  return `<svg class="action-title-svg" viewBox="0 0 360 112" role="img" aria-label="${text}">
+    <defs><path id="${id}" d="M 18,91 Q 180,33 342,91" fill="none"/></defs>
+    <g font-family="'Helvetica Neue',Arial,system-ui,sans-serif" font-style="italic"
+       font-weight="900" font-size="57" letter-spacing="-1.7" text-anchor="middle"
+       stroke="var(--navy)" stroke-width="5.2" stroke-linejoin="round">
+      <text transform="translate(4,4)" fill="var(--navy)">${path}</text>
+      <text fill="var(--pink)" paint-order="stroke fill">${path}</text>
+    </g>
+  </svg>`;
+}
