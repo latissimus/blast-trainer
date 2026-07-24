@@ -572,7 +572,7 @@ body.einstieg-fokus::after{content:"";position:fixed;inset:0;z-index:39;
   background:rgba(5,10,24,.64);pointer-events:none;
   -webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px)}
 .log-einstieg.willkommen-fokus{position:relative;z-index:40;
-  animation:einstiegFokus .82s ease-in-out 3;background:var(--surface)}
+  animation:einstiegFokus 1.05s ease-in-out infinite;background:var(--surface)}
 @keyframes einstiegFokus{
   0%,100%{transform:scale(1)}
   50%{transform:scale(1.025)}
@@ -585,7 +585,7 @@ body.einstieg-fokus::after{content:"";position:fixed;inset:0;z-index:39;
   -webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);
   touch-action:pan-y}
 .tutorial-dimmer[hidden]{display:none}
-.log-tutorial{position:sticky;top:calc(var(--topbar-h) + 8px);z-index:42;isolation:isolate;overflow:hidden;
+.log-tutorial{position:sticky;top:calc(var(--topbar-h) + 2px);z-index:42;isolation:isolate;overflow:hidden;
   width:min(580px,calc(100vw - 14px));margin:0 0 14px 50%;padding:17px;
   transform:translateX(-50%);background-color:rgba(255,255,255,.97);
   border:var(--bw) solid var(--ink);border-radius:16px;
@@ -630,7 +630,6 @@ body.einstieg-fokus::after{content:"";position:fixed;inset:0;z-index:39;
 .tutorial-pf{font-family:var(--mono);font-style:normal;font-size:19px;margin-left:3px;line-height:1}
 .log-tutorial-weiter[data-offen]{background:var(--prio);color:#fff}
 .log-tutorial-ende{display:grid;gap:12px;margin-top:17px}
-.log-tutorial-ende a{text-align:center;color:var(--ink);font-size:13px;font-weight:700;text-underline-offset:2px}
 .block.tutorial-aktiv{position:relative;z-index:41;outline:4px solid var(--pink);outline-offset:3px}
 .tutorial-ziel{position:relative;z-index:2;outline:4px solid var(--pink)!important;outline-offset:3px;
   animation:tutorialPuls 1.3s ease-in-out infinite}
@@ -647,15 +646,20 @@ body.einstieg-fokus::after{content:"";position:fixed;inset:0;z-index:39;
   background:url(./assets/silhouette-navy.png) 0 0/68px 68px repeat}
 .tutorial-startfx.an{animation:tutorialStartFlaeche 4s cubic-bezier(.58,.05,.25,1) both}
 .tutorial-startfx-inhalt{position:relative;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;width:min(100%,420px);gap:16px;padding:30px 22px;text-align:center;opacity:0}
+  justify-content:center;top:-5vh;width:min(100%,420px);gap:15px;padding:30px 22px;
+  text-align:center;opacity:0}
 .tutorial-startfx.an .tutorial-startfx-inhalt{animation:tutorialStartText 3.15s .3s cubic-bezier(.16,.84,.32,1) both}
 .tutorial-startfx small,.tutorial-startfx span{font-family:var(--mono);font-weight:800;
   color:var(--navy);text-transform:uppercase;letter-spacing:.08em}
-.tutorial-startfx small{font-size:11px;line-height:1.4}
-.action-title-svg{display:block;width:min(310px,88vw);height:auto;overflow:visible}
-.willkommen-fx .action-title-svg{width:min(294px,84vw)}
-.tutorial-startfx span{max-width:320px;padding:7px 10px;border:2px solid var(--navy);
-  font-size:12px;line-height:1.35}
+.tutorial-startfx small{font-size:10.5px;line-height:1.4}
+.action-title-svg{display:block;width:min(274px,80vw);height:auto;overflow:visible}
+.willkommen-fx .action-title-svg{width:min(248px,74vw)}
+.tutorial-startfx span{max-width:290px;padding:6px 9px;border:2px solid var(--navy);
+  font-size:11px;line-height:1.35}
+.willkommen-fx span{max-width:266px;padding:5px 8px;font-size:10px}
+.willkommen-fx.an{animation-duration:5.8s}
+.willkommen-fx.an .tutorial-startfx-inhalt{
+  animation:willkommenStartText 4.15s .4s cubic-bezier(.2,.72,.28,1) both}
 @keyframes tutorialStartFlaeche{
   0%{opacity:0;transform:translateY(0)}
   11%,84%{opacity:1;transform:translateY(0)}
@@ -668,7 +672,14 @@ body.einstieg-fokus::after{content:"";position:fixed;inset:0;z-index:39;
   78%{opacity:1;transform:scale(.96)}
   100%{opacity:0;transform:scale(.91)}
 }
-.willkommen-nachzug{animation:willkommenNachzug .95s cubic-bezier(.22,.8,.3,1) both}
+@keyframes willkommenStartText{
+  0%{opacity:0;transform:scale(.9)}
+  15%{opacity:1;transform:scale(1)}
+  68%{opacity:1;transform:scale(1.075)}
+  84%{opacity:1;transform:scale(.99)}
+  100%{opacity:0;transform:scale(.96)}
+}
+.willkommen-nachzug{animation:willkommenNachzug 1.3s cubic-bezier(.22,.8,.3,1) both}
 @keyframes willkommenNachzug{
   from{transform:translateY(-24px)}
   to{transform:translateY(0)}

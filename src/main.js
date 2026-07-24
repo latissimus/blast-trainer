@@ -438,12 +438,12 @@ function showWillkommen() {
   document.body.appendChild(fx);
   requestAnimationFrame(() => fx.classList.add('an'));
   const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const bereit = new Promise((r) => setTimeout(r, reduziert ? 500 : 3250));
+  const bereit = new Promise((r) => setTimeout(r, reduziert ? 500 : 4700));
   const fertig = new Promise((r) => setTimeout(() => {
     fx.remove();
     if (themeFarbe) themeMeta?.setAttribute('content', themeFarbe);
     r();
-  }, reduziert ? 700 : 4200));
+  }, reduziert ? 700 : 6050));
   return { bereit, fertig };
 }
 
@@ -456,8 +456,11 @@ function einstiegHervorheben() {
     document.body.classList.remove('einstieg-fokus');
     karte.classList.remove('willkommen-fokus');
   };
-  karte.addEventListener('click', beenden, { once: true });
-  setTimeout(beenden, 2700);
+  // Der Fokus ist keine weitere zeitgesteuerte Meldung: Er bleibt, bis der
+  // Nutzer sich bewusst fuer Start oder Ueberspringen entscheidet.
+  karte.querySelector('.log-einstieg-los')?.addEventListener('click', beenden, { once: true });
+  karte.querySelector('.log-einstieg-skip')?.addEventListener('click', beenden, { once: true });
+  karte.querySelector('a')?.addEventListener('click', beenden, { once: true });
 }
 
 /* ------------------------------------------------------------ top-level render */
@@ -516,7 +519,7 @@ async function render() {
     // Die Log-Seite liegt schon hinter der hellblauen Flaeche und folgt ihr
     // leicht nach unten, sobald sie aus dem Bild faehrt.
     app.classList.add('willkommen-nachzug');
-    setTimeout(() => app.classList.remove('willkommen-nachzug'), 1000);
+    setTimeout(() => app.classList.remove('willkommen-nachzug'), 1400);
     willkommenAblauf.fertig.then(einstiegHervorheben);
   }
 

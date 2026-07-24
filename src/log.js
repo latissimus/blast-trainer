@@ -921,7 +921,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
             die letzten Werte. Weitere Erklärungen findest du jederzeit im FAQ.</p>
           <div class="log-tutorial-ende">
             <button type="button" class="log-tutorial-weiter" data-tutorial-fertig>Tutorial abschließen</button>
-            <a href="#faq">FAQ öffnen</a>
           </div>`;
         karte.querySelector('[data-tutorial-fertig]').onclick = tutorialStartAnimation;
       }
