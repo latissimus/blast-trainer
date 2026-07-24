@@ -5,6 +5,7 @@ import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
 import { auswahlGruppen, sucheAuswahlGruppen, imKatalog } from './auswahl.js';
 import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
+import { startePause } from './pause.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
 // ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
@@ -84,7 +85,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   let saveTimer = null;
   let saveStateEl = null;
-  let timerId = null;
 
   // ---- persistence -------------------------------------------------
   // Dezenter Sync-Status als Icon: ✓ gespeichert · ↻ speichert · ⚠ Fehler
@@ -370,11 +370,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     document.body.appendChild(tutorialFx);
     requestAnimationFrame(() => tutorialFx?.classList.add('an'));
     const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    tutorialFxTimer.push(setTimeout(() => tutorialBeenden(false), reduziert ? 500 : 2850));
+    // Der Inhalt dahinter darf erst wechseln, wenn die Schrift verschwunden
+    // ist. Die violette Flaeche deckt den Wechsel ab und faehrt danach herunter.
+    tutorialFxTimer.push(setTimeout(() => tutorialBeenden(false), reduziert ? 500 : 3450));
     tutorialFxTimer.push(setTimeout(() => {
       tutorialFx?.remove();
       tutorialFx = null;
-    }, reduziert ? 700 : 3250));
+    }, reduziert ? 700 : 4200));
   }
   function tutorialScrollen() {
     if (!tutorialAktiv || tutorialSchritt < 0) return;
@@ -462,11 +464,28 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const liste = schale.querySelector('.ex-picker-liste');
 
     const schliessen = () => {
+      window.visualViewport?.removeEventListener('resize', anOberkante);
+      picker.classList.remove('tastatur');
+      picker.style.removeProperty('--picker-top');
+      picker.style.removeProperty('--picker-hoehe');
       if (picker.open) picker.close();
       else picker.removeAttribute('open');
     };
+    const anOberkante = () => {
+      const ansicht = window.visualViewport;
+      const oben = Math.max(6, Number(ansicht?.offsetTop) || 0) + 6;
+      const hoehe = Math.max(240, (Number(ansicht?.height) || window.innerHeight) - oben - 6);
+      picker.classList.add('tastatur');
+      picker.style.setProperty('--picker-top', `${oben}px`);
+      picker.style.setProperty('--picker-hoehe', `${hoehe}px`);
+      liste.scrollTop = 0;
+    };
     schale.querySelector('.ex-picker-zu').onclick = schliessen;
     picker.onclick = (e) => { if (e.target === picker) schliessen(); };
+    suche.addEventListener('focus', () => {
+      anOberkante();
+      window.visualViewport?.addEventListener('resize', anOberkante);
+    });
 
     const waehlen = (name) => {
       schliessen();
@@ -496,6 +515,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
           liste.appendChild(b);
         });
       });
+      liste.scrollTop = 0;
     };
     suche.oninput = zeichneListe;
     schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
@@ -793,17 +813,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
     contentEl.innerHTML = '';
     tutorialDunkel.hidden = !tutorialAktiv;
 
-    const tage = daysOfWeek(state.week);
-    const tagNummer = Math.max(0, tage.indexOf(state.day)) + 1;
-    const tageskopf = document.createElement('section');
-    tageskopf.className = 'log-tageskopf';
-    tageskopf.innerHTML = `
-      <div>
-        <small>Woche ${state.week} · Tag ${tagNummer} · ${LEVEL_LABEL[tier]}</small>
-        <b>${tpl.sub}</b>
-      </div>`;
-    contentEl.appendChild(tageskopf);
-
     if (einstiegSichtbar) {
       const einstieg = document.createElement('section');
       einstieg.className = 'log-einstieg';
@@ -979,7 +988,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
         </div>
         <div class="cue">${cues.join('')}</div>`;
       // Muskelname mitgeben: Die Mitteilung soll sagen, wovon die Pause war.
-      if (!readOnly) el.querySelectorAll('.chip.rest').forEach((b) => (b.onclick = () => startTimer(Number(b.dataset.rest), blockMus)));
+      if (!readOnly) el.querySelectorAll('.chip.rest').forEach((b) => (
+        b.onclick = () => startePause(Number(b.dataset.rest), blockMus)
+      ));
 
       exOf(blk, tier).forEach((exDef, xi) => {
         const exDiv = document.createElement('div'); exDiv.className = 'ex';
@@ -1207,99 +1218,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function renderAll() { renderHeader(); renderDay(); }
   renderAll();
 
-  // ---- pause timer (editable only) ---------------------------------
-  let tEnd = 0;
-  // Signal am Ende der Pause.
-  //
-  // Vibration gibt es auf iOS nicht – WebKit hat navigator.vibrate nie
-  // ausgeliefert. Der Aufruf bleibt fuer Android drin und ist auf dem iPhone
-  // folgenlos. Traegt dort also der Ton.
-  //
-  // iOS gibt Audio nur nach einer Nutzeraktion frei, darum wird der Context
-  // beim Antippen des Timers geweckt und offen gehalten. Liegt das Handy mit
-  // dunklem Display in der Tasche, friert iOS das JavaScript ein – dann kommt
-  // weder Ton noch sonst etwas. Das ist die Grenze einer Web-App.
-  let audioCtx = null;
-  function primeAudio() {
-    try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) return;
-      if (!audioCtx) audioCtx = new AC();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-    } catch (e) { /* kein Audio – der Timer laeuft trotzdem */ }
-  }
-  async function alertDone() {
-    try { navigator.vibrate?.([180, 90, 180]); } catch (e) { /* egal */ }
-    if (!audioCtx) return;
-    // iOS legt den AudioContext still, sobald die App kurz in den Hintergrund
-    // geht oder der Bildschirm zugeht – der Zustand heisst dann "suspended"
-    // oder "interrupted". Vorher stieg die Funktion hier einfach aus, und der
-    // Ton blieb fuer den Rest der Einheit weg, auch wenn die App wieder vorne
-    // war. Jetzt wird er stattdessen geweckt.
-    if (audioCtx.state !== 'running') {
-      try { await audioCtx.resume(); } catch (e) { return; }
-      if (audioCtx.state !== 'running') return;
-    }
-    try {
-      // Zwei kurze Toene: hoerbar, aber kein Alarm.
-      [0, 0.22].forEach((offset) => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        const t0 = audioCtx.currentTime + offset;
-        osc.frequency.setValueAtTime(880, t0);
-        gain.gain.setValueAtTime(0.0001, t0);
-        gain.gain.exponentialRampToValueAtTime(0.25, t0 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
-        osc.connect(gain).connect(audioCtx.destination);
-        osc.start(t0); osc.stop(t0 + 0.2);
-      });
-    } catch (e) { /* egal */ }
-  }
-
-  // Pausenende per Push bestellen.
-  //
-  // Der Ton unten erreicht dich nur, solange die App vorne ist – bist du bei
-  // YouTube, friert iOS das JavaScript ein. Lokal geplante Mitteilungen gibt es
-  // auf iOS nicht, also muss die Erinnerung von aussen kommen. Die Edge Function
-  // schlaeft die Pause ab und schickt dann.
-  //
-  // Fehler hier bleiben still: Der Timer auf dem Bildschirm laeuft ohnehin, der
-  // Push ist die Zugabe.
-  function pushTimer(aktion, sec, label) {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
-    if (!navigator.onLine) return;
-    supabase.functions
-      .invoke('pausentimer', { body: { aktion, sekunden: sec, label } })
-      .catch(() => {});
-  }
-
-  function startTimer(sec, label) {
-    if (readOnly) return;
-    primeAudio();
-    pushTimer('start', sec, label);
-    clearInterval(timerId);
-    tEnd = Date.now() + sec * 1000;
-    const box = document.querySelector('#app-timer'); box.hidden = false; box.classList.remove('done');
-    // Die ganze Leiste wird zur Uhr. Waehrend der Pause waehlt man ohnehin
-    // nichts aus – und wenn doch, bricht der Timer ab. Also darf der Platz
-    // solange ihm gehoeren, statt sich mit fuenf Feldern zu draengeln.
-    document.querySelector('.ctrlbar').classList.add('timer-an');
-    tick();
-    timerId = setInterval(tick, 250);
-  }
-  function tick() {
-    const box = document.querySelector('#app-timer'); if (!box) return;
-    const left = Math.max(0, Math.round((tEnd - Date.now()) / 1000));
-    box.querySelector('#app-timertxt').textContent = Math.floor(left / 60) + ':' + String(left % 60).padStart(2, '0');
-    if (left <= 0) {
-      clearInterval(timerId);
-      box.classList.add('done');
-      alertDone();
-      setTimeout(() => { box.hidden = true; document.querySelector('.ctrlbar')?.classList.remove('timer-an'); }, 4000);
-    }
-  }
-
-
   if (mergedOffline && !readOnly) {
     // Offline geladen oder zusammengefuehrt: Der lokale Stand ist jetzt der
     // gueltige und muss noch hoch. Markieren und (falls Netz da ist) senden.
@@ -1315,33 +1233,20 @@ export async function mountLog(container, { userId, readOnly = false }) {
     writeLog(userId, payloadOut(), false, false);
   }
 
-  // Set-O-Meter und Timer-Abbruch haengen an der Steuerleiste, die weiter oben
-  // gebaut wird. Der Knopf "Einheit speichern" ist ersatzlos entfallen: Die App
+  // Der Knopf "Einheit speichern" ist ersatzlos entfallen: Die App
   // speichert nach jeder Eingabe von selbst, und ob das geklappt hat, sagt der
   // Sync-Punkt in der Kopfleiste. Ein Knopf, der nur das ausloest, was ohnehin
   // laeuft, verspricht eine Notwendigkeit, die es nicht gibt.
-  document.querySelector('#app-timerx').onclick = () => {
-    clearInterval(timerId);
-    document.querySelector('#app-timer').hidden = true;
-    document.querySelector('.ctrlbar').classList.remove('timer-an');
-    // Auch den schlafenden Auftrag abbestellen, sonst meldet er sich spaeter
-    // fuer eine Pause, die du abgebrochen hast.
-    pushTimer('stop');
-  };
 
   return {
     destroy() {
       clearTimeout(saveTimer);
-      clearInterval(timerId);
       clearInterval(retryId);
       window.removeEventListener('online', retrySync);
       // Die App-Huelle blendet die Felder auf Unterseiten aus; stilllegen wir
       // sie trotzdem, damit kein verdecktes natives Element reagieren kann.
       const slots = document.querySelector('#app-slots');
       if (slots) slots.querySelectorAll('select,input').forEach((el) => { el.disabled = true; });
-      const t = document.querySelector('#app-timer');
-      if (t) t.hidden = true;
-      document.querySelector('.ctrlbar')?.classList.remove('timer-an');
       // Der Phasen-Chip gehoert dem Log – ausserhalb gibt es keine Phase.
       const ph = document.querySelector('#app-phase');
       if (ph) ph.hidden = true;

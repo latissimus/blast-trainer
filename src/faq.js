@@ -179,4 +179,13 @@ export function mountFaq(container) {
   wrap.querySelector('[data-tutorial-start]')?.addEventListener('click', () => {
     try { sessionStorage.setItem('blast:tutorial-start', '1'); } catch (e) { /* egal */ }
   });
+  wrap.querySelectorAll('details.faq').forEach((frage) => {
+    frage.addEventListener('toggle', () => {
+      if (!frage.open) return;
+      requestAnimationFrame(() => frage.scrollIntoView({
+        block: 'start',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      }));
+    });
+  });
 }

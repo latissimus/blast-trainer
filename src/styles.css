@@ -346,8 +346,13 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker{width:min(560px,calc(100vw - 18px));max-height:min(78vh,720px);margin:auto;
   padding:0;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
   background:var(--surface);color:var(--ink);overflow:hidden}
+.ex-picker.tastatur{position:fixed;inset:var(--picker-top,6px) auto auto 50%;
+  margin:0;transform:translateX(-50%);
+  max-height:min(var(--picker-hoehe,calc(100dvh - 12px)),720px)}
 .ex-picker::backdrop{background:rgba(5,10,24,.72);backdrop-filter:blur(2px)}
 .ex-picker-schale{display:flex;flex-direction:column;max-height:min(78vh,720px);padding:12px}
+.ex-picker.tastatur .ex-picker-schale{
+  max-height:min(var(--picker-hoehe,calc(100dvh - 12px)),720px)}
 .ex-picker-kopf{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .ex-picker-kopf>div{display:flex;flex-direction:column;min-width:0;flex:1}
 .ex-picker-kopf small{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted)}
@@ -478,16 +483,20 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   -webkit-appearance:none;appearance:none}
 .ci select:disabled{cursor:default}
 .ci:has(select:disabled) .wert{opacity:.55}
-/* Das Menue rechts. Flieder mit demselben Dreiecksmuster wie die
-   Set-O-Meter-Seite – es hebt sich damit von den vier Einstellfeldern ab:
+/* Das Menue rechts. Flieder mit vielen kleinen Figuren aus dem LOGMAN-Logo –
+   es hebt sich damit von den vier Einstellfeldern ab:
    Die aendern den Inhalt der Seite, dieses wechselt die Seite. */
 :root[data-theme="dark"] .ctrlbar .inner::before{background:rgba(30,33,42,.27)}
 .ci.menue{background:var(--lila);color:var(--lila-ink);flex:0 0 62px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15'%3E%3Cpath d='M7.5 4l3.2 5.4H4.3z' fill='%230B1B44' fill-opacity='.13'/%3E%3C/svg%3E");
-  background-position:center}
-.ci.menue .wert{display:flex;align-items:center;justify-content:center;line-height:0}
+  overflow:hidden;isolation:isolate}
+.ci.menue::before{content:"";position:absolute;z-index:0;inset:-7px;
+  background:url(./assets/silhouette-navy.png) 2px 1px/31px 31px repeat;
+  opacity:.14;pointer-events:none}
+:root[data-theme="dark"] .ci.menue::before{filter:brightness(0) invert(1);opacity:.11}
+.ci.menue .wert{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;line-height:0}
 .ci.menue .wert svg{display:block;fill:currentColor}
-.ci.menue .lbl{color:var(--lila-ink);opacity:.8}
+.ci.menue .lbl{position:relative;z-index:1;color:var(--lila-ink);opacity:.8}
+.ci.menue select{z-index:2}
 
 /* Pausentimer. Er uebernimmt die GANZE Leiste, statt sich ein Feld zu teilen:
    Waehrend der Pause waehlt man ohnehin nichts aus, und jede Auswahl wuerde den
@@ -514,6 +523,12 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 :root[data-theme="dark"] .ctrlbar.nur-menue .ci.menue{
   background-color:rgba(89,68,126,.58);color:#fff}
 :root[data-theme="dark"] .ctrlbar.nur-menue .ci.menue .lbl{color:#fff}
+/* Eine laufende Pause gehört der ganzen App. Auf Unterseiten nimmt der Timer
+   deshalb wieder die volle Leistenbreite ein, statt in der schmalen
+   Nur-Menü-Hülle zu stecken. */
+.ctrlbar.nur-menue.timer-an{pointer-events:auto}
+.ctrlbar.nur-menue.timer-an .inner{max-width:580px;padding:5px}
+.ctrlbar.nur-menue.timer-an .inner::before{display:block}
 /* Das × liegt absolut rechts und zaehlt nicht zur Breite – sonst waere die
    Zahl um dessen halbe Breite nach links verschoben statt wirklich mittig. */
 .timerfeld{position:relative;flex:1;display:flex;align-items:center;justify-content:center;
@@ -531,16 +546,6 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Stand vorher auf 22px, damit der Anfang der Liste als Anfang liest – im
    Gebrauch wirkte der Sonderabstand aber nur wie ein Versehen. */
 .erstblock{padding-top:14px}
-
-/* Kompakter Tageskopf: beantwortet vor dem ersten Block drei Fragen, ohne eine
-   weitere Bedienzeile zu bauen – wo bin ich, welches Level, was trainiere ich? */
-.log-tageskopf{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:9px 12px;
-  background:rgba(255,255,255,.48);border:var(--bw) solid var(--ink);border-radius:var(--r)}
-:root[data-theme="dark"] .log-tageskopf{background:rgba(30,33,42,.48)}
-.log-tageskopf>div{display:flex;flex-direction:column;min-width:0}
-.log-tageskopf small{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted);
-  letter-spacing:.04em}
-.log-tageskopf b{margin-top:2px;font-size:12.5px;line-height:1.3;color:var(--ink)}
 
 /* Einmaliger Schnellstart. Er erklaert nur die erste Eingabe; Set-O,
    A/B-Rotation und Hintergrundwissen bleiben bewusst im FAQ. */
@@ -568,13 +573,17 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   -webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);
   touch-action:pan-y}
 .tutorial-dimmer[hidden]{display:none}
-.log-tutorial{position:sticky;top:calc(var(--topbar-h) + 8px);z-index:42;
+.log-tutorial{position:sticky;top:calc(var(--topbar-h) + 8px);z-index:42;isolation:isolate;overflow:hidden;
   width:min(580px,calc(100vw - 14px));margin:0 0 12px 50%;padding:12px;
   transform:translateX(-50%);background-color:rgba(255,255,255,.97);
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Cpath d='M9 5l3.2 5.5H5.8z' fill='%23693398' fill-opacity='.045'/%3E%3C/svg%3E");
   border:var(--bw) solid var(--ink);border-radius:16px;
   -webkit-backdrop-filter:blur(8px) saturate(1.15);backdrop-filter:blur(8px) saturate(1.15)}
+.log-tutorial::before{content:"";position:absolute;z-index:0;inset:-18px;
+  background:url(./assets/silhouette-navy.png) 0 0/62px 62px repeat;
+  opacity:.025;pointer-events:none}
+.log-tutorial>*{position:relative;z-index:1}
 :root[data-theme="dark"] .log-tutorial{background-color:rgba(30,33,42,.97)}
+.log-tutorial-basics{border-color:var(--prio)}
 .log-tutorial-kopf{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .log-tutorial-kopf span{padding:4px 7px;border-radius:999px;background:var(--prio);
   color:#fff;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
@@ -611,31 +620,38 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   animation:tutorialPuls 1.3s ease-in-out infinite}
 @keyframes tutorialPuls{0%,100%{outline-color:var(--pink)}50%{outline-color:var(--prio)}}
 
-/* Kurzer violetter Retro-Abschluss statt eines weiteren Hinweisfensters. */
+/* Violetter Retro-Auftakt und -Abschluss. Erst blendet die Flaeche weich ein,
+   dann waechst und schrumpft die Botschaft; zum Schluss faehrt die Flaeche
+   geschlossen nach unten aus dem Bild. */
 .tutorial-startfx{position:fixed;inset:0;z-index:100;display:grid;place-items:center;
-  overflow:hidden;background:var(--prio);color:#fff;opacity:0;transform:scaleY(.02);
+  overflow:hidden;background:var(--prio);color:#fff;opacity:0;
   pointer-events:auto}
 .tutorial-startfx::before{content:"";position:absolute;inset:0;opacity:.18;
   background:repeating-linear-gradient(0deg,transparent 0 5px,#fff 6px 7px)}
 .tutorial-startfx-strahlen{position:absolute;inset:-20%;opacity:.22;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='42'%3E%3Cpath d='M21 5l12 21H9z' fill='none' stroke='white' stroke-width='3'/%3E%3C/svg%3E");
-  transform:rotate(-8deg) scale(1.2)}
-.tutorial-startfx.an{animation:tutorialStartEin .28s steps(4,end) forwards}
+  background:url(./assets/silhouette-navy.png) 0 0/76px 76px repeat;
+  filter:brightness(0) invert(1);transform:rotate(-7deg) scale(1.18)}
+.tutorial-startfx.an{animation:tutorialStartFlaeche 4s cubic-bezier(.58,.05,.25,1) both}
 .tutorial-startfx-inhalt{position:relative;display:flex;flex-direction:column;align-items:center;
   gap:20px;padding:30px;text-align:center;opacity:0}
-.tutorial-startfx.an .tutorial-startfx-inhalt{animation:tutorialStartText 2.75s .18s cubic-bezier(.16,.84,.32,1) both}
+.tutorial-startfx.an .tutorial-startfx-inhalt{animation:tutorialStartText 3.15s .3s cubic-bezier(.16,.84,.32,1) both}
 .tutorial-startfx small,.tutorial-startfx span{font-family:var(--mono);font-weight:800;
   text-transform:uppercase;letter-spacing:.08em}
 .tutorial-startfx small{font-size:11px}
 .tutorial-startfx b{font-family:var(--display);font-style:italic;font-size:clamp(42px,15vw,76px);
   line-height:.9;text-transform:uppercase;text-shadow:4px 4px 0 var(--ink)}
 .tutorial-startfx span{padding:7px 10px;border:2px solid #fff;font-size:12px}
-@keyframes tutorialStartEin{to{opacity:1;transform:scaleY(1)}}
+@keyframes tutorialStartFlaeche{
+  0%{opacity:0;transform:translateY(0)}
+  11%,84%{opacity:1;transform:translateY(0)}
+  100%{opacity:1;transform:translateY(102%)}
+}
 @keyframes tutorialStartText{
-  0%{opacity:0;transform:scale(.72)}
-  12%{opacity:1;transform:scale(1)}
-  82%{opacity:1;transform:scale(1.24)}
-  100%{opacity:0;transform:scale(1.28)}
+  0%{opacity:0;transform:scale(.74)}
+  15%{opacity:1;transform:scale(1)}
+  60%{opacity:1;transform:scale(1.22)}
+  78%{opacity:1;transform:scale(.96)}
+  100%{opacity:0;transform:scale(.91)}
 }
 
 /* Erst nach einer vollstaendigen Einheit. Der Nutzer entscheidet selbst, ob
@@ -823,6 +839,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    dieselben weissen Karten wie im Log, Pink markiert nur aktive Planung. */
 body[data-seite="meter"]{--bg:#B1E7FF;--surface:#FFFFFF;--surface2:#EAF4FC}
 body[data-seite="prog"]{--bg:#D9BBF7}
+body[data-seite="feedback"]{--bg:#D9BBF7}
 body[data-seite="faq"]{--bg:#FBE7A4}
 body[data-seite="profile"]{--bg:#BFE7D2}
 /* Hellblauer Grund, weisse Flaechen. Anders als die uebrigen Seiten setzt diese
@@ -837,6 +854,7 @@ body[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
 /* Dunkel: derselbe Aufbau, nur umgekehrt – blaeulicher Grund, hellere Flaechen. */
 :root[data-theme="dark"] body[data-seite="notizbuch"]{--bg:#101A2B;--surface:#1C2637;--surface2:#1C2637}
 :root[data-theme="dark"] body[data-seite="prog"]{--bg:#2A1B45}
+:root[data-theme="dark"] body[data-seite="feedback"]{--bg:#2A1B45}
 :root[data-theme="dark"] body[data-seite="faq"]{--bg:#332B14}
 :root[data-theme="dark"] body[data-seite="profile"]{--bg:#143024}
 
@@ -847,11 +865,12 @@ body[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
    Beide liegen ton-in-ton in der Tintenfarbe statt in einem festen Lila –
    so tragen sie jeden Seitengrund und kippen im Dark-Mode von selbst mit.
    Welches Muster eine Seite bekommt, ist unten eine Zeile. */
-body[data-seite="meter"],body[data-seite="prog"],
+body[data-seite="meter"],body[data-seite="prog"],body[data-seite="feedback"],
 body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   background-image:var(--muster-dreieck);background-size:auto}
 :root[data-theme="dark"] body[data-seite="meter"],
 :root[data-theme="dark"] body[data-seite="prog"],
+:root[data-theme="dark"] body[data-seite="feedback"],
 :root[data-theme="dark"] body[data-seite="faq"],
 :root[data-theme="dark"] body[data-seite="profile"],
 :root[data-theme="dark"] body[data-seite="notizbuch"]{
@@ -864,6 +883,32 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 :root[data-theme="dark"] body[data-seite="prog"],
 :root[data-theme="dark"] body[data-seite="notizbuch"]{
   background-image:var(--muster-tropfen-dunkel)}
+
+/* ---------- Feedback ---------- */
+.feedback-intro{margin:0 0 12px;padding:12px 13px;background:var(--surface);
+  border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
+.feedback-intro p{margin:0 0 4px;font-family:var(--display);font-style:italic;
+  font-size:17px;font-weight:700;text-transform:uppercase;line-height:1.15}
+.feedback-intro span{display:block;color:var(--muted);font-size:12.5px;line-height:1.45}
+.feedback-form{padding:14px;background:var(--surface);border:var(--bw) solid var(--ink);
+  border-radius:var(--r-karte)}
+.feedback-form .fld-l:not(:first-child){margin-top:14px}
+.feedback-text{display:block;min-height:164px;resize:vertical;line-height:1.55}
+.feedback-zaehler{display:flex;justify-content:space-between;gap:10px;margin:5px 1px 13px;
+  color:var(--muted);font-size:10.5px}
+.feedback-zaehler b{color:var(--ink)}
+.feedback-status{margin-top:10px}
+.feedback-status:empty{display:none}
+.feedback-eingang{margin-top:24px}
+.feedback-eingang>.section-title{margin-bottom:10px}
+.feedback-laden{color:var(--muted);font-size:13px}
+.feedback-eintrag{margin-bottom:8px;padding:11px;background:var(--surface);
+  border:var(--bw) solid var(--ink);border-radius:var(--r)}
+.feedback-eintrag-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.feedback-eintrag-kopf b{font-family:var(--display);font-style:italic;text-transform:uppercase}
+.feedback-eintrag-kopf time,.feedback-eintrag small{color:var(--muted);font-size:10px}
+.feedback-eintrag small{display:block;margin:2px 0 7px}
+.feedback-eintrag p{margin:0;white-space:pre-wrap;font-size:13px;line-height:1.5}
 
 /* ---------- FAQ- und Meter-Seite ---------- */
 .src{font-size:12px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:var(--bw) solid var(--ink);padding-top:10px}
@@ -879,7 +924,8 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
    Gewicht 400, nicht in der kursiven Display-Schrift. Die Versalien stehen
    dort im Text, nicht im CSS; wir behalten text-transform, weil unsere Fragen
    gemischt geschrieben sind. */
-.faq{border:var(--bw) solid var(--ink);border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;overflow:hidden}
+.faq{scroll-margin-top:calc(var(--topbar-h) + 10px);border:var(--bw) solid var(--ink);
+  border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;overflow:hidden}
 .faq>summary{list-style:none;cursor:pointer;padding:18px 46px 18px 18px;position:relative;
   font-family:var(--mono);font-weight:400;text-transform:uppercase;font-size:16px;
   line-height:1.35;color:var(--ink)}

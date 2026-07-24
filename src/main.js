@@ -12,6 +12,8 @@ import { mountMeter } from './meter.js';
 import { mountProg } from './prog.js';
 import { mountNotizbuch } from './notizbuch.js';
 import { mountAdmin } from './admin.js';
+import { mountFeedback } from './feedback.js';
+import { verbindePausenAnzeige, stoppePause } from './pause.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
 applyTheme(getTheme());
@@ -39,9 +41,11 @@ let routeToken = 0;         // guards against stale async mounts
 let authMode = 'login';     // 'login' | 'signup'
 let recovery = false;       // aus der Zuruecksetzen-Mail gekommen: neues Passwort faellig
 let splash = false;         // frisch eingeloggt: einmal das Logo zeigen
+let willkommen = false;     // frisch registriert: vor dem Tutorial willkommen heissen
 let topbarObserver = null;   // liefert Unterseiten die echte Sticky-Header-Hoehe
 let aktiveAnsicht = null;    // fuer die Rueckkehr an dieselbe Stelle im Log
 let logScrollY = 0;
+const WILLKOMMEN_EMAIL = 'blast:willkommen-email';
 
 // Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
 // Fehler). In der App selbst bleibt es draussen: Dort willst du eintragen, nicht
@@ -66,6 +70,7 @@ function cleanupActive() {
 /* ------------------------------------------------------------ auth UI */
 function renderAuth() {
   cleanupActive();
+  stoppePause(false);
   const isLogin = authMode === 'login';
   app.innerHTML = `
     ${MARQUEE}
@@ -121,10 +126,17 @@ function renderAuth() {
       if (isLogin) {
         // Muss VOR signIn stehen: onAuthStateChange feuert waehrend des Aufrufs,
         // nicht danach – danach gesetzt kaeme das Flag zu spaet fuer render().
-        splash = true;
+        const wartendeAdresse = localStorage.getItem(WILLKOMMEN_EMAIL);
+        willkommen = wartendeAdresse === email.toLowerCase();
+        splash = !willkommen;
         await signIn(email, pass);
         // onAuthStateChange handles the rest
       } else {
+        // Auch dieses Flag muss vor signUp stehen: Bei deaktivierter
+        // Mail-Bestaetigung liefert Supabase sofort eine Sitzung und feuert das
+        // Auth-Ereignis noch waehrend des Aufrufs.
+        willkommen = true;
+        localStorage.setItem(WILLKOMMEN_EMAIL, email.toLowerCase());
         const data = await signUp(email, pass, name);
         if (!data.session) {
           showMsg('Fast geschafft! Bitte bestätige deine E-Mail über den Link, den wir dir geschickt haben, und logge dich dann ein.', 'ok');
@@ -135,6 +147,8 @@ function renderAuth() {
       }
     } catch (err) {
       splash = false;   // Login gescheitert: kein Logo zeigen
+      willkommen = false;
+      if (!isLogin) localStorage.removeItem(WILLKOMMEN_EMAIL);
       showMsg(translateErr(err), 'err');
       btn.disabled = false;
     }
@@ -256,6 +270,7 @@ function renderChrome() {
           <select id="app-menue" aria-label="Ansicht"></select></label>
       </div>
     </div>`;
+  verbindePausenAnzeige();
 
   app.querySelectorAll('nav [data-view]').forEach((b) => {
     b.onclick = () => { location.hash = b.dataset.view; };
@@ -284,6 +299,7 @@ function renderChrome() {
     <option value="notizbuch">NOTIZBUCH</option>
     <option value="meter">SET-O-METER</option>
     <option value="prog">PROGRESSION</option>
+    <option value="feedback">FEEDBACK</option>
     <option value="faq">FAQs</option>
     ${isAdmin ? '<option value="admin">ADMIN</option>' : ''}`;
   menue.onchange = () => {
@@ -323,7 +339,7 @@ function setNavActive(view) {
     'nur-menue',
     view !== 'log' && view !== 'admin',
   );
-  const namen = { log: 'Log', faq: 'FAQ', meter: 'Set-O', prog: 'Prog', notizbuch: 'Notizbuch', admin: 'Admin', profile: 'Profil' };
+  const namen = { log: 'Log', faq: 'FAQ', meter: 'Set-O', prog: 'Prog', feedback: 'Feedback', notizbuch: 'Notizbuch', admin: 'Admin', profile: 'Profil' };
   app.querySelector('#app-menue-l').textContent = namen[view] || 'Log';
   // Auf Unterseiten bleibt nur das Menue sichtbar. Die Log-Felder behalten
   // intern ihren letzten Stand, bis das Log wieder gemountet wird.
@@ -340,7 +356,7 @@ async function routeView() {
   if (!view) return;
   let hash = (location.hash.replace('#', '') || 'log');
   if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
-  if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'notizbuch'].includes(hash)) hash = 'log';
+  if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'feedback', 'notizbuch'].includes(hash)) hash = 'log';
   setNavActive(hash);
 
   const token = ++routeToken;
@@ -362,6 +378,8 @@ async function routeView() {
       await mountMeter(view, { userId: session.user.id });
     } else if (hash === 'prog') {
       await mountProg(view, { userId: session.user.id });
+    } else if (hash === 'feedback') {
+      await mountFeedback(view, { session, profile });
     } else if (hash === 'notizbuch') {
       // Die Huelle und der lokale Spiegel erscheinen sofort; der Serverstand
       // wird innerhalb der Seite nachgeladen und blockiert den Wechsel nicht.
@@ -396,14 +414,39 @@ function showSplash() {
   return new Promise((r) => setTimeout(r, 2000));
 }
 
+// Direkt nach der Registrierung fuehrt ein kurzer eigener Auftakt in das
+// Tutorial. Er laeuft parallel zum Laden des Profils und verlaengert den Start
+// deshalb nur dann, wenn das Profil schneller als die Animation da ist.
+function showWillkommen() {
+  cleanupActive();
+  localStorage.removeItem(WILLKOMMEN_EMAIL);
+  app.innerHTML = `
+    <div class="tutorial-startfx willkommen-fx" role="status" aria-live="polite">
+      <div class="tutorial-startfx-strahlen" aria-hidden="true"></div>
+      <div class="tutorial-startfx-inhalt">
+        <small>Dein Training. Klar geführt.</small>
+        <b>Willkommen!</b>
+        <span>Als Nächstes richten wir deinen Plan ein</span>
+      </div>
+    </div>`;
+  requestAnimationFrame(() => app.querySelector('.willkommen-fx')?.classList.add('an'));
+  const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return new Promise((r) => setTimeout(r, reduziert ? 700 : 4050));
+}
+
 /* ------------------------------------------------------------ top-level render */
 async function render() {
   cleanupActive();
-  if (!session) { profile = null; recovery = false; splash = false; renderAuth(); return; }
+  if (!session) { profile = null; recovery = false; splash = false; willkommen = false; renderAuth(); return; }
   if (recovery) { renderRecovery(); return; }
 
-  const splashFertig = splash ? showSplash() : null;
+  // Manche Mail-Bestaetigungslinks stellen die Sitzung direkt beim Neuladen
+  // her, ohne dass der Nutzer danach noch einmal auf „Anmelden“ tippt.
+  const wartendeAdresse = localStorage.getItem(WILLKOMMEN_EMAIL);
+  if (wartendeAdresse && wartendeAdresse === session.user.email?.toLowerCase()) willkommen = true;
+  const splashFertig = willkommen ? showWillkommen() : (splash ? showSplash() : null);
   splash = false;
+  willkommen = false;
 
   if (!profile || profile.id !== session.user.id) {
     // Nur wenn kein Splash laeuft – sonst wuerde er ihn ueberschreiben.
