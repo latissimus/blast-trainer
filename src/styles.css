@@ -592,7 +592,10 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   touch-action:pan-y}
 .tutorial-dimmer[hidden]{display:none}
 .tutorial-kopfmaske{position:fixed;z-index:50;top:0;left:0;width:100vw;height:0;
-  background:#fff;pointer-events:none;transition:height .32s cubic-bezier(.22,.75,.3,1)}
+  background:linear-gradient(rgba(5,10,24,.72),rgba(5,10,24,.72)),var(--bg);
+  pointer-events:none;transition:height .32s cubic-bezier(.22,.75,.3,1)}
+.tutorial-kopfmaske::before{content:"";position:absolute;inset:0 0 auto;height:env(safe-area-inset-top);
+  background:#B1E7FF}
 .tutorial-kopfmaske[hidden]{display:none}
 .log-tutorial{position:sticky;top:calc(env(safe-area-inset-top) + 3px);z-index:60;
   isolation:isolate;overflow:hidden;

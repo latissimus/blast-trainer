@@ -244,7 +244,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const tutorialThemeMeta = document.querySelector('meta[name="theme-color"]');
   const appThemeFarbe = document.documentElement.dataset.theme === 'dark' ? '#12141A' : '#AEDCF6';
   const tutorialThemeSetzen = (aktiv) => {
-    tutorialThemeMeta?.setAttribute('content', aktiv ? '#FFFFFF' : appThemeFarbe);
+    tutorialThemeMeta?.setAttribute('content', aktiv ? '#B1E7FF' : appThemeFarbe);
   };
 
   // Aus dem FAQ kann das Tutorial auch spaeter erneut gestartet werden.
