@@ -438,12 +438,12 @@ function showWillkommen() {
   document.body.appendChild(fx);
   requestAnimationFrame(() => fx.classList.add('an'));
   const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const bereit = new Promise((r) => setTimeout(r, reduziert ? 500 : 4700));
+  const bereit = new Promise((r) => setTimeout(r, reduziert ? 500 : 6350));
   const fertig = new Promise((r) => setTimeout(() => {
     fx.remove();
     if (themeFarbe) themeMeta?.setAttribute('content', themeFarbe);
     r();
-  }, reduziert ? 700 : 6050));
+  }, reduziert ? 700 : 8050));
   return { bereit, fertig };
 }
 
@@ -516,11 +516,12 @@ async function render() {
   renderChrome();
   await routeView();
   if (willkommenAblauf) {
-    // Die Log-Seite liegt schon hinter der hellblauen Flaeche und folgt ihr
-    // leicht nach unten, sobald sie aus dem Bild faehrt.
+    // Der Fokus liegt bereits fertig HINTER der hellblauen Flaeche. Sobald sie
+    // herunterfaehrt, wird deshalb direkt die abgedunkelte Seite mit der
+    // pulsierenden Einstiegskarte sichtbar – ohne Zwischenbild.
+    einstiegHervorheben();
     app.classList.add('willkommen-nachzug');
-    setTimeout(() => app.classList.remove('willkommen-nachzug'), 1400);
-    willkommenAblauf.fertig.then(einstiegHervorheben);
+    setTimeout(() => app.classList.remove('willkommen-nachzug'), 1700);
   }
 
   // Push-Abo im Hintergrund auffrischen. Ein Abo stirbt, wenn die App vom

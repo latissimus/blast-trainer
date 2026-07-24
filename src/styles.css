@@ -549,8 +549,13 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 
 /* Einmaliger Schnellstart. Er erklaert nur die erste Eingabe; Set-O,
    A/B-Rotation und Hintergrundwissen bleiben bewusst im FAQ. */
-.log-einstieg{margin-bottom:12px;padding:13px;background:var(--surface);border:var(--bw) solid var(--ink);
-  border-radius:var(--r-karte)}
+.log-einstieg{position:relative;isolation:isolate;overflow:hidden;margin-bottom:12px;padding:13px;
+  background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
+.log-einstieg::before{content:"";position:absolute;z-index:0;inset:-18px;
+  background:url(./assets/silhouette-navy.png) 0 0/58px 58px repeat;
+  opacity:.055;pointer-events:none}
+.log-einstieg>*{position:relative;z-index:1}
+:root[data-theme="dark"] .log-einstieg::before{filter:brightness(0) invert(1);opacity:.045}
 .log-einstieg-kicker{margin:0 0 8px;font-family:var(--display);font-style:italic;font-weight:700;
   text-transform:uppercase;font-size:19px}
 .log-einstieg ol{margin:0;padding-left:21px;color:var(--muted);font-size:13px;line-height:1.65}
@@ -566,9 +571,10 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .log-einstieg a{grid-column:1/-1;font-size:12px;font-weight:700;color:var(--ink);
   text-underline-offset:2px;text-align:center}
 /* Nach der Registrierungsanimation liegt diese Karte bereits hinter der
-   herunterfahrenden Flaeche. Drei ruhige Impulse lenken den Blick darauf;
+   herunterfahrenden Flaeche. Der ruhige Impuls bleibt bis zur Entscheidung;
    waehrenddessen tritt alles andere zurueck. */
-body.einstieg-fokus::after{content:"";position:fixed;inset:0;z-index:39;
+body.einstieg-fokus #app{isolation:isolate}
+body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:39;
   background:rgba(5,10,24,.64);pointer-events:none;
   -webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px)}
 .log-einstieg.willkommen-fokus{position:relative;z-index:40;
@@ -585,16 +591,19 @@ body.einstieg-fokus::after{content:"";position:fixed;inset:0;z-index:39;
   -webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);
   touch-action:pan-y}
 .tutorial-dimmer[hidden]{display:none}
-.log-tutorial{position:sticky;top:calc(var(--topbar-h) + 2px);z-index:42;isolation:isolate;overflow:hidden;
-  width:min(580px,calc(100vw - 14px));margin:0 0 14px 50%;padding:17px;
-  transform:translateX(-50%);background-color:rgba(255,255,255,.97);
+.log-tutorial{position:sticky;top:calc(env(safe-area-inset-top) + 3px);z-index:60;
+  isolation:isolate;overflow:hidden;
+  width:min(580px,calc(100vw - 14px));
+  margin:calc(0px - var(--topbar-h,45px) + env(safe-area-inset-top) + 3px) 0 14px 50%;
+  padding:17px;
+  transform:translateX(-50%);background-color:#fff;
   border:var(--bw) solid var(--ink);border-radius:16px;
-  -webkit-backdrop-filter:blur(8px) saturate(1.15);backdrop-filter:blur(8px) saturate(1.15)}
+  -webkit-backdrop-filter:none;backdrop-filter:none}
 .log-tutorial::before{content:"";position:absolute;z-index:0;inset:-18px;
   background:url(./assets/silhouette-navy.png) 0 0/62px 62px repeat;
   opacity:.06;pointer-events:none}
 .log-tutorial>*{position:relative;z-index:1}
-:root[data-theme="dark"] .log-tutorial{background-color:rgba(30,33,42,.97)}
+:root[data-theme="dark"] .log-tutorial{background-color:#1E212A}
 :root[data-theme="dark"] .log-tutorial::before{filter:brightness(0) invert(1);opacity:.045}
 .log-tutorial-basics{border-color:var(--prio)}
 .log-tutorial-kopf{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
@@ -657,9 +666,9 @@ body.einstieg-fokus::after{content:"";position:fixed;inset:0;z-index:39;
 .tutorial-startfx span{max-width:290px;padding:6px 9px;border:2px solid var(--navy);
   font-size:11px;line-height:1.35}
 .willkommen-fx span{max-width:266px;padding:5px 8px;font-size:10px}
-.willkommen-fx.an{animation-duration:5.8s}
+.willkommen-fx.an{animation-duration:7.8s}
 .willkommen-fx.an .tutorial-startfx-inhalt{
-  animation:willkommenStartText 4.15s .4s cubic-bezier(.2,.72,.28,1) both}
+  animation:willkommenStartText 6s .45s cubic-bezier(.2,.72,.28,1) both}
 @keyframes tutorialStartFlaeche{
   0%{opacity:0;transform:translateY(0)}
   11%,84%{opacity:1;transform:translateY(0)}
@@ -679,7 +688,7 @@ body.einstieg-fokus::after{content:"";position:fixed;inset:0;z-index:39;
   84%{opacity:1;transform:scale(.99)}
   100%{opacity:0;transform:scale(.96)}
 }
-.willkommen-nachzug{animation:willkommenNachzug 1.3s cubic-bezier(.22,.8,.3,1) both}
+.willkommen-nachzug{animation:willkommenNachzug 1.6s cubic-bezier(.22,.8,.3,1) both}
 @keyframes willkommenNachzug{
   from{transform:translateY(-24px)}
   to{transform:translateY(0)}

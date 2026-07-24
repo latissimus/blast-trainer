@@ -391,10 +391,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
         : contentEl.querySelector('.tutorial-aktiv');
       const karte = contentEl.querySelector('.log-tutorial');
       if (!ziel || !karte) return;
-      const kopfHoehe = parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--topbar-h'),
-      ) || 0;
-      const zielOben = kopfHoehe + 8 + karte.offsetHeight + 10;
+      // Die Karte liegt waehrend des Tutorials bewusst ueber dem Header. Das
+      // naechste Uebungsfeld richtet sich deshalb an ihrer TATSAECHLICHEN
+      // Unterkante aus, nicht an Headerhoehe + geschaetzter Kartenhoehe. So
+      // scrollt kein Feld vor oder sichtbar hinter die Einrichtungsbox.
+      const zielOben = karte.getBoundingClientRect().bottom + 10;
       const scrollZiel = Math.max(0, window.scrollY + ziel.getBoundingClientRect().top - zielOben);
       window.scrollTo({
         top: scrollZiel,
