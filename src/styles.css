@@ -374,9 +374,19 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker{width:min(560px,calc(100vw - 18px));max-height:min(78vh,720px);margin:auto;
   padding:0;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
   background:var(--surface);color:var(--ink);overflow:hidden}
-.ex-picker.tastatur{position:fixed;inset:var(--picker-top,6px) auto auto 50%;
+/* Bei offener Tastatur klebt der Dialog oben. Die Safe-Area MUSS hier drauf:
+   viewport-fit=cover laesst den Layout-Viewport am Displayrand beginnen, der
+   berechnete Abstand kam aber aus visualViewport.offsetTop und war auf dem
+   iPhone 12px. Der Dialog ist weiss (--surface) und schob sich damit unter
+   Uhrzeit und Akku – das war der weisse Displayrand. env() gibt es nur in
+   CSS, deshalb wird hier addiert statt in anOberkante() zu rechnen.
+   Die Hoehe verliert denselben Betrag, sonst haengt der Dialog unten ueber. */
+.ex-picker.tastatur{position:fixed;
+  --picker-hoehe-sicher:min(
+    calc(var(--picker-hoehe,calc(100dvh - 12px)) - env(safe-area-inset-top)),720px);
+  inset:calc(env(safe-area-inset-top) + var(--picker-top,6px)) auto auto 50%;
   margin:0;transform:translateX(-50%);
-  max-height:min(var(--picker-hoehe,calc(100dvh - 12px)),720px)}
+  max-height:var(--picker-hoehe-sicher)}
 /* Der Backdrop bleibt leer: Auf dem installierten iPhone endet er oberhalb
    der Safe-Area, der Streifen unter Uhrzeit und Akku blieb dadurch hellblau.
    Abgedunkelt wird stattdessen mit .ex-picker-dimmer – ein gewoehnliches
@@ -394,8 +404,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 body:has(.tutorial-dimmer:not([hidden])) .ex-picker-dimmer{
   background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
 .ex-picker-schale{display:flex;flex-direction:column;max-height:min(78vh,720px);padding:12px}
-.ex-picker.tastatur .ex-picker-schale{
-  max-height:min(var(--picker-hoehe,calc(100dvh - 12px)),720px)}
+.ex-picker.tastatur .ex-picker-schale{max-height:var(--picker-hoehe-sicher)}
 .ex-picker-kopf{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .ex-picker-kopf>div{display:flex;flex-direction:column;min-width:0;flex:1}
 .ex-picker-kopf small{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted)}
