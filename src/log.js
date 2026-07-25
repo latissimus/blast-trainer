@@ -376,7 +376,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
         ${actionTitleSvg("LOS GEHT'S!")}
         <span>Du beginnst jetzt mit Woche 1 · Tag 1. Mehr Hilfe findest du im FAQ.</span>
       </div>`;
-    tutorialThemeMeta?.setAttribute('content', '#B1E7FF');
+    // Die Vollbildflaeche der Schlussanimation ist hell – die Statusleiste
+    // muss also zurueck auf die App-Farbe. Frueher stand hier ein fest
+    // verdrahtetes #B1E7FF ueber eine Variable, die es nicht mehr gibt; das
+    // warf einen ReferenceError und brach die Animation an dieser Stelle ab.
+    // Ueber den gemeinsamen Schalter stimmt die Farbe ausserdem im Dunkelmodus.
+    tutorialThemeSetzen(false);
     document.body.appendChild(tutorialFx);
     requestAnimationFrame(() => tutorialFx?.classList.add('an'));
     const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -453,13 +458,26 @@ export async function mountLog(container, { userId, readOnly = false }) {
   document.body.appendChild(picker);
   // Die Escape-Taste schliesst einen modalen Dialog am Schliessen-Weg vorbei.
   // Ohne das hier bliebe die Statusleiste danach dunkel.
-  picker.addEventListener('close', () => dunkleStatusleiste(false, 'uebungswahl'));
+  picker.addEventListener('close', () => {
+    dunkleStatusleiste(false, 'uebungswahl');
+    pickerDunkel.hidden = true;
+  });
   const tutorialDunkel = document.createElement('div');
   tutorialDunkel.className = 'tutorial-dimmer';
   tutorialDunkel.hidden = !tutorialAktiv;
   tutorialDunkel.setAttribute('aria-hidden', 'true');
   tutorialDunkel.onclick = () => tutorialScrollen();
   document.body.appendChild(tutorialDunkel);
+  // Abdunkelung fuer den Uebungswaehler – bewusst NICHT ueber ::backdrop.
+  // Auf dem installierten iPhone endet der Dialog-Backdrop unterhalb der
+  // Safe-Area: Der Streifen unter Uhrzeit und Akku blieb hellblau stehen.
+  // Der Tutorial-Dimmer daneben schafft es, weil er ein gewoehnliches festes
+  // Element mit inset:0 ist. Also hier derselbe Weg.
+  const pickerDunkel = document.createElement('div');
+  pickerDunkel.className = 'ex-picker-dimmer';
+  pickerDunkel.hidden = true;
+  pickerDunkel.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(pickerDunkel);
   // Deckflaeche zwischen Displayoberkante und Tutorialkarte. Die aktive
   // Muskelbox darf beim automatischen Scrollen weder seitlich noch oberhalb
   // der Karte hervorschauen. Die Karte selbst liegt eine Ebene darueber.
@@ -516,6 +534,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       picker.style.removeProperty('--picker-top');
       picker.style.removeProperty('--picker-hoehe');
       dunkleStatusleiste(false, 'uebungswahl');
+      pickerDunkel.hidden = true;
       if (picker.open) picker.close();
       else picker.removeAttribute('open');
     };
@@ -568,9 +587,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
     suche.oninput = zeichneListe;
     schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
     zeichneListe();
-    // Der Dimmer des Dialogs deckt den ganzen Bildschirm ab, auch die
-    // Safe-Area. Damit Uhrzeit und Akku darauf lesbar bleiben, muss iOS sie
-    // weiss zeichnen – und das macht es am dunklen theme-color fest.
+    // Immer einblenden. Ob die Flaeche auch faerbt, entscheidet CSS anhand des
+    // Tutorial-Dimmers – der wird beim Neuzeichnen ein- und ausgeblendet, ein
+    // hier abgefragter Momentwert waere gleich wieder veraltet.
+    pickerDunkel.hidden = false;
     dunkleStatusleiste(true, 'uebungswahl');
     if (typeof picker.showModal === 'function') picker.showModal();
     else picker.setAttribute('open', '');
@@ -1323,6 +1343,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (saveStateEl) saveStateEl.hidden = true;
       picker.remove();
       tutorialDunkel.remove();
+      pickerDunkel.remove();
+      dunkleStatusleiste(false, 'uebungswahl');
       cancelAnimationFrame(tutorialMaskenRaf);
       window.removeEventListener('resize', tutorialMaskePlanen);
       window.removeEventListener('scroll', tutorialMaskePlanen);

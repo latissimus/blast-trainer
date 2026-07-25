@@ -377,7 +377,22 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker.tastatur{position:fixed;inset:var(--picker-top,6px) auto auto 50%;
   margin:0;transform:translateX(-50%);
   max-height:min(var(--picker-hoehe,calc(100dvh - 12px)),720px)}
-.ex-picker::backdrop{background:rgba(5,10,24,.72);backdrop-filter:blur(2px)}
+/* Der Backdrop bleibt leer: Auf dem installierten iPhone endet er oberhalb
+   der Safe-Area, der Streifen unter Uhrzeit und Akku blieb dadurch hellblau.
+   Abgedunkelt wird stattdessen mit .ex-picker-dimmer – ein gewoehnliches
+   festes Element mit inset:0, genau wie beim Tutorial, wo es funktioniert.
+   Das Klicken daneben zum Schliessen haengt weiter am Dialog selbst, der
+   Dimmer nimmt deshalb keine Zeiger an. */
+.ex-picker::backdrop{background:transparent}
+.ex-picker-dimmer{position:fixed;inset:0;z-index:36;background:rgba(5,10,24,.72);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);pointer-events:none}
+.ex-picker-dimmer[hidden]{display:none}
+/* Waehrend des Tutorials dunkelt dessen Dimmer bereits ab. Beide zusammen
+   wuerden den Hintergrund fast schwarz faerben, also faerbt hier nur einer.
+   Bewusst in CSS statt in JS: Der Tutorial-Dimmer wird beim Neuzeichnen
+   ein- und ausgeblendet, ein einmal abgefragter Zustand waere sofort veraltet. */
+body:has(.tutorial-dimmer:not([hidden])) .ex-picker-dimmer{
+  background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
 .ex-picker-schale{display:flex;flex-direction:column;max-height:min(78vh,720px);padding:12px}
 .ex-picker.tastatur .ex-picker-schale{
   max-height:min(var(--picker-hoehe,calc(100dvh - 12px)),720px)}
