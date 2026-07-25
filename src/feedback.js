@@ -17,7 +17,10 @@ export async function mountFeedback(container, { session, profile }) {
   wrap.className = 'wrap pad-bottom feedback-seite';
   wrap.innerHTML = `
     <div class="seitenkopf">
-      <h1 class="section-title">✦ Feedback</h1>
+      <div class="seitenkopf-text">
+        <span class="seitenkopf-kicker">Deine Idee</span>
+        <h1 class="section-title">Feedback</h1>
+      </div>
       <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
     </div>
     <section class="feedback-intro">
@@ -31,7 +34,7 @@ export async function mountFeedback(container, { session, profile }) {
       </select>
       <label class="fld-l" for="feedback-text">Dein Vorschlag</label>
       <textarea class="input feedback-text" id="feedback-text" minlength="10" maxlength="2000"
-        placeholder="Was ist dir aufgefallen – und wie könnte es besser sein?" required></textarea>
+        placeholder="Zum Beispiel: Ich habe nicht verstanden, wie … Einfacher wäre es, wenn …" required></textarea>
       <div class="feedback-zaehler"><span>Mindestens 10 Zeichen</span><b>0 / 2000</b></div>
       <button class="btn btn-primary btn-block" type="submit">Feedback senden</button>
       <div class="feedback-status" aria-live="polite"></div>

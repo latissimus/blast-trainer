@@ -7,11 +7,31 @@ export function mountFaq(container) {
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
     <div class="seitenkopf">
-      <h1 class="section-title">💬 FAQ</h1>
+      <div class="seitenkopf-text">
+        <span class="seitenkopf-kicker">Hilfe</span>
+        <h1 class="section-title">FAQ</h1>
+      </div>
       <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
     </div>
 
-    <p class="faq-sektion">Schnellstart</p>
+    <nav class="faq-spruenge" aria-label="FAQ-Bereiche">
+      <a href="#faq-start">Start</a>
+      <a href="#faq-training">Training</a>
+      <a href="#faq-plan">Plan</a>
+      <a href="#faq-hintergrund">Hintergrund</a>
+    </nav>
+
+    <section class="faq-startkarte" aria-labelledby="faq-starttitel">
+      <span class="faq-start-kicker">Start in 60 Sekunden</span>
+      <h2 id="faq-starttitel">So legst du los</h2>
+      <ol>
+        <li><b>Tutorial starten</b> und die Heavy-Übungen für Woche 1 und 2 festlegen.</li>
+        <li><b>Woche, Tag und Level</b> unten im Log prüfen.</li>
+        <li><b>Gewicht, Wiederholungen und bei Heavy RIR</b> eintragen – gespeichert wird automatisch.</li>
+      </ol>
+    </section>
+
+    <p class="faq-sektion" id="faq-start">Schnellstart</p>
 
     <details class="faq" open><summary>Wie starte ich mein erstes Training?</summary>
       <div class="faq-a">
@@ -52,7 +72,7 @@ export function mountFaq(container) {
       </div>
     </details>
 
-    <p class="faq-sektion">Im Training</p>
+    <p class="faq-sektion" id="faq-training">Im Training</p>
 
     <details class="faq"><summary>Wie trainiere ich Heavy?</summary>
       <div class="faq-a">
@@ -89,7 +109,7 @@ export function mountFaq(container) {
       </div>
     </details>
 
-    <p class="faq-sektion">Plan verstehen</p>
+    <p class="faq-sektion" id="faq-plan">Plan verstehen</p>
 
     <details class="faq"><summary>Wie sieht die Trainingswoche aus?</summary>
       <div class="faq-a">
@@ -143,7 +163,7 @@ export function mountFaq(container) {
       </div>
     </details>
 
-    <p class="faq-sektion">Hintergrund</p>
+    <p class="faq-sektion" id="faq-hintergrund">Hintergrund</p>
 
     <details class="faq"><summary>Was ist LOGMAN?</summary>
       <div class="faq-a">
@@ -180,8 +200,12 @@ export function mountFaq(container) {
     try { sessionStorage.setItem('blast:tutorial-start', '1'); } catch (e) { /* egal */ }
   });
   wrap.querySelectorAll('details.faq').forEach((frage) => {
+    frage.querySelector('summary')?.addEventListener('click', () => {
+      frage.dataset.manuellGeoeffnet = '1';
+    });
     frage.addEventListener('toggle', () => {
-      if (!frage.open) return;
+      if (!frage.open || frage.dataset.manuellGeoeffnet !== '1') return;
+      delete frage.dataset.manuellGeoeffnet;
       requestAnimationFrame(() => frage.scrollIntoView({
         block: 'start',
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',

@@ -62,12 +62,15 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
         ? `<span class="delta d-hold">= gehalten</span>`
         : `<span class="delta ${v.kg > 0 ? 'd-up' : 'd-down'}">${v.kg > 0 ? '▲' : '▼'} ${fmt(Math.abs(v.kg))} kg · ${fmt(Math.abs(v.prozent))} %</span>`;
       karte.querySelector('#fs-kopf').innerHTML = `${titel}
+        <small class="mess-label">Aktueller Leistungswert</small>
         <div class="mess-wert">${fmt(v.letzt)} <span>kg e1RM</span> ${delta}</div>
         <div class="mess-datum">Woche ${r.punkte[0].week} → ${r.punkte[r.punkte.length - 1].week} · bester Satz je Woche</div>`;
-      karte.querySelector('#fs-kurve').innerHTML = kurveSvg(
-        [{ werte: r.punkte.map((p) => ({ x: p.week, wert: p.e1 })), klasse: 'trend', punkte: true }],
-        { einheit: 'kg', xText: (w) => 'Wo ' + w },
-      );
+      karte.querySelector('#fs-kurve').innerHTML = `
+        <div class="prog-kurvenkopf"><b>Leistungstrend</b><span>Heavy · e1RM</span></div>
+        ${kurveSvg(
+          [{ werte: r.punkte.map((p) => ({ x: p.week, wert: p.e1 })), klasse: 'trend', punkte: true }],
+          { einheit: 'kg', xText: (w) => 'Wo ' + w },
+        )}`;
     };
 
     const wahl = karte.querySelector('#fs-wahl');

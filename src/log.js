@@ -887,26 +887,21 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
           </div>
           <h2>So funktioniert dein Plan</h2>
-          <p class="log-tutorial-lead">Du trainierst sechs Wochen mit drei Satzarten.</p>
-          <div class="tutorial-basics">
-            <div class="tutorial-basic">
-              <b>6</b><span><strong>Wochen</strong>A und B wechseln sich ab</span>
-            </div>
-            <div class="tutorial-basic">
-              <b>H</b><span><strong>Heavy</strong>schwerere Arbeit · Übungen einmal festlegen</span>
-            </div>
-            <div class="tutorial-basic">
-              <b>P+C</b><span><strong>Pump & Cluster</strong>zwei weitere Satzarten · Übungen frei</span>
-            </div>
-            <div class="tutorial-basic">
-              <b>C/I</b><span><strong>Comp & Iso</strong>große Mehrgelenksübung · gezielte Einzelmuskelübung</span>
-            </div>
+          <p class="log-tutorial-lead">Sechs Wochen. Nur deine Heavy-Übungen legst du einmal fest.</p>
+          <div class="tutorial-rotation" aria-label="A- und B-Wochen">
+            <span><b>A</b><small>Wochen 1 · 3 · 5</small></span>
+            <i aria-hidden="true">↔</i>
+            <span><b>B</b><small>Wochen 2 · 4 · 6</small></span>
           </div>
-          <p><b>Woche 1 ist deine A-Auswahl</b> für Woche 1, 3 und 5.
-            <b>Woche 2 ist deine B-Auswahl</b> für Woche 2, 4 und 6.
-            Die App übernimmt deine Heavy-Übungen danach automatisch.</p>
+          <div class="tutorial-satzarten">
+            <span><b>Heavy</b><small>Übungen in A und B festlegen</small></span>
+            <span><b>Pump</b><small>leichter · versagensnah · frei wählen</small></span>
+            <span><b>Cluster</b><small>6 × 4 · frei wählen</small></span>
+          </div>
+          <p class="log-tutorial-typen"><b>Comp</b> = große Mehrgelenksübung ·
+            <b>Iso</b> = gezielte Einzelmuskelübung</p>
           <button type="button" class="log-tutorial-weiter" data-tutorial-beginnen>
-            Heavy-Auswahl starten <span class="tutorial-pf">→</span>
+            Plan einrichten <span class="tutorial-pf">→</span>
           </button>`;
         karte.querySelector('[data-tutorial-beginnen]').onclick = () => {
           tutorialZielSetzen(0);
@@ -920,6 +915,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const naechsteAuswahl = alsNaechstes
           ? `Jetzt ${alsNaechstes.muskel} ${alsNaechstes.rolle}-Übung wählen`
           : '';
+        const rollenHilfe = alsNaechstes?.rolle === 'Comp'
+          ? '<b>Comp</b> = große Übung mit mehreren beteiligten Gelenken und Muskeln.'
+          : alsNaechstes?.rolle === 'Iso'
+            ? '<b>Iso</b> = gezielte Übung für den angezeigten Muskel.'
+            : '';
+        const auswahlName = schritt.gruppe.startsWith('A') ? 'A-Auswahl' : 'B-Auswahl';
+        const wochenText = schritt.week === 1 ? 'Wochen 1 · 3 · 5' : 'Wochen 2 · 4 · 6';
         karte.innerHTML = `
           <div class="log-tutorial-kopf">
             <span>Setup ${tutorialSchritt + 1} / 4</span>
@@ -928,11 +930,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
           <div class="tutorial-fortschritt" aria-hidden="true">
             ${TUTORIAL_SETUP.map((_, i) => `<i class="${i <= tutorialSchritt ? 'an' : ''}"></i>`).join('')}
           </div>
-          <h2>${schritt.titel} · Heavy</h2>
-          <p>Wähle alle Heavy-Übungen dieses Tages. Diese <b>${schritt.gruppe.startsWith('A') ? 'A-Auswahl' : 'B-Auswahl'}</b>
-            übernimmt die App automatisch in alle ${schritt.week === 1 ? 'ungeraden Wochen 1, 3 und 5' : 'geraden Wochen 2, 4 und 6'}.</p>
-          <p class="log-tutorial-typen"><b>Comp</b> = große Mehrgelenksübung ·
-            <b>Iso</b> = gezielte Einzelmuskelübung</p>
+          <div class="tutorial-zielkopf"><h2>${schritt.titel}</h2><span>Heavy</span></div>
+          <p class="tutorial-kurzziel"><b>${auswahlName}</b> · wird automatisch für ${wochenText} übernommen.</p>
+          ${rollenHilfe ? `<p class="log-tutorial-typen">${rollenHilfe}</p>` : ''}
           <p class="log-tutorial-stand"><b>${tutorialStatus.gewaehlt} / ${tutorialStatus.gesamt}</b> Heavy-Übungen gewählt</p>
           <button type="button" class="log-tutorial-weiter" data-tutorial-weiter ${fertig ? '' : 'data-offen'}>
             ${fertig
@@ -950,12 +950,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <span>Satzeingabe</span>
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
           </div>
-          <h2>So protokollierst du Heavy</h2>
-          <p>Links steht die Satznummer. Danach trägst du <b>kg</b>,
-            <b>Wdh.</b> und <b>RIR</b> ein. RIR bedeutet <i>Reps in Reserve</i>,
-            also Wiederholungen in Reserve. RIR 1 heißt: Eine saubere Wiederholung wäre noch möglich gewesen.</p>
-          <p>Über der Übung zeigt dir LOGMAN beim nächsten vergleichbaren Training
-            die letzten Werte. Weitere Erklärungen findest du jederzeit im FAQ.</p>
+          <h2>Heavy protokollieren</h2>
+          <div class="tutorial-eingabe">
+            <span><b>kg</b><small>Gewicht</small></span>
+            <span><b>Wdh.</b><small>Wiederholungen</small></span>
+            <span><b>RIR</b><small>Wiederholungen übrig</small></span>
+          </div>
+          <p><b>RIR 1</b> bedeutet: Eine saubere Wiederholung wäre noch möglich gewesen.</p>
+          <p class="tutorial-kurzziel">Beim nächsten vergleichbaren Training stehen die letzten Werte direkt über der Eingabe.</p>
           <div class="log-tutorial-ende">
             <button type="button" class="log-tutorial-weiter" data-tutorial-fertig>Tutorial abschließen</button>
           </div>`;
@@ -1008,7 +1010,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
       const blockMus = blk.mus;
 
-      const el = document.createElement('div'); el.className = 'block';
+      const el = document.createElement('div'); el.className = `block block-${effType}`;
       const cues = [];
       if (effType === 'load') {
         cues.push('<span class="chip">' + effReps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');

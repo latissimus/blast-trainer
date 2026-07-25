@@ -16,9 +16,14 @@ export async function mountAdmin(container, { session }) {
     container.innerHTML = '';
     const wrap = document.createElement('div');
     wrap.className = 'wrap';
-    wrap.style.paddingTop = '18px';
     wrap.style.paddingBottom = '40px';
-    wrap.innerHTML = `<h1 class="section-title">Admin · Alle Nutzer</h1>`;
+    wrap.innerHTML = `
+      <div class="seitenkopf">
+        <div class="seitenkopf-text">
+          <span class="seitenkopf-kicker">Verwaltung</span>
+          <h1 class="section-title">Alle Nutzer</h1>
+        </div>
+      </div>`;
     container.appendChild(wrap);
 
     const { data: profiles, error } = await supabase
@@ -55,10 +60,14 @@ export async function mountAdmin(container, { session }) {
     container.innerHTML = '';
     const wrap = document.createElement('div');
     wrap.className = 'wrap';
-    wrap.style.paddingTop = '18px';
     wrap.innerHTML = `
+      <div class="seitenkopf">
+        <div class="seitenkopf-text">
+          <span class="seitenkopf-kicker">Kundenlog</span>
+          <h1 class="section-title">${p.full_name || p.email || 'Nutzer'}</h1>
+        </div>
+      </div>
       <button class="back-link" id="ad-back">← Zurück zur Liste</button>
-      <h1 class="section-title" style="margin-bottom:8px">${p.full_name || p.email || 'Nutzer'}</h1>
       <div class="readonly-note">Nur-Lese-Ansicht · Log von ${p.email || p.id}</div>`;
     container.appendChild(wrap);
     wrap.querySelector('#ad-back').onclick = showList;

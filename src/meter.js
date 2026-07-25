@@ -19,16 +19,24 @@ export async function mountMeter(container, { userId }) {
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
     <div class="seitenkopf">
-      <h1 class="section-title">🎯 Set-O-Meter</h1>
+      <div class="seitenkopf-text">
+        <span class="seitenkopf-kicker">Planung</span>
+        <h1 class="section-title">Set-O-Meter</h1>
+      </div>
       ${zurueckChip()}
     </div>
     <div class="som-statuskopf">
       <p class="som-lage" id="som-lage"></p>
       <button class="som-info-knopf" id="som-info-knopf" type="button" aria-expanded="false" aria-controls="som-info">i</button>
     </div>
-    <p class="som-einfach"><b>Optional:</b> Ohne Änderung bleibt dein Plan vollständig.
-      Für eine Priorität: <b>1.</b> Muskel öffnen · <b>2.</b> Art wählen ·
-      <b>3.</b> bei Umverteilung einen Spender bestätigen.</p>
+    <div class="som-einfach">
+      <p><b>Optional:</b> Ohne Änderung bleibt dein Plan vollständig.</p>
+      <div class="som-ablauf" aria-label="So setzt du eine Priorität">
+        <span><i>1</i>Muskel öffnen</span>
+        <span><i>2</i>Art wählen</span>
+        <span><i>3</i>Spender bestätigen</span>
+      </div>
+    </div>
     <div class="som-kurzhilfe" id="som-info" hidden>
       <p><b>Direkte Arbeit:</b> Der Muskel ist das Hauptziel der Übung.</p>
       <p><b>Indirekte Arbeit:</b> Der Muskel arbeitet als unterstützender Nebenmuskel mit, während eine andere Muskelgruppe das Hauptziel ist – zum Beispiel der Trizeps beim Bankdrücken oder der Bizeps beim Rudern.</p>
@@ -168,7 +176,11 @@ export async function mountMeter(container, { userId }) {
       <button type="button" class="som-zeile" data-konto="${html(r.konto)}" aria-expanded="${offen ? 'true' : 'false'}">
         <span class="som-zeile-kopf"><span class="som-name">${html(zeigName(r.konto))}</span>${prio ? '<span class="som-prio-marke">Priorität</span>' : ''}</span>
         <span class="som-track"><span class="som-fill-direkt" style="width:${direktBreite}%"></span><span class="som-fill-indirekt" style="width:${indirektBreite}%"></span></span>
-        <span class="som-zeile-fuss"><span class="som-zahlen"><b>${direkt}</b> direkt · <b>${indirekt}</b> indirekt</span><span class="som-pfeil" aria-hidden="true">⌄</span></span>
+        <span class="som-zeile-fuss">
+          <span class="som-wert"><small>Direkt</small><b>${direkt}</b></span>
+          <span class="som-wert"><small>Indirekt</small><b>${indirekt}</b></span>
+          <span class="som-pfeil" aria-hidden="true">⌄</span>
+        </span>
       </button>
       ${offen ? inlineEditor(r.konto, werte, prioErgebnisse) : ''}
     </div>`;

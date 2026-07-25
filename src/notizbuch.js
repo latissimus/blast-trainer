@@ -82,7 +82,10 @@ export function mountNotizbuch(container, { userId }) {
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
     <div class="seitenkopf">
-      <h1 class="section-title">📄 Notizbuch</h1>
+      <div class="seitenkopf-text">
+        <span class="seitenkopf-kicker">Notizen</span>
+        <h1 class="section-title">Notizbuch</h1>
+      </div>
       ${zurueckChip()}
     </div>
     <div id="nb-inhalt"><p class="som-hinweis">lädt…</p></div>`;

@@ -18,7 +18,10 @@ export async function mountProg(container, { userId }) {
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
     <div class="seitenkopf">
-      <h1 class="section-title">📈 Progression</h1>
+      <div class="seitenkopf-text">
+        <span class="seitenkopf-kicker">Auswertung</span>
+        <h1 class="section-title">Progression</h1>
+      </div>
       <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
     </div>
     <div class="som-statuskopf prog-statuskopf">

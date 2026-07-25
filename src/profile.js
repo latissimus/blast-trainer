@@ -67,12 +67,27 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   wrap.className = 'wrap pad-bottom';
   wrap.innerHTML = `
     <div class="seitenkopf">
-      <h1 class="section-title">Mein Profil</h1>
+      <div class="seitenkopf-text">
+        <span class="seitenkopf-kicker">Konto</span>
+        <h1 class="section-title">Mein Profil</h1>
+      </div>
       <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
     </div>`;
 
-  const card = document.createElement('div');
-  card.className = 'card';
+  const profilSektion = (titel, offen = false, klasse = '') => {
+    const details = document.createElement('details');
+    details.className = `profile-abschnitt${klasse ? ` ${klasse}` : ''}`;
+    details.open = offen;
+    const summary = document.createElement('summary');
+    summary.textContent = titel;
+    const inhalt = document.createElement('div');
+    inhalt.className = 'profile-abschnitt-inhalt';
+    details.append(summary, inhalt);
+    wrap.appendChild(details);
+    return inhalt;
+  };
+
+  const card = profilSektion('Konto', true);
 
   // --- top: avatar + role ---
   const top = document.createElement('div');
@@ -151,12 +166,9 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     onProfileUpdated?.(profile);
   };
   card.appendChild(saveBtn);
-  wrap.appendChild(card);
 
   // --- Passwort aendern -------------------------------------------------
-  const pwCard = document.createElement('div');
-  pwCard.className = 'card';
-  pwCard.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 4px">Passwort ändern</h2>`;
+  const pwCard = profilSektion('Passwort ändern');
   const pwMsg = document.createElement('div');
   pwCard.appendChild(pwMsg);
 
@@ -190,12 +202,9 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     toast('Passwort geändert');
   };
   pwCard.appendChild(pwBtn);
-  wrap.appendChild(pwCard);
 
   // --- Darstellung -------------------------------------------------------
-  const thCard = document.createElement('div');
-  thCard.className = 'card';
-  thCard.innerHTML = `<h2 class="section-title" style="font-size:18px;margin:0 0 16px">Darstellung</h2>`;
+  const thCard = profilSektion('Darstellung');
   const seg = document.createElement('div');
   seg.className = 'themeseg';
   [['retro', 'Retro'], ['dark', 'Dark']].forEach(([wert, label]) => {
@@ -210,23 +219,15 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     seg.appendChild(b);
   });
   thCard.appendChild(seg);
-  wrap.appendChild(thCard);
 
   // --- Eigene Daten -------------------------------------------------------
   // Bewusst unten im Profil statt im Hauptmenue: wichtig fuer Kontrolle und
   // Datenschutz, aber keine Handlung waehrend des Trainings.
-  const dataCard = document.createElement('div');
-  dataCard.className = 'card profile-daten';
+  const dataCard = profilSektion('Meine Daten');
   dataCard.innerHTML = `
-    <h2 class="section-title" style="font-size:18px;margin:0 0 6px">Meine Daten</h2>
     <p class="profile-hinweis">Exportiert Profil, Trainingslog und Notizen als JSON-Datei.</p>
     <button class="btn btn-block" type="button" data-export>Daten exportieren</button>
-    <div class="profile-gefahr">
-      <p><b>Account löschen</b><br>Entfernt Account, Trainingsdaten und Notizbuch endgültig.</p>
-      <button class="btn btn-block btn-danger" type="button" data-account-weg>Account und Daten löschen</button>
-    </div>
     <div class="profile-daten-status" aria-live="polite"></div>`;
-  wrap.appendChild(dataCard);
 
   const datenStatus = dataCard.querySelector('.profile-daten-status');
   dataCard.querySelector('[data-export]').onclick = async (e) => {
@@ -263,12 +264,19 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     }
   };
 
-  dataCard.querySelector('[data-account-weg]').onclick = async (e) => {
+  const dangerCard = profilSektion('Account löschen', false, 'gefahr');
+  dangerCard.innerHTML = `
+    <p class="profile-hinweis">Entfernt Account, Trainingsdaten und Notizbuch endgültig.</p>
+    <button class="btn btn-block btn-danger" type="button" data-account-weg>Account und Daten löschen</button>
+    <div class="profile-daten-status" aria-live="polite"></div>`;
+  const dangerStatus = dangerCard.querySelector('.profile-daten-status');
+
+  dangerCard.querySelector('[data-account-weg]').onclick = async (e) => {
     const bestaetigung = prompt('Der Account und alle Daten werden endgültig gelöscht.\n\nTippe LÖSCHEN zum Bestätigen:');
     if (bestaetigung !== 'LÖSCHEN') return;
     const btn = e.currentTarget;
     btn.disabled = true;
-    datenStatus.textContent = 'Account wird gelöscht…';
+    dangerStatus.textContent = 'Account wird gelöscht…';
     let bilderEntfernt = false;
     try {
       // Vor dem Entfernen der separat gespeicherten Bilder pruefen, ob die
@@ -298,7 +306,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
       const serverFunktionFehlt =
         err?.code === 'PGRST202' ||
         /delete_own_account|could not find the function|schema cache/i.test(err?.message || '');
-      datenStatus.textContent = bilderEntfernt
+      dangerStatus.textContent = bilderEntfernt
         ? 'Der Account blieb bestehen; Notizbuchbilder wurden bereits entfernt.'
         : serverFunktionFehlt
           ? 'Die Kontolöschung ist auf dem Server noch nicht aktiviert. Es wurden keine Daten gelöscht.'
@@ -311,7 +319,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   // sichtbar, obwohl man ihn selten braucht – im Profil liegt er naeher an den
   // uebrigen Kontoeinstellungen.
   const outCard = document.createElement('div');
-  outCard.className = 'card';
+  outCard.className = 'profile-ausloggen';
   const outBtn = document.createElement('button');
   outBtn.className = 'btn btn-block';
   outBtn.textContent = 'Abmelden';
