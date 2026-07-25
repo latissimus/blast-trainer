@@ -40,7 +40,7 @@
      --green, weil --green weiterhin "erledigt/weiter" bedeutet (Knopf zum
      naechsten Tag), und eigene Tinte, weil --ink im Dark-Mode hell wird –
      auf Neon-Limette waere das unlesbar. */
-  --cluster:#CEFC17;
+  --cluster:#4e2224;
   --cluster-ink:#141414;
   --green:#154C2B;  /* "erledigt / weiter" – Knopf zum naechsten Tag */
   --down:#E8785B;
