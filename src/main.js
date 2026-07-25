@@ -331,6 +331,12 @@ function setNavActive(view) {
   // Traegt die Seitenfarbe: Jede Unterseite hat ihren eigenen Grundton, das Log
   // bleibt hellblau. Setzt --bg um, damit Kopfleiste und Bedienleiste von selbst
   // mitgehen, statt jede Flaeche einzeln umfaerben zu muessen.
+  //
+  // AUCH auf <html>, nicht nur auf <body>: Die Leinwand hinter der Seite nimmt
+  // die Farbe von <html>. Stand --bg nur auf <body>, blieb <html> beim
+  // Grundton des Logs – auf der Progression war unterhalb des Inhalts und beim
+  // Ueberscrollen deshalb ein hellblauer Streifen zu sehen.
+  document.documentElement.dataset.seite = view;
   document.body.dataset.seite = view;
   // Die vier Trainingsfelder wirken nur im Log. Auf Unterseiten bleibt unten
   // deshalb nur das Menue sichtbar; inaktive Felder sehen sonst bedienbar aus

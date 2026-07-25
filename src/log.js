@@ -473,11 +473,16 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function tutorialMaskeAktualisieren() {
     tutorialMaskenRaf = null;
     const karte = contentEl.querySelector('.log-tutorial');
-    if (!tutorialAktiv || !karte) {
+    // Nur wenn das Tutorial WIRKLICH aus ist wird zurueckgesetzt. Frueher
+    // genuegte eine fehlende Karte – die gibt es aber auch mitten im
+    // Neuzeichnen fuer einen Moment, und dann sprang die Statusleiste kurz
+    // auf die helle App-Farbe zurueck.
+    if (!tutorialAktiv) {
       tutorialKopfmaske.hidden = true;
       if (!tutorialFx) tutorialThemeSetzen(false);
       return;
     }
+    if (!karte) return;   // Zwischenzustand: alles so lassen, wie es ist
     tutorialKopfmaske.hidden = false;
     tutorialThemeSetzen(true);
     tutorialKopfmaske.style.height = `${Math.ceil(karte.getBoundingClientRect().bottom)}px`;

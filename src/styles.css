@@ -29,7 +29,17 @@
      fuellt waehrend des Tutorials die iOS-Safe-Area und die Scrollmaske. */
   --tutorial-dim:#354859;
   --up:#12A150;
-  --green:#154C2B;  /* MR-Badge und abgelaufener Timer – dieselbe Optik */
+  /* Cluster-Streifen und -Badge. Vorher --green (#154C2B, Waldgruen) – das war
+     die einzige Farbe der App, die auf keiner der beiden Vorlagen vorkommt:
+     retromuscle.net fuehrt ueberhaupt kein Gruen, Feastables nur ein grelles
+     Limette. Dieses Butter-Gelb ist gemessen von retromuscle.net und bildet
+     mit Navy (Heavy) und Pink (Pump) den klassischen 80er-Dreiklang.
+     Eigene Variable statt --green, weil --green weiterhin "erledigt/weiter"
+     bedeutet (Knopf zum naechsten Tag), und eigene Tinte, weil --ink im
+     Dark-Mode hell wird – auf Gelb waere das unlesbar. */
+  --cluster:#FFEF69;
+  --cluster-ink:#141414;
+  --green:#154C2B;  /* "erledigt / weiter" – Knopf zum naechsten Tag */
   --down:#E8785B;
   --hold:#C7912A;
 
@@ -294,14 +304,14 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .block::before{content:"";position:absolute;z-index:1;inset:0 0 auto;height:5px;pointer-events:none}
 .block-load::before{background:var(--navy)}
 .block-pump::before{background:var(--pink)}
-.block-mr::before{background:var(--green)}
+.block-mr::before{background:var(--cluster)}
 .block.opt{border-style:dashed}
 .bhead{display:flex;align-items:center;gap:8px;padding:15px 13px 9px;border-bottom:var(--bw) solid var(--ink)}
 .bhead .mus{font-family:var(--display);font-style:italic;font-weight:700;font-size:16px;text-transform:uppercase}
 .badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:999px;text-transform:uppercase;border:var(--bw) solid var(--ink);font-family:var(--display);font-style:italic}
 .b-load{background:var(--load);color:#fff}
 .b-pump{background:var(--pump);color:var(--ink)}
-.b-mr{background:var(--green);color:#fff}
+.b-mr{background:var(--cluster);color:var(--cluster-ink)}
 .target{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;white-space:nowrap;font-weight:700}
 .target b{color:var(--ink);font-weight:800}
 .target.met b{color:var(--up)}
@@ -605,6 +615,16 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   background:var(--tutorial-dim);
   pointer-events:none;transition:height .32s cubic-bezier(.22,.75,.3,1)}
 .tutorial-kopfmaske[hidden]{display:none}
+/* Streifen unter der iOS-Statusleiste – rein aus CSS, ohne Messung.
+   Die Flaeche oberhalb der Karte haengt sonst an drei Dingen gleichzeitig:
+   dem Dimmer (backdrop-filter), der per JS gemessenen Kopfmaske und deren
+   Hoehen-Transition. Auf dem iPhone fiel dort etwas aus und der Bereich wurde
+   hell. Dieser Streifen ist an nichts davon gekoppelt: feste Hoehe aus
+   env(), keine Animation, ueber der Karte (z 70 > 60). Er endet exakt dort,
+   wo die Karte beginnt (safe-area + 3px), ueberdeckt sie also nie. */
+html.tutorial-laeuft body::before{content:"";position:fixed;z-index:70;
+  top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 3px);
+  background:var(--tutorial-dim);pointer-events:none}
 .log-tutorial{position:sticky;top:calc(env(safe-area-inset-top) + 3px);z-index:60;
   isolation:isolate;overflow:hidden;
   width:min(580px,calc(100vw - 14px));
@@ -613,10 +633,25 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   transform:translateX(-50%);background-color:#fff;
   border:var(--bw) solid var(--ink);border-radius:16px;
   -webkit-backdrop-filter:none;backdrop-filter:none;
-  animation:tutorialKarteEin .28s cubic-bezier(.22,.75,.3,1) both}
+  /* Derselbe ruhige Impuls wie bei der Einstiegskarte (einstiegFokus): gleiche
+     Dauer, gleicher Hub. Er braucht aber eigene Keyframes, weil die Karte
+     bereits translateX(-50%) traegt – ein reines scale() wuerde das
+     ueberschreiben und die Karte nach rechts springen lassen.
+     transform-origin oben: Die Karte klebt am oberen Rand; waechst sie aus der
+     Mitte, schoebe sie sich bei jedem Puls in die Statusleiste. */
+  transform-origin:50% 0;
+  animation:tutorialKarteEin .28s cubic-bezier(.22,.75,.3,1) both,
+            tutorialKartePuls 1.05s .28s ease-in-out infinite}
 @keyframes tutorialKarteEin{
   from{opacity:.82}
   to{opacity:1}
+}
+@keyframes tutorialKartePuls{
+  0%,100%{transform:translateX(-50%) scale(1)}
+  50%{transform:translateX(-50%) scale(1.025)}
+}
+@media (prefers-reduced-motion:reduce){
+  .log-tutorial{animation:tutorialKarteEin .28s cubic-bezier(.22,.75,.3,1) both}
 }
 :root[data-theme="dark"] .log-tutorial{background-color:#1E212A}
 .log-tutorial-basics{border-color:var(--prio)}
@@ -928,26 +963,26 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
    grossen Flaechen davon ab, leer zu wirken. */
 /* Set-O bleibt bewusst im Kernsystem der App: derselbe hellblaue Grund und
    dieselben weissen Karten wie im Log, Pink markiert nur aktive Planung. */
-body[data-seite="meter"]{--bg:#B1E7FF;--surface:#FFFFFF;--surface2:#EAF4FC}
-body[data-seite="prog"]{--bg:#D9BBF7}
-body[data-seite="feedback"]{--bg:#D9BBF7}
-body[data-seite="faq"]{--bg:#FBE7A4}
-body[data-seite="profile"]{--bg:#BFE7D2}
+:root[data-seite="meter"]{--bg:#B1E7FF;--surface:#FFFFFF;--surface2:#EAF4FC}
+:root[data-seite="prog"]{--bg:#D9BBF7}
+:root[data-seite="feedback"]{--bg:#D9BBF7}
+:root[data-seite="faq"]{--bg:#FBE7A4}
+:root[data-seite="profile"]{--bg:#BFE7D2}
 /* Hellblauer Grund, weisse Flaechen. Anders als die uebrigen Seiten setzt diese
    auch --surface und --surface2 um: Damit werden Karte, Notizfeld UND der
    "+ Bild"-Chip von selbst weiss, statt jede Flaeche einzeln einzufaerben.
    (--surface2 traegt sonst einen Blaustich, den der Chip sichtbar machen wuerde.) */
 /* Kein eigenes --bg mehr: Die Seite nimmt das globale Hellblau. Frueher stand
    hier der alte Wert #AEDCF6 und blieb nach der Farbanpassung zurueck. */
-body[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
+:root[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
 
-:root[data-theme="dark"] body[data-seite="meter"]{--bg:#0B0D12;--surface:#191C24;--surface2:#232733}
+:root[data-theme="dark"][data-seite="meter"]{--bg:#0B0D12;--surface:#191C24;--surface2:#232733}
 /* Dunkel: derselbe Aufbau, nur umgekehrt – blaeulicher Grund, hellere Flaechen. */
-:root[data-theme="dark"] body[data-seite="notizbuch"]{--bg:#101A2B;--surface:#1C2637;--surface2:#1C2637}
-:root[data-theme="dark"] body[data-seite="prog"]{--bg:#2A1B45}
-:root[data-theme="dark"] body[data-seite="feedback"]{--bg:#2A1B45}
-:root[data-theme="dark"] body[data-seite="faq"]{--bg:#332B14}
-:root[data-theme="dark"] body[data-seite="profile"]{--bg:#143024}
+:root[data-theme="dark"][data-seite="notizbuch"]{--bg:#101A2B;--surface:#1C2637;--surface2:#1C2637}
+:root[data-theme="dark"][data-seite="prog"]{--bg:#2A1B45}
+:root[data-theme="dark"][data-seite="feedback"]{--bg:#2A1B45}
+:root[data-theme="dark"][data-seite="faq"]{--bg:#332B14}
+:root[data-theme="dark"][data-seite="profile"]{--bg:#143024}
 
 /* ---------- Seitenmuster ----------
    Zwei Muster, ueber Variablen waehlbar: die bisherigen Dreiecke und die
