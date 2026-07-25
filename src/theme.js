@@ -12,6 +12,11 @@ const FARBE = { retro: '#B1E7FF', dark: '#0B0D12' };
 
 export const gueltig = (t) => (t === 'dark' ? 'dark' : 'retro');
 
+// Gruende, aus denen die Statusleiste gerade dunkel sein muss (Tutorial,
+// Uebungswaehler, …). Steht hier oben, weil applyTheme() sie schon kennen
+// muss – Details bei dunkleStatusleiste() weiter unten.
+const dunkelGruende = new Set();
+
 export function getTheme() {
   try { return gueltig(localStorage.getItem(KEY)); } catch (e) { return 'retro'; }
 }
@@ -21,6 +26,13 @@ export function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', theme);
   // Faerbt auf dem iPhone die Statusleiste ueber der App – sonst bliebe oben
   // ein hellblauer Streifen ueber dem dunklen Log stehen.
+  //
+  // ABER NICHT, solange etwas den Bildschirm abdunkelt: render() ruft diese
+  // Funktion bei jedem Seitenaufbau, setTheme() beim Umschalten im Profil.
+  // Ohne die Sperre haette jeder dieser Aufrufe die dunkle Statusleiste eines
+  // offenen Uebungswaehlers oder des Tutorials wieder aufgehellt – und zwar
+  // lautlos, weil dunkleStatusleiste() davon nichts mitbekommt.
+  if (dunkelGruende.size > 0) return;
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', FARBE[theme]);
 }
@@ -50,8 +62,6 @@ export function setTheme(t) {
 // geoeffnet. Wuerde jeder Aufrufer die Leiste einfach umschalten, haette das
 // Schliessen des Waehlers sie mitten im Tutorial wieder aufgehellt. Deshalb
 // werden die Gruende gezaehlt – dunkel bleibt es, solange noch einer offen ist.
-const dunkelGruende = new Set();
-
 export function dunkleStatusleiste(aktiv, grund = 'tutorial') {
   if (aktiv) dunkelGruende.add(grund);
   else dunkelGruende.delete(grund);
