@@ -70,6 +70,16 @@ export function dunkleStatusleiste(aktiv, grund = 'tutorial') {
   const meta = document.querySelector('meta[name="theme-color"]');
   if (!meta) return;
   if (an) {
+    // ===== VORUEBERGEHENDE DIAGNOSE – wieder entfernen! =====
+    // Der Uebungswaehler faerbt knallrot, alles andere wie gehabt. Damit ist
+    // unterscheidbar, ob das Meta beim Waehler ueberhaupt ankommt:
+    //   Leiste wird rot  -> Meta greift, der bisherige Wert wurde ueberschrieben
+    //   Leiste bleibt hell -> Meta greift beim Waehler grundsaetzlich nicht
+    // Danach wieder ersetzen durch die Zeile darunter ohne den roten Zweig.
+    if (dunkelGruende.has('uebungswahl')) {
+      meta.setAttribute('content', '#FF0000');
+      return;
+    }
     const dunkel = getComputedStyle(document.documentElement).getPropertyValue('--tutorial-dim').trim();
     meta.setAttribute('content', dunkel || '#354859');
   } else {

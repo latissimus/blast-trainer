@@ -398,17 +398,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    volle Deckung, Hoehe rein aus env(): ohne Messung, ohne Animation, ohne
    Top-Layer. position:fixed nimmt sie aus dem Flexfluss, sie wird also kein
    Flex-Kind der Deckflaeche. */
-/* ===== VORUEBERGEHENDE DIAGNOSE – wieder entfernen! =====
-   Rot statt --tutorial-dim und 40px hoeher als noetig. Das trennt drei Faelle,
-   die sich sonst nicht unterscheiden lassen:
-     rot bis zur Displayoberkante -> Element deckt die Safe-Area, env() stimmt
-     rot erst UNTER der Statusleiste -> Element rendert, env() liefert 0
-     gar kein Rot -> Element erreicht die Zone ueberhaupt nicht
-   Danach zurueck auf: height:calc(env(safe-area-inset-top) + 3px)
-                       background:var(--tutorial-dim) */
 .ex-picker-lage::before{content:"";position:fixed;top:0;left:0;width:100vw;
-  height:calc(env(safe-area-inset-top) + 40px);
-  background:#FF0000;pointer-events:none}
+  height:calc(env(safe-area-inset-top) + 3px);
+  background:var(--tutorial-dim);pointer-events:none}
 /* Bei offener Tastatur klebt das Feld oben – aber UNTERHALB der Safe-Area.
    viewport-fit=cover laesst den Layout-Viewport am Displayrand beginnen, der
    Abstand aus visualViewport.offsetTop war auf dem iPhone nur 12px. Das Feld
