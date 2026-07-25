@@ -371,40 +371,38 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 
 /* Durchsuchbarer Uebungswaehler. Ein Dialog statt 199 Eintraegen im
    System-Scrollrad; die Treffer bleiben nach "zuletzt" und Muskel gruppiert. */
-.ex-picker{width:min(560px,calc(100vw - 18px));max-height:min(78vh,720px);margin:auto;
-  padding:0;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
-  background:var(--surface);color:var(--ink);overflow:hidden}
-/* Bei offener Tastatur klebt der Dialog oben. Die Safe-Area MUSS hier drauf:
+/* Die Deckflaeche dunkelt SELBST ab und traegt das Feld in sich. Kein <dialog>
+   und kein ::backdrop mehr: Ein modaler Dialog liegt in der Top-Layer, und
+   dort endete die Abdunkelung auf dem installierten iPhone oberhalb der
+   Safe-Area – der Streifen unter Uhrzeit und Akku blieb hellblau. Der
+   Tutorial-Dimmer daneben schafft es zuverlaessig, weil er ein gewoehnliches
+   festes Element mit inset:0 ist. Das hier ist dieselbe Bauweise.
+   z 80 muss ueber der Tutorialkarte (60) und dem Statusleisten-Riegel (70)
+   liegen: Der Waehler wird auch MITTEN im Tutorial geoeffnet, und als modaler
+   Dialog lag er frueher in der Top-Layer, also ueber allem. Bei z 45 war er
+   hinter der Tutorialkarte verschwunden. Unter der Startanimation (100)
+   bleibt er, die deckt bewusst alles zu. */
+.ex-picker-lage{position:fixed;inset:0;z-index:80;
+  display:flex;align-items:center;justify-content:center;padding:9px;
+  background:rgba(5,10,24,.72);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  overscroll-behavior:contain}
+.ex-picker-lage[hidden]{display:none}
+/* Bei offener Tastatur klebt das Feld oben – aber UNTERHALB der Safe-Area.
    viewport-fit=cover laesst den Layout-Viewport am Displayrand beginnen, der
-   berechnete Abstand kam aber aus visualViewport.offsetTop und war auf dem
-   iPhone 12px. Der Dialog ist weiss (--surface) und schob sich damit unter
-   Uhrzeit und Akku – das war der weisse Displayrand. env() gibt es nur in
-   CSS, deshalb wird hier addiert statt in anOberkante() zu rechnen.
-   Die Hoehe verliert denselben Betrag, sonst haengt der Dialog unten ueber. */
-.ex-picker.tastatur{position:fixed;
+   Abstand aus visualViewport.offsetTop war auf dem iPhone nur 12px. Das Feld
+   ist weiss (--surface) und schob sich damit unter Uhrzeit und Akku.
+   Die Hoehe verliert denselben Betrag, sonst haengt es unten ueber. */
+.ex-picker-lage.tastatur{align-items:flex-start;
   --picker-hoehe-sicher:min(
     calc(var(--picker-hoehe,calc(100dvh - 12px)) - env(safe-area-inset-top)),720px);
-  inset:calc(env(safe-area-inset-top) + var(--picker-top,6px)) auto auto 50%;
-  margin:0;transform:translateX(-50%);
-  max-height:var(--picker-hoehe-sicher)}
-/* Der Backdrop bleibt leer: Auf dem installierten iPhone endet er oberhalb
-   der Safe-Area, der Streifen unter Uhrzeit und Akku blieb dadurch hellblau.
-   Abgedunkelt wird stattdessen mit .ex-picker-dimmer – ein gewoehnliches
-   festes Element mit inset:0, genau wie beim Tutorial, wo es funktioniert.
-   Das Klicken daneben zum Schliessen haengt weiter am Dialog selbst, der
-   Dimmer nimmt deshalb keine Zeiger an. */
-.ex-picker::backdrop{background:transparent}
-.ex-picker-dimmer{position:fixed;inset:0;z-index:36;background:rgba(5,10,24,.72);
-  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);pointer-events:none}
-.ex-picker-dimmer[hidden]{display:none}
-/* Waehrend des Tutorials dunkelt dessen Dimmer bereits ab. Beide zusammen
-   wuerden den Hintergrund fast schwarz faerben, also faerbt hier nur einer.
-   Bewusst in CSS statt in JS: Der Tutorial-Dimmer wird beim Neuzeichnen
-   ein- und ausgeblendet, ein einmal abgefragter Zustand waere sofort veraltet. */
-body:has(.tutorial-dimmer:not([hidden])) .ex-picker-dimmer{
-  background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+  padding-top:calc(env(safe-area-inset-top) + var(--picker-top,6px))}
+.ex-picker{width:min(560px,100%);max-height:min(78vh,720px);
+  padding:0;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
+  background:var(--surface);color:var(--ink);overflow:hidden}
 .ex-picker-schale{display:flex;flex-direction:column;max-height:min(78vh,720px);padding:12px}
-.ex-picker.tastatur .ex-picker-schale{max-height:var(--picker-hoehe-sicher)}
+.ex-picker-lage.tastatur .ex-picker,
+.ex-picker-lage.tastatur .ex-picker-schale{max-height:var(--picker-hoehe-sicher)}
 .ex-picker-kopf{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .ex-picker-kopf>div{display:flex;flex-direction:column;min-width:0;flex:1}
 .ex-picker-kopf small{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted)}
@@ -415,7 +413,10 @@ body:has(.tutorial-dimmer:not([hidden])) .ex-picker-dimmer{
 .ex-picker-suche{width:100%;padding:11px 12px;border:var(--bw) solid var(--ink);border-radius:var(--r);
   background:var(--surface2);color:var(--ink);font:700 16px var(--ui)}
 .ex-picker-suche:focus{outline:none;border-color:var(--pink)}
-.ex-picker-liste{overflow:auto;-webkit-overflow-scrolling:touch;margin-top:8px;padding-right:2px}
+/* overscroll-behavior: Ohne <dialog> gibt es keine eingebaute Sperre mehr –
+   sonst scrollt am Ende der Liste die Seite dahinter weiter. */
+.ex-picker-liste{overflow:auto;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;margin-top:8px;padding-right:2px}
 .ex-picker-gruppe{position:sticky;top:0;z-index:1;margin:8px 0 4px;padding:5px 7px;
   background:var(--surface);border-bottom:2px dashed var(--ink);
   font-family:var(--display);font-style:italic;font-size:10px;font-weight:700;

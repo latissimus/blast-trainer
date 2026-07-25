@@ -452,32 +452,30 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // im nativen Scrollrad. Der Dialog wird fuer jedes Feld wiederverwendet und
   // liegt ausserhalb der Trainingskarten, damit deren Neuzeichnen ihn nicht
   // mitten in einer Auswahl entfernt.
-  const picker = document.createElement('dialog');
+  //
+  // BEWUSST KEIN <dialog> MEHR. Ein modal geoeffneter Dialog liegt in der
+  // Top-Layer, und dort endete die Abdunkelung auf dem installierten iPhone
+  // oberhalb der Safe-Area: Der Streifen unter Uhrzeit und Akku blieb hellblau.
+  // Weder ::backdrop noch ein zusaetzlicher Riegel im Seitenfluss kamen dagegen
+  // an. Der Tutorial-Dimmer schafft es dagegen zuverlaessig – weil er ein ganz
+  // gewoehnliches festes Element mit inset:0 ist. Genau diese Bauweise hat der
+  // Waehler jetzt: eine Deckflaeche, die selbst abdunkelt, mit dem Feld darin.
+  const pickerLage = document.createElement('div');
+  pickerLage.className = 'ex-picker-lage';
+  pickerLage.hidden = true;
+  const picker = document.createElement('div');
   picker.className = 'ex-picker';
+  picker.setAttribute('role', 'dialog');
+  picker.setAttribute('aria-modal', 'true');
   picker.setAttribute('aria-label', 'Übung auswählen');
-  document.body.appendChild(picker);
-  // Die Escape-Taste schliesst einen modalen Dialog am Schliessen-Weg vorbei.
-  // Ohne das hier bliebe die Statusleiste danach dunkel.
-  picker.addEventListener('close', () => {
-    dunkleStatusleiste(false, 'uebungswahl');
-    pickerDunkel.hidden = true;
-  });
+  pickerLage.appendChild(picker);
+  document.body.appendChild(pickerLage);
   const tutorialDunkel = document.createElement('div');
   tutorialDunkel.className = 'tutorial-dimmer';
   tutorialDunkel.hidden = !tutorialAktiv;
   tutorialDunkel.setAttribute('aria-hidden', 'true');
   tutorialDunkel.onclick = () => tutorialScrollen();
   document.body.appendChild(tutorialDunkel);
-  // Abdunkelung fuer den Uebungswaehler – bewusst NICHT ueber ::backdrop.
-  // Auf dem installierten iPhone endet der Dialog-Backdrop unterhalb der
-  // Safe-Area: Der Streifen unter Uhrzeit und Akku blieb hellblau stehen.
-  // Der Tutorial-Dimmer daneben schafft es, weil er ein gewoehnliches festes
-  // Element mit inset:0 ist. Also hier derselbe Weg.
-  const pickerDunkel = document.createElement('div');
-  pickerDunkel.className = 'ex-picker-dimmer';
-  pickerDunkel.hidden = true;
-  pickerDunkel.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(pickerDunkel);
   // Deckflaeche zwischen Displayoberkante und Tutorialkarte. Die aktive
   // Muskelbox darf beim automatischen Scrollen weder seitlich noch oberhalb
   // der Karte hervorschauen. Die Karte selbst liegt eine Ebene darueber.
@@ -528,27 +526,31 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const suche = schale.querySelector('.ex-picker-suche');
     const liste = schale.querySelector('.ex-picker-liste');
 
+    // Ohne <dialog> gibt es kein eingebautes Escape mehr – selbst nachruesten.
+    const beiTaste = (e) => { if (e.key === 'Escape') schliessen(); };
     const schliessen = () => {
       window.visualViewport?.removeEventListener('resize', anOberkante);
-      picker.classList.remove('tastatur');
-      picker.style.removeProperty('--picker-top');
-      picker.style.removeProperty('--picker-hoehe');
+      document.removeEventListener('keydown', beiTaste);
+      pickerLage.classList.remove('tastatur');
+      pickerLage.style.removeProperty('--picker-top');
+      pickerLage.style.removeProperty('--picker-hoehe');
       dunkleStatusleiste(false, 'uebungswahl');
-      pickerDunkel.hidden = true;
-      if (picker.open) picker.close();
-      else picker.removeAttribute('open');
+      pickerLage.hidden = true;
     };
     const anOberkante = () => {
       const ansicht = window.visualViewport;
       const oben = Math.max(6, Number(ansicht?.offsetTop) || 0) + 6;
       const hoehe = Math.max(240, (Number(ansicht?.height) || window.innerHeight) - oben - 6);
-      picker.classList.add('tastatur');
-      picker.style.setProperty('--picker-top', `${oben}px`);
-      picker.style.setProperty('--picker-hoehe', `${hoehe}px`);
+      pickerLage.classList.add('tastatur');
+      pickerLage.style.setProperty('--picker-top', `${oben}px`);
+      pickerLage.style.setProperty('--picker-hoehe', `${hoehe}px`);
       liste.scrollTop = 0;
     };
     schale.querySelector('.ex-picker-zu').onclick = schliessen;
-    picker.onclick = (e) => { if (e.target === picker) schliessen(); };
+    // Tippen neben das Feld schliesst – die Deckflaeche ist jetzt ein echtes
+    // Element, der Treffer liegt also auf ihr statt auf einem ::backdrop.
+    pickerLage.onclick = (e) => { if (e.target === pickerLage) schliessen(); };
+    document.addEventListener('keydown', beiTaste);
     suche.addEventListener('focus', () => {
       anOberkante();
       window.visualViewport?.addEventListener('resize', anOberkante);
@@ -587,13 +589,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     suche.oninput = zeichneListe;
     schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
     zeichneListe();
-    // Immer einblenden. Ob die Flaeche auch faerbt, entscheidet CSS anhand des
-    // Tutorial-Dimmers – der wird beim Neuzeichnen ein- und ausgeblendet, ein
-    // hier abgefragter Momentwert waere gleich wieder veraltet.
-    pickerDunkel.hidden = false;
+    pickerLage.hidden = false;
     dunkleStatusleiste(true, 'uebungswahl');
-    if (typeof picker.showModal === 'function') picker.showModal();
-    else picker.setAttribute('open', '');
     requestAnimationFrame(() => suche.focus());
   }
 
@@ -1341,9 +1338,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (ph) ph.hidden = true;
       // Der Punkt gehoert dem Log – ausserhalb gibt es nichts zu synchronisieren.
       if (saveStateEl) saveStateEl.hidden = true;
-      picker.remove();
+      pickerLage.remove();
       tutorialDunkel.remove();
-      pickerDunkel.remove();
       dunkleStatusleiste(false, 'uebungswahl');
       cancelAnimationFrame(tutorialMaskenRaf);
       window.removeEventListener('resize', tutorialMaskePlanen);
