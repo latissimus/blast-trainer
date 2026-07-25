@@ -110,7 +110,6 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 html{background:var(--bg)}
-html.statusleiste-dunkel{background:var(--tutorial-dim)}
 body{
   background:var(--bg);color:var(--ink);font-family:var(--mono);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
@@ -388,19 +387,6 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
   overscroll-behavior:contain}
 .ex-picker-lage[hidden]{display:none}
-/* DECKENDE Kopfflaeche, exakt nach dem Vorbild von .tutorial-kopfmaske.
-   Grund: Beim Tutorial ist genau diese Maske das Element, das den Bereich oben
-   dunkel macht – sie verschluckt die Kopfleiste komplett ("der Header
-   verschwindet, dahinter nur eine blaue Flaeche"). Die durchscheinende
-   Deckflaeche allein reicht nicht: Auf dem installierten iPhone blieb der
-   Streifen unter Uhrzeit und Akku hellblau, weil dort die Kopfleiste
-   durchschien. Also dieselbe Bauweise wie die Maske – fest, top:0, 100vw,
-   volle Deckung, Hoehe rein aus env(): ohne Messung, ohne Animation, ohne
-   Top-Layer. position:fixed nimmt sie aus dem Flexfluss, sie wird also kein
-   Flex-Kind der Deckflaeche. */
-.ex-picker-lage::before{content:"";position:fixed;top:0;left:0;width:100vw;
-  height:calc(env(safe-area-inset-top) + 3px);
-  background:var(--tutorial-dim);pointer-events:none}
 /* Bei offener Tastatur klebt das Feld oben – aber UNTERHALB der Safe-Area.
    viewport-fit=cover laesst den Layout-Viewport am Displayrand beginnen, der
    Abstand aus visualViewport.offsetTop war auf dem iPhone nur 12px. Das Feld
@@ -675,16 +661,6 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   background:var(--tutorial-dim);
   pointer-events:none;transition:height .32s cubic-bezier(.22,.75,.3,1)}
 .tutorial-kopfmaske[hidden]{display:none}
-/* Streifen unter der iOS-Statusleiste – rein aus CSS, ohne Messung.
-   Die Flaeche oberhalb der Karte haengt sonst an drei Dingen gleichzeitig:
-   dem Dimmer (backdrop-filter), der per JS gemessenen Kopfmaske und deren
-   Hoehen-Transition. Auf dem iPhone fiel dort etwas aus und der Bereich wurde
-   hell. Dieser Streifen ist an nichts davon gekoppelt: feste Hoehe aus
-   env(), keine Animation, ueber der Karte (z 70 > 60). Er endet exakt dort,
-   wo die Karte beginnt (safe-area + 3px), ueberdeckt sie also nie. */
-html.statusleiste-dunkel body::before{content:"";position:fixed;z-index:70;
-  top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 3px);
-  background:var(--tutorial-dim);pointer-events:none}
 .log-tutorial{position:sticky;top:calc(env(safe-area-inset-top) + 3px);z-index:60;
   isolation:isolate;overflow:hidden;
   width:min(580px,calc(100vw - 14px));

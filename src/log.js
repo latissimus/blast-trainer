@@ -7,7 +7,6 @@ import { auswahlGruppen, sucheAuswahlGruppen, imKatalog } from './auswahl.js';
 import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
-import { dunkleStatusleiste } from './theme.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
 // ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
@@ -242,11 +241,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
   let tutorialFxTimer = [];
   let tutorialLetzterBlock = null;
   let tutorialScrollAufFeld = false;
-  // Gemeinsamer Baustein mit main.js (einstiegHervorheben): Beide Stellen
-  // brauchen dieselbe dunkle Statusleiste, und sie muessen dabei zusammen-
-  // spielen, sonst blitzt beim Uebergang vom "LOGMAN einrichten"-Vorspiel ins
-  // Setup kurz die helle Farbe auf.
-  const tutorialThemeSetzen = dunkleStatusleiste;
 
   // Aus dem FAQ kann das Tutorial auch spaeter erneut gestartet werden.
   try {
@@ -376,12 +370,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
         ${actionTitleSvg("LOS GEHT'S!")}
         <span>Du beginnst jetzt mit Woche 1 · Tag 1. Mehr Hilfe findest du im FAQ.</span>
       </div>`;
-    // Die Vollbildflaeche der Schlussanimation ist hell – die Statusleiste
-    // muss also zurueck auf die App-Farbe. Frueher stand hier ein fest
-    // verdrahtetes #B1E7FF ueber eine Variable, die es nicht mehr gibt; das
-    // warf einen ReferenceError und brach die Animation an dieser Stelle ab.
-    // Ueber den gemeinsamen Schalter stimmt die Farbe ausserdem im Dunkelmodus.
-    tutorialThemeSetzen(false);
     document.body.appendChild(tutorialFx);
     requestAnimationFrame(() => tutorialFx?.classList.add('an'));
     const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -391,7 +379,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tutorialFxTimer.push(setTimeout(() => {
       tutorialFx?.remove();
       tutorialFx = null;
-      tutorialThemeSetzen(false);
     }, reduziert ? 3200 : 6800));
   }
   function tutorialScrollen() {
@@ -490,16 +477,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const karte = contentEl.querySelector('.log-tutorial');
     // Nur wenn das Tutorial WIRKLICH aus ist wird zurueckgesetzt. Frueher
     // genuegte eine fehlende Karte – die gibt es aber auch mitten im
-    // Neuzeichnen fuer einen Moment, und dann sprang die Statusleiste kurz
-    // auf die helle App-Farbe zurueck.
+    // Neuzeichnen fuer einen Moment, und dann flackerte die Maske kurz weg.
     if (!tutorialAktiv) {
       tutorialKopfmaske.hidden = true;
-      if (!tutorialFx) tutorialThemeSetzen(false);
       return;
     }
     if (!karte) return;   // Zwischenzustand: alles so lassen, wie es ist
     tutorialKopfmaske.hidden = false;
-    tutorialThemeSetzen(true);
     tutorialKopfmaske.style.height = `${Math.ceil(karte.getBoundingClientRect().bottom)}px`;
   }
   function tutorialMaskePlanen() {
@@ -534,7 +518,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
       pickerLage.classList.remove('tastatur');
       pickerLage.style.removeProperty('--picker-top');
       pickerLage.style.removeProperty('--picker-hoehe');
-      dunkleStatusleiste(false, 'uebungswahl');
       pickerLage.hidden = true;
     };
     const anOberkante = () => {
@@ -590,14 +573,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
     zeichneListe();
     pickerLage.hidden = false;
-    dunkleStatusleiste(true, 'uebungswahl');
-    // KEIN Autofokus mehr. Zwei Gruende:
-    // 1) Diagnose: theme-color kam beim Waehler nicht an, beim Tutorial schon.
-    //    Der auffaelligste Unterschied ist die sofort aufspringende Tastatur –
-    //    Safari faerbt seine Leiste offenbar nicht um, solange sie oben ist.
-    // 2) Auf dem Telefon verdeckte die Tastatur ohnehin den groessten Teil der
-    //    Liste, obwohl man meist nur scrollen und tippen will. Wer suchen
-    //    moechte, tippt ins Feld – dann greift anOberkante() wie bisher.
+    requestAnimationFrame(() => suche.focus());
   }
 
   // ---- untere Bedienleiste -----------------------------------------
@@ -1346,12 +1322,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (saveStateEl) saveStateEl.hidden = true;
       pickerLage.remove();
       tutorialDunkel.remove();
-      dunkleStatusleiste(false, 'uebungswahl');
       cancelAnimationFrame(tutorialMaskenRaf);
       window.removeEventListener('resize', tutorialMaskePlanen);
       window.removeEventListener('scroll', tutorialMaskePlanen);
       tutorialKopfmaske.remove();
-      tutorialThemeSetzen(false);
       tutorialFxTimer.forEach(clearTimeout);
       tutorialFxTimer = [];
       tutorialFx?.remove();

@@ -4,37 +4,47 @@
 // Abends am Handy dunkel, tagsueber am Rechner hell – das waere kaputt, wenn die
 // Wahl am Konto haengt. Ausserdem greift sie so ohne Netz und ohne Wartezeit.
 const KEY = 'blast:theme';
-// War #AEDCF6/#12141A – die alten --bg-Werte von vor der Farbabstimmung auf
-// retromuscle.net. Seitdem lief diese Liste der Wahrheit in styles.css
-// hinterher: Beim Umschalten des Themes im Profil bekam die iOS-Statusleiste
-// einen Farbton, den keine Flaeche der App mehr tatsaechlich zeigt.
-const FARBE = { retro: '#B1E7FF', dark: '#0B0D12' };
 
 export const gueltig = (t) => (t === 'dark' ? 'dark' : 'retro');
-
-// Gruende, aus denen die Statusleiste gerade dunkel sein muss (Tutorial,
-// Uebungswaehler, …). Steht hier oben, weil applyTheme() sie schon kennen
-// muss – Details bei dunkleStatusleiste() weiter unten.
-const dunkelGruende = new Set();
 
 export function getTheme() {
   try { return gueltig(localStorage.getItem(KEY)); } catch (e) { return 'retro'; }
 }
 
+// iOS Safari liest theme-color nicht zuverlaessig neu, wenn nur das ATTRIBUT
+// geaendert wird. Der Knoten wird deshalb ersetzt, das erzwingt die
+// Neubewertung. Auf Android ist das unnoetig, aber harmlos.
+function metaFarbeSetzen(farbe) {
+  const alt = document.querySelector('meta[name="theme-color"]');
+  if (!alt || alt.getAttribute('content') === farbe) return;
+  const neu = document.createElement('meta');
+  neu.setAttribute('name', 'theme-color');
+  neu.setAttribute('content', farbe);
+  alt.replaceWith(neu);
+}
+
+// EINE Regel fuer die Systemleiste oben: Sie traegt immer die Farbe der Seite,
+// auf der man gerade ist. Progression flieder, FAQ gelb, Log hellblau.
+//
+// Bewusst OHNE Sonderfaelle. Frueher schaltete das Tutorial die Leiste auf
+// einen dunklen Ton um – und weil das an Scroll- und Resize-Ereignissen hing,
+// sprang sie beim Scrollen sichtbar um. Genau das soll nicht passieren:
+// Dunkelt sich der Seiteninhalt ab, endet die Abdunkelung eben an der Kante
+// zum geschuetzten Bereich. Die Leiste bleibt ruhig.
+//
+// --bg statt einer eigenen Liste: Die Farbe steht ohnehin schon in styles.css
+// (:root[data-seite=…]). Eine zweite Liste in JS lief in der Vergangenheit
+// zuverlaessig hinterher – genau daher kam der veraltete Ton #AEDCF6.
+export function statusleisteAnSeite() {
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  if (bg) metaFarbeSetzen(bg);
+}
+
 export function applyTheme(t) {
   const theme = gueltig(t);
   document.documentElement.setAttribute('data-theme', theme);
-  // Faerbt auf dem iPhone die Statusleiste ueber der App – sonst bliebe oben
-  // ein hellblauer Streifen ueber dem dunklen Log stehen.
-  //
-  // ABER NICHT, solange etwas den Bildschirm abdunkelt: render() ruft diese
-  // Funktion bei jedem Seitenaufbau, setTheme() beim Umschalten im Profil.
-  // Ohne die Sperre haette jeder dieser Aufrufe die dunkle Statusleiste eines
-  // offenen Uebungswaehlers oder des Tutorials wieder aufgehellt – und zwar
-  // lautlos, weil dunkleStatusleiste() davon nichts mitbekommt.
-  if (dunkelGruende.size > 0) return;
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', FARBE[theme]);
+  // Nach dem Themewechsel steht ein anderes --bg an derselben Seite.
+  statusleisteAnSeite();
 }
 
 export function setTheme(t) {
@@ -42,47 +52,4 @@ export function setTheme(t) {
   try { localStorage.setItem(KEY, theme); } catch (e) { /* privater Modus: gilt nur fuer diese Sitzung */ }
   applyTheme(theme);
   return theme;
-}
-
-// Dunkle Statusleiste fuer alles, was den Bildschirm abdunkelt: Tutorial,
-// das "LOGMAN einrichten"-Vorspiel und der Uebungswaehler.
-//
-// WICHTIG zum Verstaendnis, warum das so schwer zu fassen war: index.html
-// setzt apple-mobile-web-app-status-bar-style auf "black-translucent". Das
-// bedeutet: Es gibt auf dem installierten iPhone gar keine separate, vom
-// System eingefaerbte Statusleiste – der Bereich ist durchsichtig und zeigt
-// exakt das, was die Seite an dieser Stelle selbst zeichnet. Dafuer sorgt
-// html.statusleiste-dunkel (Canvas-Hintergrund) plus der feste Riegel
-// (body::before in styles.css, Abschnitt "Seitenmuster").
-// Das theme-color-Meta wird mitgesetzt, weil es im Safari-Tab greift – und
-// weil iOS daran die Farbe von Uhrzeit und Akku festmacht: dunkles Meta
-// bedeutet weisse Systemelemente. Genau das macht sie ueber dem Dimmer lesbar.
-//
-// MEHRERE GRUENDE GLEICHZEITIG: Im Tutorial wird auch der Uebungswaehler
-// geoeffnet. Wuerde jeder Aufrufer die Leiste einfach umschalten, haette das
-// Schliessen des Waehlers sie mitten im Tutorial wieder aufgehellt. Deshalb
-// werden die Gruende gezaehlt – dunkel bleibt es, solange noch einer offen ist.
-export function dunkleStatusleiste(aktiv, grund = 'tutorial') {
-  if (aktiv) dunkelGruende.add(grund);
-  else dunkelGruende.delete(grund);
-  const an = dunkelGruende.size > 0;
-  document.documentElement.classList.toggle('statusleiste-dunkel', an);
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (!meta) return;
-  if (an) {
-    // ===== VORUEBERGEHENDE DIAGNOSE – wieder entfernen! =====
-    // Der Uebungswaehler faerbt knallrot, alles andere wie gehabt. Damit ist
-    // unterscheidbar, ob das Meta beim Waehler ueberhaupt ankommt:
-    //   Leiste wird rot  -> Meta greift, der bisherige Wert wurde ueberschrieben
-    //   Leiste bleibt hell -> Meta greift beim Waehler grundsaetzlich nicht
-    // Danach wieder ersetzen durch die Zeile darunter ohne den roten Zweig.
-    if (dunkelGruende.has('uebungswahl')) {
-      meta.setAttribute('content', '#FF0000');
-      return;
-    }
-    const dunkel = getComputedStyle(document.documentElement).getPropertyValue('--tutorial-dim').trim();
-    meta.setAttribute('content', dunkel || '#354859');
-  } else {
-    meta.setAttribute('content', FARBE[getTheme()]);
-  }
 }

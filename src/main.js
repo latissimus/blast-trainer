@@ -3,7 +3,7 @@ import { supabase } from './supabase.js';
 import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } from './auth.js';
 import { readProfile, writeProfile } from './localstore.js';
 import { brandSvg, actionTitleSvg } from './brand.js';
-import { getTheme, applyTheme, dunkleStatusleiste } from './theme.js';
+import { getTheme, applyTheme, statusleisteAnSeite } from './theme.js';
 import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
 import { mountLog, toast } from './log.js';
 import { mountProfile } from './profile.js';
@@ -338,6 +338,9 @@ function setNavActive(view) {
   // Ueberscrollen deshalb ein hellblauer Streifen zu sehen.
   document.documentElement.dataset.seite = view;
   document.body.dataset.seite = view;
+  // Erst jetzt steht das --bg dieser Seite fest – die Systemleiste oben zieht
+  // mit. Eine Regel fuer alle Ansichten, ohne Sonderfaelle.
+  statusleisteAnSeite();
   // Die vier Trainingsfelder wirken nur im Log. Auf Unterseiten bleibt unten
   // deshalb nur das Menue sichtbar; inaktive Felder sehen sonst bedienbar aus
   // und nehmen auf dem Telefon fast die ganze Breite ein.
@@ -463,17 +466,9 @@ function einstiegHervorheben() {
   if (!karte) return;
   document.body.classList.add('einstieg-fokus');
   karte.classList.add('willkommen-fokus');
-  // GEFUNDENE LUECKE: Diese Karte dimmte den Hintergrund per DOM-Overlay,
-  // liess die iOS-Statusleiste aber hell – anders als die Setup-Karten direkt
-  // danach, die tutorialThemeSetzen(true) aufrufen. Der Sprung von hell auf
-  // dunkel beim Weiterklicken war genau das, was als "nicht abgedunkelt"
-  // auffiel. dunkleStatusleiste ist derselbe Baustein wie im Tutorial selbst
-  // (log.js), nicht nur optisch angeglichen.
-  dunkleStatusleiste(true);
   const verlassen = () => {
     document.body.classList.remove('einstieg-fokus');
     karte.classList.remove('willkommen-fokus');
-    dunkleStatusleiste(false);
   };
   // "Tutorial starten" behaelt die dunkle Leiste bewusst bei: Die naechste
   // Karte (Setup-Schritt) braucht exakt dieselbe Abdunklung, log.js uebernimmt
