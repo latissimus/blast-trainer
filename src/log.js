@@ -242,9 +242,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
   let tutorialLetzterBlock = null;
   let tutorialScrollAufFeld = false;
   const tutorialThemeMeta = document.querySelector('meta[name="theme-color"]');
-  const appThemeFarbe = document.documentElement.dataset.theme === 'dark' ? '#12141A' : '#AEDCF6';
+  const tutorialFarbe = () =>
+    getComputedStyle(document.documentElement).getPropertyValue('--tutorial-dim').trim() || '#354859';
+  const appThemeFarbe = () =>
+    getComputedStyle(document.body).getPropertyValue('--bg').trim() ||
+    (document.documentElement.dataset.theme === 'dark' ? '#0B0D12' : '#B1E7FF');
   const tutorialThemeSetzen = (aktiv) => {
-    tutorialThemeMeta?.setAttribute('content', aktiv ? '#B1E7FF' : appThemeFarbe);
+    document.documentElement.classList.toggle('tutorial-laeuft', aktiv);
+    tutorialThemeMeta?.setAttribute('content', aktiv ? tutorialFarbe() : appThemeFarbe());
   };
 
   // Aus dem FAQ kann das Tutorial auch spaeter erneut gestartet werden.
@@ -886,22 +891,33 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <span>Kurz erklärt</span>
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
           </div>
-          <h2>So funktioniert dein Plan</h2>
-          <p class="log-tutorial-lead">Sechs Wochen. Nur deine Heavy-Übungen legst du einmal fest.</p>
-          <div class="tutorial-rotation" aria-label="A- und B-Wochen">
-            <span><b>A</b><small>Wochen 1 · 3 · 5</small></span>
-            <i aria-hidden="true">↔</i>
-            <span><b>B</b><small>Wochen 2 · 4 · 6</small></span>
+          <h2>Dein Plan auf einen Blick</h2>
+          <div class="tutorial-planpunkte">
+            <div>
+              <b>6</b>
+              <span><strong>6 Wochen</strong><small>Eine Trainingsphase dauert sechs Wochen.</small></span>
+            </div>
+            <div>
+              <b>A/B</b>
+              <span><strong>A/B-Wechsel</strong><small>A läuft in Woche 1, 3 und 5 · B in Woche 2, 4 und 6.</small></span>
+            </div>
+            <div>
+              <b>3</b>
+              <span><strong>3 Satzarten</strong><small>Heavy ist schwer · Pump leichter und versagensnah · Cluster ist 6 × 4.</small></span>
+            </div>
           </div>
-          <div class="tutorial-satzarten">
-            <span><b>Heavy</b><small>Übungen in A und B festlegen</small></span>
-            <span><b>Pump</b><small>leichter · versagensnah · frei wählen</small></span>
-            <span><b>Cluster</b><small>6 × 4 · frei wählen</small></span>
+          <div class="tutorial-heavyinfo">
+            <strong>Was du jetzt festlegst</strong>
+            <p>Nur für Heavy wählst du feste Übungen: einmal für A und einmal für B.
+              LOGMAN übernimmt sie danach automatisch. Pump und Cluster wählst du im Training frei.</p>
+            <p>Je nach Muskel fragt Heavy nach einer großen Grundübung und/oder einer gezielten Übung:</p>
+            <div class="tutorial-rollen">
+              <span><b>Comp</b><small>mehrere Gelenke und Muskeln</small></span>
+              <span><b>Iso</b><small>ein Muskel möglichst gezielt</small></span>
+            </div>
           </div>
-          <p class="log-tutorial-typen"><b>Comp</b> = große Mehrgelenksübung ·
-            <b>Iso</b> = gezielte Einzelmuskelübung</p>
           <button type="button" class="log-tutorial-weiter" data-tutorial-beginnen>
-            Plan einrichten <span class="tutorial-pf">→</span>
+            Heavy-Übungen auswählen <span class="tutorial-pf">→</span>
           </button>`;
         karte.querySelector('[data-tutorial-beginnen]').onclick = () => {
           tutorialZielSetzen(0);
@@ -913,12 +929,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const fertig = tutorialStatus.offen.length === 0;
         const alsNaechstes = tutorialStatus.offen[0];
         const naechsteAuswahl = alsNaechstes
-          ? `Jetzt ${alsNaechstes.muskel} ${alsNaechstes.rolle}-Übung wählen`
+          ? `${alsNaechstes.muskel} ${alsNaechstes.rolle}-Übung wählen`
           : '';
         const rollenHilfe = alsNaechstes?.rolle === 'Comp'
-          ? '<b>Comp</b> = große Übung mit mehreren beteiligten Gelenken und Muskeln.'
+          ? '<b>Comp-Feld:</b> Wähle eine große Grundübung. Sie bewegt mehrere Gelenke und trainiert mehrere Muskeln.'
           : alsNaechstes?.rolle === 'Iso'
-            ? '<b>Iso</b> = gezielte Übung für den angezeigten Muskel.'
+            ? '<b>Iso-Feld:</b> Wähle eine Übung, die den angezeigten Muskel möglichst gezielt belastet.'
             : '';
         const auswahlName = schritt.gruppe.startsWith('A') ? 'A-Auswahl' : 'B-Auswahl';
         const wochenText = schritt.week === 1 ? 'Wochen 1 · 3 · 5' : 'Wochen 2 · 4 · 6';
