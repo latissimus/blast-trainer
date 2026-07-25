@@ -32,25 +32,34 @@ export function setTheme(t) {
   return theme;
 }
 
-// Dunkle Statusleiste fuer Tutorial UND das "LOGMAN einrichten"-Vorspiel.
+// Dunkle Statusleiste fuer alles, was den Bildschirm abdunkelt: Tutorial,
+// das "LOGMAN einrichten"-Vorspiel und der Uebungswaehler.
 //
 // WICHTIG zum Verstaendnis, warum das so schwer zu fassen war: index.html
 // setzt apple-mobile-web-app-status-bar-style auf "black-translucent". Das
 // bedeutet: Es gibt auf dem installierten iPhone gar keine separate, vom
 // System eingefaerbte Statusleiste – der Bereich ist durchsichtig und zeigt
-// exakt das, was die Seite an dieser Stelle selbst zeichnet. Das
-// theme-color-Meta hilft dort kaum; es wirkt zuverlaessig nur in Safaris
-// eigener Adressleiste (Tab-Modus), nicht in der installierten App. Der
-// einzig verlaessliche Hebel ist echte Farbe im DOM an dieser Stelle – dafuer
-// sorgt html.tutorial-laeuft (Canvas-Hintergrund) plus der feste Riegel
-// ueber der Karte (body::before in styles.css, Abschnitt "Seitenmuster").
-// Das Meta wird trotzdem mitgesetzt, weil es in einem normalen Safari-Tab
-// (z.B. beim Testen ohne Installation) tatsaechlich greift.
-export function dunkleStatusleiste(aktiv) {
-  document.documentElement.classList.toggle('tutorial-laeuft', aktiv);
+// exakt das, was die Seite an dieser Stelle selbst zeichnet. Dafuer sorgt
+// html.statusleiste-dunkel (Canvas-Hintergrund) plus der feste Riegel
+// (body::before in styles.css, Abschnitt "Seitenmuster").
+// Das theme-color-Meta wird mitgesetzt, weil es im Safari-Tab greift – und
+// weil iOS daran die Farbe von Uhrzeit und Akku festmacht: dunkles Meta
+// bedeutet weisse Systemelemente. Genau das macht sie ueber dem Dimmer lesbar.
+//
+// MEHRERE GRUENDE GLEICHZEITIG: Im Tutorial wird auch der Uebungswaehler
+// geoeffnet. Wuerde jeder Aufrufer die Leiste einfach umschalten, haette das
+// Schliessen des Waehlers sie mitten im Tutorial wieder aufgehellt. Deshalb
+// werden die Gruende gezaehlt – dunkel bleibt es, solange noch einer offen ist.
+const dunkelGruende = new Set();
+
+export function dunkleStatusleiste(aktiv, grund = 'tutorial') {
+  if (aktiv) dunkelGruende.add(grund);
+  else dunkelGruende.delete(grund);
+  const an = dunkelGruende.size > 0;
+  document.documentElement.classList.toggle('statusleiste-dunkel', an);
   const meta = document.querySelector('meta[name="theme-color"]');
   if (!meta) return;
-  if (aktiv) {
+  if (an) {
     const dunkel = getComputedStyle(document.documentElement).getPropertyValue('--tutorial-dim').trim();
     meta.setAttribute('content', dunkel || '#354859');
   } else {

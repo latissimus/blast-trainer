@@ -110,7 +110,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 html{background:var(--bg)}
-html.tutorial-laeuft{background:var(--tutorial-dim)}
+html.statusleiste-dunkel{background:var(--tutorial-dim)}
 body{
   background:var(--bg);color:var(--ink);font-family:var(--mono);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
@@ -551,6 +551,17 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 :root[data-theme="dark"] .ctrlbar.nur-menue .ci.menue{
   background-color:rgba(89,68,126,.58);color:#fff}
 :root[data-theme="dark"] .ctrlbar.nur-menue .ci.menue .lbl{color:#fff}
+/* Auf Unterseiten entfaellt die Leiste ganz. Zurueck ins Log fuehrt der
+   "← Log"-Chip unter dem Kopf, und das Log ist die Seite, zu der man ohnehin
+   staendig zurueckkehrt – das Menue unten war der zweite Weg zum selben Ziel.
+   Der Admin behaelt seine volle Leiste (er bekommt nie .nur-menue), weil die
+   vier Felder dort die einzige Moeglichkeit sind, durch fremde Wochen zu
+   blaettern. Eine laufende Pause holt die Leiste sofort zurueck – siehe unten. */
+.ctrlbar.nur-menue:not(.timer-an){display:none}
+/* Ohne Leiste braucht der Seitenfuss keinen Platz mehr freizuhalten. Laeuft
+   gerade eine Pause, steht die Leiste wieder da und der Abstand ebenso. */
+body:has(.ctrlbar.nur-menue:not(.timer-an)) .pad-bottom{padding-bottom:24px}
+
 /* Eine laufende Pause gehört der ganzen App. Auf Unterseiten nimmt der Timer
    deshalb wieder die volle Leistenbreite ein, statt in der schmalen
    Nur-Menü-Hülle zu stecken. */
@@ -625,7 +636,7 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
    hell. Dieser Streifen ist an nichts davon gekoppelt: feste Hoehe aus
    env(), keine Animation, ueber der Karte (z 70 > 60). Er endet exakt dort,
    wo die Karte beginnt (safe-area + 3px), ueberdeckt sie also nie. */
-html.tutorial-laeuft body::before{content:"";position:fixed;z-index:70;
+html.statusleiste-dunkel body::before{content:"";position:fixed;z-index:70;
   top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 3px);
   background:var(--tutorial-dim);pointer-events:none}
 .log-tutorial{position:sticky;top:calc(env(safe-area-inset-top) + 3px);z-index:60;

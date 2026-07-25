@@ -137,7 +137,7 @@ export async function mountMeter(container, { userId }) {
       ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt je 1 Satz ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
       <span class="som-ed-label">1 · Muskel priorisieren</span>
       <button type="button" class="som-prio-toggle${cfg ? ' on' : ''}" data-prio-toggle ${!hatPumpplatz ? ' disabled' : ''}>
-        <span aria-hidden="true">${cfg ? '✓' : '○'}</span> ${cfg ? 'Priorität aktiv' : 'Als Priorität setzen'}
+        <span aria-hidden="true">${cfg ? '✓' : '○'}</span> ${cfg ? 'Priorität aktiv' : 'Als Priorität setzen (+ 1 Satz)'}
       </button>
       ${!hatPumpplatz ? '<p class="som-hinweis">Für diesen Muskel gibt es in dieser Woche keinen regulären Pumpplatz.</p>' : ''}
       ${zeigeModus && hatPumpplatz ? `<div class="som-inline-plan">

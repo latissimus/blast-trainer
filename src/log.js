@@ -451,6 +451,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
   picker.className = 'ex-picker';
   picker.setAttribute('aria-label', 'Übung auswählen');
   document.body.appendChild(picker);
+  // Die Escape-Taste schliesst einen modalen Dialog am Schliessen-Weg vorbei.
+  // Ohne das hier bliebe die Statusleiste danach dunkel.
+  picker.addEventListener('close', () => dunkleStatusleiste(false, 'uebungswahl'));
   const tutorialDunkel = document.createElement('div');
   tutorialDunkel.className = 'tutorial-dimmer';
   tutorialDunkel.hidden = !tutorialAktiv;
@@ -512,6 +515,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       picker.classList.remove('tastatur');
       picker.style.removeProperty('--picker-top');
       picker.style.removeProperty('--picker-hoehe');
+      dunkleStatusleiste(false, 'uebungswahl');
       if (picker.open) picker.close();
       else picker.removeAttribute('open');
     };
@@ -564,6 +568,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
     suche.oninput = zeichneListe;
     schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
     zeichneListe();
+    // Der Dimmer des Dialogs deckt den ganzen Bildschirm ab, auch die
+    // Safe-Area. Damit Uhrzeit und Akku darauf lesbar bleiben, muss iOS sie
+    // weiss zeichnen – und das macht es am dunklen theme-color fest.
+    dunkleStatusleiste(true, 'uebungswahl');
     if (typeof picker.showModal === 'function') picker.showModal();
     else picker.setAttribute('open', '');
     requestAnimationFrame(() => suche.focus());
