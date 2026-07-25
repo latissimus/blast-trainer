@@ -591,7 +591,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     zeichneListe();
     pickerLage.hidden = false;
     dunkleStatusleiste(true, 'uebungswahl');
-    requestAnimationFrame(() => suche.focus());
+    // KEIN Autofokus mehr. Zwei Gruende:
+    // 1) Diagnose: theme-color kam beim Waehler nicht an, beim Tutorial schon.
+    //    Der auffaelligste Unterschied ist die sofort aufspringende Tastatur –
+    //    Safari faerbt seine Leiste offenbar nicht um, solange sie oben ist.
+    // 2) Auf dem Telefon verdeckte die Tastatur ohnehin den groessten Teil der
+    //    Liste, obwohl man meist nur scrollen und tippen will. Wer suchen
+    //    moechte, tippt ins Feld – dann greift anOberkante() wie bisher.
   }
 
   // ---- untere Bedienleiste -----------------------------------------
