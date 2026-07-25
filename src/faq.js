@@ -122,6 +122,7 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p>In <b>Woche 1</b> trägst du die Heavy-Übungen für <b>Tag 1 und Tag 2</b> ein. Diese A-Auswahl übernimmt die App automatisch in alle ungeraden Wochen: <b>Woche 1, 3 und 5</b>.</p>
         <p>In <b>Woche 2</b> wählst du Heavy für <b>Tag 1 und Tag 2</b> ein zweites Mal. Diese B-Auswahl gilt automatisch für die geraden Wochen <b>2, 4 und 6</b>. Verglichen wird deshalb immer A mit A und B mit B.</p>
+        <p>Der Wechsel bringt regelmäßig andere Übungen in den Plan. Das sorgt für <b>mehr Abwechslung und Motivation</b>, ohne dass die Heavy-Leistung unpassend miteinander verglichen wird.</p>
         <p>Pump- und Cluster-Übungen dürfen jede Woche frei wechseln. Zuletzt verwendete Übungen stehen im Suchdialog oben.</p>
       </div>
     </details>
@@ -196,6 +197,19 @@ export function mountFaq(container) {
 
     <p class="src">Evidenz: Pelland et al. · Baz-Valle et al. · Schoenfeld et al. · Wolf/Schoenfeld · Bell et al. (Deload).</p>`;
   container.appendChild(wrap);
+  // Die vier Ziele liegen innerhalb der bereits geoeffneten FAQ-Seite. Ohne
+  // Abfangen liest der globale Hash-Router "#faq-start" als unbekannte Ansicht
+  // und faellt deshalb auf das Log zurueck.
+  wrap.querySelectorAll('.faq-spruenge a').forEach((sprung) => {
+    sprung.addEventListener('click', (e) => {
+      e.preventDefault();
+      const ziel = wrap.querySelector(sprung.getAttribute('href'));
+      ziel?.scrollIntoView({
+        block: 'start',
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
+    });
+  });
   wrap.querySelector('[data-tutorial-start]')?.addEventListener('click', () => {
     try { sessionStorage.setItem('blast:tutorial-start', '1'); } catch (e) { /* egal */ }
   });

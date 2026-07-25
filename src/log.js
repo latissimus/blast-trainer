@@ -376,9 +376,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tutorialFx.innerHTML = `
       <div class="tutorial-startfx-strahlen" aria-hidden="true"></div>
       <div class="tutorial-startfx-inhalt">
-        <small>Heavy-Setup komplett</small>
+        <small>Einrichtung abgeschlossen</small>
         ${actionTitleSvg("LOS GEHT'S!")}
-        <span>Woche 1 · Tag 1</span>
+        <span>Du beginnst jetzt mit Woche 1 · Tag 1. Mehr Hilfe findest du im FAQ.</span>
       </div>`;
     tutorialThemeMeta?.setAttribute('content', '#B1E7FF');
     document.body.appendChild(tutorialFx);
@@ -386,12 +386,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // Der Inhalt dahinter darf erst wechseln, wenn die Schrift verschwunden
     // ist. Die violette Flaeche deckt den Wechsel ab und faehrt danach herunter.
-    tutorialFxTimer.push(setTimeout(() => tutorialBeenden(false), reduziert ? 500 : 3450));
+    tutorialFxTimer.push(setTimeout(() => tutorialBeenden(false), reduziert ? 3000 : 5650));
     tutorialFxTimer.push(setTimeout(() => {
       tutorialFx?.remove();
       tutorialFx = null;
       tutorialThemeSetzen(false);
-    }, reduziert ? 700 : 4200));
+    }, reduziert ? 3200 : 6800));
   }
   function tutorialScrollen() {
     if (!tutorialAktiv || tutorialSchritt < 0) return;
@@ -899,7 +899,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             </div>
             <div>
               <b>A/B</b>
-              <span><strong>A/B-Wechsel</strong><small>A läuft in Woche 1, 3 und 5 · B in Woche 2, 4 und 6.</small></span>
+              <span><strong>A/B-Wechsel</strong><small>A läuft in Woche 1, 3 und 5 · B in 2, 4 und 6. Der Wechsel bringt Abwechslung und Motivation.</small></span>
             </div>
             <div>
               <b>3</b>

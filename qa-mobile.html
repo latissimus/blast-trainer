@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    html,body{margin:0;min-height:100%;background:#ddd}
+    iframe{display:block;width:393px;height:852px;margin:20px auto;border:8px solid #111;border-radius:32px;background:#B1E7FF}
+  </style>
+</head>
+<body>
+  <iframe id="phone"></iframe>
+  <script>
+    document.querySelector('#phone').src = '/qa-animation.html?' + location.search.slice(1);
+  </script>
+</body>
+</html>

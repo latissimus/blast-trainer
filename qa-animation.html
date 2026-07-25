@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body data-seite="log">
+  <div id="qa"></div>
+  <script type="module">
+    import { actionTitleSvg } from '/src/brand.js';
+    const qa = document.querySelector('#qa');
+    const typ = new URLSearchParams(location.search).get('typ');
+    if (typ === 'setup') {
+      qa.innerHTML = `<div class="wrap" style="padding-top:70px">
+        <section class="log-einstieg">
+          <p class="log-einstieg-kicker">LOGMAN einrichten</p>
+          <p class="log-einstieg-text">Das kurze Tutorial erklärt zuerst den Plan. Danach führt es dich Schritt für Schritt durch deine feste Übungsauswahl.</p>
+          <div><button class="log-einstieg-los">Tutorial starten</button><button class="log-einstieg-skip">Überspringen</button></div>
+        </section>
+      </div>`;
+    } else {
+      const start = typ === 'start';
+      qa.innerHTML = `<div class="tutorial-startfx ${start ? 'willkommen-fx ' : ''}an">
+        <div class="tutorial-startfx-strahlen"></div>
+        <div class="tutorial-startfx-inhalt">
+          <small>${start ? 'Dein LOGMAN ist bereit' : 'Einrichtung abgeschlossen'}</small>
+          ${actionTitleSvg(start ? 'PLAN EINRICHTEN' : "LOS GEHT'S!")}
+          <span>${start
+            ? 'Als Nächstes erklärt das Tutorial deinen Plan und führt dich durch die Übungsauswahl.'
+            : 'Du beginnst jetzt mit Woche 1 · Tag 1. Mehr Hilfe findest du im FAQ.'}</span>
+        </div>
+      </div>`;
+    }
+  </script>
+</body>
+</html>

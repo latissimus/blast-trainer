@@ -428,9 +428,9 @@ function showWillkommen() {
   fx.innerHTML = `
       <div class="tutorial-startfx-strahlen" aria-hidden="true"></div>
       <div class="tutorial-startfx-inhalt">
-        <small>Dein Training. Klar geführt.</small>
-        ${actionTitleSvg('STARTKLAR?')}
-        <span>Als Nächstes richten wir deinen Plan ein</span>
+        <small>Dein LOGMAN ist bereit</small>
+        ${actionTitleSvg('PLAN EINRICHTEN')}
+        <span>Als Nächstes erklärt das Tutorial deinen Plan und führt dich durch die Übungsauswahl.</span>
       </div>`;
   const themeMeta = document.querySelector('meta[name="theme-color"]');
   const themeFarbe = themeMeta?.getAttribute('content');
@@ -438,12 +438,12 @@ function showWillkommen() {
   document.body.appendChild(fx);
   requestAnimationFrame(() => fx.classList.add('an'));
   const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const bereit = new Promise((r) => setTimeout(r, reduziert ? 500 : 6350));
+  const bereit = new Promise((r) => setTimeout(r, reduziert ? 3000 : 6350));
   const fertig = new Promise((r) => setTimeout(() => {
     fx.remove();
     if (themeFarbe) themeMeta?.setAttribute('content', themeFarbe);
     r();
-  }, reduziert ? 700 : 8050));
+  }, reduziert ? 3200 : 8050));
   return { bereit, fertig };
 }
 
