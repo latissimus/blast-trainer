@@ -29,15 +29,18 @@
      fuellt waehrend des Tutorials die iOS-Safe-Area und die Scrollmaske. */
   --tutorial-dim:#354859;
   --up:#12A150;
-  /* Cluster-Streifen und -Badge. Vorher --green (#154C2B, Waldgruen) – das war
-     die einzige Farbe der App, die auf keiner der beiden Vorlagen vorkommt:
-     retromuscle.net fuehrt ueberhaupt kein Gruen, Feastables nur ein grelles
-     Limette. Dieses Butter-Gelb ist gemessen von retromuscle.net und bildet
-     mit Navy (Heavy) und Pink (Pump) den klassischen 80er-Dreiklang.
-     Eigene Variable statt --green, weil --green weiterhin "erledigt/weiter"
-     bedeutet (Knopf zum naechsten Tag), und eigene Tinte, weil --ink im
-     Dark-Mode hell wird – auf Gelb waere das unlesbar. */
-  --cluster:#FFEF69;
+  /* Cluster-Streifen und -Badge. Das vorherige Butter-Gelb lag zu nah an
+     --mr (#FFDE59, "MR"-Badges/Flash-Zustaende) – beide Gelbtoene waren im
+     Log kaum zu unterscheiden. Per Skript auf beiden Vorlagen live
+     nachgemessen (alle computed colors ausgelesen, nicht nur angeschaut):
+     BEIDE Seiten fuehren wiederkehrend dasselbe grelle Neon-Limette als
+     Akzent – Feastables nutzt #CEFC17 an sechs Stellen (kein Einzelfall,
+     echter Markenakzent), retromuscle.net #F3FF00 in derselben Familie.
+     Dieser Wert ist der gemessene Feastables-Ton. Eigene Variable statt
+     --green, weil --green weiterhin "erledigt/weiter" bedeutet (Knopf zum
+     naechsten Tag), und eigene Tinte, weil --ink im Dark-Mode hell wird –
+     auf Neon-Limette waere das unlesbar. */
+  --cluster:#CEFC17;
   --cluster-ink:#141414;
   --green:#154C2B;  /* "erledigt / weiter" – Knopf zum naechsten Tag */
   --down:#E8785B;
@@ -1013,6 +1016,16 @@ html.tutorial-laeuft body::before{content:"";position:fixed;z-index:70;
 :root[data-theme="dark"][data-seite="prog"],
 :root[data-theme="dark"][data-seite="notizbuch"]{
   background-image:var(--muster-tropfen-dunkel)}
+
+/* body traegt auf allen Seiten eine eigene, deckende --bg-Flaeche (siehe
+   oben, "html,body"). Bekommt eine Seite ihr Muster vom html-Element, liegt
+   diese deckende Body-Flaeche genau darueber und verschluckt das Muster
+   ersatzlos – sichtbar wird nur der schmale Rand, wo html unter body
+   hervorschaut. Deshalb hier transparent: html scheint durch, inklusive
+   Muster, und liefert exakt dieselbe --bg-Farbe. */
+body[data-seite="meter"],body[data-seite="prog"],body[data-seite="feedback"],
+body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
+  background:transparent}
 
 /* ---------- Feedback ---------- */
 .feedback-intro{margin:0 0 12px;padding:12px 13px;background:var(--surface);
