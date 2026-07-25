@@ -625,7 +625,15 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   -webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);
   touch-action:pan-y}
 .tutorial-dimmer[hidden]{display:none}
+/* min-height ist der Boden, unter den die Maske nie faellt. Ohne ihn gab es
+   eine Luecke: Die Hoehe wird per JS gesetzt und mit .32s animiert, startet
+   aber bei 0 – waehrend dieser Blende lag der Streifen unter der iOS-Uhr frei
+   und zeigte das Hellblau der Kopfleiste. Dasselbe beim Scrollen, wenn die
+   klebende Karte auf dem iPhone kurz nachhinkt und ihre gemessene Unterkante
+   zu klein ausfaellt. Der Boden haengt an nichts Gemessenem und an keiner
+   Animation, kann also nicht danebenliegen. */
 .tutorial-kopfmaske{position:fixed;z-index:50;top:0;left:0;width:100vw;height:0;
+  min-height:calc(env(safe-area-inset-top) + 3px);
   background:var(--tutorial-dim);
   pointer-events:none;transition:height .32s cubic-bezier(.22,.75,.3,1)}
 .tutorial-kopfmaske[hidden]{display:none}
