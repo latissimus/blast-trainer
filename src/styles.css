@@ -105,7 +105,7 @@ h1,h2,h3,.display{
 button{font-family:inherit;cursor:pointer}
 a{color:var(--navy)}
 .wrap{max-width:580px;margin:0 auto;padding:0 14px}
-#view>.wrap{animation:seiteEin .18s cubic-bezier(.22,.75,.3,1) both}
+body:not([data-seite="log"]) #view>.wrap{animation:seiteEin .18s cubic-bezier(.22,.75,.3,1)}
 @keyframes seiteEin{from{opacity:.72;transform:translateY(5px)}to{opacity:1;transform:none}}
 
 /* ---------- Top bar / nav ---------- */
@@ -822,6 +822,7 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   transition:transform .16s ease}
 .som-muskel.offen .som-pfeil{transform:rotate(180deg)}
 .som-inline-editor{padding:0 12px 12px;border-top:2px dashed var(--ink)}
+.som-inline-editor>.som-ed-label{margin-top:16px}
 .som-indirekt-quellen{margin:9px 0 0;color:var(--muted)}
 .som-indirekt-quellen>span{display:block;margin-bottom:5px;font-size:10.5px;font-weight:800;
   text-transform:uppercase;letter-spacing:.06em}
