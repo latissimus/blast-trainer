@@ -991,23 +991,27 @@ html.tutorial-laeuft body::before{content:"";position:fixed;z-index:70;
    Beide liegen ton-in-ton in der Tintenfarbe statt in einem festen Lila –
    so tragen sie jeden Seitengrund und kippen im Dark-Mode von selbst mit.
    Welches Muster eine Seite bekommt, ist unten eine Zeile. */
-body[data-seite="meter"],body[data-seite="prog"],body[data-seite="feedback"],
-body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
+/* Auf :root (html), nicht auf body: Body ist nur so hoch wie sein Inhalt,
+   html traegt die Farbe des kompletten Scrollbereichs (siehe --bg oben).
+   Stand das Muster nur auf body, endete es an dessen Unterkante – auf kurzen
+   Seiten wie Progression war die untere Haelfte einfarbig statt gemustert. */
+:root[data-seite="meter"],:root[data-seite="prog"],:root[data-seite="feedback"],
+:root[data-seite="faq"],:root[data-seite="profile"],:root[data-seite="notizbuch"]{
   background-image:var(--muster-dreieck);background-size:auto}
-:root[data-theme="dark"] body[data-seite="meter"],
-:root[data-theme="dark"] body[data-seite="prog"],
-:root[data-theme="dark"] body[data-seite="feedback"],
-:root[data-theme="dark"] body[data-seite="faq"],
-:root[data-theme="dark"] body[data-seite="profile"],
-:root[data-theme="dark"] body[data-seite="notizbuch"]{
+:root[data-theme="dark"][data-seite="meter"],
+:root[data-theme="dark"][data-seite="prog"],
+:root[data-theme="dark"][data-seite="feedback"],
+:root[data-theme="dark"][data-seite="faq"],
+:root[data-theme="dark"][data-seite="profile"],
+:root[data-theme="dark"][data-seite="notizbuch"]{
   background-image:var(--muster-dreieck-dunkel)}
-:root[data-theme="dark"] body[data-seite="log"]{background-image:none}
+:root[data-theme="dark"][data-seite="log"]{background-image:none}
 
 /* Der bisherige Set-O-Hintergrund liegt jetzt auf Progression und Notizbuch. */
-body[data-seite="prog"],body[data-seite="notizbuch"]{
+:root[data-seite="prog"],:root[data-seite="notizbuch"]{
   background-image:var(--muster-tropfen);background-size:112px}
-:root[data-theme="dark"] body[data-seite="prog"],
-:root[data-theme="dark"] body[data-seite="notizbuch"]{
+:root[data-theme="dark"][data-seite="prog"],
+:root[data-theme="dark"][data-seite="notizbuch"]{
   background-image:var(--muster-tropfen-dunkel)}
 
 /* ---------- Feedback ---------- */

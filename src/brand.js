@@ -46,14 +46,61 @@ export function brandSvg() {
 // Kurzer Aktionsschriftzug fuer die Vollbildanimationen. Dieselbe Schrift,
 // Kruemmung, Kontur und derselbe harte Versatz wie beim Logo – nur ohne Sterne,
 // damit kurze Aussagen auch auf einem schmalen iPhone ruhig bleiben.
+//
+// GEFUNDENER FEHLER, nicht nur Geschmack: "PLAN EINRICHTEN" erschien als
+// "AN EINRICHT". SVG-textPath streckt einen zu langen Text nicht und bricht
+// ihn nicht um – Zeichen, die ueber das Pfadende hinausfallen, werden
+// ERSATZLOS NICHT GEZEICHNET. Der Pfad unten ist rund 331 Einheiten lang;
+// bei fester Schriftgroesse 57 braucht "PLAN EINRICHTEN" rund 500 Einheiten
+// Vorschubbreite – die aeusseren Buchstaben fielen beidseitig weg, ohne
+// Fehler, ohne Warnung.
+//
+// Deshalb wird VOR dem Bauen der eigentlichen Grafik echt im DOM gemessen
+// (Canvas-Textmessung kennt kein SVG letter-spacing und waere nur eine
+// Naeherung) und die Schrift bei Bedarf verkleinert – nie vergroessert, kurze
+// Woerter behalten ihre volle Praesenz.
+const AKTION_PFAD = 'M 18,91 Q 180,33 342,91';
+const AKTION_SCHRIFT = 57, AKTION_KONTUR = 5.2, AKTION_SPERRUNG = -1.7;
+let aktionPfadlaenge = null;   // einmal berechnet, danach wiederverwendet
+
+function textVorschub(text, fontSize) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('style', 'position:absolute;left:-9999px;top:-9999px');
+  svg.innerHTML = `<text font-family="'Helvetica Neue',Arial,system-ui,sans-serif"
+    font-style="italic" font-weight="900" font-size="${fontSize}"
+    letter-spacing="${AKTION_SPERRUNG}">${text}</text>`;
+  document.body.appendChild(svg);
+  const breite = svg.querySelector('text').getBBox().width;
+  document.body.removeChild(svg);
+  return breite;
+}
+
 export function actionTitleSvg(text) {
   const id = 'actionpath' + (++seq);
+  let fontSize = AKTION_SCHRIFT, strokeWidth = AKTION_KONTUR, spacing = AKTION_SPERRUNG;
+  try {
+    if (aktionPfadlaenge == null) {
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', AKTION_PFAD);
+      aktionPfadlaenge = p.getTotalLength();
+    }
+    // 20 Einheiten Sicherheitsabstand: Kontur und Schlagschatten brauchen an
+    // den Enden noch etwas Luft, sonst wirkt der letzte Buchstabe abgeschnitten.
+    const ziel = aktionPfadlaenge - 20;
+    const vorschub = textVorschub(text, AKTION_SCHRIFT);
+    if (vorschub > ziel) {
+      const faktor = ziel / vorschub;
+      fontSize = +(AKTION_SCHRIFT * faktor).toFixed(1);
+      strokeWidth = +(AKTION_KONTUR * faktor).toFixed(2);
+      spacing = +(AKTION_SPERRUNG * faktor).toFixed(2);
+    }
+  } catch (e) { /* Messung optional – ungemessen bleibt es bei der Standardgroesse */ }
   const path = `<textPath href="#${id}" startOffset="50%">${text}</textPath>`;
   return `<svg class="action-title-svg" viewBox="0 0 360 112" role="img" aria-label="${text}">
-    <defs><path id="${id}" d="M 18,91 Q 180,33 342,91" fill="none"/></defs>
+    <defs><path id="${id}" d="${AKTION_PFAD}" fill="none"/></defs>
     <g font-family="'Helvetica Neue',Arial,system-ui,sans-serif" font-style="italic"
-       font-weight="900" font-size="57" letter-spacing="-1.7" text-anchor="middle"
-       stroke="var(--navy)" stroke-width="5.2" stroke-linejoin="round">
+       font-weight="900" font-size="${fontSize}" letter-spacing="${spacing}" text-anchor="middle"
+       stroke="var(--navy)" stroke-width="${strokeWidth}" stroke-linejoin="round">
       <text transform="translate(4,4)" fill="var(--navy)">${path}</text>
       <text fill="var(--pink)" paint-order="stroke fill">${path}</text>
     </g>

@@ -3,7 +3,7 @@ import { supabase } from './supabase.js';
 import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } from './auth.js';
 import { readProfile, writeProfile } from './localstore.js';
 import { brandSvg, actionTitleSvg } from './brand.js';
-import { getTheme, applyTheme } from './theme.js';
+import { getTheme, applyTheme, dunkleStatusleiste } from './theme.js';
 import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
 import { mountLog, toast } from './log.js';
 import { mountProfile } from './profile.js';
@@ -438,18 +438,23 @@ function showWillkommen() {
         ${actionTitleSvg('PLAN EINRICHTEN')}
         <span>Als Nächstes erklärt das Tutorial deinen Plan und führt dich durch die Übungsauswahl.</span>
       </div>`;
+  // GEFUNDENES WETTRENNEN: Diese Funktion faerbte die Statusleiste frueher
+  // selbst wieder zurueck, auf einem eigenen, von aussen unabhaengigen Timer
+  // (~8s). render() setzt aber laengst VORHER (bei "bereit", ~6.35s) die
+  // naechste Seite und ggf. einstiegHervorheben(), das die Leiste bewusst
+  // dunkel haelt. Der spaete Timer hier ueberschrieb diese Absicht wieder mit
+  // Hell – die Karte "LOGMAN einrichten" zeigte deshalb eine helle Leiste,
+  // obwohl ihr eigener Dimmer laengst aktiv war. Die Statusleiste ist jetzt
+  // Sache von render() (siehe applyTheme(getTheme()) dort): Diese Funktion
+  // fasst sie fuer die Dauer des Auftakts nur an und ruehrt sie danach nicht
+  // mehr an.
   const themeMeta = document.querySelector('meta[name="theme-color"]');
-  const themeFarbe = themeMeta?.getAttribute('content');
   themeMeta?.setAttribute('content', '#B1E7FF');
   document.body.appendChild(fx);
   requestAnimationFrame(() => fx.classList.add('an'));
   const reduziert = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const bereit = new Promise((r) => setTimeout(r, reduziert ? 3000 : 6350));
-  const fertig = new Promise((r) => setTimeout(() => {
-    fx.remove();
-    if (themeFarbe) themeMeta?.setAttribute('content', themeFarbe);
-    r();
-  }, reduziert ? 3200 : 8050));
+  const fertig = new Promise((r) => setTimeout(() => { fx.remove(); r(); }, reduziert ? 3200 : 8050));
   return { bereit, fertig };
 }
 
@@ -458,15 +463,30 @@ function einstiegHervorheben() {
   if (!karte) return;
   document.body.classList.add('einstieg-fokus');
   karte.classList.add('willkommen-fokus');
-  const beenden = () => {
+  // GEFUNDENE LUECKE: Diese Karte dimmte den Hintergrund per DOM-Overlay,
+  // liess die iOS-Statusleiste aber hell – anders als die Setup-Karten direkt
+  // danach, die tutorialThemeSetzen(true) aufrufen. Der Sprung von hell auf
+  // dunkel beim Weiterklicken war genau das, was als "nicht abgedunkelt"
+  // auffiel. dunkleStatusleiste ist derselbe Baustein wie im Tutorial selbst
+  // (log.js), nicht nur optisch angeglichen.
+  dunkleStatusleiste(true);
+  const verlassen = () => {
     document.body.classList.remove('einstieg-fokus');
     karte.classList.remove('willkommen-fokus');
+    dunkleStatusleiste(false);
   };
-  // Der Fokus ist keine weitere zeitgesteuerte Meldung: Er bleibt, bis der
-  // Nutzer sich bewusst fuer Start oder Ueberspringen entscheidet.
-  karte.querySelector('.log-einstieg-los')?.addEventListener('click', beenden, { once: true });
-  karte.querySelector('.log-einstieg-skip')?.addEventListener('click', beenden, { once: true });
-  karte.querySelector('a')?.addEventListener('click', beenden, { once: true });
+  // "Tutorial starten" behaelt die dunkle Leiste bewusst bei: Die naechste
+  // Karte (Setup-Schritt) braucht exakt dieselbe Abdunklung, log.js uebernimmt
+  // sie nahtlos. Sie hier kurz auszuschalten wuerde nur ein Aufblitzen der
+  // hellen Farbe zwischen den beiden Karten erzeugen.
+  karte.querySelector('.log-einstieg-los')?.addEventListener('click', () => {
+    document.body.classList.remove('einstieg-fokus');
+    karte.classList.remove('willkommen-fokus');
+  }, { once: true });
+  // Ueberspringen oder der FAQ-Link verlassen die Einrichtung ganz – hier MUSS
+  // die Statusleiste wieder hell werden.
+  karte.querySelector('.log-einstieg-skip')?.addEventListener('click', verlassen, { once: true });
+  karte.querySelector('a')?.addEventListener('click', verlassen, { once: true });
 }
 
 /* ------------------------------------------------------------ top-level render */
@@ -519,6 +539,13 @@ async function render() {
   // hinter dem Logo warten muessen.
   if (willkommenAblauf) await willkommenAblauf.bereit;
   else if (splashFertig) await splashFertig;
+  // Statusleiste auf den korrekten Ausgangswert zuruecksetzen, JEDES Mal, bevor
+  // die Seite gebaut wird – nicht per Timer irgendwann spaeter (siehe
+  // showWillkommen: genau das erzeugte ein Wettrennen mit
+  // einstiegHervorheben() weiter unten und liess die Leiste bei "LOGMAN
+  // einrichten" faelschlich hell). applyTheme ist idempotent, ausserhalb des
+  // Willkommens-Auftakts aendert dieser Aufruf sichtbar nichts.
+  applyTheme(getTheme());
   renderChrome();
   await routeView();
   if (willkommenAblauf) {

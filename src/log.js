@@ -7,6 +7,7 @@ import { auswahlGruppen, sucheAuswahlGruppen, imKatalog } from './auswahl.js';
 import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
+import { dunkleStatusleiste } from './theme.js';
 
 // Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
 // ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
@@ -241,16 +242,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
   let tutorialFxTimer = [];
   let tutorialLetzterBlock = null;
   let tutorialScrollAufFeld = false;
-  const tutorialThemeMeta = document.querySelector('meta[name="theme-color"]');
-  const tutorialFarbe = () =>
-    getComputedStyle(document.documentElement).getPropertyValue('--tutorial-dim').trim() || '#354859';
-  const appThemeFarbe = () =>
-    getComputedStyle(document.body).getPropertyValue('--bg').trim() ||
-    (document.documentElement.dataset.theme === 'dark' ? '#0B0D12' : '#B1E7FF');
-  const tutorialThemeSetzen = (aktiv) => {
-    document.documentElement.classList.toggle('tutorial-laeuft', aktiv);
-    tutorialThemeMeta?.setAttribute('content', aktiv ? tutorialFarbe() : appThemeFarbe());
-  };
+  // Gemeinsamer Baustein mit main.js (einstiegHervorheben): Beide Stellen
+  // brauchen dieselbe dunkle Statusleiste, und sie muessen dabei zusammen-
+  // spielen, sonst blitzt beim Uebergang vom "LOGMAN einrichten"-Vorspiel ins
+  // Setup kurz die helle Farbe auf.
+  const tutorialThemeSetzen = dunkleStatusleiste;
 
   // Aus dem FAQ kann das Tutorial auch spaeter erneut gestartet werden.
   try {
