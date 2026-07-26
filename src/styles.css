@@ -424,7 +424,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   padding-top:calc(env(safe-area-inset-top) + var(--picker-top,6px))}
 .ex-picker{width:min(560px,100%);max-height:min(78vh,720px);
   padding:0;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
-  background:var(--surface);color:var(--text);overflow:hidden}
+  background:var(--surface);color:var(--text);overflow:hidden;
+  box-shadow:0 8px 22px rgba(10,19,48,.2)}
 .ex-picker-schale{display:flex;flex-direction:column;max-height:min(78vh,720px);padding:12px}
 .ex-picker-lage.tastatur .ex-picker,
 .ex-picker-lage.tastatur .ex-picker-schale{max-height:var(--picker-hoehe-sicher)}
@@ -693,22 +694,11 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   overflow-x:hidden;overflow-y:auto;
   border:var(--bw) solid var(--ink);border-radius:16px;
   -webkit-backdrop-filter:none;backdrop-filter:none;
-  /* Derselbe ruhige Impuls wie bei der Einstiegskarte (einstiegFokus): gleiche
-     Dauer, gleicher Hub. Er braucht aber eigene Keyframes, weil die Karte
-     bereits translateX(-50%) traegt – ein reines scale() wuerde das
-     ueberschreiben und die Karte nach rechts springen lassen.
-     transform-origin oben: Die Karte klebt am oberen Rand; waechst sie aus der
-     Mitte, schoebe sie sich bei jedem Puls in die Statusleiste. */
-  transform-origin:50% 0;
-  animation:tutorialKarteEin .28s cubic-bezier(.22,.75,.3,1) both,
-            tutorialKartePuls 1.05s .28s ease-in-out infinite}
+  box-shadow:0 8px 22px rgba(10,19,48,.2);
+  animation:tutorialKarteEin .28s cubic-bezier(.22,.75,.3,1) both}
 @keyframes tutorialKarteEin{
   from{opacity:.82}
   to{opacity:1}
-}
-@keyframes tutorialKartePuls{
-  0%,100%{transform:translateX(-50%) scale(1)}
-  50%{transform:translateX(-50%) scale(1.025)}
 }
 @media (prefers-reduced-motion:reduce){
   .log-tutorial{animation:tutorialKarteEin .28s cubic-bezier(.22,.75,.3,1) both}
