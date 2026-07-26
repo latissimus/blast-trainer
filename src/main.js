@@ -279,11 +279,11 @@ function renderChrome() {
               <rect x="2" y="2" width="54" height="47" rx="7" fill="#F2A5DA" stroke="#8968FF" stroke-width="2.3" mask="url(#menue-fenster-ausschnitt)"/>
               <path d="M9 2h40a7 7 0 0 1 7 7v8H2V9a7 7 0 0 1 7-7Z" fill="#AEEBFA"/>
               <path d="M2 17h54" fill="none" stroke="#8968FF" stroke-width="2.3"/>
-              <path d="M34 11h4" fill="none" stroke="#8968FF" stroke-width="1.8" stroke-linecap="round"/>
-              <rect x="41" y="7.5" width="5" height="5" fill="none" stroke="#8968FF" stroke-width="1.5"/>
-              <path d="m49 7.5 5 5m0-5-5 5" fill="none" stroke="#8968FF" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M31 11h4" fill="none" stroke="#8968FF" stroke-width="1.8" stroke-linecap="round"/>
+              <rect x="38" y="7.5" width="5" height="5" fill="none" stroke="#8968FF" stroke-width="1.5"/>
+              <path d="m46 7.5 5 5m0-5-5 5" fill="none" stroke="#8968FF" stroke-width="1.5" stroke-linecap="round"/>
               <rect x="7" y="21" width="43" height="23" rx="5" fill="none" stroke="#8968FF" stroke-width="1.8"/>
-              <text x="28.5" y="32.5" fill="#111111" font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace" font-size="8.2" font-weight="800" text-anchor="middle" dominant-baseline="middle">MENÜ</text>
+              <text class="menue-computer-text" x="28.5" y="32.5" fill="#111111" font-family="'Helvetica Neue',Arial,system-ui,sans-serif" font-size="9.6" font-style="italic" font-weight="900" text-anchor="middle" dominant-baseline="middle">MENÜ</text>
             </svg>
           </span>
           <select id="app-menue" aria-label="Ansicht"></select>

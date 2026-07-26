@@ -543,6 +543,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ci.menue{flex:0 0 62px;align-self:stretch;padding:0;overflow:hidden;isolation:isolate}
 .menue-computer{position:absolute;inset:2px 1px 1px;z-index:1;display:block;pointer-events:none}
 .menue-computer svg{display:block;width:100%;height:100%;overflow:visible}
+:root[data-theme="dark"] .menue-computer-text{fill:#FFFFFF}
 .ci.menue select{z-index:3}
 
 /* Pausentimer. Er uebernimmt die GANZE Leiste, statt sich ein Feld zu teilen:
