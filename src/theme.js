@@ -4,6 +4,7 @@
 // Abends am Handy dunkel, tagsueber am Rechner hell – das waere kaputt, wenn die
 // Wahl am Konto haengt. Ausserdem greift sie so ohne Netz und ohne Wartezeit.
 const KEY = 'blast:theme';
+const overlayQuellen = new Set();
 
 export const gueltig = (t) => (t === 'dark' ? 'dark' : 'retro');
 
@@ -23,21 +24,23 @@ function metaFarbeSetzen(farbe) {
   alt.replaceWith(neu);
 }
 
-// EINE Regel fuer die Systemleiste oben: Sie traegt immer die Farbe der Seite,
-// auf der man gerade ist. Progression flieder, FAQ gelb, Log hellblau.
-//
-// Bewusst OHNE Sonderfaelle. Frueher schaltete das Tutorial die Leiste auf
-// einen dunklen Ton um – und weil das an Scroll- und Resize-Ereignissen hing,
-// sprang sie beim Scrollen sichtbar um. Genau das soll nicht passieren:
-// Dunkelt sich der Seiteninhalt ab, endet die Abdunkelung eben an der Kante
-// zum geschuetzten Bereich. Die Leiste bleibt ruhig.
-//
-// --bg statt einer eigenen Liste: Die Farbe steht ohnehin schon in styles.css
-// (:root[data-seite=…]). Eine zweite Liste in JS lief in der Vergangenheit
-// zuverlaessig hinterher – genau daher kam der veraltete Ton #AEDCF6.
+// Eine einzige Quelle steuert die geschuetzte iOS-Leiste. Ist ein Overlay offen,
+// traegt sie denselben dunklen Ton wie dessen Abdunklung; sonst die Seitenfarbe.
+// Ein Set statt eines Booleans ist wichtig: Der Uebungskatalog kann innerhalb
+// des Tutorials aufgehen. Schliesst er, muss das Tutorial die Leiste weiterhin
+// dunkel halten.
 export function statusleisteAnSeite() {
-  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  const variable = overlayQuellen.size ? '--tutorial-dim' : '--bg';
+  const bg = getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
   if (bg) metaFarbeSetzen(bg);
+}
+
+export function setStatusleistenOverlay(quelle, offen) {
+  if (!quelle) return;
+  if (offen) overlayQuellen.add(quelle);
+  else overlayQuellen.delete(quelle);
+  document.documentElement.classList.toggle('statusleiste-overlay', overlayQuellen.size > 0);
+  statusleisteAnSeite();
 }
 
 export function applyTheme(t) {

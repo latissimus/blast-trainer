@@ -3,7 +3,7 @@ import { supabase } from './supabase.js';
 import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } from './auth.js';
 import { readProfile, writeProfile } from './localstore.js';
 import { brandSvg, actionTitleSvg } from './brand.js';
-import { getTheme, applyTheme, statusleisteAnSeite } from './theme.js';
+import { getTheme, applyTheme, statusleisteAnSeite, setStatusleistenOverlay } from './theme.js';
 import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
 import { mountLog, toast } from './log.js';
 import { mountProfile } from './profile.js';
@@ -477,10 +477,12 @@ function einstiegHervorheben() {
   const karte = app.querySelector('.log-einstieg');
   if (!karte) return;
   document.body.classList.add('einstieg-fokus');
+  setStatusleistenOverlay('einstieg', true);
   karte.classList.add('willkommen-fokus');
   const verlassen = () => {
     document.body.classList.remove('einstieg-fokus');
     karte.classList.remove('willkommen-fokus');
+    setStatusleistenOverlay('einstieg', false);
   };
   // "Tutorial starten" behaelt die dunkle Leiste bewusst bei: Die naechste
   // Karte (Setup-Schritt) braucht exakt dieselbe Abdunklung, log.js uebernimmt
@@ -489,6 +491,7 @@ function einstiegHervorheben() {
   karte.querySelector('.log-einstieg-los')?.addEventListener('click', () => {
     document.body.classList.remove('einstieg-fokus');
     karte.classList.remove('willkommen-fokus');
+    setStatusleistenOverlay('einstieg', false);
   }, { once: true });
   // Ueberspringen oder der FAQ-Link verlassen die Einrichtung ganz – hier MUSS
   // die Statusleiste wieder hell werden.

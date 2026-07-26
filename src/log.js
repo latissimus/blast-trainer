@@ -7,6 +7,7 @@ import { auswahlGruppen, sucheAuswahlGruppen, imKatalog } from './auswahl.js';
 import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
+import { setStatusleistenOverlay } from './theme.js';
 
 // Evidenznahe Orientierung: drei Minuten zwischen schweren Saetzen und
 // vollstaendigen Clusters-Runden, zwei Minuten bei leichter Pump-Arbeit.
@@ -327,6 +328,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     einstiegSichtbar = false;
     tutorialLetzterBlock = null;
     tutorialScrollAufFeld = false;
+    setStatusleistenOverlay('tutorial', true);
     if (schritt < TUTORIAL_SETUP.length) {
       const ziel = TUTORIAL_SETUP[Math.max(0, schritt)];
       state.week = ziel.week;
@@ -352,6 +354,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     state.week = 1;
     state.day = 'OK-A';
     einstiegSichtbar = false;
+    setStatusleistenOverlay('tutorial', false);
     if (tutorialDunkel) tutorialDunkel.hidden = true;
     queuePersist();
     renderAll();
@@ -359,6 +362,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
   function tutorialStartAnimation() {
     if (tutorialFx) return;
+    // Die Abschlussanimation ist ein bewusst hellblauer Markenmoment. Der
+    // eigentliche Tutorial-Overlayzustand endet deshalb schon beim Start der
+    // Animation und nicht erst, wenn darunter der Log neu gezeichnet wird.
+    setStatusleistenOverlay('tutorial', false);
     tutorialFx = document.createElement('div');
     tutorialFx.className = 'tutorial-startfx';
     tutorialFx.setAttribute('role', 'status');
@@ -471,6 +478,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   tutorialKopfmaske.hidden = !tutorialAktiv;
   tutorialKopfmaske.setAttribute('aria-hidden', 'true');
   document.body.appendChild(tutorialKopfmaske);
+  setStatusleistenOverlay('tutorial', tutorialAktiv);
   let tutorialMaskenRaf = null;
   function tutorialMaskeAktualisieren() {
     tutorialMaskenRaf = null;
@@ -519,6 +527,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       pickerLage.style.removeProperty('--picker-top');
       pickerLage.style.removeProperty('--picker-hoehe');
       pickerLage.hidden = true;
+      setStatusleistenOverlay('uebungskatalog', false);
     };
     const anOberkante = () => {
       const ansicht = window.visualViewport;
@@ -573,6 +582,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
     zeichneListe();
     pickerLage.hidden = false;
+    setStatusleistenOverlay('uebungskatalog', true);
     requestAnimationFrame(() => suche.focus());
   }
 
@@ -1325,6 +1335,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
       tutorialFxTimer = [];
       tutorialFx?.remove();
       tutorialFx = null;
+      setStatusleistenOverlay('uebungskatalog', false);
+      setStatusleistenOverlay('tutorial', false);
     },
   };
 }

@@ -110,6 +110,10 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 html{background:var(--bg)}
+/* Safari zeigt beim Scroll-Gummiband die Leinwand von <html>. Waere sie trotz
+   offenem Overlay noch weiss oder seitenfarben, blitzt genau der geschuetzte
+   Bereich um Uhrzeit und Akku beim Scrollen um. */
+html.statusleiste-overlay{background:var(--tutorial-dim)}
 body{
   background:var(--bg);color:var(--text);font-family:var(--mono);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
