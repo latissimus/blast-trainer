@@ -41,8 +41,11 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
   function zeichneAlles(payload) {
     const reihen = heavyReihen(payload);
     if (!reihen.length) {
-      inhalt.innerHTML = `<div class="mess-leer">Noch keine Heavy-Übung mit zwei erfassten Wochen.<br>
-        <span style="font-size:11.5px">Sobald dieselbe Übung ein zweites Mal im Log steht, erscheint hier ihr Verlauf.</span></div>`;
+      inhalt.innerHTML = `<div class="prog-leer">
+        <span class="prog-leer-icon" aria-hidden="true">↗</span>
+        <b>Noch kein Verlauf</b>
+        <p>Sobald dieselbe Heavy-Übung in zwei Wochen im Log steht, erscheint hier ihre Entwicklung.</p>
+      </div>`;
       return;
     }
 

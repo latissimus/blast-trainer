@@ -164,8 +164,11 @@ export function mountNotizbuch(container, { userId }) {
         Bilder und Änderungen brauchen Internet.</p>` : ''}
       ${notizen.length
         ? `<div class="nb-raster">${kacheln}</div>`
-        : `<p class="som-hinweis">Noch nichts notiert. Platz für Links, Screenshots,
-             Gedanken zur Technik — bleibt beim Start einer neuen Phase erhalten.</p>`}`;
+        : `<div class="nb-leer">
+             <span class="nb-leer-icon" aria-hidden="true">＋</span>
+             <b>Noch nichts notiert</b>
+             <p>Platz für Links, Screenshots und Gedanken zur Technik. Deine Notizen bleiben auch bei einer neuen Phase erhalten.</p>
+           </div>`}`;
 
     inhalt.querySelector('#nb-neu').onclick = () => {
       offen = { id: 'entwurf', neu: true, titel: '', text: '', bilder: [] };

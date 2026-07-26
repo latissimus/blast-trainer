@@ -95,9 +95,10 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   const avSlot = document.createElement('div');
   avSlot.appendChild(avatarNode(profile, email));
   const meta = document.createElement('div');
+  meta.className = 'profile-meta';
   meta.innerHTML = `
-    <div style="font-weight:800;font-size:16px">${profile.full_name || '—'}</div>
-    <div style="font-size:12px;color:var(--muted)">${email}</div>
+    <div class="profile-name">${profile.full_name || '—'}</div>
+    <div class="profile-email">${email}</div>
     <span class="role-tag ${profile.role === 'admin' ? 'admin' : ''}">${profile.role === 'admin' ? 'Admin' : 'Trainee'}</span>`;
   top.appendChild(avSlot); top.appendChild(meta);
   card.appendChild(top);
@@ -105,17 +106,30 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   // --- avatar upload ---
   const upWrap = document.createElement('div');
   upWrap.innerHTML = `<label class="fld-l">Profilbild ändern</label>`;
+  const fileLabel = document.createElement('label');
+  fileLabel.className = 'profile-datei';
   const fileIn = document.createElement('input');
   fileIn.type = 'file'; fileIn.accept = 'image/png,image/jpeg,image/webp,image/gif';
-  fileIn.className = 'input';
-  upWrap.appendChild(fileIn);
+  const fileKnopf = document.createElement('span');
+  fileKnopf.className = 'profile-datei-knopf';
+  fileKnopf.textContent = 'Bild wählen';
+  const fileName = document.createElement('span');
+  fileName.className = 'profile-dateiname';
+  fileName.textContent = 'Kein Bild gewählt';
+  fileLabel.append(fileKnopf, fileName, fileIn);
+  upWrap.appendChild(fileLabel);
   card.appendChild(upWrap);
 
   fileIn.onchange = async () => {
     const file = fileIn.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { toast('Bitte eine Bilddatei wählen'); fileIn.value = ''; return; }
-    if (file.size > 15 * 1024 * 1024) { toast('Bild zu groß (max 15 MB)'); fileIn.value = ''; return; }
+    fileName.textContent = file.name;
+    if (!file.type.startsWith('image/')) {
+      toast('Bitte eine Bilddatei wählen'); fileIn.value = ''; fileName.textContent = 'Kein Bild gewählt'; return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast('Bild zu groß (max 15 MB)'); fileIn.value = ''; fileName.textContent = 'Kein Bild gewählt'; return;
+    }
     toast('Verarbeite Bild…');
     let dataUrl;
     try {
@@ -123,13 +137,20 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     } catch (e) {
       toast('Bild konnte nicht gelesen werden');
       fileIn.value = '';
+      fileName.textContent = 'Kein Bild gewählt';
       return;
     }
     const { error: updErr } = await supabase.from('profiles').update({ avatar_url: dataUrl }).eq('id', session.user.id);
-    if (updErr) { toast('Konnte Bild nicht speichern'); return; }
+    if (updErr) {
+      toast('Konnte Bild nicht speichern');
+      fileIn.value = '';
+      fileName.textContent = 'Kein Bild gewählt';
+      return;
+    }
     profile.avatar_url = dataUrl;
     avSlot.innerHTML = ''; avSlot.appendChild(avatarNode(profile, email));
     fileIn.value = '';
+    fileName.textContent = 'Kein Bild gewählt';
     toast('Profilbild aktualisiert');
     onProfileUpdated?.(profile);
   };
@@ -160,7 +181,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     saveBtn.disabled = false;
     if (error) { toast('Speichern fehlgeschlagen'); return; }
     profile.full_name = nameIn.value.trim();
-    meta.querySelector('div').textContent = profile.full_name || '—';
+    meta.querySelector('.profile-name').textContent = profile.full_name || '—';
     if (!profile.avatar_url) { avSlot.innerHTML = ''; avSlot.appendChild(avatarNode(profile, email)); }
     toast('Profil gespeichert');
     onProfileUpdated?.(profile);
