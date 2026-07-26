@@ -31,8 +31,8 @@ function metaFarbeSetzen(farbe) {
 // des Tutorials aufgehen. Schliesst er, muss das Tutorial die Leiste weiterhin
 // dunkel halten.
 export function statusleisteAnSeite() {
-  const variable = overlayQuellen.size ? '--tutorial-dim' : '--bg';
-  const bg = getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+  // Overlays lock scrolling but do not alter the page or status-bar colour.
+  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
   if (bg) metaFarbeSetzen(bg);
 }
 

@@ -30,7 +30,6 @@
   --prio-wash:rgba(103,49,143,.14);
   /* Entspricht dem 72%-Dimmer ueber dem hellblauen Log. Dieselbe Vollfarbe
      fuellt waehrend des Tutorials die iOS-Safe-Area und die Scrollmaske. */
-  --tutorial-dim:#354859;
   --up:#12A150;
   /* Clusters bekommen eine eigene, klar gruene Kennfarbe. So sind sie von
      Heavy (Navy), Pump (Pink) und gelben Hinweisen sofort unterscheidbar. */
@@ -80,7 +79,6 @@
   --accent-ink:#0B1B44;
   --muted:#98A2B3;
   --faint:#8490A3;
-  --tutorial-dim:#070915;
 
   /* Navy verschwindet auf Fast-Schwarz. Aufgehellt bleibt es erkennbar
      dasselbe Blau und traegt weiter Laufband, LOAD-Badge, aktiven Tab. */
@@ -113,13 +111,13 @@ html{background:var(--bg)}
 /* Safari zeigt beim Scroll-Gummiband die Leinwand von <html>. Waere sie trotz
    offenem Overlay noch weiss oder seitenfarben, blitzt genau der geschuetzte
    Bereich um Uhrzeit und Akku beim Scrollen um. */
-html.statusleiste-overlay{background:var(--tutorial-dim)}
+html.statusleiste-overlay{background:var(--bg)}
 /* Zweite Absicherung fuer den iOS-Web-App-Canvas: Je nach Scrollzustand nimmt
    WebKit fuer den transparenten Statusbereich den Body statt des html-Elements.
    Der eigentliche App-Inhalt behaelt separat seine Seitenfarbe und wird wie
    bisher vom Overlay abgedunkelt. */
-html.statusleiste-overlay body{background:var(--tutorial-dim)}
-html.statusleiste-overlay #app{min-height:100dvh;background:transparent}
+html.statusleiste-overlay body{background:var(--bg)}
+html.statusleiste-overlay #app{min-height:100dvh;background:var(--bg)}
 html.statusleiste-overlay #view{min-height:100dvh;background:var(--bg)}
 /* Nicht das iOS-Fenster und auch nicht der Body, sondern nur der eigentliche
    Seiteninhalt #view scrollt waehrend eines Overlays.
@@ -166,9 +164,8 @@ body:not([data-seite="log"]) #view>.wrap{animation:seiteEin .18s cubic-bezier(.2
    Grund tragen – sonst bleibt zwischen Statusleiste und Tutorialkarte ein
    heller Streifen stehen. */
 html.statusleiste-overlay .topbar,
-html.statusleiste-overlay .topbar::after{
-  background:var(--tutorial-dim)}
-html.statusleiste-overlay .topbar::before{background:var(--tutorial-dim)}
+html.statusleiste-overlay .topbar::after,
+html.statusleiste-overlay .topbar::before{background:var(--bg)}
 .topbar .wrap{position:relative;z-index:2;display:flex;align-items:center;gap:10px}
 /* LOGMAN-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
    Kein Layout-Effekt (Kontur/Schatten ändern die Header-Höhe nicht). */
@@ -413,8 +410,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    bleibt er, die deckt bewusst alles zu. */
 .ex-picker-lage{position:fixed;inset:0;z-index:80;
   display:flex;align-items:center;justify-content:center;padding:9px;
-  background:rgba(5,10,24,.72);
-  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  background:transparent;
   overscroll-behavior:contain}
 .ex-picker-lage[hidden]{display:none}
 /* Bei offener Tastatur klebt das Feld oben – aber UNTERHALB der Safe-Area.
@@ -519,7 +515,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   background:linear-gradient(180deg,transparent 0,var(--bg) 8px,transparent 8px)}
 /* Auch ausserhalb der Milchglasleiste darf beim Tutorial kein heller
    Seitenstreifen sichtbar bleiben – besonders nicht an den unteren Ecken. */
-html.statusleiste-overlay .ctrlbar{z-index:50;background:var(--tutorial-dim)}
+html.statusleiste-overlay .ctrlbar{z-index:50;background:var(--bg)}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
    auf. Der Schatten liegt ausserhalb und wird davon nicht beschnitten. */
@@ -546,7 +542,7 @@ html.statusleiste-overlay .ctrlbar{z-index:50;background:var(--tutorial-dim)}
 .ctrlbar .inner::after{content:'';position:absolute;inset:0;z-index:-2;pointer-events:none;
   border-radius:16px;box-shadow:0 0 0 100vmax var(--bg);
   clip-path:inset(8px -100vmax -100vmax -100vmax)}
-html.statusleiste-overlay .ctrlbar .inner::after{box-shadow:0 0 0 100vmax var(--tutorial-dim)}
+html.statusleiste-overlay .ctrlbar .inner::after{box-shadow:0 0 0 100vmax var(--bg)}
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;padding:8px 2px;
   border:0;border-radius:11px;background:none;color:var(--text);cursor:pointer}
@@ -660,8 +656,7 @@ body:has(.ctrlbar.nur-menue:not(.timer-an)) .pad-bottom{padding-bottom:24px}
    waehrenddessen tritt alles andere zurueck. */
 body.einstieg-fokus #app{isolation:isolate}
 body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:39;
-  background:rgba(5,10,24,.64);pointer-events:none;
-  -webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px)}
+  background:transparent;pointer-events:none}
 .log-einstieg.willkommen-fokus{position:relative;z-index:40;
   animation:einstiegFokus 1.05s ease-in-out infinite;background:var(--surface)}
 @keyframes einstiegFokus{
@@ -673,8 +668,7 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
    Bedienleiste. Der feste Dimmer liegt ueber der restlichen App; nur Karte und
    der gerade erklaerte Muskelblock werden darueber angehoben. */
 .tutorial-dimmer{position:fixed;top:var(--topbar-h,0px);right:0;bottom:0;left:0;z-index:35;
-  background:rgba(5,10,24,.72);
-  -webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);
+  background:transparent;
   touch-action:pan-y}
 .tutorial-dimmer[hidden]{display:none}
 /* Die installierte iOS-App behandelt die Statusleiste bei
@@ -686,7 +680,7 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
    der hellblaue Header noch die weisse Tutorialkarte in die Safe Area rutschen. */
 html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 3px);
-  background:var(--tutorial-dim);pointer-events:none}
+  background:var(--bg);pointer-events:none}
 .tutorial-ebene{position:fixed;z-index:60;inset:0;pointer-events:none}
 .tutorial-ebene[hidden]{display:none}
 .log-tutorial{position:absolute;top:calc(env(safe-area-inset-top) + 3px);left:50%;
