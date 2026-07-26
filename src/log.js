@@ -473,7 +473,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
   tutorialDunkel.hidden = !tutorialAktiv;
   tutorialDunkel.setAttribute('aria-hidden', 'true');
   tutorialDunkel.onclick = () => tutorialScrollen();
-  document.body.appendChild(tutorialDunkel);
+  // Der Dimmer muss dieselbe Compositing-Ebene wie die scrollenden Karten
+  // teilen. Auf iOS liegt ein fester Dimmer ausserhalb von #view sonst ueber
+  // dem kompletten Scrollcontainer – auch ueber dem aktiven Übungsfeld.
+  container.appendChild(tutorialDunkel);
   // Die Tutorialkarte gehoert nicht in den scrollenden Trainingsinhalt.
   // Andernfalls wandert ihre weisse Flaeche auf iOS beim Scrollen unter die
   // transparente Systemleiste. Diese feste Ebene bleibt am Display stehen,
