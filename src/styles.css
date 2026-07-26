@@ -358,7 +358,6 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .chip{display:inline-flex;align-items:center;justify-content:center;line-height:1.2;
   font-size:12.5px;color:var(--text);background:var(--surface2);border:var(--bw) solid var(--ink);
   padding:7px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
-.block-load .chip:not(.rest){background:var(--load);color:#fff}
 .chip.stretch{background:var(--pink);color:var(--accent-ink)}
 .chip.rest{background:var(--surface);font-family:var(--mono);font-weight:700}
 .chip.rest:disabled{opacity:.55}
