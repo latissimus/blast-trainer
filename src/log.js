@@ -474,37 +474,37 @@ export async function mountLog(container, { userId, readOnly = false }) {
   tutorialDunkel.setAttribute('aria-hidden', 'true');
   tutorialDunkel.onclick = () => tutorialScrollen();
   document.body.appendChild(tutorialDunkel);
-  // Deckflaeche zwischen Displayoberkante und Tutorialkarte. Die aktive
-  // Muskelbox darf beim automatischen Scrollen weder seitlich noch oberhalb
-  // der Karte hervorschauen. Die Karte selbst liegt eine Ebene darueber.
-  const tutorialKopfmaske = document.createElement('div');
-  tutorialKopfmaske.className = 'tutorial-kopfmaske';
-  tutorialKopfmaske.hidden = !tutorialAktiv;
-  tutorialKopfmaske.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(tutorialKopfmaske);
+  // Keine dynamische Kopfmaske mehr: Sie wurde frueher bei jedem Scrollschritt
+  // auf die Unterkante der Tutorialkarte ausgemessen und war der Ausloeser fuer
+  // die wechselnde weisse iOS-Systemleiste. Die Karte selbst (z 60) verdeckt
+  // alles in ihrem Rechteck; den schmalen Bereich darueber deckt der statische
+  // Safe-Area-Schutz aus styles.css ab.
   setStatusleistenOverlay('tutorial', tutorialAktiv);
-  let tutorialMaskenRaf = null;
-  function tutorialMaskeAktualisieren() {
-    tutorialMaskenRaf = null;
+  let tutorialClipRaf = null;
+  function tutorialClipAktualisieren() {
+    tutorialClipRaf = null;
     const karte = contentEl.querySelector('.log-tutorial');
-    // Nur wenn das Tutorial WIRKLICH aus ist wird zurueckgesetzt. Frueher
-    // genuegte eine fehlende Karte – die gibt es aber auch mitten im
-    // Neuzeichnen fuer einen Moment, und dann flackerte die Maske kurz weg.
-    if (!tutorialAktiv) {
-      tutorialKopfmaske.hidden = true;
+    const block = contentEl.querySelector('.block.tutorial-aktiv');
+    if (!tutorialAktiv || !karte || !block) {
+      block?.style.removeProperty('--tutorial-clip-top');
       return;
     }
-    if (!karte) return;   // Zwischenzustand: alles so lassen, wie es ist
-    tutorialKopfmaske.hidden = false;
-    tutorialKopfmaske.style.height = `${Math.ceil(karte.getBoundingClientRect().bottom)}px`;
+    const blockRect = block.getBoundingClientRect();
+    // Nur die hervorgehobene Muskelkarte abschneiden. Anders als die fruehere
+    // Vollflaechenmaske veraendert das keine Flaeche im iOS-Statusbereich.
+    const verdeckt = Math.max(0, Math.min(
+      blockRect.height + 8,
+      Math.ceil(karte.getBoundingClientRect().bottom - blockRect.top),
+    ));
+    block.style.setProperty('--tutorial-clip-top', `${verdeckt}px`);
   }
-  function tutorialMaskePlanen() {
-    if (tutorialMaskenRaf != null) return;
-    tutorialMaskenRaf = requestAnimationFrame(tutorialMaskeAktualisieren);
+  function tutorialClipPlanen() {
+    if (tutorialClipRaf != null) return;
+    tutorialClipRaf = requestAnimationFrame(tutorialClipAktualisieren);
   }
-  window.addEventListener('resize', tutorialMaskePlanen);
-  window.addEventListener('scroll', tutorialMaskePlanen, { passive: true });
-  document.body.addEventListener('scroll', tutorialMaskePlanen, { passive: true });
+  window.addEventListener('resize', tutorialClipPlanen);
+  window.addEventListener('scroll', tutorialClipPlanen, { passive: true });
+  document.body.addEventListener('scroll', tutorialClipPlanen, { passive: true });
 
   function oeffneUebungswahl({ titel, gruppen, aktuell, onSelect }) {
     picker.innerHTML = '';
@@ -586,9 +586,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
     suche.oninput = zeichneListe;
     schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
     zeichneListe();
-    pickerLage.hidden = false;
+    // Erst den dunklen iOS-/Overlayzustand setzen, dann das Feld sichtbar
+    // machen. Kein automatischer Fokus: Das sofortige Oeffnen der iOS-Tastatur
+    // baute den geschuetzten Bereich erneut in der hellen Seitenfarbe auf.
     setStatusleistenOverlay('uebungskatalog', true);
-    requestAnimationFrame(() => suche.focus());
+    pickerLage.hidden = false;
   }
 
   // ---- untere Bedienleiste -----------------------------------------
@@ -1198,7 +1200,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       contentEl.querySelector('.setrow')?.classList.add('tutorial-ziel');
     }
     renderVolume(cell, tpl, tier);
-    tutorialMaskeAktualisieren();
+    tutorialClipPlanen();
     tutorialScrollen();
 
     // Nach den sechs Belastungswochen bewusst entscheiden: direkt eine neue
@@ -1332,11 +1334,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (saveStateEl) saveStateEl.hidden = true;
       pickerLage.remove();
       tutorialDunkel.remove();
-      cancelAnimationFrame(tutorialMaskenRaf);
-      window.removeEventListener('resize', tutorialMaskePlanen);
-      window.removeEventListener('scroll', tutorialMaskePlanen);
-      document.body.removeEventListener('scroll', tutorialMaskePlanen);
-      tutorialKopfmaske.remove();
+      cancelAnimationFrame(tutorialClipRaf);
+      window.removeEventListener('resize', tutorialClipPlanen);
+      window.removeEventListener('scroll', tutorialClipPlanen);
+      document.body.removeEventListener('scroll', tutorialClipPlanen);
       tutorialFxTimer.forEach(clearTimeout);
       tutorialFxTimer = [];
       tutorialFx?.remove();

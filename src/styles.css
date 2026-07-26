@@ -680,18 +680,6 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
 html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 3px);
   background:var(--tutorial-dim);pointer-events:none}
-/* min-height ist der Boden, unter den die Maske nie faellt. Ohne ihn gab es
-   eine Luecke: Die Hoehe wird per JS gesetzt und mit .32s animiert, startet
-   aber bei 0 – waehrend dieser Blende lag der Streifen unter der iOS-Uhr frei
-   und zeigte das Hellblau der Kopfleiste. Dasselbe beim Scrollen, wenn die
-   klebende Karte auf dem iPhone kurz nachhinkt und ihre gemessene Unterkante
-   zu klein ausfaellt. Der Boden haengt an nichts Gemessenem und an keiner
-   Animation, kann also nicht danebenliegen. */
-.tutorial-kopfmaske{position:fixed;z-index:50;top:0;left:0;width:100vw;height:0;
-  min-height:calc(env(safe-area-inset-top) + 3px);
-  background:var(--tutorial-dim);
-  pointer-events:none;transition:height .32s cubic-bezier(.22,.75,.3,1)}
-.tutorial-kopfmaske[hidden]{display:none}
 .log-tutorial{position:sticky;top:calc(env(safe-area-inset-top) + 3px);z-index:60;
   isolation:isolate;overflow:hidden;
   width:min(580px,calc(100vw - 14px));
@@ -780,6 +768,9 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .log-tutorial-weiter[data-offen]{background:var(--prio);color:#fff}
 .log-tutorial-ende{display:grid;gap:12px;margin-top:17px}
 .block.tutorial-aktiv{position:relative;z-index:41;outline:4px solid var(--pink);outline-offset:3px;
+  /* Negative Seiten lassen die pinke Kontur normal stehen; nur der Bereich,
+     der hinter der Tutorialkarte liegt, wird oben abgeschnitten. */
+  clip-path:inset(var(--tutorial-clip-top,0px) -8px -8px -8px);
   transition:outline-color .3s ease,transform .3s ease}
 .tutorial-ziel{position:relative;z-index:2;outline:4px solid var(--pink)!important;outline-offset:3px;
   animation:tutorialPuls 1.3s ease-in-out infinite}
