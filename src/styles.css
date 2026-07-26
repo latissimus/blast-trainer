@@ -425,7 +425,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker{width:min(560px,100%);max-height:min(78vh,720px);
   padding:0;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
   background:var(--surface);color:var(--text);overflow:hidden;
-  box-shadow:0 8px 22px rgba(10,19,48,.2)}
+  box-shadow:0 10px 30px rgba(10,19,48,.38),0 2px 7px rgba(10,19,48,.24)}
 .ex-picker-schale{display:flex;flex-direction:column;max-height:min(78vh,720px);padding:12px}
 .ex-picker-lage.tastatur .ex-picker,
 .ex-picker-lage.tastatur .ex-picker-schale{max-height:var(--picker-hoehe-sicher)}
@@ -694,7 +694,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   overflow-x:hidden;overflow-y:auto;
   border:var(--bw) solid var(--ink);border-radius:16px;
   -webkit-backdrop-filter:none;backdrop-filter:none;
-  box-shadow:0 8px 22px rgba(10,19,48,.2);
+  box-shadow:0 10px 30px rgba(10,19,48,.34),0 2px 7px rgba(10,19,48,.22);
   animation:tutorialKarteEin .28s cubic-bezier(.22,.75,.3,1) both}
 @keyframes tutorialKarteEin{
   from{opacity:.82}
