@@ -121,12 +121,16 @@ html.statusleiste-overlay{background:var(--tutorial-dim)}
 html.statusleiste-overlay body{background:var(--tutorial-dim)}
 html.statusleiste-overlay #app{min-height:100dvh;background:transparent}
 html.statusleiste-overlay #view{min-height:100dvh;background:var(--bg)}
-/* Nicht das iOS-Fenster, sondern der Body scrollt waehrend eines Overlays.
+/* Nicht das iOS-Fenster und auch nicht der Body, sondern nur der eigentliche
+   Seiteninhalt #view scrollt waehrend eines Overlays.
    Dadurch bleibt der transparente Statusbereich auf derselben dunklen Flaeche,
    auch wenn das Tutorial automatisch zur naechsten Uebung faehrt. */
 html.overlay-scroll-gesperrt{height:100%;overflow:hidden}
-html.overlay-scroll-gesperrt body{position:fixed;inset:0;width:100%;height:100%;
-  overflow-y:auto;overscroll-behavior:none;-webkit-overflow-scrolling:touch}
+html.overlay-scroll-gesperrt body{position:fixed;inset:0;width:100%;height:100%;overflow:hidden}
+html.overlay-scroll-gesperrt #app{display:flex;flex-direction:column;height:100%;overflow:hidden}
+html.overlay-scroll-gesperrt #view{flex:1 1 auto;min-height:0;overflow-y:auto;
+  padding-top:var(--tutorial-kartenraum,0px);
+  overscroll-behavior:none;-webkit-overflow-scrolling:touch}
 body{
   background:var(--bg);color:var(--text);font-family:var(--mono);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
@@ -680,12 +684,16 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
 html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 3px);
   background:var(--tutorial-dim);pointer-events:none}
-.log-tutorial{position:sticky;top:calc(env(safe-area-inset-top) + 3px);z-index:60;
+.tutorial-ebene{position:fixed;z-index:60;inset:0;pointer-events:none}
+.tutorial-ebene[hidden]{display:none}
+.log-tutorial{position:absolute;top:calc(env(safe-area-inset-top) + 3px);left:50%;
   isolation:isolate;overflow:hidden;
   width:min(580px,calc(100vw - 14px));
-  margin:calc(0px - var(--topbar-h,45px) + env(safe-area-inset-top) + 3px) 0 14px 50%;
+  max-height:calc(100dvh - env(safe-area-inset-top) - 6px);
+  margin:0;
   padding:17px;
-  transform:translateX(-50%);background-color:#fff;
+  transform:translateX(-50%);background-color:#fff;pointer-events:auto;
+  overflow-x:hidden;overflow-y:auto;
   border:var(--bw) solid var(--ink);border-radius:16px;
   -webkit-backdrop-filter:none;backdrop-filter:none;
   /* Derselbe ruhige Impuls wie bei der Einstiegskarte (einstiegFokus): gleiche

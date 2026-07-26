@@ -48,18 +48,20 @@ export function setStatusleistenOverlay(quelle, offen) {
   // In der installierten iOS-App liegt die Statusleiste transparent ueber der
   // Seite. Scrollt das Browserfenster, bewertet WebKit die Flaeche darunter
   // neu – beim Tutorial war das die weisse sticky Karte. Solange ein Overlay
-  // offen ist, bleibt das Fenster deshalb bei 0; stattdessen scrollt der Body
-  // als eigener, feststehender App-Scroller. Verschachtelte Overlays teilen
-  // sich diesen Zustand ueber overlayQuellen.
+  // offen ist, bleibt das Fenster deshalb bei 0; stattdessen scrollt nur #view
+  // innerhalb der feststehenden App. Verschachtelte Overlays teilen sich
+  // diesen Zustand ueber overlayQuellen.
   if (!warOffen && istOffen) {
     overlayScrollY = window.scrollY;
     root.classList.add('overlay-scroll-gesperrt');
-    document.body.scrollTop = overlayScrollY;
+    const scroller = document.querySelector('#view');
+    if (scroller) scroller.scrollTop = overlayScrollY;
     window.scrollTo(0, 0);
   } else if (warOffen && !istOffen) {
-    overlayScrollY = document.body.scrollTop;
+    const scroller = document.querySelector('#view');
+    overlayScrollY = scroller?.scrollTop || 0;
     root.classList.remove('overlay-scroll-gesperrt');
-    document.body.scrollTop = 0;
+    if (scroller) scroller.scrollTop = 0;
     window.scrollTo(0, overlayScrollY);
   }
   statusleisteAnSeite();

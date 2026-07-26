@@ -394,7 +394,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const ziel = tutorialScrollAufFeld
         ? contentEl.querySelector('.tutorial-scrollziel')
         : contentEl.querySelector('.tutorial-aktiv');
-      const karte = contentEl.querySelector('.log-tutorial');
+      const karte = tutorialEbene.querySelector('.log-tutorial');
       if (!ziel || !karte) return;
       // Die Karte liegt waehrend des Tutorials bewusst ueber dem Header. Das
       // naechste Uebungsfeld richtet sich deshalb an ihrer TATSAECHLICHEN
@@ -402,7 +402,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       // scrollt kein Feld vor oder sichtbar hinter die Einrichtungsbox.
       const zielOben = karte.getBoundingClientRect().bottom + 10;
       const appScroller = document.documentElement.classList.contains('overlay-scroll-gesperrt')
-        ? document.body
+        ? container
         : null;
       const aktuellePosition = appScroller ? appScroller.scrollTop : window.scrollY;
       const scrollZiel = Math.max(0, aktuellePosition + ziel.getBoundingClientRect().top - zielOben);
@@ -474,6 +474,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
   tutorialDunkel.setAttribute('aria-hidden', 'true');
   tutorialDunkel.onclick = () => tutorialScrollen();
   document.body.appendChild(tutorialDunkel);
+  // Die Tutorialkarte gehoert nicht in den scrollenden Trainingsinhalt.
+  // Andernfalls wandert ihre weisse Flaeche auf iOS beim Scrollen unter die
+  // transparente Systemleiste. Diese feste Ebene bleibt am Display stehen,
+  // waehrend ausschliesslich #view darunter scrollt.
+  const tutorialEbene = document.createElement('div');
+  tutorialEbene.className = 'tutorial-ebene';
+  tutorialEbene.hidden = !tutorialAktiv;
+  document.body.appendChild(tutorialEbene);
   // Keine dynamische Kopfmaske mehr: Sie wurde frueher bei jedem Scrollschritt
   // auf die Unterkante der Tutorialkarte ausgemessen und war der Ausloeser fuer
   // die wechselnde weisse iOS-Systemleiste. Die Karte selbst (z 60) verdeckt
@@ -483,12 +491,22 @@ export async function mountLog(container, { userId, readOnly = false }) {
   let tutorialClipRaf = null;
   function tutorialClipAktualisieren() {
     tutorialClipRaf = null;
-    const karte = contentEl.querySelector('.log-tutorial');
+    const karte = tutorialEbene.querySelector('.log-tutorial');
     const block = contentEl.querySelector('.block.tutorial-aktiv');
-    if (!tutorialAktiv || !karte || !block) {
+    if (!tutorialAktiv || !karte) {
+      container.style.removeProperty('--tutorial-kartenraum');
       block?.style.removeProperty('--tutorial-clip-top');
       return;
     }
+    // Weil die Karte nun ausserhalb des Scrollcontainers fest am Display
+    // sitzt, reserviert #view denselben Raum. So beginnt die aktuelle
+    // Muskelkarte direkt UNTER der Tutorialkarte, statt von ihr abgeschnitten
+    // zu werden. Beim naechsten Feld kann #view diesen Raum intern wegscrollen.
+    container.style.setProperty(
+      '--tutorial-kartenraum',
+      `${Math.ceil(karte.getBoundingClientRect().bottom + 10)}px`,
+    );
+    if (!block) return;
     const blockRect = block.getBoundingClientRect();
     // Nur die hervorgehobene Muskelkarte abschneiden. Anders als die fruehere
     // Vollflaechenmaske veraendert das keine Flaeche im iOS-Statusbereich.
@@ -504,7 +522,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
   window.addEventListener('resize', tutorialClipPlanen);
   window.addEventListener('scroll', tutorialClipPlanen, { passive: true });
-  document.body.addEventListener('scroll', tutorialClipPlanen, { passive: true });
+  container.addEventListener('scroll', tutorialClipPlanen, { passive: true });
 
   function oeffneUebungswahl({ titel, gruppen, aktuell, onSelect }) {
     picker.innerHTML = '';
@@ -879,6 +897,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const cell = ensureCell();
     const prev = prevFilled(state.day, state.week);
     contentEl.innerHTML = '';
+    tutorialEbene.innerHTML = '';
+    tutorialEbene.hidden = !tutorialAktiv;
     tutorialDunkel.hidden = !tutorialAktiv;
 
     if (einstiegSichtbar) {
@@ -1007,7 +1027,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       karte.querySelector('[data-tutorial-zu]').onclick = () => {
         if (confirm('Tutorial beenden? Du kannst es später im FAQ erneut starten.')) tutorialBeenden(true);
       };
-      contentEl.appendChild(karte);
+      tutorialEbene.appendChild(karte);
     }
 
     const naechste = tutorialAktiv ? null : naechsteEinheit();
@@ -1334,10 +1354,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (saveStateEl) saveStateEl.hidden = true;
       pickerLage.remove();
       tutorialDunkel.remove();
+      tutorialEbene.remove();
+      container.style.removeProperty('--tutorial-kartenraum');
       cancelAnimationFrame(tutorialClipRaf);
       window.removeEventListener('resize', tutorialClipPlanen);
       window.removeEventListener('scroll', tutorialClipPlanen);
-      document.body.removeEventListener('scroll', tutorialClipPlanen);
+      container.removeEventListener('scroll', tutorialClipPlanen);
       tutorialFxTimer.forEach(clearTimeout);
       tutorialFxTimer = [];
       tutorialFx?.remove();
