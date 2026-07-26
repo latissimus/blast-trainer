@@ -43,6 +43,27 @@ export function brandSvg() {
 </svg>`;
 }
 
+// Gerader LOGMAN-Schriftzug fuer kompakte Navigationselemente. Dieselbe
+// Typografie, Kontur und derselbe harte Versatz wie beim Logo, aber ohne
+// Kruemmung und Sterne. Als SVG bleibt die Darstellung auf iOS verlaesslich:
+// ein normaler Buttontext kann dort je nach verfuegbarer Schriftschnitt-Datei
+// sichtbar zwischen 700 und 900 wechseln.
+export function menuTitleSvg(text) {
+  const sicher = String(text)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+  return `<svg class="menu-title-svg" viewBox="0 0 250 42" aria-hidden="true" focusable="false">
+    <g font-family="'Helvetica Neue',Arial,system-ui,sans-serif" font-style="italic"
+       font-weight="900" font-size="25" letter-spacing="-.7" text-anchor="end"
+       stroke="#2A1240" stroke-width="2.4" stroke-linejoin="round">
+      <text x="244" y="30" transform="translate(3,3)" fill="#2A1240">${sicher}</text>
+      <text x="244" y="30" fill="var(--prio)" paint-order="stroke fill">${sicher}</text>
+    </g>
+  </svg>`;
+}
+
 // Kurzer Aktionsschriftzug fuer die Vollbildanimationen. Dieselbe Schrift,
 // Kruemmung, Kontur und derselbe harte Versatz wie beim Logo – nur ohne Sterne,
 // damit kurze Aussagen auch auf einem schmalen iPhone ruhig bleiben.

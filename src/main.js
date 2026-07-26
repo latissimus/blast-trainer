@@ -2,7 +2,7 @@ import './styles.css';
 import { supabase } from './supabase.js';
 import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } from './auth.js';
 import { readProfile, writeProfile } from './localstore.js';
-import { brandSvg, actionTitleSvg } from './brand.js';
+import { brandSvg, actionTitleSvg, menuTitleSvg } from './brand.js';
 import { getTheme, applyTheme, statusleisteAnSeite } from './theme.js';
 import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
 import { mountLog, toast } from './log.js';
@@ -308,8 +308,8 @@ function renderChrome() {
     ['faq', 'FAQ', 'FAQs'],
     ...(isAdmin ? [['admin', 'ADMIN', 'Admin']] : []),
   ];
-  menuePanel.innerHTML = menueZiele.map(([wert, titel, aria], index) =>
-    `<button class="retro-menue-feld retro-menue-${wert}" style="--menu-index:${index};--menu-count:${menueZiele.length}" type="button" role="menuitem" data-menu-view="${wert}" aria-label="${aria}">${titel}</button>`,
+  menuePanel.innerHTML = menueZiele.map(([wert, titel, aria]) =>
+    `<button class="retro-menue-feld retro-menue-${wert}" type="button" role="menuitem" data-menu-view="${wert}" aria-label="${aria}">${menuTitleSvg(titel)}</button>`,
   ).join('');
   const menueSchliessen = () => {
     menuePanel.hidden = true;
@@ -321,6 +321,26 @@ function renderChrome() {
     menuePanel.hidden = !offen;
     menue.setAttribute('aria-expanded', String(offen));
     menue.classList.toggle('offen', offen);
+    if (offen) {
+      const felder = [...menuePanel.querySelectorAll('.retro-menue-feld')];
+      const ohneBewegung = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      felder.forEach((feld, index) => {
+        feld.getAnimations?.().forEach((animation) => animation.cancel());
+        if (!feld.animate || ohneBewegung) return;
+        feld.animate(
+          [
+            { opacity: 0, transform: 'translateY(9px)' },
+            { opacity: 1, transform: 'translateY(0)' },
+          ],
+          {
+            duration: 280,
+            delay: (felder.length - index - 1) * 55,
+            easing: 'cubic-bezier(.22,.75,.3,1)',
+            fill: 'both',
+          },
+        );
+      });
+    }
   };
   menue.onclick = (e) => { e.stopPropagation(); menueUmschalten(); };
   menuePanel.onclick = (e) => {
