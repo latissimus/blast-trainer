@@ -119,7 +119,14 @@ html.statusleiste-overlay{background:var(--tutorial-dim)}
    Der eigentliche App-Inhalt behaelt separat seine Seitenfarbe und wird wie
    bisher vom Overlay abgedunkelt. */
 html.statusleiste-overlay body{background:var(--tutorial-dim)}
-html.statusleiste-overlay #app{min-height:100dvh;background:var(--bg)}
+html.statusleiste-overlay #app{min-height:100dvh;background:transparent}
+html.statusleiste-overlay #view{min-height:100dvh;background:var(--bg)}
+/* Nicht das iOS-Fenster, sondern der Body scrollt waehrend eines Overlays.
+   Dadurch bleibt der transparente Statusbereich auf derselben dunklen Flaeche,
+   auch wenn das Tutorial automatisch zur naechsten Uebung faehrt. */
+html.overlay-scroll-gesperrt{height:100%;overflow:hidden}
+html.overlay-scroll-gesperrt body{position:fixed;inset:0;width:100%;height:100%;
+  overflow-y:auto;overscroll-behavior:none;-webkit-overflow-scrolling:touch}
 body{
   background:var(--bg);color:var(--text);font-family:var(--mono);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
@@ -150,6 +157,16 @@ body:not([data-seite="log"]) #view>.wrap{animation:seiteEin .18s cubic-bezier(.2
    erscheinen. Sichtbar ist ausschliesslich der Teil unterhalb der Kontur. */
 .topbar::after{content:"";position:absolute;z-index:1;left:0;right:0;top:0;bottom:0;
   background:var(--bg);pointer-events:none}
+/* Der Header ist das Element, das in der installierten iOS-App tatsaechlich
+   unter Uhrzeit und Akku liegt. Nur seinen Safe-Area-Anteil dunkel faerben;
+   der sichtbare Header darunter behaelt seine Seitenfarbe und wird normal vom
+   Overlay abgedunkelt. */
+html.statusleiste-overlay .topbar,
+html.statusleiste-overlay .topbar::after{
+  background:linear-gradient(to bottom,
+    var(--tutorial-dim) 0 calc(env(safe-area-inset-top) + 3px),
+    var(--bg) calc(env(safe-area-inset-top) + 3px))}
+html.statusleiste-overlay .topbar::before{background:var(--tutorial-dim)}
 .topbar .wrap{position:relative;z-index:2;display:flex;align-items:center;gap:10px}
 /* LOGMAN-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
    Kein Layout-Effekt (Kontur/Schatten ändern die Header-Höhe nicht). */

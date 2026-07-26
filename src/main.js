@@ -421,7 +421,16 @@ async function routeView() {
   aktiveAnsicht = hash;
   const zielY = hash === 'log' ? logScrollY : 0;
   requestAnimationFrame(() => {
-    if (token === routeToken) window.scrollTo({ top: zielY, behavior: 'instant' });
+    if (token !== routeToken) return;
+    // Ein offenes Tutorial/Overlay haelt das iOS-Fenster bewusst bei 0 und
+    // scrollt den Body intern. Sonst wuerde dieser spaete Routen-Scroll die
+    // Sperre direkt nach dem Mounten wieder aushebeln.
+    if (document.documentElement.classList.contains('overlay-scroll-gesperrt')) {
+      document.body.scrollTo({ top: zielY, behavior: 'instant' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    } else {
+      window.scrollTo({ top: zielY, behavior: 'instant' });
+    }
   });
 }
 

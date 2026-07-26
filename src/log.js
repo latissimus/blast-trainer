@@ -401,8 +401,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
       // Unterkante aus, nicht an Headerhoehe + geschaetzter Kartenhoehe. So
       // scrollt kein Feld vor oder sichtbar hinter die Einrichtungsbox.
       const zielOben = karte.getBoundingClientRect().bottom + 10;
-      const scrollZiel = Math.max(0, window.scrollY + ziel.getBoundingClientRect().top - zielOben);
-      window.scrollTo({
+      const appScroller = document.documentElement.classList.contains('overlay-scroll-gesperrt')
+        ? document.body
+        : null;
+      const aktuellePosition = appScroller ? appScroller.scrollTop : window.scrollY;
+      const scrollZiel = Math.max(0, aktuellePosition + ziel.getBoundingClientRect().top - zielOben);
+      (appScroller || window).scrollTo({
         top: scrollZiel,
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
       });
@@ -500,6 +504,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
   window.addEventListener('resize', tutorialMaskePlanen);
   window.addEventListener('scroll', tutorialMaskePlanen, { passive: true });
+  document.body.addEventListener('scroll', tutorialMaskePlanen, { passive: true });
 
   function oeffneUebungswahl({ titel, gruppen, aktuell, onSelect }) {
     picker.innerHTML = '';
@@ -1330,6 +1335,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       cancelAnimationFrame(tutorialMaskenRaf);
       window.removeEventListener('resize', tutorialMaskePlanen);
       window.removeEventListener('scroll', tutorialMaskePlanen);
+      document.body.removeEventListener('scroll', tutorialMaskePlanen);
       tutorialKopfmaske.remove();
       tutorialFxTimer.forEach(clearTimeout);
       tutorialFxTimer = [];

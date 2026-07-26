@@ -5,6 +5,7 @@
 // Wahl am Konto haengt. Ausserdem greift sie so ohne Netz und ohne Wartezeit.
 const KEY = 'blast:theme';
 const overlayQuellen = new Set();
+let overlayScrollY = 0;
 
 export const gueltig = (t) => (t === 'dark' ? 'dark' : 'retro');
 
@@ -37,9 +38,30 @@ export function statusleisteAnSeite() {
 
 export function setStatusleistenOverlay(quelle, offen) {
   if (!quelle) return;
+  const warOffen = overlayQuellen.size > 0;
   if (offen) overlayQuellen.add(quelle);
   else overlayQuellen.delete(quelle);
-  document.documentElement.classList.toggle('statusleiste-overlay', overlayQuellen.size > 0);
+  const istOffen = overlayQuellen.size > 0;
+  const root = document.documentElement;
+  root.classList.toggle('statusleiste-overlay', istOffen);
+
+  // In der installierten iOS-App liegt die Statusleiste transparent ueber der
+  // Seite. Scrollt das Browserfenster, bewertet WebKit die Flaeche darunter
+  // neu – beim Tutorial war das die weisse sticky Karte. Solange ein Overlay
+  // offen ist, bleibt das Fenster deshalb bei 0; stattdessen scrollt der Body
+  // als eigener, feststehender App-Scroller. Verschachtelte Overlays teilen
+  // sich diesen Zustand ueber overlayQuellen.
+  if (!warOffen && istOffen) {
+    overlayScrollY = window.scrollY;
+    root.classList.add('overlay-scroll-gesperrt');
+    document.body.scrollTop = overlayScrollY;
+    window.scrollTo(0, 0);
+  } else if (warOffen && !istOffen) {
+    overlayScrollY = document.body.scrollTop;
+    root.classList.remove('overlay-scroll-gesperrt');
+    document.body.scrollTop = 0;
+    window.scrollTo(0, overlayScrollY);
+  }
   statusleisteAnSeite();
 }
 
