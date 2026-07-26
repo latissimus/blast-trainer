@@ -424,7 +424,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
     calc(var(--picker-hoehe,calc(100dvh - 12px)) - env(safe-area-inset-top)),720px);
   padding-top:calc(env(safe-area-inset-top) + var(--picker-top,6px))}
 .ex-picker{width:min(560px,100%);max-height:min(78vh,720px);
-  padding:0;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
+  padding:0;border:var(--bw) solid var(--load);border-radius:var(--r-karte);
   background:var(--surface);color:var(--text);overflow:hidden;
   box-shadow:0 10px 30px rgba(10,19,48,.38),0 2px 7px rgba(10,19,48,.24)}
 .ex-picker-schale{display:flex;flex-direction:column;max-height:min(78vh,720px);padding:12px}
