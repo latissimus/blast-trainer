@@ -78,7 +78,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie trainiere ich Heavy?</summary>
       <div class="faq-a">
-        <p><b>6–12 Wiederholungen, 0–2 RIR.</b> Beim Comp-Satz nur der letzte Satz bis zum Versagen; Iso-Sätze dürfen ans Versagen. Pause: Heavy etwa 3 Minuten, Pump etwa 2 Minuten, zwischen vollständigen Clusters etwa 3 Minuten.</p>
+        <p><b>6–12 Wiederholungen, 0–2 RIR.</b> Beim Comp-Satz nur der letzte Satz bis zum Versagen; Iso-Sätze dürfen ans Versagen. Pause: Oberkörper-Heavy etwa 2 Minuten, Unterkörper-Heavy etwa 3 Minuten, Pump je nach Tag 1,5–2 Minuten und zwischen vollständigen Clusters etwa 3 Minuten.</p>
         <p>Heavy ist die vergleichbare Messlatte. Trage diese Sätze deshalb besonders genau ein.</p>
       </div>
     </details>

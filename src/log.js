@@ -9,9 +9,30 @@ import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
 
-// Evidenznahe Orientierung: drei Minuten zwischen schweren Saetzen und
-// vollstaendigen Clusters-Runden, zwei Minuten bei leichter Pump-Arbeit.
+// Evidenznahe Orientierung: Pausen haengen am Tagestyp. Oberkoerper-Heavy ist
+// kuerzer getaktet als die schwere Unterkoerper-Einheit; Oberkoerper-Pump am
+// Unterkoerper-Heavy-Tag bleibt bewusst kompakter.
 const MR_REST = 180;
+const OK_HEAVY_REST = 120;
+const OK_PUMP_REST = 90;
+const DEFAULT_PUMP_REST = 120;
+
+function effektivePause(blk, effType, day) {
+  if (effType === 'mr') return MR_REST;
+  if (effType === 'pump') {
+    if (day?.startsWith('UK-') && blk.type === 'pump') return OK_PUMP_REST;
+    if (blk.type === 'mr') return DEFAULT_PUMP_REST;
+    return blk.rest || DEFAULT_PUMP_REST;
+  }
+  if (effType === 'load' && day?.startsWith('OK-')) return OK_HEAVY_REST;
+  return Math.max(180, blk.rest || 0);
+}
+
+function pausenLabel(sekunden) {
+  if (sekunden < 60) return sekunden + ' s';
+  const minuten = sekunden / 60;
+  return (Number.isInteger(minuten) ? String(minuten) : String(minuten).replace('.', ',')) + ' min';
+}
 
 // Anzeige-Labels der Set-Typen. Die internen Keys (load/pump/mr) bleiben, damit
 // gespeicherte Logs gueltig bleiben – nur die Beschriftung wechselt.
@@ -1069,7 +1090,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const effType = effTypeOf(blk, tier);              // Typ je Tier (Pump-Ausnahme bei MR)
       if (freeEx) entry.names = entry.names || (entry.name != null ? [entry.name] : []);  // frei pro Woche/Feld
       const names = freeEx ? null : dayNames(state.day, blk);
-      const effRest = effType === 'mr' ? MR_REST : (effType === 'pump' ? 120 : Math.max(180, blk.rest || 0));
+      const effRest = effektivePause(blk, effType, state.day);
       const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
       const blockMus = blk.mus;
 
@@ -1080,7 +1101,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       }
       if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · leicht</span>', '<span class="chip">versagensnah · Partials optional</span>');
       if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
-      cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + (effRest >= 60 ? (effRest / 60) + ' min' : effRest + ' s') + '</button>');
+      cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + pausenLabel(effRest) + '</button>');
 
       el.innerHTML = `
         <div class="bhead">
