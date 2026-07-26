@@ -45,6 +45,8 @@ let willkommen = false;     // frisch registriert: vor dem Tutorial willkommen h
 let topbarObserver = null;   // liefert Unterseiten die echte Sticky-Header-Hoehe
 let aktiveAnsicht = null;    // fuer die Rueckkehr an dieselbe Stelle im Log
 let logScrollY = 0;
+let menueAussenHandler = null;
+let menueEscapeHandler = null;
 const WILLKOMMEN_EMAIL = 'blast:willkommen-email';
 
 // Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
@@ -266,8 +268,13 @@ function renderChrome() {
           <label class="ci"><span class="wert" id="ci-dat-w">—</span><span class="lbl">Datum</span>
             <input id="lg-datum" type="date" aria-label="Datum der Einheit" disabled></label>
         </div>
-        <label class="ci menue"><span class="wert" id="app-menue-i"><svg viewBox="0 0 22 16" width="21" height="15" aria-hidden="true"><rect x="0" y="0" width="22" height="3.6" rx="1.8"/><rect x="0" y="6.2" width="22" height="3.6" rx="1.8"/><rect x="0" y="12.4" width="22" height="3.6" rx="1.8"/></svg></span><span class="lbl" id="app-menue-l">Log</span>
-          <select id="app-menue" aria-label="Ansicht"></select></label>
+        <div class="menue-wrap">
+          <button class="ci menue" id="app-menue-toggle" type="button" aria-expanded="false" aria-controls="app-menue-panel" aria-label="Menü öffnen">
+            <span class="wert" aria-hidden="true"><svg viewBox="0 0 22 16" width="21" height="15"><rect x="0" y="0" width="22" height="3.6" rx="1.8"/><rect x="0" y="6.2" width="22" height="3.6" rx="1.8"/><rect x="0" y="12.4" width="22" height="3.6" rx="1.8"/></svg></span>
+            <span class="lbl">Menü</span>
+          </button>
+          <div class="retro-menue" id="app-menue-panel" hidden role="menu" aria-label="Seitenmenü"></div>
+        </div>
       </div>
     </div>`;
   verbindePausenAnzeige();
@@ -288,24 +295,49 @@ function renderChrome() {
   topbarObserver = new ResizeObserver(schreibeTopbarHoehe);
   topbarObserver.observe(topbar);
 
-  // Das Menue unten rechts. Inzwischen sind alle Ziele eigene Seiten – auch das
-  // Set-O-Meter, das frueher ein Fenster ueber dem Log war.
-  //
-  // Grossbuchstaben stehen hier ausgeschrieben statt per text-transform: In
-  // nativen <option>-Elementen setzt iOS die CSS-Auszeichnung nicht um.
-  const menue = app.querySelector('#app-menue');
-  menue.innerHTML = `
-    <option value="log">LOG</option>
-    <option value="notizbuch">NOTIZBUCH</option>
-    <option value="meter">SET-O-METER</option>
-    <option value="prog">PROGRESSION</option>
-    <option value="feedback">FEEDBACK</option>
-    <option value="faq">FAQs</option>
-    ${isAdmin ? '<option value="admin">ADMIN</option>' : ''}`;
-  menue.onchange = () => {
-    const w = menue.value;
-    location.hash = w;
+  // Seitenmenü: sichtbare Retro-Kacheln statt des schwer verständlichen
+  // nativen Auswahlfelds. Die Farben der Kacheln folgen den Seitenflächen.
+  const menue = app.querySelector('#app-menue-toggle');
+  const menuePanel = app.querySelector('#app-menue-panel');
+  const menueZiele = [
+    ['log', 'LOG', 'Log'],
+    ['meter', 'SET-O-METER', 'Set-O-Meter'],
+    ['prog', 'PROGRESSION', 'Progression'],
+    ['notizbuch', 'NOTIZBUCH', 'Notizbuch'],
+    ['feedback', 'FEEDBACK', 'Feedback'],
+    ['faq', 'FAQ', 'FAQs'],
+    ...(isAdmin ? [['admin', 'ADMIN', 'Admin']] : []),
+  ];
+  menuePanel.innerHTML = menueZiele.map(([wert, titel, aria]) =>
+    `<button class="retro-menue-feld retro-menue-${wert}" type="button" role="menuitem" data-menu-view="${wert}" aria-label="${aria}">${titel}</button>`,
+  ).join('');
+  const menueSchliessen = () => {
+    menuePanel.hidden = true;
+    menue.setAttribute('aria-expanded', 'false');
+    menue.classList.remove('offen');
   };
+  const menueUmschalten = () => {
+    const offen = menuePanel.hidden;
+    menuePanel.hidden = !offen;
+    menue.setAttribute('aria-expanded', String(offen));
+    menue.classList.toggle('offen', offen);
+  };
+  menue.onclick = (e) => { e.stopPropagation(); menueUmschalten(); };
+  menuePanel.onclick = (e) => {
+    e.stopPropagation();
+    const ziel = e.target.closest('[data-menu-view]')?.dataset.menuView;
+    if (!ziel) return;
+    menueSchliessen();
+    if (location.hash.replace(/^#/, '') !== ziel) location.hash = ziel;
+  };
+  if (menueAussenHandler) document.removeEventListener('click', menueAussenHandler);
+  menueAussenHandler = () => { menueSchliessen(); };
+  document.addEventListener('click', menueAussenHandler);
+  if (menueEscapeHandler) document.removeEventListener('keydown', menueEscapeHandler);
+  menueEscapeHandler = (e) => {
+    if (e.key === 'Escape' && !menuePanel.hidden) menueSchliessen();
+  };
+  document.addEventListener('keydown', menueEscapeHandler);
 
   // Einmaliger Hinweis. Eine native App darf beim ersten Start selbst fragen,
   // eine Web-App nicht – Apple verlangt einen echten Tipp. Nach dem Tippen ist
@@ -325,9 +357,12 @@ function setNavActive(view) {
   app.querySelectorAll('nav [data-view]').forEach((b) => {
     b.classList.toggle('active', b.dataset.view === view);
   });
-  const m = app.querySelector('#app-menue');
-  if (!m) return;
-  m.value = view;
+  const m = app.querySelector('#app-menue-toggle');
+  const panel = app.querySelector('#app-menue-panel');
+  if (!m || !panel) return;
+  panel.querySelectorAll('[data-menu-view]').forEach((feld) => {
+    feld.classList.toggle('aktiv', feld.dataset.menuView === view);
+  });
   // Traegt die Seitenfarbe: Jede Unterseite hat ihren eigenen Grundton, das Log
   // bleibt hellblau. Setzt --bg um, damit Kopfleiste und Bedienleiste von selbst
   // mitgehen, statt jede Flaeche einzeln umfaerben zu muessen.
@@ -348,8 +383,6 @@ function setNavActive(view) {
     'nur-menue',
     view !== 'log' && view !== 'admin',
   );
-  const namen = { log: 'Log', faq: 'FAQ', meter: 'Set-O', prog: 'Prog', feedback: 'Feedback', notizbuch: 'Notizbuch', admin: 'Admin', profile: 'Profil' };
-  app.querySelector('#app-menue-l').textContent = namen[view] || 'Log';
   // Auf Unterseiten bleibt nur das Menue sichtbar. Die Log-Felder behalten
   // intern ihren letzten Stand, bis das Log wieder gemountet wird.
 }

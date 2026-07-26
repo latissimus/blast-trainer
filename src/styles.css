@@ -482,7 +482,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    beruehrt die rechte untere Ecke den Bildschirmrand. */
 .ctrlbar{--ctrlbar-bottom:max(6px, calc(env(safe-area-inset-bottom) - 6px));
   position:fixed;left:0;right:0;bottom:0;z-index:30;
-  padding:0 7px var(--ctrlbar-bottom);overflow:hidden;
+  padding:0 7px var(--ctrlbar-bottom);overflow:visible;
   background:linear-gradient(180deg,transparent 0,var(--bg) 8px,transparent 8px)}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
@@ -535,12 +535,13 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   -webkit-appearance:none;appearance:none}
 .ci select:disabled{cursor:default}
 .ci:has(select:disabled) .wert{opacity:.55}
+.menue-wrap{position:relative;z-index:2;flex:0 0 62px;min-width:0}
 /* Das Menue rechts. Flieder mit vielen kleinen Figuren aus dem LOGMAN-Logo –
    es hebt sich damit von den vier Einstellfeldern ab:
    Die aendern den Inhalt der Seite, dieses wechselt die Seite. */
 :root[data-theme="dark"] .ctrlbar .inner::before{background:rgba(30,33,42,.27)}
 .ci.menue{background:var(--lila);color:var(--lila-ink);flex:0 0 62px;
-  overflow:hidden;isolation:isolate}
+  width:100%;overflow:hidden;isolation:isolate}
 .ci.menue::before{content:"";position:absolute;z-index:0;inset:-7px;
   background:url(./assets/silhouette-navy.png) 2px 1px/23px 23px repeat;
   opacity:.14;pointer-events:none}
@@ -548,7 +549,32 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ci.menue .wert{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;line-height:0}
 .ci.menue .wert svg{display:block;fill:currentColor}
 .ci.menue .lbl{position:relative;z-index:1;color:var(--lila-ink);opacity:.8}
-.ci.menue select{z-index:2}
+.ci.menue.offen{background:var(--pink);color:var(--ink)}
+.ci.menue.offen .lbl{color:var(--ink);opacity:1}
+.retro-menue{position:absolute;right:0;bottom:calc(100% + 9px);display:grid;grid-template-columns:repeat(2,minmax(118px,1fr));gap:7px;width:min(88vw,292px);padding:7px;
+  border:var(--bw) solid var(--ink);border-radius:16px;background:var(--surface);isolation:isolate;animation:retroMenueAuf .2s cubic-bezier(.22,.75,.3,1)}
+.retro-menue[hidden]{display:none}
+.retro-menue-feld{position:relative;min-height:57px;padding:9px 8px;border:var(--bw) solid var(--ink);border-radius:10px;color:var(--ink);font-family:var(--display);font-size:13px;font-style:italic;font-weight:800;line-height:1.1;text-align:center;cursor:pointer;overflow:hidden}
+.retro-menue-feld::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--muster-dreieck);opacity:.65;pointer-events:none}
+.retro-menue-feld:hover,.retro-menue-feld:focus-visible{outline:none;transform:translateY(-1px)}
+.retro-menue-feld.aktiv{box-shadow:inset 0 -4px 0 var(--ink)}
+.retro-menue-log{background:#B1E7FF}
+.retro-menue-meter,.retro-menue-notizbuch{background:#B1E7FF}
+.retro-menue-prog,.retro-menue-feedback{background:#D9BBF7}
+.retro-menue-faq{background:#FBE7A4}
+.retro-menue-admin{background:#BFE7D2}
+:root[data-theme="dark"] .retro-menue{background:var(--surface)}
+:root[data-theme="dark"] .retro-menue-log,
+:root[data-theme="dark"] .retro-menue-meter,
+:root[data-theme="dark"] .retro-menue-notizbuch{background:#0B0D12;color:#EDF0F6}
+:root[data-theme="dark"] .retro-menue-prog,
+:root[data-theme="dark"] .retro-menue-feedback{background:#2A1B45;color:#EDF0F6}
+:root[data-theme="dark"] .retro-menue-faq{background:#332B14;color:#EDF0F6}
+:root[data-theme="dark"] .retro-menue-admin{background:#143024;color:#EDF0F6}
+@keyframes retroMenueAuf{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@media (max-width:300px){
+  .retro-menue{grid-template-columns:1fr;width:min(78vw,210px)}
+}
 
 /* Pausentimer. Er uebernimmt die GANZE Leiste, statt sich ein Feld zu teilen:
    Waehrend der Pause waehlt man ohnehin nichts aus, und jede Auswahl wuerde den
@@ -563,10 +589,11 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* Der abgelaufene Zustand traegt sonst ein helles Gruen, das auf Hellblau
    ebenfalls verschwindet. Dunkelgruen haelt den Unterschied zum Lauf. */
 :root[data-theme="dark"] .ctrlbar.timer-an .timerfeld.done{color:#0E5B30}
-.ctrlbar.timer-an .slots,.ctrlbar.timer-an .menue{display:none}
+.ctrlbar.timer-an .slots,.ctrlbar.timer-an .menue-wrap{display:none}
 .ctrlbar.nur-menue .slots{display:none}
 .ctrlbar.nur-menue{background:none;overflow:visible;pointer-events:none}
 .ctrlbar.nur-menue .inner{max-width:104px;padding:0;pointer-events:auto}
+.ctrlbar.nur-menue .menue-wrap{flex:1 1 auto;width:100%}
 .ctrlbar.nur-menue .inner::before,.ctrlbar.nur-menue .inner::after{display:none}
 .ctrlbar.nur-menue .ci.menue{flex:1 1 auto;min-height:54px;
   background-color:rgba(217,187,247,.58);
@@ -581,10 +608,10 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Der Admin behaelt seine volle Leiste (er bekommt nie .nur-menue), weil die
    vier Felder dort die einzige Moeglichkeit sind, durch fremde Wochen zu
    blaettern. Eine laufende Pause holt die Leiste sofort zurueck – siehe unten. */
-.ctrlbar.nur-menue:not(.timer-an){display:none}
+.ctrlbar.nur-menue:not(.timer-an){display:block}
 /* Ohne Leiste braucht der Seitenfuss keinen Platz mehr freizuhalten. Laeuft
    gerade eine Pause, steht die Leiste wieder da und der Abstand ebenso. */
-body:has(.ctrlbar.nur-menue:not(.timer-an)) .pad-bottom{padding-bottom:24px}
+body:has(.ctrlbar.nur-menue:not(.timer-an)) .pad-bottom{padding-bottom:88px}
 
 /* Eine laufende Pause gehört der ganzen App. Auf Unterseiten nimmt der Timer
    deshalb wieder die volle Leistenbreite ein, statt in der schmalen
