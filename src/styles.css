@@ -71,7 +71,7 @@
    waehrend die Ränder im Dunkeln ruhiger als im Retro-Theme auftreten.
    ============================================================ */
 :root[data-theme="dark"]{
-  --bg:#0B0D12;       /* tiefer als zuvor (#12141A) – auf Wunsch dunkler */
+  --bg:#101A2B;       /* einheitliches tiefes Navy aus dem Notizbuch */
   --surface:#191C24;
   --surface2:#232733;
   --ink:#697486;
@@ -155,7 +155,7 @@ body:not([data-seite="log"]) #view>.wrap{animation:seiteEin .18s cubic-bezier(.2
   width:1.9em;height:1.9em;z-index:-1;pointer-events:none;
   filter:var(--sil-filter);
   background:url(./assets/silhouette-navy.png) center/contain no-repeat}
-:root[data-theme="dark"] .brand::before{opacity:.58}
+:root[data-theme="dark"] .brand::before{opacity:1}
 .nav{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .nav-btn{background:var(--surface);border:var(--bw) solid var(--ink);color:var(--text);
   padding:7px 11px;border-radius:var(--r);font-size:13px;font-weight:700;
@@ -1007,13 +1007,13 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
    hier der alte Wert #AEDCF6 und blieb nach der Farbanpassung zurueck. */
 :root[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
 
-:root[data-theme="dark"][data-seite="meter"]{--bg:#0B0D12;--surface:#191C24;--surface2:#232733}
-/* Dunkel: derselbe Aufbau, nur umgekehrt – blaeulicher Grund, hellere Flaechen. */
+:root[data-theme="dark"][data-seite="meter"]{--bg:#101A2B;--surface:#191C24;--surface2:#232733}
+/* Dunkel: ein gemeinsamer Navy-Grund, die individuellen Muster bleiben bestehen. */
 :root[data-theme="dark"][data-seite="notizbuch"]{--bg:#101A2B;--surface:#1C2637;--surface2:#1C2637}
-:root[data-theme="dark"][data-seite="prog"]{--bg:#2A1B45}
-:root[data-theme="dark"][data-seite="feedback"]{--bg:#2A1B45}
-:root[data-theme="dark"][data-seite="faq"]{--bg:#10131B}
-:root[data-theme="dark"][data-seite="profile"]{--bg:#10131B}
+:root[data-theme="dark"][data-seite="prog"]{--bg:#101A2B}
+:root[data-theme="dark"][data-seite="feedback"]{--bg:#101A2B}
+:root[data-theme="dark"][data-seite="faq"]{--bg:#101A2B}
+:root[data-theme="dark"][data-seite="profile"]{--bg:#101A2B}
 
 /* Im Dark-Mode bleibt die Seitenidentitaet am kleinen Farbstempel erhalten.
    Der grosse Hintergrund bleibt dadurch ruhig und konsistent. */
@@ -1256,6 +1256,7 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 .prog-leer-icon,.nb-leer-icon{display:grid;place-items:center;width:48px;height:48px;margin-bottom:12px;
   border:var(--bw) solid var(--ink);border-radius:10px;background:var(--pink);color:var(--accent-ink);
   font-family:var(--display);font-style:italic;font-size:27px;font-weight:700}
+.nb-leer-icon{font-family:var(--mono);font-style:normal;line-height:1}
 .prog-leer b,.nb-leer b{font-family:var(--display);font-style:italic;font-size:18px;
   text-transform:uppercase}
 .prog-leer p,.nb-leer p{max-width:360px;margin:7px 0 0;color:var(--muted);
