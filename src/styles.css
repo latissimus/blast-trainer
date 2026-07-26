@@ -16,7 +16,7 @@
   --faint:#8A94A3;
   --line:#0A0A0A;
 
-  --load:#001454;   /* navy  */
+  --load:#443199;   /* heavy violet */
   --pump:#FF69AE;   /* pink  */
   --mr:#FFDE59;     /* yellow*/
   /* Flieder: gehoert nur dem Set-O-Meter. Bewusst eine Farbe, die sonst nichts
@@ -81,9 +81,9 @@
   --faint:#8490A3;
 
   /* Navy verschwindet auf Fast-Schwarz. Aufgehellt bleibt es erkennbar
-     dasselbe Blau und traegt weiter Laufband, LOAD-Badge, aktiven Tab. */
+     dasselbe Blau und traegt weiter Laufband und aktiven Tab. */
   --navy:#4B6FD6;
-  --load:#4B6FD6;
+  --load:#443199;
   --navy-panel:#1B2C5C;
   --link:#91A9FF;
 
@@ -331,7 +331,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* ---------- Blocks ---------- */
 .block{position:relative;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte);margin-bottom:14px;overflow:hidden}
 .block::before{content:"";position:absolute;z-index:1;inset:0 0 auto;height:5px;pointer-events:none}
-.block-load::before{background:var(--navy)}
+.block-load::before{background:var(--load)}
 .block-pump::before{background:var(--pink)}
 .block-mr::before{background:var(--cluster)}
 .block.opt{border-style:dashed}
