@@ -161,15 +161,13 @@ body:not([data-seite="log"]) #view>.wrap{animation:seiteEin .18s cubic-bezier(.2
    erscheinen. Sichtbar ist ausschliesslich der Teil unterhalb der Kontur. */
 .topbar::after{content:"";position:absolute;z-index:1;left:0;right:0;top:0;bottom:0;
   background:var(--bg);pointer-events:none}
-/* Der Header ist das Element, das in der installierten iOS-App tatsaechlich
-   unter Uhrzeit und Akku liegt. Nur seinen Safe-Area-Anteil dunkel faerben;
-   der sichtbare Header darunter behaelt seine Seitenfarbe und wird normal vom
-   Overlay abgedunkelt. */
+/* Der Header liegt in der installierten iOS-App direkt unter Uhrzeit und Akku.
+   Bei einem Overlay muss deshalb die komplette Kopfzeile denselben dunklen
+   Grund tragen – sonst bleibt zwischen Statusleiste und Tutorialkarte ein
+   heller Streifen stehen. */
 html.statusleiste-overlay .topbar,
 html.statusleiste-overlay .topbar::after{
-  background:linear-gradient(to bottom,
-    var(--tutorial-dim) 0 calc(env(safe-area-inset-top) + 3px),
-    var(--bg) calc(env(safe-area-inset-top) + 3px))}
+  background:var(--tutorial-dim)}
 html.statusleiste-overlay .topbar::before{background:var(--tutorial-dim)}
 .topbar .wrap{position:relative;z-index:2;display:flex;align-items:center;gap:10px}
 /* LOGMAN-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
@@ -519,6 +517,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   position:fixed;left:0;right:0;bottom:0;z-index:30;
   padding:0 7px var(--ctrlbar-bottom);overflow:hidden;
   background:linear-gradient(180deg,transparent 0,var(--bg) 8px,transparent 8px)}
+/* Auch ausserhalb der Milchglasleiste darf beim Tutorial kein heller
+   Seitenstreifen sichtbar bleiben – besonders nicht an den unteren Ecken. */
+html.statusleiste-overlay .ctrlbar{z-index:50;background:var(--tutorial-dim)}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
    auf. Der Schatten liegt ausserhalb und wird davon nicht beschnitten. */
@@ -545,6 +546,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ctrlbar .inner::after{content:'';position:absolute;inset:0;z-index:-2;pointer-events:none;
   border-radius:16px;box-shadow:0 0 0 100vmax var(--bg);
   clip-path:inset(8px -100vmax -100vmax -100vmax)}
+html.statusleiste-overlay .ctrlbar .inner::after{box-shadow:0 0 0 100vmax var(--tutorial-dim)}
 .ci{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:2px;padding:8px 2px;
   border:0;border-radius:11px;background:none;color:var(--text);cursor:pointer}
@@ -670,7 +672,8 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
 /* Gefuehrtes Heavy-Setup. Die Karte ist genauso breit wie die untere
    Bedienleiste. Der feste Dimmer liegt ueber der restlichen App; nur Karte und
    der gerade erklaerte Muskelblock werden darueber angehoben. */
-.tutorial-dimmer{position:fixed;inset:0;z-index:35;background:rgba(5,10,24,.72);
+.tutorial-dimmer{position:fixed;top:var(--topbar-h,0px);right:0;bottom:0;left:0;z-index:35;
+  background:rgba(5,10,24,.72);
   -webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);
   touch-action:pan-y}
 .tutorial-dimmer[hidden]{display:none}
