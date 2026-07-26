@@ -97,6 +97,15 @@ describe('imKatalog / eintragVon', () => {
 });
 
 describe('echter Katalog gegen echte Vorlage', () => {
+  it('beschraenkt den Beine-Pump auf Quads', () => {
+    ['OK-A', 'OK-B'].forEach((tag) => {
+      const block = TPL[tag].blocks.find((blk) => blk.id === 'p_quad');
+      expect(block.konten).toEqual(['Quads']);
+      expect(auswahlGruppen(block.konten, null).flatMap((g) => g.eintraege)
+        .every((e) => e.haupt === 'Quads')).toBe(true);
+    });
+  });
+
   it('kennt nur die 15 Muskelkonten', () => {
     KATALOG.forEach((e) => {
       expect(KONTEN, `Hauptspieler von ${e.n}`).toContain(e.haupt);

@@ -23,7 +23,10 @@ export const TPL = {
     { id: 'back',  mus: 'Rücken',    konten: ['Lat', 'Oberer Rücken'], type: 'load', sets: [2, 3, 4], rest: 90,  reps: '6–12', ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
     { id: 'chest', mus: 'Brust',     konten: ['Brust'], type: 'load', sets: [1, 2, 4], rest: 90,  reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
     { id: 'delt',  mus: 'Schultern', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'], type: 'load', sets: [1, 2, 4], rest: 90,  reps: '6–12', ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
-    { id: 'p_quad', mus: 'Beine',         konten: ['Quads', 'Glutes', 'Hams', 'Adduktoren'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
+    // Der einzelne Beine-Pump ist nur fuer die Quads. Hams/Glutes haben im
+    // folgenden p_gh-Feld einen eigenen Platz und werden hier nicht doppelt
+    // im Katalog angeboten.
+    { id: 'p_quad', mus: 'Beine',         konten: ['Quads'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
     // Fussnote ‡: Level I nur ein Satz fuer den schwaecheren von beiden, Level II/III je einer.
     { id: 'p_gh',   mus: 'Quads + Hams/Glutes',  konten: ['Quads', 'Hams', 'Glutes'], type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1,
       ex: [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }],
@@ -49,7 +52,7 @@ export const TPL = {
     { id: 'back',  mus: 'Rücken',    konten: ['Lat', 'Oberer Rücken'], type: 'load', sets: [2, 3, 4], rest: 90, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
     { id: 'chest', mus: 'Brust',     konten: ['Brust'], type: 'load', sets: [1, 2, 4], rest: 90, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
     { id: 'delt',  mus: 'Schultern', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'], type: 'load', sets: [1, 2, 4], rest: 90, reps: '6–12', ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
-    { id: 'p_quad', mus: 'Beine',         konten: ['Quads', 'Glutes', 'Hams', 'Adduktoren'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
+    { id: 'p_quad', mus: 'Beine',         konten: ['Quads'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
     { id: 'p_gh',   mus: 'Quads + Hams/Glutes',  konten: ['Quads', 'Hams', 'Glutes'], type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1,
       ex: [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }],
       // Level I hat nur ein Feld (der schwaechere von beiden) – dort beide anbieten.

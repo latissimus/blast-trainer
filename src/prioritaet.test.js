@@ -4,7 +4,7 @@ import {
   prioritaetsAnpassungen,
   spenderKandidaten,
 } from './prioritaet.js';
-import { KONTEN } from './katalog.js';
+import { KATALOG, KONTEN } from './katalog.js';
 
 const K = [
   { n: 'Brustpumpe', haupt: 'Brust', neben: ['Vordere Schulter'], typ: 'Iso' },
@@ -32,6 +32,17 @@ function payload(tier = 1) {
 }
 
 describe('Priorisierung – Wirkung', () => {
+  it('legt Glutes auf das Hams/Glutes-Pumpfeld', () => {
+    const r = prioritaetsAnpassungen({
+      week: 1,
+      data: {},
+      tier: { 'OK-A|1': 1 },
+      volumen: { prioritaet: { Glutes: { modus: 'plus' } } },
+    }, 1, KATALOG);
+    expect(r.delta['OK-A|p_gh|1']).toBe(1);
+    expect(r.delta['OK-A|p_quad|0']).toBeUndefined();
+  });
+
   it('schlägt genau einen Pump-Satz auf', () => {
     const p = payload(1);
     p.volumen.prioritaet.Unterarme = { modus: 'plus' };
@@ -103,9 +114,12 @@ describe('Priorisierung – Wirkung', () => {
 describe('Priorisierung – Planung', () => {
   it('bietet für jedes Muskelkonto einen regulären Pumpplatz an', () => {
     const p = payload(2);
-    KONTEN.forEach((konto) => {
+    // Adduktoren haben im Unterkoerper-Tag ein eigenes Heavy-Feld, aber kein
+    // regulaeres Pumpfeld. Eine Pump-Prioritaet waere dort daher irrefuehrend.
+    KONTEN.filter((konto) => konto !== 'Adduktoren').forEach((konto) => {
       expect(pumpMoeglichkeiten(p, 1, konto).length, konto).toBeGreaterThan(0);
     });
+    expect(pumpMoeglichkeiten(p, 1, 'Adduktoren')).toHaveLength(0);
   });
 
   it('ordnet hohes Gesamtvolumen zuerst und schließt andere Prioritäten aus', () => {

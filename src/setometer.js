@@ -82,7 +82,7 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
       // Pump und Cluster werden je Woche neu gewaehlt und liegen im Block.
       const namen = eintragBlock.names || ((exAlle[tag] || {})[blk.id]) || [];
 
-      exOf(blk, tier).forEach((_, xi) => {
+      exOf(blk, tier).forEach((exDef, xi) => {
         const name = (namen[xi] || '').trim();
         if (!name) return;                      // noch nicht gewaehlt
 
@@ -99,6 +99,11 @@ export function zaehleWoche(payload, woche, katalog = KATALOG) {
           unbekannte.add(name);
           return;
         }
+        // Behalte alte Logs sichtbar, aber rechne eine inzwischen ungueltige
+        // Feldwahl nicht dem falschen Muskelkonto zu (z. B. Glutes im alten
+        // Beine-Pump-Feld statt im Hams/Glutes-Feld).
+        const erlaubt = exDef.konten || blk.konten || [];
+        if (!erlaubt.includes(eintrag.haupt)) return;
         konten[eintrag.haupt] += anzahl;
         direkt[eintrag.haupt] += anzahl;
         eintrag.neben.forEach((nb) => {

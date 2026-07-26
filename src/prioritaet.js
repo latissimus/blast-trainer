@@ -56,11 +56,16 @@ export function pumpFelder(payload, woche, katalog = KATALOG) {
         const name = String(namen[xi] || '').trim();
         const eintrag = idx.get(klein(name));
         if (!eintrag) return;
+        // Alte Logs koennen noch eine Uebung enthalten, die frueher wegen
+        // eines zu breiten Blocks erlaubt war. Sie darf keine Prioritaet auf
+        // das falsche Feld ziehen; massgeblich ist immer das konkrete Feld.
+        const erlaubt = exDef.konten || blk.konten || [];
+        if (!erlaubt.includes(eintrag.haupt)) return;
         felder.push({
           key: slotKey(tag, blk.id, xi), tag, blockId: blk.id, xi,
           mus: blk.mus, name, konto: eintrag.haupt, neben: eintrag.neben || [],
           tier, anzahl: targetSets(blk, tier),
-          erlaubt: exDef.konten || blk.konten || [],
+          erlaubt,
         });
       });
     });
