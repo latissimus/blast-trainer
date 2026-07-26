@@ -23,12 +23,7 @@ export function mountFaq(container) {
       <p id="faq-suche-kein" hidden>Keine passende FAQ-Antwort gefunden.</p>
     </div>
 
-    <nav class="faq-spruenge" aria-label="FAQ-Bereiche">
-      <a href="#faq-start">Start</a>
-      <a href="#faq-training">Training</a>
-      <a href="#faq-plan">Plan</a>
-      <a href="#faq-hintergrund">Hintergrund</a>
-    </nav>
+    <p class="faq-sektion" id="faq-start">Schnellstart</p>
 
     <section class="faq-startkarte" aria-labelledby="faq-starttitel">
       <span class="faq-start-kicker">Start in 60 Sekunden</span>
@@ -39,8 +34,6 @@ export function mountFaq(container) {
         <li><b>Gewicht, Wiederholungen und bei Heavy RIR</b> eintragen – gespeichert wird automatisch.</li>
       </ol>
     </section>
-
-    <p class="faq-sektion" id="faq-start">Schnellstart</p>
 
     <details class="faq" open><summary>Wie starte ich mein erstes Training?</summary>
       <div class="faq-a">
@@ -241,19 +234,6 @@ export function mountFaq(container) {
     faqSuche.value = '';
     faqFiltern();
     faqSuche.focus();
-  });
-  // Die vier Ziele liegen innerhalb der bereits geoeffneten FAQ-Seite. Ohne
-  // Abfangen liest der globale Hash-Router "#faq-start" als unbekannte Ansicht
-  // und faellt deshalb auf das Log zurueck.
-  wrap.querySelectorAll('.faq-spruenge a').forEach((sprung) => {
-    sprung.addEventListener('click', (e) => {
-      e.preventDefault();
-      const ziel = wrap.querySelector(sprung.getAttribute('href'));
-      ziel?.scrollIntoView({
-        block: 'start',
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-      });
-    });
   });
   wrap.querySelector('[data-tutorial-start]')?.addEventListener('click', () => {
     try { sessionStorage.setItem('blast:tutorial-start', '1'); } catch (e) { /* egal */ }
