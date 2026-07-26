@@ -267,8 +267,16 @@ function renderChrome() {
             <input id="lg-datum" type="date" aria-label="Datum der Einheit" disabled></label>
         </div>
         <label class="ci menue">
-          <span class="menue-figuren" aria-hidden="true">${'<i></i>'.repeat(9)}</span>
-          <span class="wert" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><path d="M2 10 9 2l7 8z"/></svg></span>
+          <span class="wert" aria-hidden="true">
+            <svg class="menue-fenster" viewBox="0 0 38 28" width="30" height="22">
+              <rect x="5" y="5" width="31" height="21" rx="4" fill="#7560E6"/>
+              <rect x="2" y="2" width="32" height="22" rx="4" fill="#F2A5DA" stroke="#8968FF" stroke-width="2"/>
+              <path d="M6 2h24a4 4 0 0 1 4 4v4H2V6a4 4 0 0 1 4-4Z" fill="#AEEBFA"/>
+              <path d="M2 10h32" fill="none" stroke="#8968FF" stroke-width="2"/>
+              <rect x="5" y="13" width="26" height="7.5" rx="2.5" fill="#111111" stroke="#8968FF" stroke-width="1.5"/>
+              <path d="M24.5 6.2h2.5m2-1.5 3 3m0-3-3 3" fill="none" stroke="#8968FF" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
           <span class="lbl">Menü</span>
           <select id="app-menue" aria-label="Ansicht"></select>
         </label>

@@ -535,24 +535,13 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   -webkit-appearance:none;appearance:none}
 .ci select:disabled{cursor:default}
 .ci:has(select:disabled) .wert{opacity:.55}
-/* Das Menue rechts. Flieder mit vielen kleinen Figuren aus dem LOGMAN-Logo –
-   es hebt sich damit von den vier Einstellfeldern ab:
+/* Das Menue rechts. Das kleine Computerfenster greift die Cyan-, Pink- und
+   Violetttoene alter Desktop-Oberflaechen auf und hebt sich damit von den
+   vier Einstellfeldern ab:
    Die aendern den Inhalt der Seite, dieses wechselt die Seite. */
 :root[data-theme="dark"] .ctrlbar .inner::before{background:rgba(30,33,42,.27)}
 .ci.menue{background:var(--lila);color:var(--lila-ink);flex:0 0 62px;
   align-self:stretch;overflow:hidden;isolation:isolate}
-.menue-figuren{position:absolute;z-index:0;inset:0;overflow:hidden;pointer-events:none}
-.menue-figuren i{position:absolute;width:14px;height:14px;background:url(./assets/silhouette-navy.png) center/contain no-repeat;opacity:.13}
-.menue-figuren i:nth-child(1){left:-2px;top:1px;transform:rotate(-24deg)}
-.menue-figuren i:nth-child(2){left:18px;top:-4px;width:13px;height:13px;transform:rotate(16deg)}
-.menue-figuren i:nth-child(3){right:1px;top:2px;transform:rotate(31deg)}
-.menue-figuren i:nth-child(4){left:5px;top:22px;width:13px;height:13px;transform:rotate(38deg)}
-.menue-figuren i:nth-child(5){left:27px;top:17px;width:15px;height:15px;transform:rotate(-35deg)}
-.menue-figuren i:nth-child(6){right:4px;top:25px;width:13px;height:13px;transform:rotate(9deg)}
-.menue-figuren i:nth-child(7){left:-3px;bottom:-4px;width:15px;height:15px;transform:rotate(19deg)}
-.menue-figuren i:nth-child(8){left:25px;bottom:-5px;transform:rotate(43deg)}
-.menue-figuren i:nth-child(9){right:-3px;bottom:-4px;width:15px;height:15px;transform:rotate(-28deg)}
-:root[data-theme="dark"] .menue-figuren{filter:brightness(0) invert(1)}
 .ci.menue .wert{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;line-height:0}
 .ci.menue .wert svg{display:block;fill:currentColor}
 .ci.menue .lbl{position:relative;z-index:1;color:var(--lila-ink);opacity:.8}
