@@ -72,7 +72,11 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
         <h1 class="section-title">Mein Profil</h1>
       </div>
       <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
-    </div>`;
+    </div>
+    <section class="seiten-einstieg">
+      <b>Alles zu deinem Konto</b>
+      <span>Profil, Darstellung und Daten übersichtlich verwalten.</span>
+    </section>`;
 
   const profilSektion = (titel, offen = false, klasse = '') => {
     const details = document.createElement('details');

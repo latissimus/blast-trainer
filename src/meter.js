@@ -25,25 +25,27 @@ export async function mountMeter(container, { userId }) {
       </div>
       ${zurueckChip()}
     </div>
-    <div class="som-statuskopf">
-      <p class="som-lage" id="som-lage"></p>
-      <button class="som-info-knopf" id="som-info-knopf" type="button" aria-expanded="false" aria-controls="som-info">i</button>
-    </div>
-    <div class="som-einfach">
-      <p><b>Optional:</b> Ohne Änderung bleibt dein Plan vollständig.</p>
-      <div class="som-ablauf" aria-label="So setzt du eine Priorität">
-        <span><i>1</i>Muskel öffnen</span>
-        <span><i>2</i>Art wählen</span>
-        <span><i>3</i>Spender bestätigen</span>
+    <section class="som-einstieg" aria-label="Set-O-Meter verwenden">
+      <div class="som-statuskopf">
+        <p class="som-lage" id="som-lage"></p>
+        <button class="som-info-knopf" id="som-info-knopf" type="button" aria-expanded="false" aria-controls="som-info">i</button>
       </div>
-    </div>
+      <div class="som-einfach">
+        <p><b>Optional:</b> Dein Plan funktioniert auch ohne Priorität.</p>
+        <div class="som-ablauf" aria-label="So setzt du eine Priorität">
+          <span><i>1</i>Muskel</span>
+          <span><i>2</i>Art</span>
+          <span><i>3</i>Spender</span>
+        </div>
+      </div>
+      <div class="som-legende" aria-label="Balkenlegende">
+        <span><i class="direkt"></i> Direkte Arbeit</span><span><i class="indirekt"></i> Indirekte Arbeit</span>
+      </div>
+    </section>
     <div class="som-kurzhilfe" id="som-info" hidden>
       <p><b>Direkte Arbeit:</b> Der Muskel ist das Hauptziel der Übung.</p>
       <p><b>Indirekte Arbeit:</b> Der Muskel arbeitet als unterstützender Nebenmuskel mit, während eine andere Muskelgruppe das Hauptziel ist – zum Beispiel der Trizeps beim Bankdrücken oder der Bizeps beim Rudern.</p>
       <p>Jeder solche Satz wird als <b>1 indirekter Satz</b> angezeigt, trägt im Vergleichsbalken aber nur <b>0,5</b> bei. So bleibt sichtbar, wie oft der Muskel mitarbeitet, ohne indirekte und direkte Belastung gleichzusetzen.</p>
-    </div>
-    <div class="som-legende" aria-label="Balkenlegende">
-      <span><i class="direkt"></i> Direkte Arbeit</span><span><i class="indirekt"></i> Indirekte Arbeit</span>
     </div>
     <div class="som-liste" id="som-body">lädt…</div>
     <p class="som-speicher" id="som-speicher" aria-live="polite"></p>`;
@@ -205,7 +207,7 @@ export async function mountMeter(container, { userId }) {
       ? `<p class="som-gruppe${klasse ? ` ${klasse}` : ''}">${titel}</p>${reihen.map((r) => reihe(r, max, werte, prioritaet, prios)).join('')}`
       : '';
     body.innerHTML = (gesamt === 0
-      ? '<p class="som-hinweis som-hinweis-oben">Noch keine Übung gewählt. Prioritäten kannst du trotzdem bereits festlegen.</p>'
+      ? '<p class="som-hinweis som-hinweis-oben">Ohne Übung · Priorität trotzdem möglich.</p>'
       : '') + gruppe('Priorisiert', priorisiert, 'prio') + gruppe(priorisiert.length ? 'Alle Muskeln' : 'Muskeln', uebrig)
       + (ohneZuordnung ? `<p class="som-hinweis">Nicht zugeordnet: ${unbekannte.map((u) => `<b>${html(u)}</b>`).join(', ') || 'Übung ohne Namen'}.</p>` : '');
 

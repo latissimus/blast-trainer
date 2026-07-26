@@ -88,6 +88,10 @@ export function mountNotizbuch(container, { userId }) {
       </div>
       ${zurueckChip()}
     </div>
+    <section class="seiten-einstieg">
+      <b>Dein Trainingsgedächtnis</b>
+      <span>Links, Bilder und Gedanken an einem Ort.</span>
+    </section>
     <div id="nb-inhalt"><p class="som-hinweis">lädt…</p></div>`;
   container.appendChild(wrap);
 

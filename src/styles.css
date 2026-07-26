@@ -814,6 +814,12 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:10px;
   font-weight:800;text-transform:uppercase;letter-spacing:.08em}
 .seitenkopf .section-title{margin:0;min-width:0;font-size:27px}
+.seiten-einstieg{display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  margin:0 0 10px;padding:8px 11px;border:var(--bw) solid var(--ink);
+  border-radius:var(--r);background:var(--surface)}
+.seiten-einstieg b{font-family:var(--display);font-style:italic;font-size:13px;
+  text-transform:uppercase;white-space:nowrap}
+.seiten-einstieg span{color:var(--muted);font-size:12px;line-height:1.35;text-align:left}
 .zurueck{position:absolute;top:calc(100% + 18px);
   right:max(14px,calc((100vw - 580px) / 2 + 14px));z-index:-1;
   display:inline-flex;align-items:center;text-decoration:none;
@@ -826,6 +832,14 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
 
 /* ---------- Set-O-Meter ----------
    Eigene Planungsseite, erreichbar ueber das App-Menue. */
+.som-einstieg{margin:0 0 8px;padding:7px 8px;background:var(--surface);
+  border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
+.som-einstieg .som-statuskopf{margin:0 0 6px;padding:0 0 6px;border:0;
+  border-bottom:1.5px solid var(--ink);border-radius:0;background:transparent}
+.som-einstieg .som-einfach{margin:0;padding:0;border:0;border-radius:0;background:transparent}
+.som-einstieg .som-einfach p{margin:0 0 5px}
+.som-einstieg .som-legende{margin:6px 0 0;padding:6px 2px 0;
+  border-top:1.5px dashed var(--ink)}
 .som-statuskopf{display:flex;align-items:stretch;gap:8px;margin-bottom:8px;padding:8px;
   background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
 .som-lage{display:grid;grid-template-columns:repeat(2,1fr);gap:0;flex:1;margin:0;font-family:var(--mono)}
@@ -934,7 +948,8 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   border:var(--bw) solid var(--ink);border-radius:var(--r);color:var(--text);font-family:var(--mono);
   font-size:11px;font-weight:700}
 .som-hinweis{margin:10px 0 0;font-size:12px;line-height:1.45;color:var(--muted)}
-.som-hinweis-oben{margin:0 0 2px;padding:9px 10px;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r)}
+.som-hinweis-oben{margin:0 2px 5px;padding:2px 0;background:transparent;border:0;border-radius:0;
+  font-size:12px;text-align:left}
 .som-speicher{min-height:18px;margin:8px 2px 0;text-align:center;font-size:11px;color:var(--muted)}
 
 /* Direkt am Uebungsfeld sichtbar: Der Satz stammt aus der Prioritaetsplanung. */
@@ -1362,3 +1377,28 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
    Auszeichnung (.nb-offline, .src). */
 .som-hinweis,.mess-leer,.mess-hinweis,.kurve-leer{
   font-family:var(--mono);font-size:14px;line-height:1.5;color:var(--muted);text-align:center}
+
+/* Funktionale Kleinschrift hat eine feste Untergrenze. Diese Texte vermitteln
+   Status, Einheiten oder Bedienlogik und duerfen deshalb nicht wie Dekoration
+   behandelt werden. */
+.phasechip,.badge,.role,.ex-picker-kopf small,.ex-picker-gruppe,.delta,.fld .u,
+.ci .lbl,.log-tutorial-kopf span,.tutorial-rollen small,.tutorial-zielkopf>span,
+.tutorial-eingabe small,.tutorial-startfx small,.willkommen-fx span,.log-weiter span,
+.seitenkopf-kicker,.som-stat small,.som-ablauf span,.som-ablauf i,.som-legende,
+.som-prio-marke,.som-wert small,.som-indirekt-quellen>span,.som-modusseg small,
+.som-spender-zahlen,.som-spender-wahl em,.volrolle,.feedback-zaehler,
+.feedback-eintrag-kopf time,.feedback-eintrag small,.faq-start-kicker,
+.mess-label,.prog-kurvenkopf span,.k-achse{
+  font-size:11px!important}
+.som-hinweis.som-hinweis-oben{font-size:12px;text-align:left}
+
+/* Kleine runde Symbole bleiben optisch kompakt, erhalten aber eine echte
+   44×44-px-Trefferflaeche. Das Pseudoelement gehoert zum jeweiligen Button
+   und ist damit ebenfalls anklickbar. */
+.ibtn,.delrow,.ex-picker-zu,.log-tutorial-kopf button,.som-info-knopf,
+.nb-lupe-zu,.pb-x{position:relative}
+.ibtn::after,.delrow::after,.ex-picker-zu::after,.log-tutorial-kopf button::after,
+.som-info-knopf::after,.faq-suche button::after,.nb-bildweg::after,
+.nb-lupe-zu::after,.timerfeld .x::after,.pb-x::after{
+  content:"";position:absolute;left:50%;top:50%;width:max(44px,100%);
+  height:max(44px,100%);transform:translate(-50%,-50%)}
