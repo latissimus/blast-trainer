@@ -269,15 +269,22 @@ function renderChrome() {
         <label class="ci menue">
           <span class="menue-computer" aria-hidden="true">
             <svg viewBox="0 0 62 55" preserveAspectRatio="none">
-              <rect x="6" y="5" width="53" height="47" rx="7" fill="#7560E6"/>
-              <rect x="2" y="2" width="54" height="47" rx="7" fill="#F2A5DA" stroke="#8968FF" stroke-width="2.3"/>
+              <defs>
+                <mask id="menue-fenster-ausschnitt" maskUnits="userSpaceOnUse">
+                  <rect width="62" height="55" fill="#FFFFFF"/>
+                  <rect x="7" y="21" width="43" height="23" rx="5" fill="#000000"/>
+                </mask>
+              </defs>
+              <rect x="6" y="5" width="53" height="47" rx="7" fill="#7560E6" mask="url(#menue-fenster-ausschnitt)"/>
+              <rect x="2" y="2" width="54" height="47" rx="7" fill="#F2A5DA" stroke="#8968FF" stroke-width="2.3" mask="url(#menue-fenster-ausschnitt)"/>
               <path d="M9 2h40a7 7 0 0 1 7 7v8H2V9a7 7 0 0 1 7-7Z" fill="#AEEBFA"/>
               <path d="M2 17h54" fill="none" stroke="#8968FF" stroke-width="2.3"/>
-              <path d="M40 11h4.5" fill="none" stroke="#8968FF" stroke-width="1.8" stroke-linecap="round"/>
-              <rect x="47" y="7.2" width="5.5" height="5.5" fill="none" stroke="#8968FF" stroke-width="1.5"/>
-              <rect x="7" y="21" width="43" height="23" rx="5" fill="#FFFFFF" fill-opacity=".24" stroke="#8968FF" stroke-width="1.8"/>
+              <path d="M34 11h4" fill="none" stroke="#8968FF" stroke-width="1.8" stroke-linecap="round"/>
+              <rect x="41" y="7.5" width="5" height="5" fill="none" stroke="#8968FF" stroke-width="1.5"/>
+              <path d="m49 7.5 5 5m0-5-5 5" fill="none" stroke="#8968FF" stroke-width="1.5" stroke-linecap="round"/>
+              <rect x="7" y="21" width="43" height="23" rx="5" fill="none" stroke="#8968FF" stroke-width="1.8"/>
+              <text x="28.5" y="32.5" fill="#111111" font-family="ui-monospace,'SF Mono',Menlo,Consolas,monospace" font-size="8.2" font-weight="800" text-anchor="middle" dominant-baseline="middle">MENÜ</text>
             </svg>
-            <span class="lbl menue-computer-label">Menü</span>
           </span>
           <select id="app-menue" aria-label="Ansicht"></select>
         </label>
