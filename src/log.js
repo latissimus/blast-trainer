@@ -9,11 +9,11 @@ import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
 
-// Evidenznahe Orientierung: Pausen haengen am Tagestyp. Oberkoerper-Heavy ist
-// kuerzer getaktet als die schwere Unterkoerper-Einheit; Oberkoerper-Pump am
-// Unterkoerper-Heavy-Tag bleibt bewusst kompakter.
+// Evidenznahe Orientierung: Pausen haengen am Tagestyp.
+// OK-Heavy/UK-Pump: 2.5/2 min, UK-Heavy/OK-Pump: 3/1.5 min.
 const MR_REST = 180;
-const OK_HEAVY_REST = 120;
+const OK_HEAVY_REST = 150;
+const UK_PUMP_REST = 120;
 const OK_PUMP_REST = 90;
 const DEFAULT_PUMP_REST = 120;
 
@@ -21,6 +21,7 @@ function effektivePause(blk, effType, day) {
   if (effType === 'mr') return MR_REST;
   if (effType === 'pump') {
     if (day?.startsWith('UK-') && blk.type === 'pump') return OK_PUMP_REST;
+    if (day?.startsWith('OK-') && blk.type === 'pump') return UK_PUMP_REST;
     if (blk.type === 'mr') return DEFAULT_PUMP_REST;
     return blk.rest || DEFAULT_PUMP_REST;
   }
@@ -31,7 +32,7 @@ function effektivePause(blk, effType, day) {
 function pausenLabel(sekunden) {
   if (sekunden < 60) return sekunden + ' s';
   const minuten = sekunden / 60;
-  return (Number.isInteger(minuten) ? String(minuten) : String(minuten).replace('.', ',')) + ' min';
+  return minuten + ' min';
 }
 
 // Anzeige-Labels der Set-Typen. Die internen Keys (load/pump/mr) bleiben, damit
