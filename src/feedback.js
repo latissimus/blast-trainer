@@ -11,6 +11,57 @@ const datumText = (wert) => new Intl.DateTimeFormat('de-DE', {
   timeStyle: 'short',
 }).format(new Date(wert));
 
+// Gemeinsamer Admin-Eingang fuer die Feedback-Seite und die Verwaltung.
+// Die Abfrage bleibt zentral, damit beide Ansichten exakt dieselbe RLS- und
+// Profilauflösung verwenden.
+export async function ladeFeedbackEingang(ziel) {
+  if (!ziel) return;
+  ziel.innerHTML = '<p class="feedback-laden">Feedback wird geladen…</p>';
+  const { data: eintraege, error } = await supabase
+    .from('feedback')
+    .select('id,user_id,kategorie,nachricht,status,created_at')
+    .order('created_at', { ascending: false })
+    .limit(50);
+  if (error) {
+    const meldung = document.createElement('p');
+    meldung.className = 'feedback-laden';
+    meldung.textContent = `Feedback konnte nicht geladen werden: ${error.message || 'Unbekannter Fehler'}`;
+    ziel.replaceChildren(meldung);
+    return;
+  }
+  const ids = [...new Set((eintraege || []).map((e) => e.user_id).filter(Boolean))];
+  let personen = [];
+  if (ids.length) {
+    const antwort = await supabase.from('profiles').select('id,full_name,email').in('id', ids);
+    personen = antwort.data || [];
+  }
+  const personVon = new Map(personen.map((p) => [p.id, p]));
+  ziel.replaceChildren();
+  if (!eintraege?.length) {
+    ziel.innerHTML = '<p class="feedback-laden">Noch kein Feedback.</p>';
+    return;
+  }
+  eintraege.forEach((eintrag) => {
+    const person = personVon.get(eintrag.user_id);
+    const karte = document.createElement('article');
+    karte.className = 'feedback-eintrag';
+    const kopf = document.createElement('div');
+    kopf.className = 'feedback-eintrag-kopf';
+    const art = document.createElement('b');
+    art.textContent = KATEGORIEN[eintrag.kategorie] || eintrag.kategorie;
+    const zeit = document.createElement('time');
+    zeit.dateTime = eintrag.created_at;
+    zeit.textContent = datumText(eintrag.created_at);
+    kopf.append(art, zeit);
+    const autor = document.createElement('small');
+    autor.textContent = person?.full_name || person?.email || eintrag.user_id;
+    const nachricht = document.createElement('p');
+    nachricht.textContent = eintrag.nachricht;
+    karte.append(kopf, autor, nachricht);
+    ziel.appendChild(karte);
+  });
+}
+
 export async function mountFeedback(container, { session, profile }) {
   container.innerHTML = '';
   const wrap = document.createElement('div');
@@ -55,50 +106,7 @@ export async function mountFeedback(container, { session, profile }) {
 
   text.addEventListener('input', () => { zaehler.textContent = `${text.value.length} / 2000`; });
 
-  async function feedbackLaden() {
-    const ziel = wrap.querySelector('[data-feedback-liste]');
-    if (!ziel) return;
-    const { data: eintraege, error } = await supabase
-      .from('feedback')
-      .select('id,user_id,kategorie,nachricht,status,created_at')
-      .order('created_at', { ascending: false })
-      .limit(50);
-    if (error) {
-      ziel.innerHTML = '<p class="feedback-laden">Feedback konnte nicht geladen werden.</p>';
-      return;
-    }
-    const ids = [...new Set((eintraege || []).map((e) => e.user_id).filter(Boolean))];
-    let personen = [];
-    if (ids.length) {
-      const antwort = await supabase.from('profiles').select('id,full_name,email').in('id', ids);
-      personen = antwort.data || [];
-    }
-    const personVon = new Map(personen.map((p) => [p.id, p]));
-    ziel.innerHTML = '';
-    if (!eintraege?.length) {
-      ziel.innerHTML = '<p class="feedback-laden">Noch kein Feedback.</p>';
-      return;
-    }
-    eintraege.forEach((eintrag) => {
-      const person = personVon.get(eintrag.user_id);
-      const karte = document.createElement('article');
-      karte.className = 'feedback-eintrag';
-      const kopf = document.createElement('div');
-      kopf.className = 'feedback-eintrag-kopf';
-      const art = document.createElement('b');
-      art.textContent = KATEGORIEN[eintrag.kategorie] || eintrag.kategorie;
-      const zeit = document.createElement('time');
-      zeit.dateTime = eintrag.created_at;
-      zeit.textContent = datumText(eintrag.created_at);
-      kopf.append(art, zeit);
-      const autor = document.createElement('small');
-      autor.textContent = person?.full_name || person?.email || eintrag.user_id;
-      const nachricht = document.createElement('p');
-      nachricht.textContent = eintrag.nachricht;
-      karte.append(kopf, autor, nachricht);
-      ziel.appendChild(karte);
-    });
-  }
+  const feedbackLaden = () => ladeFeedbackEingang(wrap.querySelector('[data-feedback-liste]'));
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();

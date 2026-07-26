@@ -1,5 +1,6 @@
 import { supabase } from './supabase.js';
 import { mountLog } from './log.js';
+import { ladeFeedbackEingang } from './feedback.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -15,8 +16,7 @@ export async function mountAdmin(container, { session }) {
     if (currentLog) { currentLog.destroy(); currentLog = null; }
     container.innerHTML = '';
     const wrap = document.createElement('div');
-    wrap.className = 'wrap';
-    wrap.style.paddingBottom = '40px';
+    wrap.className = 'wrap pad-bottom';
     wrap.innerHTML = `
       <div class="seitenkopf">
         <div class="seitenkopf-text">
@@ -33,9 +33,9 @@ export async function mountAdmin(container, { session }) {
       .order('email', { ascending: true });
 
     if (error) { wrap.insertAdjacentHTML('beforeend', `<div class="msg err">Konnte Nutzer nicht laden: ${error.message}</div>`); return; }
-    if (!profiles || profiles.length === 0) { wrap.insertAdjacentHTML('beforeend', `<div class="empty">Noch keine Nutzer.</div>`); return; }
+    if (!profiles || profiles.length === 0) wrap.insertAdjacentHTML('beforeend', `<div class="empty">Noch keine Nutzer.</div>`);
 
-    profiles.forEach((p) => {
+    (profiles || []).forEach((p) => {
       const row = document.createElement('button');
       row.className = 'cust-row';
       const isSelf = p.id === session.user.id;
@@ -54,6 +54,18 @@ export async function mountAdmin(container, { session }) {
       row.onclick = () => showCustomer(p);
       wrap.appendChild(row);
     });
+
+    const feedback = document.createElement('section');
+    feedback.className = 'feedback-eingang admin-feedback-eingang';
+    feedback.innerHTML = `
+      <h2 class="section-title">Kundenfeedback</h2>
+      <div class="feedback-intro">
+        <p>Vorschläge und Hinweise aus der App</p>
+        <span>Die neuesten 50 Einträge werden hier angezeigt.</span>
+      </div>
+      <div data-feedback-liste><p class="feedback-laden">Feedback wird geladen…</p></div>`;
+    wrap.appendChild(feedback);
+    await ladeFeedbackEingang(feedback.querySelector('[data-feedback-liste]'));
   }
 
   async function showCustomer(p) {

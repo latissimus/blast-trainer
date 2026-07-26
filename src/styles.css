@@ -1085,6 +1085,8 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 .feedback-intro p{margin:0 0 5px;font-family:var(--display);font-style:italic;
   font-size:17px;font-weight:700;text-transform:uppercase;line-height:1.15}
 .feedback-intro span{display:block;color:var(--muted);font-size:13px;line-height:1.45}
+.admin-feedback-eingang .feedback-intro{margin:0 0 10px;border-bottom:var(--bw) solid var(--ink);
+  border-radius:var(--r-karte)}
 .feedback-form{position:relative;overflow:hidden;padding:18px 14px 14px;background:var(--surface);
   border:var(--bw) solid var(--ink);border-radius:0 0 var(--r-karte) var(--r-karte)}
 .feedback-form::before{content:"";position:absolute;inset:0 0 auto;height:6px;background:var(--pink)}

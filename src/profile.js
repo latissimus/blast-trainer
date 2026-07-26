@@ -3,6 +3,7 @@ import { signOut } from './auth.js';
 import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
 import { readLog, readNotizen, clearUserData } from './localstore.js';
+import { ladeFeedbackEingang } from './feedback.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -338,6 +339,16 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
           : 'Der Account konnte nicht gelöscht werden. Es wurden keine Daten gelöscht. Bitte Verbindung prüfen und erneut versuchen.';
     }
   };
+
+  // Der Admin sieht den Eingang auch direkt im eigenen Profil. Die separate
+  // Feedback-Seite bleibt als öffentlicher Abgabeort erhalten.
+  if (profile.role === 'admin') {
+    const feedbackCard = profilSektion('Kundenfeedback', true);
+    feedbackCard.innerHTML = `
+      <p class="profile-hinweis">Die neuesten Vorschläge und Hinweise aus der App.</p>
+      <div data-feedback-liste><p class="feedback-laden">Feedback wird geladen…</p></div>`;
+    ladeFeedbackEingang(feedbackCard.querySelector('[data-feedback-liste]'));
+  }
 
   // --- Abmelden ----------------------------------------------------------
   // Frueher stand der Knopf dauerhaft in der Kopfleiste. Dort war er staendig
