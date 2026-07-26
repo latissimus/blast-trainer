@@ -37,7 +37,7 @@ export const TPL = {
     { id: 'legs', mus: 'Beine',       konten: ['Quads', 'Glutes'], type: 'load', sets: [1, 2, 3], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }] },
     { id: 'quad', mus: 'Quads',       konten: ['Quads'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
     { id: 'gh',   mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', ex: [{ r: 'Iso', n: '' }] },
-    { id: 'add',  mus: 'Adduktoren',  konten: ['Adduktoren'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', free: 1, ex: [{ r: 'Iso', n: '' }] },
+    { id: 'add',  mus: 'Abduktoren',  konten: ['Abduktoren'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', free: 1, ex: [{ r: 'Iso', n: '' }] },
     // Waden sind im Katalog durchgehend Iso – es gibt keine Verbund-Wadenübung.
     // Stand hier frueher auf Comp, dann bot die Auswahl nichts an.
     { id: 'calf', mus: 'Waden',       konten: ['Waden'], type: 'load', sets: [2, 4, 5], rest: 60,  reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
@@ -62,7 +62,7 @@ export const TPL = {
     { id: 'legs', mus: 'Beine',       konten: ['Quads', 'Glutes'], type: 'load', sets: [1, 2, 3], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }] },
     { id: 'quad', mus: 'Quads',       konten: ['Quads'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
     { id: 'gh',   mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', ex: [{ r: 'Iso', n: '' }] },
-    { id: 'add',  mus: 'Adduktoren',  konten: ['Adduktoren'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', free: 1, ex: [{ r: 'Iso', n: '' }] },
+    { id: 'add',  mus: 'Abduktoren',  konten: ['Abduktoren'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', free: 1, ex: [{ r: 'Iso', n: '' }] },
     { id: 'calf', mus: 'Waden',       konten: ['Waden'], type: 'load', sets: [2, 4, 5], rest: 60,  reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
     { id: 'p_bk', mus: 'Brust + Rücken',  konten: ['Brust', 'Lat', 'Oberer Rücken'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, stretch: 1,
       ex: [{ n: '', konten: ['Brust'] }, { n: '', konten: ['Lat', 'Oberer Rücken'] }] },
@@ -81,9 +81,8 @@ export const TPL = {
     { id: 'm_arm',  mus: 'Tri u/o Bi',    konten: ['Trizeps', 'Bizeps', 'Unterarme'], type: 'mr', typeByTier: ['pump', 'mr', 'mr'], sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1, stretch: 1,
       ex: [{ n: '', konten: ['Trizeps'] }, { n: '', konten: ['Bizeps', 'Unterarme'] }] },
     { id: 'm_gh',   mus: 'Beine (Hams)',  konten: ['Hams'], type: 'mr', sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1, ex: [{ n: '' }] },
-    // Fussnote ^: je ein Satz fuer Waden und/oder Adduktoren – zwei Felder wie bei Tri/Bi.
-    { id: 'm_calf', mus: 'Waden / Add.',  konten: ['Waden', 'Adduktoren'], type: 'mr', sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1,
-      ex: [{ n: '', konten: ['Waden'] }, { n: '', konten: ['Adduktoren'] }] },
+    { id: 'm_calf', mus: 'Waden',  konten: ['Waden'], type: 'mr', sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1,
+      ex: [{ n: '', konten: ['Waden'] }] },
     { id: 'm_abs',  mus: 'Abs',           konten: ['Abs'], type: 'mr', typeByTier: ['pump', 'pump', 'mr'], sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1, ex: [{ n: '' }] },
   ] },
 };

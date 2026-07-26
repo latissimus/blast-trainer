@@ -27,7 +27,7 @@ const KONTEN = [
   'Brust', 'Lat', 'Oberer Rücken',
   'Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter',
   'Bizeps', 'Trizeps', 'Unterarme',
-  'Quads', 'Hams', 'Glutes', 'Adduktoren', 'Waden', 'Abs',
+  'Quads', 'Hams', 'Glutes', 'Abduktoren', 'Waden', 'Abs',
 ];
 
 // Korrekturen an der Tabelle, abgesprochen mit Florian.
@@ -49,6 +49,19 @@ const KORREKTUREN = {
   'PlateLoaded Abduktionen': { haupt: 'Glutes', neben: [] },
   'Steck Abduktionen': { haupt: 'Glutes', neben: [] },
 };
+
+// Die Muskelgruppe hiess in frueheren Katalogversionen Adduktoren. Im
+// Trainingsplan ist jetzt die seitliche Gesaessarbeit gemeint: Abduktoren.
+// Die Normalisierung sitzt hier, damit die Excel-Quelldatei auch in alten
+// Arbeitsstaenden weiter lesbar bleibt und der generierte Katalog konsistent
+// bleibt.
+const MUSKEL_ALT = 'Adduktoren';
+const MUSKEL_NEU = 'Abduktoren';
+const muskelNeu = (s) => String(s || '').trim() === MUSKEL_ALT ? MUSKEL_NEU : String(s || '').trim();
+const nameNeu = (s) => ({
+  'PlateLoaded Adduktionen': 'PlateLoaded Abduktionen (seitlich)',
+  'Steck Adduktionen': 'Steck Abduktionen (seitlich)',
+}[String(s || '').trim()] || String(s || '').trim());
 
 /* ---------------------------------------------------------------- zip */
 // Minimaler Zip-Leser: zentrales Verzeichnis lesen, benoetigte Eintraege
@@ -101,7 +114,7 @@ const entschluessle = (s) =>
 
 const textVon = (xml) => {
   let t = '';
-  for (const m of xml.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)) t += m[1];
+  for (const m of xml.matchAll(/<(?:[A-Za-z0-9_]+:)?t\b[^>]*>([\s\S]*?)<\/(?:[A-Za-z0-9_]+:)?t>/g)) t += m[1];
   return entschluessle(t);
 };
 
@@ -109,7 +122,7 @@ function leseTabelle(dateien) {
   const ssXml = dateien['xl/sharedStrings.xml'];
   const texte = [];
   if (ssXml) {
-    for (const m of ssXml.toString('utf8').matchAll(/<si>([\s\S]*?)<\/si>/g)) texte.push(textVon(m[1]));
+    for (const m of ssXml.toString('utf8').matchAll(/<(?:[A-Za-z0-9_]+:)?si\b[^>]*>([\s\S]*?)<\/(?:[A-Za-z0-9_]+:)?si>/g)) texte.push(textVon(m[1]));
   }
 
   const blatt = dateien['xl/worksheets/sheet1.xml'];
@@ -120,10 +133,10 @@ function leseTabelle(dateien) {
   // Die Alternative fuer <row .../> ist noetig: Ohne sie wuerde eine leere,
   // selbstschliessende Zeile den Ausdruck bis zum naechsten </row> weiterlaufen
   // lassen und den Inhalt dazwischen verschlucken.
-  for (const r of xml.matchAll(/<row\b([^>]*?)(?:\/>|>([\s\S]*?)<\/row>)/g)) {
+  for (const r of xml.matchAll(/<(?:[A-Za-z0-9_]+:)?row\b([^>]*?)(?:\/>|>([\s\S]*?)<\/(?:[A-Za-z0-9_]+:)?row>)/g)) {
     const nr = Number((r[1].match(/\br="(\d+)"/) || [])[1]);
     const zellen = {};
-    for (const c of (r[2] || '').matchAll(/<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+    for (const c of (r[2] || '').matchAll(/<(?:[A-Za-z0-9_]+:)?c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/(?:[A-Za-z0-9_]+:)?c>)/g)) {
       const attrs = c[1], inhalt = c[2] || '';
       const spalte = (attrs.match(/\br="([A-Z]+)\d+"/) || [])[1];
       if (!spalte) continue;
@@ -132,7 +145,7 @@ function leseTabelle(dateien) {
       if (typ === 'inlineStr') {
         wert = textVon(inhalt);
       } else {
-        const v = (inhalt.match(/<v>([\s\S]*?)<\/v>/) || [])[1];
+        const v = (inhalt.match(/<(?:[A-Za-z0-9_]+:)?v\b[^>]*>([\s\S]*?)<\/(?:[A-Za-z0-9_]+:)?v>/) || [])[1];
         if (v === undefined) continue;
         wert = typ === 's' ? texte[Number(v)] : entschluessle(v);
       }
@@ -173,15 +186,15 @@ const eintraege = [];
 const gesehen = new Map();
 
 for (const { nr, zellen } of zeilen) {
-  const name = zellen.A;
+  const name = nameNeu(zellen.A);
   if (!name || nr === 1) continue;          // Kopfzeile
   if (name.startsWith('■')) continue;        // Abschnitts-Trenner
 
   const korr = KORREKTUREN[name] || {};
-  const haupt = korr.haupt ?? zellen.B ?? '';
+  const haupt = muskelNeu(korr.haupt ?? zellen.B ?? '');
   const typ = korr.typ ?? zellen.D ?? '';
   const neben = korr.neben ?? String(zellen.C || '')
-    .split(',').map((s) => s.trim())
+    .split(',').map(muskelNeu)
     .filter((s) => s && s !== '—');
 
   const melde = (was) => fehler.push(`  Zeile ${nr} · ${name}: ${was}`);

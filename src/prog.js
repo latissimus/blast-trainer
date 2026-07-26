@@ -31,7 +31,7 @@ export async function mountProg(container, { userId }) {
     <div class="som-kurzhilfe" id="prog-info" hidden>
       <p>Diese Kurve zeigt den <b>Trend deiner Heavy-Leistung</b>. Einzelne schwächere Einheiten sind normal; aussagekräftig wird erst die Entwicklung über mehrere vergleichbare Einheiten.</p>
       <p>Gezeigt wird das <b>geschätzte 1RM nach Epley</b> aus deinem besten Satz je Woche. Dadurch zählen sowohl mehr Gewicht als auch mehr Wiederholungen bei gleichem Gewicht. Es ist eine Rechengröße, kein Maximalkrafttest und kein direkter Beweis für Muskelwachstum.</p>
-      <p>Ausgewertet werden nur <b>Heavy-Sätze</b>. Pump- und Cluster-Sätze sind nicht als vergleichbarer Leistungstest gedacht.</p>
+      <p>Ausgewertet werden nur <b>Heavy-Sätze</b>. Pump- und Clusters-Sätze sind nicht als vergleichbarer Leistungstest gedacht.</p>
     </div>
     <div id="prog-inhalt"></div>`;
   container.appendChild(wrap);

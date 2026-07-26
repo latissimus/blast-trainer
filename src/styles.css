@@ -1095,6 +1095,18 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   font-family:var(--display);font-style:italic;font-size:11px;font-weight:700;
   text-align:center;text-decoration:none;text-transform:uppercase}
 .faq-spruenge a:last-child{border-right:0}
+.faq-suche{margin:0 0 12px;padding:11px 12px;background:var(--surface);
+  border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
+.faq-suche label{display:block;margin:0 0 5px;color:var(--muted);font-family:var(--display);
+  font-style:italic;font-size:12px;font-weight:700;text-transform:uppercase}
+.faq-suche-zeile{position:relative;display:flex;align-items:center}
+.faq-suche input{width:100%;min-width:0;padding:10px 37px 10px 11px;border:var(--bw) solid var(--ink);
+  border-radius:var(--r);background:var(--surface2);color:var(--ink);font:14px var(--mono)}
+.faq-suche input:focus{outline:none;border-color:var(--prio)}
+.faq-suche button{position:absolute;right:7px;width:25px;height:25px;padding:0;border:0;
+  border-radius:50%;background:var(--prio);color:#fff;font-size:18px;line-height:1}
+.faq-suche p{margin:8px 0 0;color:var(--muted);font-size:12px}
+.faq[hidden]{display:none}
 .faq-startkarte{position:relative;overflow:hidden;margin:0 0 16px;padding:16px 15px 14px;
   border:var(--bw) solid var(--ink);border-radius:var(--r-karte);background:var(--surface)}
 .faq-startkarte::before{content:"";position:absolute;inset:0 0 auto;height:6px;background:var(--pink)}

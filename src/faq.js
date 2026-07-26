@@ -14,6 +14,15 @@ export function mountFaq(container) {
       <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
     </div>
 
+    <div class="faq-suche" role="search">
+      <label for="faq-suche-input">FAQ durchsuchen</label>
+      <div class="faq-suche-zeile">
+        <input id="faq-suche-input" type="search" placeholder="z. B. Pause, RIR oder Clusters" autocomplete="off">
+        <button type="button" id="faq-suche-loeschen" aria-label="Suche löschen" hidden>×</button>
+      </div>
+      <p id="faq-suche-kein" hidden>Keine passende FAQ-Antwort gefunden.</p>
+    </div>
+
     <nav class="faq-spruenge" aria-label="FAQ-Bereiche">
       <a href="#faq-start">Start</a>
       <a href="#faq-training">Training</a>
@@ -44,7 +53,7 @@ export function mountFaq(container) {
     <details class="faq"><summary>Was muss ich pro Satz eintragen?</summary>
       <div class="faq-a">
         <p><b>Gewicht und Wiederholungen.</b> Bei Heavy kommt <b>RIR</b> hinzu. Das steht für <i>Reps in Reserve</i>, also <b>Wiederholungen in Reserve</b>: die Wiederholungen, die mit sauberer Technik noch möglich gewesen wären. RIR 1 bedeutet also: Eine Wiederholung wäre noch gegangen.</p>
-        <p>Beim Cluster trägst du das Gewicht und die Wiederholungen im letzten der sechs Minisätze ein.</p>
+        <p>Bei Clusters trägst du das Gewicht und die Wiederholungen im letzten der sechs Minisätze ein.</p>
       </div>
     </details>
 
@@ -76,7 +85,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie trainiere ich Heavy?</summary>
       <div class="faq-a">
-        <p><b>6–12 Wiederholungen, 0–2 RIR.</b> Beim Comp-Satz nur der letzte Satz bis zum Versagen; Iso-Sätze dürfen ans Versagen. Pause: Oberkörper 90 Sekunden, Unterkörper 120 Sekunden, Waden 60 Sekunden.</p>
+        <p><b>6–12 Wiederholungen, 0–2 RIR.</b> Beim Comp-Satz nur der letzte Satz bis zum Versagen; Iso-Sätze dürfen ans Versagen. Pause: Heavy etwa 3 Minuten, Pump etwa 2 Minuten, zwischen vollständigen Clusters etwa 3 Minuten.</p>
         <p>Heavy ist die vergleichbare Messlatte. Trage diese Sätze deshalb besonders genau ein.</p>
       </div>
     </details>
@@ -88,10 +97,10 @@ export function mountFaq(container) {
       </div>
     </details>
 
-    <details class="faq"><summary>Wie funktionieren Cluster?</summary>
+    <details class="faq"><summary>Wie funktionieren Clusters?</summary>
       <div class="faq-a">
-        <p>Ein Cluster besteht aus <b>6 Minisätzen mit je 4 Wiederholungen</b> und ungefähr 10 Sekunden Pause dazwischen. Nur der letzte Minisatz geht bis zum Versagen.</p>
-        <p>Als Startgewicht dient ungefähr dein 15RM. Die Pause zwischen vollständigen Clustern darf so lang sein, wie du für eine saubere nächste Runde brauchst.</p>
+        <p>Ein Clusters besteht aus <b>6 Minisätzen mit je 4 Wiederholungen</b> und ungefähr 10 Sekunden Pause dazwischen. Nur der letzte Minisatz geht bis zum Versagen.</p>
+        <p><b>15RM</b> bedeutet „15-Repetition Maximum“: ein Gewicht, mit dem du ungefähr 15 saubere Wiederholungen schaffst. Als Startgewicht für Clusters dient ungefähr dieses Gewicht. Zwischen vollständigen Clusters liegen etwa 3 Minuten Pause.</p>
       </div>
     </details>
 
@@ -113,7 +122,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie sieht die Trainingswoche aus?</summary>
       <div class="faq-a">
-        <p><b>Drei Einheiten:</b> Tag 1 Oberkörper Heavy und Unterkörper Pump, Tag 2 Unterkörper Heavy und Oberkörper Pump, Tag 3 Cluster für den ganzen Körper.</p>
+        <p><b>Drei Einheiten:</b> Tag 1 Oberkörper Heavy und Unterkörper Pump, Tag 2 Unterkörper Heavy und Oberkörper Pump, Tag 3 Clusters für den ganzen Körper.</p>
         <p>So erhält jeder Muskel mehrere unterschiedliche Reize pro Woche, ohne dass eine einzelne Einheit unnötig groß wird.</p>
       </div>
     </details>
@@ -123,14 +132,14 @@ export function mountFaq(container) {
         <p>In <b>Woche 1</b> trägst du die Heavy-Übungen für <b>Tag 1 und Tag 2</b> ein. Diese A-Auswahl übernimmt die App automatisch in alle ungeraden Wochen: <b>Woche 1, 3 und 5</b>.</p>
         <p>In <b>Woche 2</b> wählst du Heavy für <b>Tag 1 und Tag 2</b> ein zweites Mal. Diese B-Auswahl gilt automatisch für die geraden Wochen <b>2, 4 und 6</b>. Verglichen wird deshalb immer A mit A und B mit B.</p>
         <p>Der Wechsel bringt regelmäßig andere Übungen in den Plan. Das sorgt für <b>mehr Abwechslung und Motivation</b>, ohne dass die Heavy-Leistung unpassend miteinander verglichen wird.</p>
-        <p>Pump- und Cluster-Übungen dürfen jede Woche frei wechseln. Zuletzt verwendete Übungen stehen im Suchdialog oben.</p>
+        <p>Pump- und Clusters-Übungen dürfen jede Woche frei wechseln. Zuletzt verwendete Übungen stehen im Suchdialog oben.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Wie kommen die Satzzahlen zustande?</summary>
       <div class="faq-a">
-        <p>Die App kennt die Satzanzahl bereits. Sie hängt vom gewählten Level ab – du musst nichts ausrechnen und kannst nicht versehentlich zusätzliche Heavy- oder Cluster-Sätze anhängen.</p>
-        <p>Bei Heavy wird die Satzanzahl auf Comp und Iso verteilt. Bei gekoppelten Pump- und Cluster-Feldern gilt die angezeigte Zahl je Übung.</p>
+        <p>Die App kennt die Satzanzahl bereits. Sie hängt vom gewählten Level ab – du musst nichts ausrechnen und kannst nicht versehentlich zusätzliche Heavy- oder Clusters-Sätze anhängen.</p>
+        <p>Bei Heavy wird die Satzanzahl auf Comp und Iso verteilt. Bei gekoppelten Pump- und Clusters-Feldern gilt die angezeigte Zahl je Übung.</p>
       </div>
     </details>
 
@@ -152,15 +161,15 @@ export function mountFaq(container) {
     <details class="faq"><summary>Was passiert nach Woche 6?</summary>
       <div class="faq-a">
         <p>Du entscheidest zwischen <b>„Weitertrainieren · neue Phase"</b> und standardmäßig <b>1 Woche Deload</b>. Im Deload sinken Volumen und Frequenz; danach beginnt die nächste Phase wieder auf Level II.</p>
-        <p>Eine neue Phase leert Übungen, Gewichte, Wiederholungen, RIR und Übungsnotizen. Der Pump- und Cluster-Pool sowie das getrennte Notizbuch bleiben erhalten.</p>
+        <p>Eine neue Phase leert Übungen, Gewichte, Wiederholungen, RIR und Übungsnotizen. Der Pump- und Clusters-Pool sowie das getrennte Notizbuch bleiben erhalten.</p>
       </div>
     </details>
 
-    <details class="faq"><summary>Was ist der Pump- und Cluster-Pool?</summary>
+    <details class="faq"><summary>Was ist der Pump- und Clusters-Pool?</summary>
       <div class="faq-a">
-        <p>Pump- und Cluster-Übungen dürfen frei rotieren. Deshalb merkt sich der <b>Pool zu jedem Übungsnamen</b> das zuletzt verwendete Gewicht und die Wiederholungen – unabhängig davon, an welchem Tag du die Übung wieder auswählst.</p>
+        <p>Pump- und Clusters-Übungen dürfen frei rotieren. Deshalb merkt sich der <b>Pool zu jedem Übungsnamen</b> das zuletzt verwendete Gewicht und die Wiederholungen – unabhängig davon, an welchem Tag du die Übung wieder auswählst.</p>
         <p>Gibt es einen Wert aus der laufenden Phase, zeigt die App die passende Woche an. Stammt der letzte Wert aus einer früheren Phase, steht daneben <b>„Pool"</b>, weil eine alte Wochennummer nach dem Neustart irreführend wäre.</p>
-        <p>Der Pool bleibt beim Start einer neuen Phase bewusst erhalten. Er gibt nur eine Orientierung für den Einstieg; Pump und Cluster werden nicht als eigene Progressionskurve bewertet.</p>
+        <p>Der Pool bleibt beim Start einer neuen Phase bewusst erhalten. Er gibt nur eine Orientierung für den Einstieg; Pump und Clusters werden nicht als eigene Progressionskurve bewertet.</p>
       </div>
     </details>
 
@@ -176,7 +185,7 @@ export function mountFaq(container) {
     <details class="faq"><summary>Worauf kommt es beim Muskelaufbau an?</summary>
       <div class="faq-a">
         <p>Wichtig sind <b>produktive Sätze nahe genug am Versagen, langfristige Leistungsentwicklung und ausreichende Erholung</b>. Ein Satz mit größerer Reserve kann trotzdem beitragen, setzt aber meist einen kleineren Reiz als ein vergleichbarer versagensnaher Satz.</p>
-        <p>Volumen ist der Dosisregler. Die häufig genannten 10–20 Sätze sind eine grobe Faustregel, kein persönlicher Pflichtbereich. Heavy, leichte versagensnahe Pump-Arbeit und Cluster lassen sich außerdem nicht mit einem festen Faktor ineinander umrechnen.</p>
+        <p>Volumen ist der Dosisregler. Die häufig genannten 10–20 Sätze sind eine grobe Faustregel, kein persönlicher Pflichtbereich. Heavy, leichte versagensnahe Pump-Arbeit und Clusters lassen sich außerdem nicht mit einem festen Faktor ineinander umrechnen.</p>
         <p><b>Muskelkater ist kein verlässliches Maß</b> für Trainingsqualität oder Muskelwachstum. Ungewöhnlich starker Muskelkater kann aber ein Hinweis sein, dass Belastung oder Übung neu beziehungsweise schlecht vertragen war.</p>
       </div>
     </details>
@@ -197,6 +206,42 @@ export function mountFaq(container) {
 
     <p class="src">Evidenz: Pelland et al. · Baz-Valle et al. · Schoenfeld et al. · Wolf/Schoenfeld · Bell et al. (Deload).</p>`;
   container.appendChild(wrap);
+  const faqSuche = wrap.querySelector('#faq-suche-input');
+  const faqLoeschen = wrap.querySelector('#faq-suche-loeschen');
+  const faqKein = wrap.querySelector('#faq-suche-kein');
+  const faqStartkarte = wrap.querySelector('.faq-startkarte');
+  const faqBereiche = [];
+  let faqBereich = null;
+  [...wrap.children].forEach((kind) => {
+    if (kind.classList.contains('faq-sektion')) {
+      faqBereich = { kopf: kind, fragen: [] };
+      faqBereiche.push(faqBereich);
+    } else if (faqBereich && kind.matches('details.faq')) faqBereich.fragen.push(kind);
+  });
+  const normalisiere = (s) => String(s || '').toLocaleLowerCase('de-DE').trim();
+  const faqFiltern = () => {
+    const suchwort = normalisiere(faqSuche.value);
+    let treffer = 0;
+    faqBereiche.forEach(({ kopf, fragen }) => {
+      let bereichTreffer = 0;
+      fragen.forEach((frage) => {
+        const passt = !suchwort || normalisiere(frage.textContent).includes(suchwort);
+        frage.hidden = !passt;
+        if (passt) bereichTreffer += 1;
+      });
+      kopf.hidden = !!suchwort && bereichTreffer === 0;
+      treffer += bereichTreffer;
+    });
+    if (faqStartkarte) faqStartkarte.hidden = !!suchwort;
+    faqKein.hidden = !suchwort || treffer > 0;
+    faqLoeschen.hidden = !suchwort;
+  };
+  faqSuche?.addEventListener('input', faqFiltern);
+  faqLoeschen?.addEventListener('click', () => {
+    faqSuche.value = '';
+    faqFiltern();
+    faqSuche.focus();
+  });
   // Die vier Ziele liegen innerhalb der bereits geoeffneten FAQ-Seite. Ohne
   // Abfangen liest der globale Hash-Router "#faq-start" als unbekannte Ansicht
   // und faellt deshalb auf das Log zurueck.

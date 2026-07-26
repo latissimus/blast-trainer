@@ -8,13 +8,13 @@ import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
 
-// Pause zwischen zwei Clustern (s). Kein fester Vorgabewert
-// ("so viel wie nötig", Richtwert ein Cluster alle ~10 min) – hier bewusst gesetzt.
-const MR_REST = 120;
+// Evidenznahe Orientierung: drei Minuten zwischen schweren Saetzen und
+// vollstaendigen Clusters-Runden, zwei Minuten bei leichter Pump-Arbeit.
+const MR_REST = 180;
 
 // Anzeige-Labels der Set-Typen. Die internen Keys (load/pump/mr) bleiben, damit
 // gespeicherte Logs gueltig bleiben – nur die Beschriftung wechselt.
-const TYPE_LABEL = { load: 'HEAVY', pump: 'PUMP', mr: 'CLUSTER' };
+const TYPE_LABEL = { load: 'HEAVY', pump: 'PUMP', mr: 'CLUSTERS' };
 const LEVEL_LABEL = ['Kompakt', 'Standard', 'Voll'];
 const TUTORIAL_SETUP = [
   { week: 1, day: 'OK-A', titel: 'Woche 1 · Tag 1', gruppe: 'A · ungerade Wochen', folgt: 'Woche 1 · Tag 2' },
@@ -795,13 +795,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (!m) { node.innerHTML = (name && name.trim()) ? '<b>zuletzt: — (neue Übung)</b>' : '<b>zuletzt: —</b>'; return; }
     const hasR = m.r != null && m.r !== '';
     const txt = kind === 'mr'
-      ? `zuletzt: ${m.w} kg${hasR ? ` · ${m.r} Wdh. im letzten Cluster` : ''}`
+      ? `zuletzt: ${m.w} kg${hasR ? ` · ${m.r} Wdh. im letzten Clusters` : ''}`
       : `zuletzt: ${m.w} kg${hasR ? ` × ${m.r} Wdh` : ''}`;
     // Wochennummern starten pro Phase neu – Pool-Treffer stammen aus einer
     // frueheren Phase und werden deshalb nicht als "Wo N" ausgewiesen.
     node.innerHTML = `<b>${txt}</b><span class="delta d-hold">${m.pool ? 'Pool' : 'Wo ' + m.week}</span>`;
   }
-  // Ein Cluster = 6×4 Minisätze. Kompakt: Gewicht + Wdh im letzten (6.) Satz.
+  // Clusters = 6×4 Minisätze. Kompakt: Gewicht + Wdh im letzten (6.) Satz.
   function mrRow(entry, xi, si, blk, memNode) {
     const s = entry.sets[xi][si];
     const row = document.createElement('div'); row.className = 'setrow mrrow';
@@ -911,13 +911,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
             </div>
             <div>
               <b>3</b>
-              <span><strong>3 Satzarten</strong><small>Heavy ist schwer · Pump leichter und versagensnah · Cluster ist 6 × 4.</small></span>
+              <span><strong>3 Satzarten</strong><small>Heavy ist schwer · Pump leichter und versagensnah · Clusters sind 6 × 4.</small></span>
             </div>
           </div>
           <div class="tutorial-heavyinfo">
             <strong>Was du jetzt festlegst</strong>
             <p>Nur für Heavy wählst du feste Übungen: einmal für A und einmal für B.
-              LOGMAN übernimmt sie danach automatisch. Pump und Cluster wählst du im Training frei.</p>
+              LOGMAN übernimmt sie danach automatisch. Pump und Clusters wählst du im Training frei.</p>
             <p>Je nach Muskel fragt Heavy nach einer großen Grundübung und/oder einer gezielten Übung:</p>
             <div class="tutorial-rollen">
               <span><b>Comp</b><small>mehrere Gelenke und Muskeln</small></span>
@@ -1016,8 +1016,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     // bringt seine Liste selbst mit, auf iOS als Auswahlrad.
     wrap.querySelector('#lg-pool').innerHTML = '';
 
-    let rirHinweisOffen = true;
-    let tutorialWahlMarkiert = false;
+  let tutorialWahlMarkiert = false;
     tpl.blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
       if (tgt === 0) return;   // Block bei diesem Tier nicht dabei (z.B. optionale MRs bei Tier I)
@@ -1030,7 +1029,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const effType = effTypeOf(blk, tier);              // Typ je Tier (Pump-Ausnahme bei MR)
       if (freeEx) entry.names = entry.names || (entry.name != null ? [entry.name] : []);  // frei pro Woche/Feld
       const names = freeEx ? null : dayNames(state.day, blk);
-      const effRest = effType === 'mr' ? MR_REST : (effType === 'pump' ? 60 : blk.rest);
+      const effRest = effType === 'mr' ? MR_REST : (effType === 'pump' ? 120 : Math.max(180, blk.rest || 0));
       const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
       const blockMus = blk.mus;
 
@@ -1038,10 +1037,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const cues = [];
       if (effType === 'load') {
         cues.push('<span class="chip">' + effReps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');
-        if (rirHinweisOffen) {
-          cues.push('<span class="chip chip-hilfe">RIR = Wdh. übrig</span>');
-          rirHinweisOffen = false;
-        }
       }
       if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · leicht</span>', '<span class="chip">versagensnah · Partials optional</span>');
       if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
@@ -1219,7 +1214,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   async function resetAllData() {
-    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein Pump- und Cluster-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
+    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein Pump- und Clusters-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
     // Pool retten, bevor die Wochendaten fallen. Neuere Werte gewinnen.
     state.mem = Object.assign({}, state.mem, harvestMem(state.data));
     state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {}; state.datum = {};

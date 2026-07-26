@@ -114,12 +114,12 @@ describe('Priorisierung – Wirkung', () => {
 describe('Priorisierung – Planung', () => {
   it('bietet für jedes Muskelkonto einen regulären Pumpplatz an', () => {
     const p = payload(2);
-    // Adduktoren haben im Unterkoerper-Tag ein eigenes Heavy-Feld, aber kein
+    // Abduktoren haben im Unterkoerper-Tag ein eigenes Heavy-Feld, aber kein
     // regulaeres Pumpfeld. Eine Pump-Prioritaet waere dort daher irrefuehrend.
-    KONTEN.filter((konto) => konto !== 'Adduktoren').forEach((konto) => {
+    KONTEN.filter((konto) => konto !== 'Abduktoren').forEach((konto) => {
       expect(pumpMoeglichkeiten(p, 1, konto).length, konto).toBeGreaterThan(0);
     });
-    expect(pumpMoeglichkeiten(p, 1, 'Adduktoren')).toHaveLength(0);
+    expect(pumpMoeglichkeiten(p, 1, 'Abduktoren')).toHaveLength(0);
   });
 
   it('ordnet hohes Gesamtvolumen zuerst und schließt andere Prioritäten aus', () => {
