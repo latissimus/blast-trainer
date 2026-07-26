@@ -114,6 +114,12 @@ html{background:var(--bg)}
    offenem Overlay noch weiss oder seitenfarben, blitzt genau der geschuetzte
    Bereich um Uhrzeit und Akku beim Scrollen um. */
 html.statusleiste-overlay{background:var(--tutorial-dim)}
+/* Zweite Absicherung fuer den iOS-Web-App-Canvas: Je nach Scrollzustand nimmt
+   WebKit fuer den transparenten Statusbereich den Body statt des html-Elements.
+   Der eigentliche App-Inhalt behaelt separat seine Seitenfarbe und wird wie
+   bisher vom Overlay abgedunkelt. */
+html.statusleiste-overlay body{background:var(--tutorial-dim)}
+html.statusleiste-overlay #app{min-height:100dvh;background:var(--bg)}
 body{
   background:var(--bg);color:var(--text);font-family:var(--mono);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
@@ -647,6 +653,16 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   -webkit-backdrop-filter:blur(1.5px);backdrop-filter:blur(1.5px);
   touch-action:pan-y}
 .tutorial-dimmer[hidden]{display:none}
+/* Die installierte iOS-App behandelt die Statusleiste bei
+   black-translucent nicht wie einen normalen Teil des fixed Viewports:
+   theme-color und der Canvas-Hintergrund allein reichen deshalb nicht. Diese
+   feste, deckende Schutzflaeche liegt waehrend JEDES Overlays direkt unter
+   Uhrzeit und Akku. Sie scrollt nicht mit und liegt ueber Tutorialkarte (60)
+   und Uebungswaehler (80), endet aber exakt vor deren Inhalt. So kann weder
+   der hellblaue Header noch die weisse Tutorialkarte in die Safe Area rutschen. */
+html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
+  top:0;left:0;right:0;height:calc(env(safe-area-inset-top) + 3px);
+  background:var(--tutorial-dim);pointer-events:none}
 /* min-height ist der Boden, unter den die Maske nie faellt. Ohne ihn gab es
    eine Luecke: Die Hoehe wird per JS gesetzt und mit .32s animiert, startet
    aber bei 0 – waehrend dieser Blende lag der Streifen unter der iOS-Uhr frei
