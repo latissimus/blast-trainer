@@ -53,14 +53,14 @@ export async function mountMeter(container, { userId }) {
 
   let payload = null;
   const lokal = readLog(userId);
-  if (lokal?.payload) payload = lokal.payload;
+  if (lokal?.payload && lokal.dirty) payload = lokal.payload;
   else {
     try {
       const { data } = await supabase
         .from('training_logs').select('payload').eq('user_id', userId).maybeSingle();
-      payload = data?.payload || {};
+      payload = data?.payload || lokal?.payload || {};
     } catch (e) {
-      payload = {};
+      payload = lokal?.payload || {};
     }
   }
   payload.volumen = { prioritaet: payload.volumen?.prioritaet || {} };

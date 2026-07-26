@@ -188,4 +188,15 @@ describe('Priorisierung – Planung', () => {
     };
     expect(prioritaetsAnpassungen(p, 1, K).ergebnisse.Brust.spenderName).toBe('Schulter');
   });
+
+  it('verhindert, dass ein Zielfeld zugleich als Spender verwendet wird', () => {
+    const p = payload(1);
+    const kKonflikt = [...K, { n: 'Reverse Fly', haupt: 'Hintere Schulter', neben: [], typ: 'Iso' }];
+    p.data['UK-A'][1] = {};
+    p.volumen.prioritaet.Lat = { modus: 'tausch', spender: 'Seitliche Schulter' };
+    p.volumen.prioritaet['Hintere Schulter'] = { modus: 'plus' };
+    const r = prioritaetsAnpassungen(p, 1, kKonflikt);
+    expect(r.ergebnisse['Hintere Schulter'].status).toBe('ziel-fehlt');
+    expect(r.delta[r.ergebnisse.Lat.spenderFeld.key]).toBe(-1);
+  });
 });

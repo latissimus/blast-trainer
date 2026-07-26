@@ -140,9 +140,10 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
   KONTEN.forEach((ziel) => {
     const cfg = prioritaet[ziel];
     if (!gueltigePrio(cfg)) return;
-    const echtesZiel = bestesFeld(felder.filter((f) => f.konto === ziel));
+    const echtesZiel = bestesFeld(felder.filter((f) =>
+      f.konto === ziel && !reservierteSpender.has(f.key)));
     const freiesZiel = bestesFeld(pumpMoeglichkeiten(payload, woche, ziel).filter((f) =>
-      !belegteFelder.has(f.key) && !reservierteZiele.has(f.key)));
+      !belegteFelder.has(f.key) && !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key)));
     const zielFeld = echtesZiel || freiesZiel;
     if (!zielFeld) {
       ergebnisse[ziel] = { status: 'ziel-fehlt', modus: cfg.modus };
@@ -169,6 +170,7 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
     // als konkrete Übung gewählt wird.
     const festBelegt = cfg.spenderFeld ? bestesFeld(felder.filter((f) =>
       f.key === cfg.spenderFeld && f.tag === zielFeld.tag && f.key !== zielFeld.key &&
+      !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key) &&
       f.anzahl + (delta[f.key] || 0) > 0)) : null;
     const festLeer = cfg.spenderFeld && !festBelegt ? bestesFeld(pumpMoeglichkeiten(payload, woche, spender).filter((f) =>
       f.key === cfg.spenderFeld && f.tag === zielFeld.tag && f.key !== zielFeld.key &&
@@ -176,6 +178,7 @@ export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
       f.anzahl + (delta[f.key] || 0) > 0)) : null;
     const echterSpender = festBelegt || bestesFeld(felder.filter((f) =>
       f.tag === zielFeld.tag && f.konto === spender && f.key !== zielFeld.key &&
+      !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key) &&
       f.anzahl + (delta[f.key] || 0) > 0));
     const freierSpender = festLeer || bestesFeld(pumpMoeglichkeiten(payload, woche, spender).filter((f) =>
       f.tag === zielFeld.tag && f.key !== zielFeld.key && !belegteFelder.has(f.key) &&
