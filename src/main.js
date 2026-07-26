@@ -2,7 +2,7 @@ import './styles.css';
 import { supabase } from './supabase.js';
 import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } from './auth.js';
 import { readProfile, writeProfile } from './localstore.js';
-import { brandSvg, actionTitleSvg, menuTitleSvg } from './brand.js';
+import { brandSvg, actionTitleSvg } from './brand.js';
 import { getTheme, applyTheme, statusleisteAnSeite } from './theme.js';
 import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
 import { mountLog, toast } from './log.js';
@@ -45,8 +45,6 @@ let willkommen = false;     // frisch registriert: vor dem Tutorial willkommen h
 let topbarObserver = null;   // liefert Unterseiten die echte Sticky-Header-Hoehe
 let aktiveAnsicht = null;    // fuer die Rueckkehr an dieselbe Stelle im Log
 let logScrollY = 0;
-let menueAussenHandler = null;
-let menueEscapeHandler = null;
 const WILLKOMMEN_EMAIL = 'blast:willkommen-email';
 
 // Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
@@ -268,13 +266,12 @@ function renderChrome() {
           <label class="ci"><span class="wert" id="ci-dat-w">—</span><span class="lbl">Datum</span>
             <input id="lg-datum" type="date" aria-label="Datum der Einheit" disabled></label>
         </div>
-        <div class="menue-wrap">
-          <button class="ci menue" id="app-menue-toggle" type="button" aria-expanded="false" aria-controls="app-menue-panel" aria-label="Menü öffnen">
-            <span class="wert" aria-hidden="true"><svg viewBox="0 0 22 16" width="21" height="15"><rect x="0" y="0" width="22" height="3.6" rx="1.8"/><rect x="0" y="6.2" width="22" height="3.6" rx="1.8"/><rect x="0" y="12.4" width="22" height="3.6" rx="1.8"/></svg></span>
-            <span class="lbl">Menü</span>
-          </button>
-          <div class="retro-menue" id="app-menue-panel" hidden role="menu" aria-label="Seitenmenü"></div>
-        </div>
+        <label class="ci menue">
+          <span class="menue-figuren" aria-hidden="true">${'<i></i>'.repeat(9)}</span>
+          <span class="wert" aria-hidden="true"><svg viewBox="0 0 18 12" width="18" height="12"><path d="M2 10 9 2l7 8z"/></svg></span>
+          <span class="lbl">Menü</span>
+          <select id="app-menue" aria-label="Ansicht"></select>
+        </label>
       </div>
     </div>`;
   verbindePausenAnzeige();
@@ -295,69 +292,21 @@ function renderChrome() {
   topbarObserver = new ResizeObserver(schreibeTopbarHoehe);
   topbarObserver.observe(topbar);
 
-  // Seitenmenü: sichtbare Retro-Kacheln statt des schwer verständlichen
-  // nativen Auswahlfelds. Die Farben der Kacheln folgen den Seitenflächen.
-  const menue = app.querySelector('#app-menue-toggle');
-  const menuePanel = app.querySelector('#app-menue-panel');
-  const menueZiele = [
-    ['log', 'LOG', 'Log'],
-    ['meter', 'SET-O-METER', 'Set-O-Meter'],
-    ['prog', 'PROGRESSION', 'Progression'],
-    ['notizbuch', 'NOTIZBUCH', 'Notizbuch'],
-    ['feedback', 'FEEDBACK', 'Feedback'],
-    ['faq', 'FAQ', 'FAQs'],
-    ...(isAdmin ? [['admin', 'ADMIN', 'Admin']] : []),
-  ];
-  menuePanel.innerHTML = menueZiele.map(([wert, titel, aria]) =>
-    `<button class="retro-menue-feld retro-menue-${wert}" type="button" role="menuitem" data-menu-view="${wert}" aria-label="${aria}">${menuTitleSvg(titel)}</button>`,
-  ).join('');
-  const menueSchliessen = () => {
-    menuePanel.hidden = true;
-    menue.setAttribute('aria-expanded', 'false');
-    menue.classList.remove('offen');
+  // Das native Auswahlmenü ist auf dem Telefon zuverlässig und sofort
+  // verständlich. Es bleibt bewusst nur im Log sichtbar; Unterseiten führen
+  // über den bereits vorhandenen Zurück-zum-Log-Button zurück.
+  const menue = app.querySelector('#app-menue');
+  menue.innerHTML = `
+    <option value="log">LOG</option>
+    <option value="notizbuch">NOTIZBUCH</option>
+    <option value="meter">SET-O-METER</option>
+    <option value="prog">PROGRESSION</option>
+    <option value="feedback">FEEDBACK</option>
+    <option value="faq">FAQs</option>
+    ${isAdmin ? '<option value="admin">ADMIN</option>' : ''}`;
+  menue.onchange = () => {
+    location.hash = menue.value;
   };
-  const menueUmschalten = () => {
-    const offen = menuePanel.hidden;
-    menuePanel.hidden = !offen;
-    menue.setAttribute('aria-expanded', String(offen));
-    menue.classList.toggle('offen', offen);
-    if (offen) {
-      const felder = [...menuePanel.querySelectorAll('.retro-menue-feld')];
-      const ohneBewegung = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      felder.forEach((feld, index) => {
-        feld.getAnimations?.().forEach((animation) => animation.cancel());
-        if (!feld.animate || ohneBewegung) return;
-        feld.animate(
-          [
-            { opacity: 0, transform: 'translateY(9px)' },
-            { opacity: 1, transform: 'translateY(0)' },
-          ],
-          {
-            duration: 280,
-            delay: (felder.length - index - 1) * 55,
-            easing: 'cubic-bezier(.22,.75,.3,1)',
-            fill: 'both',
-          },
-        );
-      });
-    }
-  };
-  menue.onclick = (e) => { e.stopPropagation(); menueUmschalten(); };
-  menuePanel.onclick = (e) => {
-    e.stopPropagation();
-    const ziel = e.target.closest('[data-menu-view]')?.dataset.menuView;
-    if (!ziel) return;
-    menueSchliessen();
-    if (location.hash.replace(/^#/, '') !== ziel) location.hash = ziel;
-  };
-  if (menueAussenHandler) document.removeEventListener('click', menueAussenHandler);
-  menueAussenHandler = () => { menueSchliessen(); };
-  document.addEventListener('click', menueAussenHandler);
-  if (menueEscapeHandler) document.removeEventListener('keydown', menueEscapeHandler);
-  menueEscapeHandler = (e) => {
-    if (e.key === 'Escape' && !menuePanel.hidden) menueSchliessen();
-  };
-  document.addEventListener('keydown', menueEscapeHandler);
 
   // Einmaliger Hinweis. Eine native App darf beim ersten Start selbst fragen,
   // eine Web-App nicht – Apple verlangt einen echten Tipp. Nach dem Tippen ist
@@ -377,12 +326,9 @@ function setNavActive(view) {
   app.querySelectorAll('nav [data-view]').forEach((b) => {
     b.classList.toggle('active', b.dataset.view === view);
   });
-  const m = app.querySelector('#app-menue-toggle');
-  const panel = app.querySelector('#app-menue-panel');
-  if (!m || !panel) return;
-  panel.querySelectorAll('[data-menu-view]').forEach((feld) => {
-    feld.classList.toggle('aktiv', feld.dataset.menuView === view);
-  });
+  const m = app.querySelector('#app-menue');
+  if (!m) return;
+  m.value = view;
   // Traegt die Seitenfarbe: Jede Unterseite hat ihren eigenen Grundton, das Log
   // bleibt hellblau. Setzt --bg um, damit Kopfleiste und Bedienleiste von selbst
   // mitgehen, statt jede Flaeche einzeln umfaerben zu muessen.
@@ -396,15 +342,12 @@ function setNavActive(view) {
   // Erst jetzt steht das --bg dieser Seite fest – die Systemleiste oben zieht
   // mit. Eine Regel fuer alle Ansichten, ohne Sonderfaelle.
   statusleisteAnSeite();
-  // Die vier Trainingsfelder wirken nur im Log. Auf Unterseiten bleibt unten
-  // deshalb nur das Menue sichtbar; inaktive Felder sehen sonst bedienbar aus
-  // und nehmen auf dem Telefon fast die ganze Breite ein.
-  document.querySelector('.ctrlbar')?.classList.toggle(
-    'nur-menue',
-    view !== 'log' && view !== 'admin',
-  );
-  // Auf Unterseiten bleibt nur das Menue sichtbar. Die Log-Felder behalten
-  // intern ihren letzten Stand, bis das Log wieder gemountet wird.
+  // Die Log-Leiste gehoert dem Log. Auf Unterseiten verschwindet sie komplett,
+  // weil der Zurueck-zum-Log-Button oben bereits den eindeutigen Rueckweg
+  // anbietet. Der Admin behaelt seine Trainingsfelder, aber nicht das Menue.
+  const leiste = document.querySelector('.ctrlbar');
+  leiste?.classList.toggle('nur-menue', view !== 'log' && view !== 'admin');
+  leiste?.classList.toggle('ohne-menue', view !== 'log');
 }
 
 async function routeView() {

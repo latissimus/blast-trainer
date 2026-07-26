@@ -482,7 +482,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    beruehrt die rechte untere Ecke den Bildschirmrand. */
 .ctrlbar{--ctrlbar-bottom:max(6px, calc(env(safe-area-inset-bottom) - 6px));
   position:fixed;left:0;right:0;bottom:0;z-index:30;
-  padding:0 7px var(--ctrlbar-bottom);overflow:visible;
+  padding:0 7px var(--ctrlbar-bottom);overflow:hidden;
   background:linear-gradient(180deg,transparent 0,var(--bg) 8px,transparent 8px)}
 /* overflow:hidden ist noetig, nicht kosmetisch: Das native <select> darunter
    ist rechteckig und blitzte beim Antippen als weisse Ecke ueber der Rundung
@@ -535,37 +535,28 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   -webkit-appearance:none;appearance:none}
 .ci select:disabled{cursor:default}
 .ci:has(select:disabled) .wert{opacity:.55}
-.menue-wrap{position:relative;z-index:2;flex:0 0 62px;min-width:0}
 /* Das Menue rechts. Flieder mit vielen kleinen Figuren aus dem LOGMAN-Logo –
    es hebt sich damit von den vier Einstellfeldern ab:
    Die aendern den Inhalt der Seite, dieses wechselt die Seite. */
 :root[data-theme="dark"] .ctrlbar .inner::before{background:rgba(30,33,42,.27)}
 .ci.menue{background:var(--lila);color:var(--lila-ink);flex:0 0 62px;
-  width:100%;overflow:hidden;isolation:isolate}
-.ci.menue::before{content:"";position:absolute;z-index:0;inset:-7px;
-  background:url(./assets/silhouette-navy.png) 2px 1px/23px 23px repeat;
-  opacity:.14;pointer-events:none}
-:root[data-theme="dark"] .ci.menue::before{filter:brightness(0) invert(1);opacity:.11}
+  align-self:stretch;overflow:hidden;isolation:isolate}
+.menue-figuren{position:absolute;z-index:0;inset:0;overflow:hidden;pointer-events:none}
+.menue-figuren i{position:absolute;width:14px;height:14px;background:url(./assets/silhouette-navy.png) center/contain no-repeat;opacity:.13}
+.menue-figuren i:nth-child(1){left:-2px;top:1px;transform:rotate(-24deg)}
+.menue-figuren i:nth-child(2){left:18px;top:-4px;width:13px;height:13px;transform:rotate(16deg)}
+.menue-figuren i:nth-child(3){right:1px;top:2px;transform:rotate(31deg)}
+.menue-figuren i:nth-child(4){left:5px;top:22px;width:13px;height:13px;transform:rotate(38deg)}
+.menue-figuren i:nth-child(5){left:27px;top:17px;width:15px;height:15px;transform:rotate(-35deg)}
+.menue-figuren i:nth-child(6){right:4px;top:25px;width:13px;height:13px;transform:rotate(9deg)}
+.menue-figuren i:nth-child(7){left:-3px;bottom:-4px;width:15px;height:15px;transform:rotate(19deg)}
+.menue-figuren i:nth-child(8){left:25px;bottom:-5px;transform:rotate(43deg)}
+.menue-figuren i:nth-child(9){right:-3px;bottom:-4px;width:15px;height:15px;transform:rotate(-28deg)}
+:root[data-theme="dark"] .menue-figuren{filter:brightness(0) invert(1)}
 .ci.menue .wert{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;line-height:0}
 .ci.menue .wert svg{display:block;fill:currentColor}
 .ci.menue .lbl{position:relative;z-index:1;color:var(--lila-ink);opacity:.8}
-.ci.menue.offen{background:var(--pink);color:var(--ink)}
-.ci.menue.offen .lbl{color:var(--ink);opacity:1}
-.retro-menue{position:absolute;right:0;bottom:calc(100% + 9px);display:flex;flex-direction:column;width:min(72vw,214px);padding:8px 7px;
-  border:0;border-radius:16px;background:rgba(255,255,255,.3);-webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);isolation:isolate;animation:retroMenueAuf .2s cubic-bezier(.22,.75,.3,1)}
-.retro-menue[hidden]{display:none}
-.retro-menue-feld{min-height:39px;padding:5px 8px;border:0;border-radius:8px;background:transparent;cursor:pointer}
-.menu-title-svg{display:block;width:100%;height:32px;overflow:visible}
-.retro-menue-feld:hover,.retro-menue-feld:focus-visible{outline:none;background:rgba(103,49,143,.1)}
-.retro-menue-feld.aktiv{background:rgba(103,49,143,.14);color:var(--prio)}
-:root[data-theme="dark"] .retro-menue{background:rgba(25,28,36,.42)}
-:root[data-theme="dark"] .menu-title-svg text:last-child{fill:#D9BBF7}
-:root[data-theme="dark"] .retro-menue-feld:hover,
-:root[data-theme="dark"] .retro-menue-feld:focus-visible{background:rgba(217,187,247,.12)}
-@keyframes retroMenueAuf{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
-@media (max-width:300px){
-  .retro-menue{width:min(78vw,210px)}
-}
+.ci.menue select{z-index:2}
 
 /* Pausentimer. Er uebernimmt die GANZE Leiste, statt sich ein Feld zu teilen:
    Waehrend der Pause waehlt man ohnehin nichts aus, und jede Auswahl wuerde den
@@ -580,29 +571,22 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* Der abgelaufene Zustand traegt sonst ein helles Gruen, das auf Hellblau
    ebenfalls verschwindet. Dunkelgruen haelt den Unterschied zum Lauf. */
 :root[data-theme="dark"] .ctrlbar.timer-an .timerfeld.done{color:#0E5B30}
-.ctrlbar.timer-an .slots,.ctrlbar.timer-an .menue-wrap{display:none}
+.ctrlbar.timer-an .slots,.ctrlbar.timer-an .menue{display:none}
+.ctrlbar.ohne-menue .menue{display:none}
 .ctrlbar.nur-menue .slots{display:none}
 .ctrlbar.nur-menue{background:none;overflow:visible;pointer-events:none}
 .ctrlbar.nur-menue .inner{max-width:104px;padding:0;pointer-events:auto}
-.ctrlbar.nur-menue .menue-wrap{flex:1 1 auto;width:100%}
 .ctrlbar.nur-menue .inner::before,.ctrlbar.nur-menue .inner::after{display:none}
-.ctrlbar.nur-menue .ci.menue{flex:1 1 auto;min-height:54px;
-  background-color:rgba(217,187,247,.58);
-  border:var(--bw) solid var(--ink);border-radius:15px;
-  -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25)}
-:root[data-theme="dark"] .ctrlbar.nur-menue .ci.menue{
-  background-color:rgba(89,68,126,.58);color:#fff}
-:root[data-theme="dark"] .ctrlbar.nur-menue .ci.menue .lbl{color:#fff}
 /* Auf Unterseiten entfaellt die Leiste ganz. Zurueck ins Log fuehrt der
    "← Log"-Chip unter dem Kopf, und das Log ist die Seite, zu der man ohnehin
    staendig zurueckkehrt – das Menue unten war der zweite Weg zum selben Ziel.
    Der Admin behaelt seine volle Leiste (er bekommt nie .nur-menue), weil die
    vier Felder dort die einzige Moeglichkeit sind, durch fremde Wochen zu
    blaettern. Eine laufende Pause holt die Leiste sofort zurueck – siehe unten. */
-.ctrlbar.nur-menue:not(.timer-an){display:block}
+.ctrlbar.nur-menue:not(.timer-an){display:none}
 /* Ohne Leiste braucht der Seitenfuss keinen Platz mehr freizuhalten. Laeuft
    gerade eine Pause, steht die Leiste wieder da und der Abstand ebenso. */
-body:has(.ctrlbar.nur-menue:not(.timer-an)) .pad-bottom{padding-bottom:88px}
+body:has(.ctrlbar.nur-menue:not(.timer-an)) .pad-bottom{padding-bottom:24px}
 
 /* Eine laufende Pause gehört der ganzen App. Auf Unterseiten nimmt der Timer
    deshalb wieder die volle Leistenbreite ein, statt in der schmalen
