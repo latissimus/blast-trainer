@@ -308,8 +308,8 @@ function renderChrome() {
     ['faq', 'FAQ', 'FAQs'],
     ...(isAdmin ? [['admin', 'ADMIN', 'Admin']] : []),
   ];
-  menuePanel.innerHTML = menueZiele.map(([wert, titel, aria]) =>
-    `<button class="retro-menue-feld retro-menue-${wert}" type="button" role="menuitem" data-menu-view="${wert}" aria-label="${aria}">${titel}</button>`,
+  menuePanel.innerHTML = menueZiele.map(([wert, titel, aria], index) =>
+    `<button class="retro-menue-feld retro-menue-${wert}" style="--menu-index:${index};--menu-count:${menueZiele.length}" type="button" role="menuitem" data-menu-view="${wert}" aria-label="${aria}">${titel}</button>`,
   ).join('');
   const menueSchliessen = () => {
     menuePanel.hidden = true;

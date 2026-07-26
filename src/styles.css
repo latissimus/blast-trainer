@@ -551,29 +551,21 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ci.menue .lbl{position:relative;z-index:1;color:var(--lila-ink);opacity:.8}
 .ci.menue.offen{background:var(--pink);color:var(--ink)}
 .ci.menue.offen .lbl{color:var(--ink);opacity:1}
-.retro-menue{position:absolute;right:0;bottom:calc(100% + 9px);display:grid;grid-template-columns:repeat(2,minmax(118px,1fr));gap:7px;width:min(88vw,292px);padding:7px;
-  border:var(--bw) solid var(--ink);border-radius:16px;background:var(--surface);isolation:isolate;animation:retroMenueAuf .2s cubic-bezier(.22,.75,.3,1)}
+.retro-menue{position:absolute;right:0;bottom:calc(100% + 9px);display:flex;flex-direction:column;width:min(72vw,214px);padding:8px 7px;
+  border:0;border-radius:16px;background:rgba(255,255,255,.3);-webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);isolation:isolate;animation:retroMenueAuf .2s cubic-bezier(.22,.75,.3,1)}
 .retro-menue[hidden]{display:none}
-.retro-menue-feld{position:relative;min-height:57px;padding:9px 8px;border:var(--bw) solid var(--ink);border-radius:10px;color:var(--ink);font-family:var(--display);font-size:13px;font-style:italic;font-weight:800;line-height:1.1;text-align:center;cursor:pointer;overflow:hidden}
-.retro-menue-feld::after{content:"";position:absolute;inset:0;z-index:-1;background:var(--muster-dreieck);opacity:.65;pointer-events:none}
-.retro-menue-feld:hover,.retro-menue-feld:focus-visible{outline:none;transform:translateY(-1px)}
-.retro-menue-feld.aktiv{box-shadow:inset 0 -4px 0 var(--ink)}
-.retro-menue-log{background:#B1E7FF}
-.retro-menue-meter,.retro-menue-notizbuch{background:#B1E7FF}
-.retro-menue-prog,.retro-menue-feedback{background:#D9BBF7}
-.retro-menue-faq{background:#FBE7A4}
-.retro-menue-admin{background:#BFE7D2}
-:root[data-theme="dark"] .retro-menue{background:var(--surface)}
-:root[data-theme="dark"] .retro-menue-log,
-:root[data-theme="dark"] .retro-menue-meter,
-:root[data-theme="dark"] .retro-menue-notizbuch{background:#0B0D12;color:#EDF0F6}
-:root[data-theme="dark"] .retro-menue-prog,
-:root[data-theme="dark"] .retro-menue-feedback{background:#2A1B45;color:#EDF0F6}
-:root[data-theme="dark"] .retro-menue-faq{background:#332B14;color:#EDF0F6}
-:root[data-theme="dark"] .retro-menue-admin{background:#143024;color:#EDF0F6}
+.retro-menue-feld{min-height:39px;padding:8px 10px;border:0;border-bottom:1px solid rgba(103,49,143,.2);border-radius:8px;background:transparent;color:var(--prio);font-family:var(--display);font-size:14px;font-style:italic;font-weight:900;line-height:1.1;text-align:right;cursor:pointer;opacity:0;transform:translateY(8px);animation:retroMenueEin .28s cubic-bezier(.22,.75,.3,1) forwards;animation-delay:calc((var(--menu-count) - var(--menu-index) - 1) * 55ms)}
+.retro-menue-feld:last-child{border-bottom:0}
+.retro-menue-feld:hover,.retro-menue-feld:focus-visible{outline:none;background:rgba(103,49,143,.1)}
+.retro-menue-feld.aktiv{background:rgba(103,49,143,.14);color:var(--prio)}
+:root[data-theme="dark"] .retro-menue{background:rgba(25,28,36,.42)}
+:root[data-theme="dark"] .retro-menue-feld{color:#D9BBF7;border-color:rgba(217,187,247,.2)}
+:root[data-theme="dark"] .retro-menue-feld:hover,
+:root[data-theme="dark"] .retro-menue-feld:focus-visible{background:rgba(217,187,247,.12)}
 @keyframes retroMenueAuf{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes retroMenueEin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (max-width:300px){
-  .retro-menue{grid-template-columns:1fr;width:min(78vw,210px)}
+  .retro-menue{width:min(78vw,210px)}
 }
 
 /* Pausentimer. Er uebernimmt die GANZE Leiste, statt sich ein Feld zu teilen:
