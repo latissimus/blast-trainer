@@ -554,12 +554,11 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .retro-menue{position:absolute;right:0;bottom:calc(100% + 9px);display:flex;flex-direction:column;width:min(72vw,214px);padding:8px 7px;
   border:0;border-radius:16px;background:rgba(255,255,255,.3);-webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);isolation:isolate;animation:retroMenueAuf .2s cubic-bezier(.22,.75,.3,1)}
 .retro-menue[hidden]{display:none}
-.retro-menue-feld{min-height:39px;padding:8px 10px;border:0;border-bottom:1px solid rgba(103,49,143,.2);border-radius:8px;background:transparent;color:var(--prio);font-family:var(--display);font-size:14px;font-style:italic;font-weight:900;line-height:1.1;text-align:right;cursor:pointer;opacity:0;transform:translateY(8px);animation:retroMenueEin .28s cubic-bezier(.22,.75,.3,1) forwards;animation-delay:calc((var(--menu-count) - var(--menu-index) - 1) * 55ms)}
-.retro-menue-feld:last-child{border-bottom:0}
+.retro-menue-feld{min-height:39px;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:var(--prio);font-family:"Helvetica Neue",Arial,system-ui,sans-serif;font-size:14px;font-style:italic;font-weight:900;line-height:1.1;text-align:right;text-shadow:2px 2px 0 #2A1240;cursor:pointer;opacity:0;transform:translateY(8px);animation:retroMenueEin .28s cubic-bezier(.22,.75,.3,1) forwards;animation-delay:calc((var(--menu-count) - var(--menu-index) - 1) * 55ms)}
 .retro-menue-feld:hover,.retro-menue-feld:focus-visible{outline:none;background:rgba(103,49,143,.1)}
 .retro-menue-feld.aktiv{background:rgba(103,49,143,.14);color:var(--prio)}
 :root[data-theme="dark"] .retro-menue{background:rgba(25,28,36,.42)}
-:root[data-theme="dark"] .retro-menue-feld{color:#D9BBF7;border-color:rgba(217,187,247,.2)}
+:root[data-theme="dark"] .retro-menue-feld{color:#D9BBF7;text-shadow:2px 2px 0 #241735}
 :root[data-theme="dark"] .retro-menue-feld:hover,
 :root[data-theme="dark"] .retro-menue-feld:focus-visible{background:rgba(217,187,247,.12)}
 @keyframes retroMenueAuf{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
