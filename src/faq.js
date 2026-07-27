@@ -98,6 +98,21 @@ export function mountFaq(container) {
       </div>
     </details>
 
+<details class="faq"><summary>Wie soll ich die einzelnen Sätze der Übungen trainieren?</summary>
+  <div class="faq-a">
+    <p><b>Ablauf & Reihenfolge:</b><br>
+    Du kannst deine Übungen ganz normal Satz für Satz abarbeiten oder zeiteffizient als <b>Antagonisten-Supersätze</b> (Wechsel zwischen Gegenspielern oder nicht-konkurrierenden Muskeln) trainieren.</p>
+
+    <p><b>Mögliche Supersatz-Muster:</b><br>
+    • <b>Compound → Isolation → Compound → Isolation</b><br>
+    • <b>Bizeps → Trizeps → Bizeps → Trizeps</b><br>
+    • <b>Schultern → Bauch → Schultern → Bauch</b></p>
+
+    <p><b>Eiserne Regel für Supersätze:</b><br>
+    Sobald der Supersatz deine Wiederholungsleistung oder dein Gewicht in einer Übung stark nach unten zieht (ZNS-/Herz-Kreislauf-Limit), werden die Übungen getrennt und einzeln ausgeführt!</p>
+  </div>
+</details>
+
     <details class="faq"><summary>Welche Pausenzeiten gelten?</summary>
       <div class="faq-a">
         <p>Die Pause steht direkt im jeweiligen Muskelblock und passt zur Übung: große HEAVYS-Comps meist <b>3 Minuten</b>, HEAVYS-Isos meist <b>2–2.5 Minuten</b>, PUMPS meist <b>1–2 Minuten</b>.</p>
