@@ -308,15 +308,89 @@ export function mountFaq(container) {
       </div>
     </details>
 
-<details class="faq"><summary>Wer steckt hinter LOGMAN?</summary>
-  <div class="faq-a">
-    <div style="display: flex; align-items: center; gap: 15px; margin-top: 5px;">
-      <img src="${floFotoUrl}" alt="Florian Rau" style="width: 500px; height: 500px; border-radius: 0%; object-fit: cover; flex-shrink: 0; border: 2px solid #fff;">
-      <div>
-        <p style="margin: 0;"><b>Entwickelt von Florian Rau</b></p>
-        <p style="margin: 5px 0 0 0;">LOGMAN ist aus dem Anspruch heraus entstanden, ein evidenzbasiertes Werkzeug für intelligentes Krafttraining mit dem Ziel der Hypertrophie zu schaffen – mit maximalem Fokus auf Progression und Regeneration im Retro-Look. 👊🏼</p>
+<details class="faq">
+  <summary>Wer steckt hinter LOGMAN?</summary>
+  <div class="faq-a" style="padding: 15px 0;">
+    
+    <!-- Profilbild (Oben zentriert) -->
+    <div style="text-align: center; margin-bottom: 20px;">
+      <img src="${floFotoUrl}" alt="Florian Rau" style="width: 260px; height: 260px; border-radius: 12px; object-fit: cover; border: 8px solid #001454; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+      <h3 style="margin: 15px 0 5px 0; color: #001454; font-size: 1.3rem;">Entwickelt von Florian Rau</h3>
+    </div>
+
+    <!-- Intention der App -->
+    <div style="margin-bottom: 25px; line-height: 1.6; text-align: center;">
+      <p style="margin: 0;">LOGMAN ist aus dem Anspruch heraus entstanden, ein evidenzbasiertes Werkzeug für intelligentes Krafttraining mit dem Ziel der Hypertrophie zu schaffen – mit maximalem Fokus auf Progression und Regeneration im Retro-Look. 👊🏼</p>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;">
+
+    <!-- Qualifikationsprofil -->
+    <div>
+      <h4 style="margin: 0 0 15px 0; color: #001454; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.5px;">Qualifikationsprofil</h4>
+      
+      <!-- Basis-Ausbildung -->
+      <div style="background-color: #f8f9fa; padding: 12px 15px; border-radius: 8px; border-left: 4px solid #001454; margin-bottom: 15px;">
+        <p style="margin: 0; font-weight: bold;">Bachelor Fitnessökonomie</p>
+        <p style="margin: 3px 0 0 0; color: #666; font-size: 0.9rem;">10 Jahre Kraftsport-Praxis</p>
+      </div>
+
+      <!-- Fachkompetenzen Grid -->
+      <div style="display: grid; gap: 12px;">
+        
+        <div>
+          <strong style="color: #001454; font-size: 0.85rem; text-transform: uppercase;">Anatomie & Biomechanik</strong>
+          <ul style="margin: 3px 0 0 0; padding-left: 18px; font-size: 0.95rem; line-height: 1.4;">
+            <li>Funktionelle Anatomie</li>
+            <li>Gelenkstrukturen und Bewegungsachsen</li>
+            <li>Muskelaktivierungsmuster</li>
+          </ul>
+        </div>
+
+        <div>
+          <strong style="color: #001454; font-size: 0.85rem; text-transform: uppercase;">Trainingsdesign & Periodisierung</strong>
+          <ul style="margin: 3px 0 0 0; padding-left: 18px; font-size: 0.95rem; line-height: 1.4;">
+            <li>Programmdesign Theorie & Praxis</li>
+            <li>Periodisierungskonzepte</li>
+            <li>Fallbeispiel-Anwendungen</li>
+          </ul>
+        </div>
+
+        <div>
+          <strong style="color: #001454; font-size: 0.85rem; text-transform: uppercase;">Körperkomposition</strong>
+          <ul style="margin: 3px 0 0 0; padding-left: 18px; font-size: 0.95rem; line-height: 1.4;">
+            <li>Körperfettassessment</li>
+            <li>Hormone & Körperzusammensetzung</li>
+            <li>Before/After-Erfolgsfaktoren</li>
+          </ul>
+        </div>
+
+        <div>
+          <strong style="color: #001454; font-size: 0.85rem; text-transform: uppercase;">Ernährung & Supplemente</strong>
+          <ul style="margin: 3px 0 0 0; padding-left: 18px; font-size: 0.95rem; line-height: 1.4;">
+            <li>Funktionelle Ernährung (Makro- & Mikronährstoffe)</li>
+            <li>Supplement-Physiologie</li>
+          </ul>
+        </div>
+
+        <div>
+          <strong style="color: #001454; font-size: 0.85rem; text-transform: uppercase;">Rehabilitation & Mobilität</strong>
+          <ul style="margin: 3px 0 0 0; padding-left: 18px; font-size: 0.95rem; line-height: 1.4;">
+            <li>Mobility Tests & Funktionsprüfungen</li>
+            <li>Rehabilitationsprinzipien</li>
+          </ul>
+        </div>
+
+        <div>
+          <strong style="color: #001454; font-size: 0.85rem; text-transform: uppercase;">Neurotransmitter & Biomarker</strong>
+          <ul style="margin: 3px 0 0 0; padding-left: 18px; font-size: 0.95rem; line-height: 1.4;">
+            <li>Neurotransmitter-Physiologie</li>
+          </ul>
+        </div>
+
       </div>
     </div>
+
   </div>
 </details>
 
