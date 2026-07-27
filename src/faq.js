@@ -197,6 +197,29 @@ export function mountFaq(container) {
       </div>
     </details>
 
+<details class="faq"><summary>Evidenz der Trainingsrezeptur von LOGMAN</summary>
+      <div class="faq-a">
+	<p><b>Studien:</b>
+        <a href="https://www.sciencedirect.com/science/article/pii/S2095254625000869" target="_blank" rel="noopener noreferrer">Mechanismen zu Hypertrophie</a>
+	<a href="https://journals.physiology.org/doi/full/10.1152/physrev.00039.2022" target="_blank" rel="noopener noreferrer">Mechanismen zu Hypertrophie 2</a>
+	<a href="https://www.fisiologiadelejercicio.com/wp-content/uploads/2025/12/The-Resistance-Training-Dose-Response.pdf" target="_blank" rel="noopener noreferrer">Metastudie zu Volumen</a>
+	<a href="https://fitchef.com/shorts/best-rep-range-muscle-growth/" target="_blank" rel="noopener noreferrer">Last & Wiederholungsbereich</a>
+	<a href="https://sportrxiv.org/index.php/server/preprint/view/782" target="_blank" rel="noopener noreferrer">Last & Wiederholungsbereich 2</a>
+	<a href="https://www.strengthscience.co/p/closer-to-failure-bigger-muscles" target="_blank" rel="noopener noreferrer">Nähe zum Muskelversagen (RIR)</a>
+	<a href="https://getfitcraft.com/science/training-to-failure-vs-reps-in-reserve" target="_blank" rel="noopener noreferrer">Nähe zum Muskelversagen (RIR) 2</a>
+	<a href="https://www.fisiologiadelejercicio.com/wp-content/uploads/2025/12/The-Resistance-Training-Dose-Response.pdf" rel="noopener noreferrer">Trainingsfrequenz</a>
+	<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9528903/" rel="noopener noreferrer">Progressive Überladung</a>
+      </div>
+	<a href="https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2024.1429789/full" rel="noopener noreferrer">Satzpausen</a>
+	<a href="https://peerj.com/articles/16777/" rel="noopener noreferrer">Regeneration & Deload</a>
+	<a href="https://www.researchgate.net/publication/391802156_A_Practical_Approach_to_Deloading_Recommendations_and_Considerations_for_Strength_and_Physique_Sports" rel="noopener noreferrer">Regeneration & Deload 2</a>
+
+	<p><b>Zusammengefasst:</b>
+	<p>Spannung ist alles → Last ist zweitrangig (5–30 Reps, nah ans Versagen) → Volumen steigern trägt zu Muskelwachstum bei mit abnehmenden Erträgen pro weiteren Satz (~10–20 Sätze/Muskel/Woche als Korridor) → Frequenz nach Praktikabilität → progressiv überladen (egal ob Gewicht oder Reps) → Deload nach Bedarf, nicht aus Prinzip.</p>
+
+      </div>
+    </details>
+
     <details class="faq"><summary>Worauf kommt es beim Muskelaufbau an?</summary>
       <div class="faq-a">
         <p>Wichtig sind <b>produktive Sätze nahe genug am Versagen, langfristige Leistungsentwicklung und ausreichende Erholung</b>. Nicht der maximal mögliche Reiz einer einzelnen Einheit zählt, sondern der höchste wiederholbar produktive Reiz.</p>
@@ -216,13 +239,6 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p>Für Muskelaufbau und allgemeinen Verletzungsschutz ist zusätzliches langes Dehnen nicht notwendig. Krafttraining über eine kontrollierte, möglichst volle Bewegungsamplitude trainiert Beweglichkeit bereits mit.</p>
         <p>Dehnen ist sinnvoll, wenn eine konkrete Bewegungseinschränkung deine Übungstechnik stört. Vor dem Training eher kurz und dynamisch.</p>
-      </div>
-    </details>
-
- <details class="faq"><summary>Evidenz der Trainingsrezeptur von LOGMAN</summary>
-      <div class="faq-a">
-        <a href="https://www.sciencedirect.com/science/article/pii/S2095254625000869" target="_blank" rel="noopener noreferrer">Mechanismen zu Hypertrophie</a>
-	<a href="https://journals.physiology.org/doi/full/10.1152/physrev.00039.2022" target="_blank" rel="noopener noreferrer">Mechanismen zu Hypertrophie 2</a>
       </div>
     </details>
 
