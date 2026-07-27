@@ -263,6 +263,21 @@ export function mountFaq(container) {
   </div>
 </details>
 
+    <details class="faq"><summary>Worauf kommt es beim Muskelaufbau an?</summary>
+      <div class="faq-a">
+        <p>Wichtig sind <b>produktive Sätze nahe genug am Versagen, langfristige Leistungsentwicklung und ausreichende Erholung</b>. Nicht der maximal mögliche Reiz einer einzelnen Einheit zählt, sondern der höchste wiederholbar produktive Reiz.</p>
+        <p>Volumen ist der Dosisregler. Die häufig genannten 10–20 Sätze sind eine grobe Faustregel, kein persönlicher Pflichtbereich. Direkte und indirekte Arbeit sowie unterschiedliche Versagensnähe müssen im Zusammenhang betrachtet werden.</p>
+        <p><b>Muskelkater ist kein verlässliches Maß</b> für Trainingsqualität oder Muskelwachstum.</p>
+      </div>
+    </details>
+
+    <details class="faq"><summary>Soll ich stretchen?</summary>
+      <div class="faq-a">
+        <p>Für Muskelaufbau und allgemeinen Verletzungsschutz ist zusätzliches langes Dehnen nicht notwendig. Krafttraining über eine kontrollierte, möglichst volle Bewegungsamplitude trainiert Beweglichkeit bereits mit.</p>
+        <p>Dehnen ist sinnvoll, wenn eine konkrete Bewegungseinschränkung deine Übungstechnik stört. Vor dem Training eher kurz und dynamisch.</p>
+      </div>
+    </details>
+
     <p class="faq-sektion" id="faq-hintergrund">Hintergrund & Weiteres</p>
 
     <details class="faq"><summary>Was ist LOGMAN?</summary>
@@ -291,21 +306,6 @@ export function mountFaq(container) {
   <p><b>Zusammengefasst:</b></p>
   <p>Spannung ist alles → Last ist zweitrangig (5–30 Reps, nah ans Versagen) → Volumen steigern trägt zu Muskelwachstum bei mit abnehmenden Erträgen pro weiterem Satz ab einer gewissen Anzahl pro Muskel und Einheit (~10–20 Sätze/Muskel/Woche als Korridor) → Frequenz nach Praktikabilität → progressiv überladen (egal ob Gewicht oder Reps) → Deload nach Bedarf, nicht aus Prinzip.</p>
 </div>
-    </details>
-
-    <details class="faq"><summary>Worauf kommt es beim Muskelaufbau an?</summary>
-      <div class="faq-a">
-        <p>Wichtig sind <b>produktive Sätze nahe genug am Versagen, langfristige Leistungsentwicklung und ausreichende Erholung</b>. Nicht der maximal mögliche Reiz einer einzelnen Einheit zählt, sondern der höchste wiederholbar produktive Reiz.</p>
-        <p>Volumen ist der Dosisregler. Die häufig genannten 10–20 Sätze sind eine grobe Faustregel, kein persönlicher Pflichtbereich. Direkte und indirekte Arbeit sowie unterschiedliche Versagensnähe müssen im Zusammenhang betrachtet werden.</p>
-        <p><b>Muskelkater ist kein verlässliches Maß</b> für Trainingsqualität oder Muskelwachstum.</p>
-      </div>
-    </details>
-
-    <details class="faq"><summary>Soll ich stretchen?</summary>
-      <div class="faq-a">
-        <p>Für Muskelaufbau und allgemeinen Verletzungsschutz ist zusätzliches langes Dehnen nicht notwendig. Krafttraining über eine kontrollierte, möglichst volle Bewegungsamplitude trainiert Beweglichkeit bereits mit.</p>
-        <p>Dehnen ist sinnvoll, wenn eine konkrete Bewegungseinschränkung deine Übungstechnik stört. Vor dem Training eher kurz und dynamisch.</p>
-      </div>
     </details>
 
 <details class="faq"><summary>Wer steckt hinter LOGMAN?</summary>
