@@ -318,12 +318,11 @@ export function mountFaq(container) {
   </div>
 </details>
 
-    <p class="src"><b>Grundlagen:</b> LOGMAN-Training · produktive Versagensnähe · progressive Belastung · erholbares Volumen · standardisierte Ausführung.</p>`;
+    <p class="src"><b>Grundlagen:</b> LOGMAN-Training · produktive Versagensnähe · progressive Belastung · erholbares Volumen · standardisierte Ausführung.</p>
+    <div class="faq-credit">
+      <p>LOGMAN – Concept &amp; Code by <b>Florian Rau</b></p>
+    </div>`;
   container.appendChild(wrap);
-
-<div style="text-align: left; margin-top: 30px; opacity: 1; font-size: 0.85em;">
-  <p>LOGMAN – Concept & Code by <b>Florian Rau</b></p>
-</div>
 
   const faqSuche = wrap.querySelector('#faq-suche-input');
   const faqLoeschen = wrap.querySelector('#faq-suche-loeschen');
