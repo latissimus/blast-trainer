@@ -222,6 +222,13 @@ export function mountFaq(container) {
       </div>
     </details>
 
+  <details class="faq"><summary>Wann sollte ich Volumen verändern?</summary>
+      <div class="faq-a">
+        <p><b>Erhöhen:</b> Wenn Entwicklung über mehrere Cycles ausbleibt, Technik und Progression stabil sind und du vollständig erholt bist. Ergänze zunächst 1–2 Sätze und beobachte mindestens zwei bis drei Cycles.</p>
+        <p><b>Reduzieren:</b> Wenn Leistung wiederholt fällt, der Muskel bis zur nächsten Einheit nicht erholt ist, Beschwerden zunehmen oder zusätzliche Sätze nur noch geringe Qualität liefern.</p>
+      </div>
+    </details>
+
     <p class="faq-sektion" id="faq-hintergrund">Hintergrund & Weiteres</p>
 
     <details class="faq"><summary>Was ist LOGMAN?</summary>
@@ -257,13 +264,6 @@ export function mountFaq(container) {
         <p>Wichtig sind <b>produktive Sätze nahe genug am Versagen, langfristige Leistungsentwicklung und ausreichende Erholung</b>. Nicht der maximal mögliche Reiz einer einzelnen Einheit zählt, sondern der höchste wiederholbar produktive Reiz.</p>
         <p>Volumen ist der Dosisregler. Die häufig genannten 10–20 Sätze sind eine grobe Faustregel, kein persönlicher Pflichtbereich. Direkte und indirekte Arbeit sowie unterschiedliche Versagensnähe müssen im Zusammenhang betrachtet werden.</p>
         <p><b>Muskelkater ist kein verlässliches Maß</b> für Trainingsqualität oder Muskelwachstum.</p>
-      </div>
-    </details>
-
-    <details class="faq"><summary>Wann sollte ich Volumen verändern?</summary>
-      <div class="faq-a">
-        <p><b>Erhöhen:</b> Wenn Entwicklung über mehrere Cycles ausbleibt, Technik und Progression stabil sind und du vollständig erholt bist. Ergänze zunächst 1–2 Sätze und beobachte mindestens zwei bis drei Cycles.</p>
-        <p><b>Reduzieren:</b> Wenn Leistung wiederholt fällt, der Muskel bis zur nächsten Einheit nicht erholt ist, Beschwerden zunehmen oder zusätzliche Sätze nur noch geringe Qualität liefern.</p>
       </div>
     </details>
 
