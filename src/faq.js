@@ -282,8 +282,11 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Was ist LOGMAN?</summary>
       <div class="faq-a">
-        <p>LOGMAN ist ein <b>Trainingstagebuch für ein festes, aber anpassbares Muskelaufbau-System</b>. Es verbindet produktive Sätze nahe am Versagen, dokumentierbare HEAVYS, versagensnahe PUMPS, individuell erholbares Volumen und einen rollierenden OK/UK-Split.</p>
-        <p>Die App funktioniert auch ohne Empfang. Trainingsdaten werden zuerst lokal gespeichert und später synchronisiert.</p>
+	<p>LOGMAN ist aus dem Anspruch heraus entstanden, ein evidenzbasiertes Werkzeug für intelligentes Krafttraining mit dem Ziel der Hypertrophie zu schaffen – mit maximalem Fokus auf Progression und Regeneration 👊🏼</p>
+
+        <p>Als Ergebnis ist LOGMAN ist ein <b>Trainingstagebuch im Retro-Look für ein festes, aber anpassbares Muskelaufbau-System</b>. Es verbindet produktive Sätze nahe am Versagen, dokumentierbare HEAVYS, versagensnahe PUMPS, individuell erholbares Volumen und einen rollierenden OK/UK-Split.</p>
+        
+	<p>Die App funktioniert auch ohne Empfang. Trainingsdaten werden zuerst lokal gespeichert und später synchronisiert.</p>
       </div>
     </details>
 
@@ -313,8 +316,6 @@ export function mountFaq(container) {
     <div style="text-align: center; margin-bottom: 15px;">
       <img src="${floFotoUrl}" alt="Florian Rau" style="width: 250px; height: 300px; border-radius: 20px; object-fit: cover; border: 2px solid #001454;">
     </div>
-
-    <p>LOGMAN ist aus dem Anspruch heraus entstanden, ein evidenzbasiertes Werkzeug für intelligentes Krafttraining mit dem Ziel der Hypertrophie zu schaffen – mit maximalem Fokus auf Progression und Regeneration im Retro-Look. 👊🏼</p>
 
     <p><b>Entwickelt von Florian Rau</b><br>
     • Bachelor Fitnessökonomie<br>
