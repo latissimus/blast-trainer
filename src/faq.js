@@ -220,7 +220,7 @@ export function mountFaq(container) {
     </details>
 
     <p class="src"><b>Grundlagen:</b> LOGMAN-Training · produktive Versagensnähe · progressive Belastung · erholbares Volumen · standardisierte Ausführung.</p>
-<p class="src"><b>Evidenz:</b>https://www.sciencedirect.com/science/article/pii/S2095254625000869</p>`;
+<p class="src"><b>Evidenz:</b> <a href="https://www.sciencedirect.com/science/article/pii/S2095254625000869" target="_blank" rel="noopener noreferrer">ScienceDirect (Hypertrophie & Trainingslehre)</a></p>`;
   container.appendChild(wrap);
 
   const faqSuche = wrap.querySelector('#faq-suche-input');
