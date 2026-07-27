@@ -199,7 +199,7 @@ export function mountFaq(container) {
 
 <details class="faq"><summary>Evidenz der Trainingsrezeptur von LOGMAN</summary>
       <div class="faq-a">
-	<p><b>Evidenz & Quellen:</b></p>
+	<p><b>Studien & Quellen:</b></p>
   <p><a href="https://www.sciencedirect.com/science/article/pii/S2095254625000869" target="_blank" rel="noopener noreferrer">Mechanismen zu Hypertrophie</a></p>
   <p><a href="https://journals.physiology.org/doi/full/10.1152/physrev.00039.2022" target="_blank" rel="noopener noreferrer">Mechanismen zu Hypertrophie 2</a></p>
   <p><a href="https://www.fisiologiadelejercicio.com/wp-content/uploads/2025/12/The-Resistance-Training-Dose-Response.pdf" target="_blank" rel="noopener noreferrer">Metastudie zu Volumen</a></p>
@@ -214,7 +214,7 @@ export function mountFaq(container) {
   <p><a href="https://www.researchgate.net/publication/391802156_A_Practical_Approach_to_Deloading_Recommendations_and_Considerations_for_Strength_and_Physique_Sports" target="_blank" rel="noopener noreferrer">Regeneration & Deload 2</a></p>
 
   <p><b>Zusammengefasst:</b></p>
-  <p>Spannung ist alles → Last ist zweitrangig (5–30 Reps, nah ans Versagen) → Volumen steigern trägt zu Muskelwachstum bei mit abnehmenden Erträgen pro weiteren Satz (~10–20 Sätze/Muskel/Woche als Korridor) → Frequenz nach Praktikabilität → progressiv überladen (egal ob Gewicht oder Reps) → Deload nach Bedarf, nicht aus Prinzip.</p>
+  <p>Spannung ist alles → Last ist zweitrangig (5–30 Reps, nah ans Versagen) → Volumen steigern trägt zu Muskelwachstum bei mit abnehmenden Erträgen pro weiterem Satz ab einer gewissen Anzahl pro Muskel und Einheit (~10–20 Sätze/Muskel/Woche als Korridor) → Frequenz nach Praktikabilität → progressiv überladen (egal ob Gewicht oder Reps) → Deload nach Bedarf, nicht aus Prinzip.</p>
 </div>
     </details>
 
