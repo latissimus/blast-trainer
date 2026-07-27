@@ -219,9 +219,10 @@ export function mountFaq(container) {
       </div>
     </details>
 
- <details class="faq"><summary>Die Evidenz der Trainingsrezeptur von LOGMAN</summary>
+ <details class="faq"><summary>Evidenz der Trainingsrezeptur von LOGMAN</summary>
       <div class="faq-a">
         <a href="https://www.sciencedirect.com/science/article/pii/S2095254625000869" target="_blank" rel="noopener noreferrer">Mechanismen zu Hypertrophie</a>
+	<a href="https://journals.physiology.org/doi/full/10.1152/physrev.00039.2022" target="_blank" rel="noopener noreferrer">Mechanismen zu Hypertrophie 2</a>
       </div>
     </details>
 
