@@ -112,37 +112,29 @@ export function mountFaq(container) {
       </div>
     </details>
 
-    <details class="faq"><summary>Kann ich Intensitätstechniken verwenden?</summary>
+   <details class="faq"><summary>Kann ich Intensitätstechniken verwenden?</summary>
   <div class="faq-a">
     <p><b>Intensitätstechniken sind optional und ersetzen reguläre Sätze.</b> Sie sind wissenschaftlich nicht als mehr oder weniger effektiv als reguläre Sätze erwiesen, können allerdings eingesetzt werden, um Zeiteffizienz zu erzeugen.</p>
 
-    <p><b>Rest-Pause</b></p>
-    <p>Geeignet für: Maschinen, Kabel, Isolationen.</p>
-    <p><i>Beispiel:</i> Aktivierungssatz mit 10–15 Reps bis etwa 1 RIR → 15–25 Sekunden Pause → 3–5 Wiederholungen → erneut kurze Pause → 3–5 Wiederholungen.</p>
-    <p>Maximal ein Rest-Pause-Satz pro Muskel und Einheit als Ausgangspunkt.</p>
+    <p><b>Rest-Pause</b><br>
+    • Geeignet für: Maschinen, Kabel, Isolationen.<br>
+    • Beispiel: Aktivierungssatz mit 10–15 Reps bis etwa 1 RIR → 15–25 Sekunden Pause → 3–5 Wiederholungen → erneut kurze Pause → 3–5 Wiederholungen.<br>
+    • Maximal ein Rest-Pause-Satz pro Muskel und Einheit als Ausgangspunkt.</p>
 
-    <p><b>Cluster-Sätze</b></p>
-    <p>Geeignet für Maschinen oder ausgewählte Mehrgelenksübungen:</p>
-    <ul>
-      <li>Beispielsweise 4×4 bis 6×4 mit 10–15 Sekunden Pause innerhalb des Clusters.</li>
-      <li>Kein verpflichtendes mehrfaches Versagen.</li>
-      <li>1–2 Durchgänge primär zur Zeitersparnis; können innerhalb einer Einheit die Übungen einer Muskelgruppe ersetzen.</li>
-    </ul>
+    <p><b>Cluster-Sätze</b><br>
+    • Geeignet für Maschinen oder ausgewählte Mehrgelenksübungen.<br>
+    • Beispielsweise 4×4 bis 6×4 mit 10–15 Sekunden Pause innerhalb des Clusters (kein verpflichtendes mehrfaches Versagen).<br>
+    • 1–2 Durchgänge primär zur Zeitersparnis. Können innerhalb einer Einheit die Übungen einer Muskelgruppe ersetzen.</p>
 
-    <p><b>Drop-Sätze</b></p>
-    <ul>
-      <li>Nur bei sicheren Übungen.</li>
-      <li>Ein normaler Satz, anschließend einmalige Lastreduktion.</li>
-      <li>Nicht zusätzlich zu bereits maximalem Volumen.</li>
-    </ul>
+    <p><b>Drop-Sätze</b><br>
+    • Nur bei sicheren Übungen.<br>
+    • Ein normaler Satz, anschließend einmalige Lastreduktion.<br>
+    • Nicht zusätzlich zu bereits maximalem Volumen.</p>
 
-    <p><b>Lengthened Partials</b></p>
-    <ul>
-      <li>Nur bei sicherer Übung.</li>
-      <li>Nach vollständiger Ausführung aller regulären Wiederholungen.</li>
-      <li>Ausgeführt in der gedehnten Hälfte (wenige Zusatzwiederholungen).</li>
-      <li>Nicht notwendig, wenn der Satz bereits 0–1 RIR erreicht hat.</li>
-    </ul>
+    <p><b>Lengthened Partials</b><br>
+    • Nur bei sicherer Übung.<br>
+    • Nach vollständiger Ausführung aller regulären Wiederholungen in der gedehnten Hälfte (wenige Zusatzwiederholungen).<br>
+    • Nicht notwendig, wenn der Satz bereits 0–1 RIR erreicht hat.</p>
   </div>
 </details>
 
