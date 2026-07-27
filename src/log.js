@@ -966,7 +966,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             </div>
             <div>
               <b>7</b>
-              <span><strong>7 Cycles</strong><small>Nach jeder Pause machst du einfach mit der nächsten Einheit weiter.</small></span>
+              <span><strong>7 Cycles</strong><small>Jeder CYCLE besteht aus den 4 Einheiten. Nach maximal 7 CYCLES folgt ein DELOAD.</small></span>
             </div>
             <div>
               <b>2</b>
