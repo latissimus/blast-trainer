@@ -284,7 +284,7 @@ export function mountFaq(container) {
       <div class="faq-a">
 	<p>LOGMAN ist aus dem Anspruch heraus entstanden, ein evidenzbasiertes Werkzeug für intelligentes Krafttraining mit dem Ziel der Hypertrophie zu schaffen – mit maximalem Fokus auf Progression und Regeneration 👊🏼</p>
 
-        <p>Als Ergebnis ist LOGMAN ist ein <b>Trainingstagebuch im Retro-Look für ein festes, aber anpassbares Muskelaufbau-System</b>. Es verbindet produktive Sätze nahe am Versagen, dokumentierbare HEAVYS, versagensnahe PUMPS, individuell erholbares Volumen und einen rollierenden OK/UK-Split.</p>
+        <p>Im Ergebnis ist LOGMAN ein <b>Trainingstagebuch im Retro-Look für ein festes, aber anpassbares Muskelaufbau-System</b>. Es verbindet produktive Sätze nahe am Versagen, dokumentierbare HEAVYS, versagensnahe PUMPS, individuell erholbares Volumen und einen rollierenden OK/UK-Split.</p>
         
 	<p>Die App funktioniert auch ohne Empfang. Trainingsdaten werden zuerst lokal gespeichert und später synchronisiert.</p>
       </div>
