@@ -1153,7 +1153,7 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 
 /* ---------- FAQ- und Meter-Seite ---------- */
 .src{font-size:12px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:var(--bw) solid var(--ink);padding-top:10px}
-.faq-credit{text-align:center;margin-top:30px;opacity:.6;font-size:.85em}
+.faq-credit{margin-top:8px;text-align:left}
 .faq-spruenge{display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;margin:0 0 12px;
   border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface)}
 .faq-spruenge a{padding:9px 4px;border-right:1.5px solid var(--ink);color:var(--text);
