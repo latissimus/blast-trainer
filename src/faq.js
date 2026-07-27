@@ -229,6 +229,43 @@ export function mountFaq(container) {
       </div>
     </details>
 
+<details class="faq"><summary>Wie soll ein Übungswechsel aussehen?</summary>
+  <div class="faq-a">
+    <p><b>Übung bleibt im Plan, wenn:</b><br>
+    • Sie vollkommen schmerzfrei ist.<br>
+    • Die Technik stabil sitzt und der Zielmuskel klar beteiligt ist.<br>
+    • Sie kontinuierlich progressierbar ist (HEAVYS).<br>
+    • Ermüdung und Bewegungsumfang (ROM) angemessen sind.</p>
+
+    <p><b>Übung wird modifiziert, wenn:</b><br>
+    • Geräteeinstellung, Griff oder Stand Beschwerden verursachen.<br>
+    • Die verfügbaren Lastsprünge zu groß sind.<br>
+    • Die Reihenfolge innerhalb der Einheit die Leistung unnötig begrenzt.</p>
+
+    <p><b>Übung wird ersetzt, wenn:</b><br>
+    • Wiederkehrende Schmerzen auftreten.<br>
+    • Über mehrere vergleichbare Einheiten keine Progression möglich ist (HEAVYS).<br>
+    • Der Zielmuskel trotz sauberer Technikarbeit nicht der limitierende Faktor ist.<br>
+    • Die systemische Ermüdung unverhältnismäßig hoch ist.</p>
+
+    <p><b>Wichtig:</b> Übungen werden niemals allein wegen fehlendem Muskelkater oder fehlendem Pump ausgetauscht!</p>
+  </div>
+</details>
+
+<details class="faq"><summary>Wann sollte ich das Volumen individuell anpassen?</summary>
+  <div class="faq-a">
+    <p><b>Indikation für eine Drosselung:</b><br>
+    • Hoher Alltagsstress oder schwierige Lebensphasen.<br>
+    • Urlaub oder fehlende Motivation.<br>
+    • Aufkeimende Gelenkschmerzen oder schlechte Regeneration.</p>
+
+    <p><b>Konkrete Maßnahmen:</b><br>
+    • <b>Volumenstufe Level I wählen</b> (Erhaltung / Basis-Reiz).<br>
+    • <b>Weniger systemisch ermüdende Übungen:</b> Freie Mehrgelenksübungen reduzieren, häufiger auf Maschinen ausweichen.<br>
+    • <b>Keine starre Progressionspflicht:</b> Das Training dient in diesen Phasen dem Krafterhalt und der Stressbewältigung, nicht dem Erzwingen neuer Rekorde.</p>
+  </div>
+</details>
+
     <p class="faq-sektion" id="faq-hintergrund">Hintergrund & Weiteres</p>
 
     <details class="faq"><summary>Was ist LOGMAN?</summary>
