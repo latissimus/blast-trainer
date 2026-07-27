@@ -219,8 +219,13 @@ export function mountFaq(container) {
       </div>
     </details>
 
-    <p class="src"><b>Grundlagen:</b> LOGMAN-Training · produktive Versagensnähe · progressive Belastung · erholbares Volumen · standardisierte Ausführung.</p>
-<p class="src"><b>Evidenz:</b> <a href="https://www.sciencedirect.com/science/article/pii/S2095254625000869" target="_blank" rel="noopener noreferrer">Mechanismen zu Hypertrophie</a></p>`;
+ <details class="faq"><summary>Die Evidenz der Trainingsrezeptur von LOGMAN</summary>
+      <div class="faq-a">
+        <a href="https://www.sciencedirect.com/science/article/pii/S2095254625000869" target="_blank" rel="noopener noreferrer">Mechanismen zu Hypertrophie</a>
+      </div>
+    </details>
+
+    <p class="src"><b>Grundlagen:</b> LOGMAN-Training · produktive Versagensnähe · progressive Belastung · erholbares Volumen · standardisierte Ausführung.</p>`;
   container.appendChild(wrap);
 
   const faqSuche = wrap.querySelector('#faq-suche-input');
