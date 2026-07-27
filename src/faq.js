@@ -311,7 +311,7 @@ export function mountFaq(container) {
 <details class="faq"><summary>Wer steckt hinter LOGMAN?</summary>
   <div class="faq-a">
     <div style="text-align: center; margin-bottom: 15px;">
-      <img src="${floFotoUrl}" alt="Florian Rau" style="width: 250px; height: 250px; border-radius: 10px; object-fit: cover; border: 8px solid #001454;">
+      <img src="${floFotoUrl}" alt="Florian Rau" style="width: 250px; height: 250px; border-radius: 20px; object-fit: cover; border: 2px solid #001454;">
     </div>
 
     <p>LOGMAN ist aus dem Anspruch heraus entstanden, ein evidenzbasiertes Werkzeug für intelligentes Krafttraining mit dem Ziel der Hypertrophie zu schaffen – mit maximalem Fokus auf Progression und Regeneration im Retro-Look. 👊🏼</p>
@@ -319,6 +319,8 @@ export function mountFaq(container) {
     <p><b>Entwickelt von Florian Rau</b><br>
     • Bachelor Fitnessökonomie<br>
     • 10 Jahre Kraftsport-Praxis</p>
+ 
+<p><b>Ausbildungen</b><br>
 
     <p><b>Anatomie & Biomechanik:</b><br>
     • Funktionelle Anatomie<br>
