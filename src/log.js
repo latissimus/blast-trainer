@@ -1093,20 +1093,19 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
       const el = document.createElement('div'); el.className = `block block-${effType}`;
       const cues = [];
-      if (!blk.prio && effType === 'load') {
-        const hatComp = exOf(blk, tier).some((exDef) => exDef.r === 'Comp');
+      if (effType === 'load') {
+        const hatComp = blk.prio || exOf(blk, tier).some((exDef) => exDef.r === 'Comp');
         cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '1–3 RIR') + '</span>',
           `<span class="chip">${blk.deload ? 'Kein Versagen' : (hatComp ? 'Versagen nur letzter Comp' : 'Kein erzwungenes Versagen')}</span>`);
       }
-      if (!blk.prio && effType === 'pump') cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '0–1 RIR') + '</span>', '<span class="chip">leicht · versagensnah · Partials optional</span>');
-      if (!blk.prio && effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
-      if (!blk.prio) cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + pausenLabel(effRest) + '</button>');
+      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '0–1 RIR') + '</span>', '<span class="chip">leicht · versagensnah · Partials optional</span>');
+      if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
+      cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + pausenLabel(effRest) + '</button>');
 
       el.innerHTML = `
         <div class="bhead">
           <span class="mus">${blockMus}</span>
           <span class="badge b-${effType}">${TYPE_LABEL[effType] || effType}</span>
-          ${blk.prio ? '<span class="volrolle prio">Priorisiert</span>' : ''}
           <span class="target" data-tgt="${blk.id}">Sätze <b>${tgt}</b></span>
         </div>
         ${cues.length ? `<div class="cue">${cues.join('')}</div>` : ''}`;
@@ -1172,6 +1171,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
           tutorialWahlMarkiert = true;
         }
         hd.appendChild(nameIn); exDiv.appendChild(hd);
+        if (blk.prio) {
+          const pc = document.createElement('span');
+          pc.className = 'volrolle prio';
+          pc.textContent = 'Priorisiert';
+          hd.appendChild(pc);
+        }
 
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
         // Anzahl Sätze: Pump-Paare sind Supersets und Cluster-Felder eigenständig -> jede Übung

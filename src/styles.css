@@ -981,12 +981,16 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .volrolle.prio{background:var(--prio);color:#fff}
 .volrolle.minus{background:var(--prio-soft);border-color:var(--prio);color:var(--text)}
 
-/* Prioritätskarten ergänzen nur den gewählten Slot. Die ausführlichen
-   Trainingshinweise stehen schon im regulären Muskelblock direkt darüber. */
+/* Prioritaetskarten ergaenzen nur den gewaehlten Slot. Der Status-Chip sitzt
+   bei der Uebungswahl, wo auch Umverteilungs-Chips erscheinen. */
 .prioritaets-block.prioritaets-angedockt{margin-top:-7px}
 .prioritaets-block .bhead{padding-top:12px;padding-bottom:7px}
 .prioritaets-block .ex{padding-top:9px;padding-bottom:10px}
 .prioritaets-block .volrolle{font-size:8.5px}
+.prioritaets-block .exhead .role{order:0}
+.prioritaets-block .exhead .exname{order:1}
+.prioritaets-block .exhead::after{content:"";order:2;flex-basis:100%;height:0}
+.prioritaets-block .exhead .volrolle.prio{order:3}
 
 /* Level III: Zusatzvolumen bewusst je Übung statt pauschal für den ganzen Plan. */
 .satz-extra{display:inline-flex;align-items:center;gap:4px;margin-left:auto}
