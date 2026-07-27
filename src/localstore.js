@@ -125,7 +125,7 @@ export function mergePayload(srv, loc) {
   return {
     // Ansichtszustand: das Geraet, an dem zuletzt gearbeitet wurde, gewinnt.
     week: loc.week || srv.week || 1,
-    day: loc.day || srv.day || 'OK-A',
+    day: loc.day || srv.day || 'OK-H',
     data: mergeData(srv.data, loc.data),
     ex: mergeNested(srv.ex, loc.ex, pickList),
     notes: mergeNested(srv.notes, loc.notes, pickList),
@@ -133,9 +133,8 @@ export function mergePayload(srv, loc) {
     // kopiert es nicht. Was hier fehlt, faellt beim Zusammenfuehren still weg –
     // und zwar genau dann, wenn offline gearbeitet wurde.
     //
-    // Tier/Rotation/Datum sind bewusste Entscheidungen -> lokal gewinnt je Schluessel.
+    // Tier/Datum sind bewusste Entscheidungen -> lokal gewinnt je Schlüssel.
     tier: Object.assign({}, srv.tier, loc.tier),
-    rot: Object.assign({}, srv.rot, loc.rot),
     datum: Object.assign({}, srv.datum, loc.datum),
     // Die Prioritaeten bilden eine zusammenhaengende Planungsentscheidung.
     // Liegt lokal eine Fassung vor, muss auch das Entfernen eines Eintrags
@@ -147,6 +146,6 @@ export function mergePayload(srv, loc) {
     // Phasenuebergreifende Oberflaechen-Zustaende, z.B. ob der einmalige
     // Schnellstart bereits abgeschlossen wurde.
     meta: Object.assign({}, srv.meta, loc.meta),
-    v: 3,
+    v: 4,
   };
 }

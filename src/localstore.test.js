@@ -116,7 +116,7 @@ describe('mergePayload – Pool und Einstellungen', () => {
 
   it('kommt mit leeren Seiten klar', () => {
     expect(() => mergePayload(null, null)).not.toThrow();
-    expect(mergePayload({}, {}).v).toBe(3);
+    expect(mergePayload({}, {}).v).toBe(4);
   });
 });
 
@@ -131,12 +131,11 @@ describe('mergePayload – Vollstaendigkeit', () => {
       ex: { 'UK-A': { legs: ['X'] } },
       notes: { 'UK-A': { legs: ['Sitz 4'] } },
       tier: { 'UK-A|3': 1 },
-      rot: { 3: 'B' },
       mem: { 'pump|x': { w: '20' } },
       datum: { 'UK-A|3': '2026-07-19' },
       volumen: { prioritaet: { Unterarme: { modus: 'plus' } } },
       meta: { einstiegErledigt: true },
-      v: 3,
+      v: 4,
     };
     const m = mergePayload(p, {});
     Object.keys(p).forEach((k) => expect(m, `Feld "${k}" fehlt nach dem Merge`).toHaveProperty(k));

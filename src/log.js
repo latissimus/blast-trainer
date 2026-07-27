@@ -1,32 +1,16 @@
 import { supabase } from './supabase.js';
 import { readLog, writeLog, mergePayload } from './localstore.js';
-import { TPL, LEGACY, TIER_NAMES } from './template.js';
+import { TPL, TIER_NAMES, CYCLE_TAGE, DELOAD_TAGE } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
 import { auswahlGruppen, sucheAuswahlGruppen, imKatalog } from './auswahl.js';
-import { prioritaetsAnpassungen, slotKey } from './prioritaet.js';
+import { prioritaetsAnpassungen, prioBloecke, slotKey } from './prioritaet.js';
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
 
-// Evidenznahe Orientierung: Pausen haengen am Tagestyp.
-// OK-Heavy/UK-Pump: 2.5/2 min, UK-Heavy/OK-Pump: 3/1.5 min.
-const MR_REST = 180;
-const OK_HEAVY_REST = 150;
-const UK_PUMP_REST = 120;
-const OK_PUMP_REST = 90;
-const DEFAULT_PUMP_REST = 120;
-
-function effektivePause(blk, effType, day) {
-  if (effType === 'mr') return MR_REST;
-  if (effType === 'pump') {
-    if (day?.startsWith('UK-') && blk.type === 'pump') return OK_PUMP_REST;
-    if (day?.startsWith('OK-') && blk.type === 'pump') return UK_PUMP_REST;
-    if (blk.type === 'mr') return DEFAULT_PUMP_REST;
-    return blk.rest || DEFAULT_PUMP_REST;
-  }
-  if (effType === 'load' && day?.startsWith('OK-')) return OK_HEAVY_REST;
-  return Math.max(180, blk.rest || 0);
+function effektivePause(blk) {
+  return blk.rest || 120;
 }
 
 function pausenLabel(sekunden) {
@@ -37,17 +21,15 @@ function pausenLabel(sekunden) {
 
 // Anzeige-Labels der Set-Typen. Die internen Keys (load/pump/mr) bleiben, damit
 // gespeicherte Logs gueltig bleiben – nur die Beschriftung wechselt.
-const TYPE_LABEL = { load: 'HEAVY', pump: 'PUMP', mr: 'CLUSTERS' };
+const TYPE_LABEL = { load: 'HEAVYS', pump: 'PUMPS', mr: 'CLUSTERS' };
 const LEVEL_LABEL = ['Kompakt', 'Standard', 'Voll'];
 const TUTORIAL_SETUP = [
-  { week: 1, day: 'OK-A', titel: 'Woche 1 · Tag 1', gruppe: 'A · ungerade Wochen', folgt: 'Woche 1 · Tag 2' },
-  { week: 1, day: 'UK-A', titel: 'Woche 1 · Tag 2', gruppe: 'A · ungerade Wochen', folgt: 'Woche 2 · Tag 1' },
-  { week: 2, day: 'OK-B', titel: 'Woche 2 · Tag 1', gruppe: 'B · gerade Wochen', folgt: 'Woche 2 · Tag 2' },
-  { week: 2, day: 'UK-B', titel: 'Woche 2 · Tag 2', gruppe: 'B · gerade Wochen', folgt: 'Satzeingabe' },
+  { week: 1, day: 'OK-H', titel: 'OK HEAVYS', folgt: 'UK HEAVYS' },
+  { week: 1, day: 'UK-H', titel: 'UK HEAVYS', folgt: 'Satzeingabe' },
 ];
 
 /* ------------------------------------------------------------------
-   Mount the LOGMAN log (v2: Level, A/B-Wochen, Rollen, Pausen-Timer)
+   Mount the LOGMAN log (v4: Cycles, rollierender OK/UK-Split, Pausen-Timer)
    into `container`.
      userId    – whose training_logs row to load
      readOnly  – true for the admin viewing a customer (no editing/saving)
@@ -83,29 +65,42 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   let p, mergedOffline = false;
-  if (serverOk && local && local.dirty) {
+  const hatInhalt = (wert) => !!(wert && Object.keys(wert).length);
+  const lokalesAltschema = hatInhalt(local?.payload) && local.payload.v !== 4;
+  const serverAltschema = hatInhalt(server) && server.v !== 4;
+  const lokalesNeuschema = local?.payload?.v === 4;
+  const schemaReset = !lokalesNeuschema && (lokalesAltschema || serverAltschema);
+  if (serverAltschema && lokalesNeuschema) {
+    // Ein bereits lokal begonnenes Cycle-Log darf nicht von einem noch nicht
+    // aktualisierten v3-Serverstand gelöscht werden.
+    p = local.payload;
+    mergedOffline = true;
+  } else if (schemaReset) {
+    p = { v: 4 };
+    mergedOffline = true;
+  } else if (serverOk && local && local.dirty) {
     // Nach einem Phasen-Reset ersetzt der lokale Stand den Server, statt sich mit
     // ihm zu vereinigen – sonst kaemen die bewusst geloeschten Wochen zurueck.
     p = local.replace ? local.payload : mergePayload(server, local.payload);
     mergedOffline = true;
   } else if (serverOk) p = server;
   else { p = local.payload; mergedOffline = true; }
+  // Schema v4 ist ein neues Trainingssystem. Alte Ganzkörper-/Wochenlogs
+  // werden bewusst nicht gemischt, sondern durch diesen leeren Cycle-Stand
+  // ersetzt. Der Nutzer hat dieses Löschen ausdrücklich freigegeben.
   const state = {
-    // Seit dem einwoechigen Deload endet eine Phase mit Woche 7. Alte
-    // Speicherstaende aus der frueheren Woche 8 landen sicher im Deload.
-    week: Math.min(7, Math.max(1, Number(p.week) || 1)),
-    day: TPL[p.day] ? p.day : 'OK-A',
+    // Cycles 1–7, Eintrag 8 = Deload.
+    week: Math.min(8, Math.max(1, Number(p.week) || 1)),
+    day: TPL[p.day] ? p.day : 'OK-H',
     data: p.data || {},
     tier: p.tier || {},
-    rot: p.rot || {},
-    ex: p.ex || {},      // gemeinsame Übungsnamen pro Tag (über alle Wochen der Rotation)
+    ex: p.ex || {},      // feste HEAVYS-Namen pro Einheit über alle Cycles
     notes: p.notes || {}, // gemeinsame Notizen pro Tag/Übung
     mem: p.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
-    datum: p.datum || {},  // Tag|Woche -> ISO-Datum der Einheit
+    datum: p.datum || {},  // Einheit|Cycle -> ISO-Datum
     volumen: { prioritaet: p.volumen?.prioritaet || {} }, // Muskel-Prioritaeten
     meta: p.meta || {},    // phasenuebergreifende Oberflaechen-Zustaende
   };
-  migrateData();
 
   let saveTimer = null;
   let saveStateEl = null;
@@ -128,7 +123,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saveStateEl.title = title;
   }
   function payloadOut() {
-    return { data: state.data, week: state.week, day: state.day, tier: state.tier, rot: state.rot, ex: state.ex, notes: state.notes, mem: state.mem, datum: state.datum, volumen: state.volumen, meta: state.meta, v: 3 };
+    return { data: state.data, week: state.week, day: state.day, tier: state.tier, ex: state.ex, notes: state.notes, mem: state.mem, datum: state.datum, volumen: state.volumen, meta: state.meta, v: 4 };
   }
   // Lokal vormerken, ohne ein gesetztes replace-Kennzeichen zu verlieren:
   // Es darf erst fallen, wenn der Server den Stand wirklich hat.
@@ -178,42 +173,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     retryId = setInterval(retrySync, 20000);
   }
 
-  // ---- migration: v1 index->id + Übungsnamen in gemeinsamen Tag-Speicher heben ----
-  function migrateData() {
-    const d = state.data;
-    Object.keys(d).forEach((day) => {
-      const map = LEGACY[day];
-      Object.keys(d[day] || {}).sort((a, b) => Number(a) - Number(b)).forEach((wk) => {
-        const cell = d[day][wk]; if (!cell) return;
-        if (map) {
-          Object.keys(cell).forEach((k) => {
-            if (/^\d+$/.test(k)) {
-              const id = map[Number(k)];
-              if (id && !cell[id]) cell[id] = cell[k];
-              delete cell[k];
-            }
-          });
-        }
-        // Übungsnamen aus der Zelle ziehen -> state.ex[day][blockId] (spätere Wochen mit Namen gewinnen)
-        Object.keys(cell).forEach((bid) => {
-          const entry = cell[bid];
-          if (entry && entry.ex) {
-            const hasName = entry.ex.some((n) => n && n.trim());
-            state.ex[day] = state.ex[day] || {};
-            if (!state.ex[day][bid] || hasName) state.ex[day][bid] = entry.ex.slice();
-            delete entry.ex;
-          }
-        });
-      });
-    });
-  }
-
   // Gemeinsame Übungsnamen für einen Tag/Block (über alle Wochen geteilt).
   // Start LEER — jeder Trainee trägt seine Übungen selbst ein.
   function dayNames(day, blk) {
-    state.ex[day] = state.ex[day] || {};
-    if (!state.ex[day][blk.id]) state.ex[day][blk.id] = blk.ex.map(() => '');
-    return state.ex[day][blk.id];
+    const nameDay = TPL[day]?.nameSource || day;
+    state.ex[nameDay] = state.ex[nameDay] || {};
+    if (!state.ex[nameDay][blk.id]) state.ex[nameDay][blk.id] = blk.ex.map(() => '');
+    return state.ex[nameDay][blk.id];
   }
 
   // Gemeinsame Notizen pro Tag/Block/Übung (über alle Wochen geteilt)
@@ -224,14 +190,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   // ---- structure helpers -------------------------------------------
-  const rotOf = (week) => state.rot[week] || (week % 2 === 1 ? 'A' : 'B');
-  const isCruise = (week) => week >= 7;   // Woche 7 = Deload: nur Clusters, Level I
-  // Deload: 2-3 Einheiten pro Woche, alle nur Clusters -> drei
-  // eigene Slots, damit jede Einheit getrennt geloggt wird. Der dritte ist optional.
-  const daysOfWeek = (week) => {
-    if (isCruise(week)) return ['MRs', 'MRs-2', 'MRs-3'];
-    const r = rotOf(week); return ['OK-' + r, 'UK-' + r, 'MRs'];
-  };
+  const isCruise = (cycle) => cycle >= 8;
+  const daysOfWeek = (cycle) => isCruise(cycle) ? [...DELOAD_TAGE] : [...CYCLE_TAGE];
   const tierOf = (day, week) => {
     if (isCruise(week)) return 0;   // Deload fest auf Level I
     const t = state.tier[day + '|' + week]; return (t === 0 || t === 1 || t === 2) ? t : 1;
@@ -258,7 +218,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   let tutorialAktiv = !readOnly && !!state.meta.tutorialAktiv;
   const gespeicherterTutorialSchritt = Number(state.meta.tutorialSchritt);
   let tutorialSchritt = Number.isFinite(gespeicherterTutorialSchritt)
-    ? Math.min(4, Math.max(-1, gespeicherterTutorialSchritt))
+    ? Math.min(TUTORIAL_SETUP.length, Math.max(-1, gespeicherterTutorialSchritt))
     : -1;
   let tutorialFx = null;
   let tutorialFxTimer = [];
@@ -287,12 +247,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (!tpl || !cell) return { any: false, met: false };
     const tier = tierOf(day, week);
     const prio = prioritaetsAnpassungen(payloadOut(), week);
+    const blocks = [...tpl.blocks, ...prioBloecke(payloadOut(), week, day)];
     let done = 0, tgtTotal = 0;
-    tpl.blocks.forEach((blk) => {
+    blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier); if (tgt === 0) return;
       const entry = cell[blk.id];
       exOf(blk, tier).forEach((_, xi) => {
-        const basis = blk.type === 'load' ? setsForExercise(blk, tier, xi) : targetSets(blk, tier);
+        const basis = setsForExercise(blk, tier, xi);
         const cnt = Math.max(0, basis + (prio.delta[slotKey(day, blk.id, xi)] || 0));
         tgtTotal += cnt;
         const arr = (entry && entry.sets && entry.sets[xi]) || [];
@@ -306,18 +267,17 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const p = (n) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
   }
-  // Nach einer vollstaendigen Einheit nur den naechsten sinnvollen Schritt
-  // anbieten, nie automatisch umschalten. Nach Woche 6 bleibt die bewusste
-  // Wahl "neue Phase oder Deload" unangetastet.
+  // Nach einer vollständigen Einheit nur den nächsten Schritt anbieten.
+  // Nach Cycle 7 bleibt die bewusste Wahl "neue Phase oder Deload".
   function naechsteEinheit() {
     if (!dayProgress(state.day, state.week).met) return null;
-    const letzteWoche = isCruise(state.week) ? 7 : 6;
-    for (let week = state.week; week <= letzteWoche; week++) {
-      const tage = daysOfWeek(week);
-      const start = week === state.week ? tage.indexOf(state.day) + 1 : 0;
+    const letzterCycle = isCruise(state.week) ? 8 : 7;
+    for (let cycle = state.week; cycle <= letzterCycle; cycle++) {
+      const tage = daysOfWeek(cycle);
+      const start = cycle === state.week ? tage.indexOf(state.day) + 1 : 0;
       for (let i = Math.max(0, start); i < tage.length; i++) {
-        if (!dayProgress(tage[i], week).met) {
-          return { week, day: tage[i], tagNummer: i + 1 };
+        if (!dayProgress(tage[i], cycle).met) {
+          return { week: cycle, day: tage[i], tagNummer: i + 1 };
         }
       }
     }
@@ -325,7 +285,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
   function heavyAuswahlStatus(tpl, tier) {
     const felder = [];
-    tpl.blocks.forEach((blk) => {
+    tpl.blocks.filter((blk) => !blk.prio).forEach((blk) => {
       if (effTypeOf(blk, tier) !== 'load') return;
       const namen = dayNames(state.day, blk);
       exOf(blk, tier).forEach((exDef, xi) => felder.push({
@@ -358,7 +318,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       setTier(state.day, state.week, 1);
     } else {
       state.week = 1;
-      state.day = 'OK-A';
+      state.day = 'OK-H';
     }
   }
   function tutorialSpeichernUndZeichnen() {
@@ -374,7 +334,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     state.meta.tutorialAbgebrochen = abgebrochen;
     state.meta.einstiegErledigt = true;
     state.week = 1;
-    state.day = 'OK-A';
+    state.day = 'OK-H';
     einstiegSichtbar = false;
     setStatusleistenOverlay('tutorial', false);
     if (tutorialDunkel) tutorialDunkel.hidden = true;
@@ -397,7 +357,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       <div class="tutorial-startfx-inhalt">
         <small>Einrichtung abgeschlossen</small>
         ${actionTitleSvg("LOS GEHT'S!")}
-        <span>Du beginnst jetzt mit Woche 1 · Tag 1. Mehr Hilfe findest du im FAQ.</span>
+        <span>Du beginnst jetzt mit Cycle 1 · OK HEAVYS. Mehr Hilfe findest du im FAQ.</span>
       </div>`;
     document.body.appendChild(tutorialFx);
     requestAnimationFrame(() => tutorialFx?.classList.add('an'));
@@ -667,8 +627,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
   const lvlWert = ctrl.querySelector('#ci-lvl-w');
   const datWert = ctrl.querySelector('#ci-dat-w');
 
-  wocheSel.innerHTML = Array.from({ length: 7 }, (_, i) =>
-    `<option value="${i + 1}">Woche ${i + 1}${i + 1 >= 7 ? ' · Deload' : ''}</option>`).join('');
+  wocheSel.innerHTML = [
+    ...Array.from({ length: 7 }, (_, i) =>
+      `<option value="${i + 1}">Cycle ${i + 1}</option>`),
+    '<option value="8">Deload</option>',
+  ].join('');
   wocheSel.onchange = () => { state.week = Number(wocheSel.value); queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
   tagSel.onchange = () => { state.day = tagSel.value; queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
   tierSeg.onchange = () => { setTier(state.day, state.week, Number(tierSeg.value)); queuePersist(); renderAll(); };
@@ -691,7 +654,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     // in der sich wirklich etwas aendert – der darf auffallen.
     const imDeload = isCruise(state.week);
     phaseEl.hidden = false;
-    phaseEl.textContent = imDeload ? 'Deload' : 'Overreach';
+    phaseEl.textContent = imDeload ? 'Deload' : 'Cycle ' + state.week;
     phaseEl.classList.toggle('laut', imDeload);
     renderControls();
   }
@@ -704,9 +667,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const cruise = isCruise(state.week);
 
     wocheSel.value = String(state.week);
-    woWert.textContent = 'Wo ' + state.week;
-    // Die Unterzeile traegt die Rotation – im Deload gibt es keine.
-    woLbl.textContent = cruise ? 'Deload' : rotOf(state.week) + '-Woche';
+    woWert.textContent = cruise ? 'Deload' : 'C ' + state.week;
+    woLbl.textContent = cruise ? 'aktiv' : 'Cycle';
 
     // Der Fortschritt der ANDEREN Tage war frueher als Punkt auf den drei
     // Reitern sichtbar. In einer Klappliste faellt das weg, also steht er jetzt
@@ -723,8 +685,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const beschriftung = (d, i) => {
       const pr = dayProgress(d, state.week);
       const mark = pr.any ? (pr.met ? '✓ ' : '◦ ') : '';
-      const opt = cruise && i === 2 ? ' (opt.)' : '';
-      return `${mark}Tag ${i + 1}${opt} · ${TPL[d].short}`;
+      return `${mark}${TPL[d].short}`;
     };
     if (tagSel.options.length !== days.length) {
       // Nur wenn sich die ANZAHL aendert (Overreach <-> Deload) bleibt nichts
@@ -739,10 +700,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     });
     if (tagSel.value !== state.day) tagSel.value = state.day;
     const idx = days.indexOf(state.day);
-    tagWert.textContent = 'Tag ' + (idx + 1);
-    // Kurzform ohne "· Heavy": In 60px passt nur der Koerperteil, und die volle
-    // Beschreibung steht ohnehin direkt ueber dem ersten Block.
-    tagLbl.textContent = TPL[state.day].short.split(' · ')[0];
+    const [koerper, typ] = TPL[state.day].short.split(' · ');
+    tagWert.textContent = koerper;
+    tagLbl.textContent = typ;
 
     const tier = tierOf(state.day, state.week);
     tierSeg.value = String(tier);
@@ -768,7 +728,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       else if (diff < -0.4) chip = `<span class="delta d-down">▼ gesunken</span>`;
       else chip = `<span class="delta d-hold">= gehalten</span>`;
     }
-    node.innerHTML = `<b>Wo ${pWeek}: ${txt}</b>${chip}`;
+    node.innerHTML = `<b>Cycle ${pWeek}: ${txt}</b>${chip}`;
   }
 
   function setRow(entry, xi, si, blk, prevLine, prevSets, prev, count) {
@@ -859,7 +819,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       : `zuletzt: ${m.w} kg${hasR ? ` × ${m.r} Wdh` : ''}`;
     // Wochennummern starten pro Phase neu – Pool-Treffer stammen aus einer
     // frueheren Phase und werden deshalb nicht als "Wo N" ausgewiesen.
-    node.innerHTML = `<b>${txt}</b><span class="delta d-hold">${m.pool ? 'Pool' : 'Wo ' + m.week}</span>`;
+    node.innerHTML = `<b>${txt}</b><span class="delta d-hold">${m.pool ? 'Pool' : 'C ' + m.week}</span>`;
   }
   // Clusters = 6×4 Minisätze. Kompakt: Gewicht + Wdh im letzten (6.) Satz.
   function mrRow(entry, xi, si, blk, memNode) {
@@ -964,30 +924,30 @@ export async function mountLog(container, { userId, readOnly = false }) {
           <h2>Dein Plan auf einen Blick</h2>
           <div class="tutorial-planpunkte">
             <div>
-              <b>6</b>
-              <span><strong>6 Wochen</strong><small>Eine Trainingsphase dauert sechs Wochen.</small></span>
+              <b>4</b>
+              <span><strong>4 Einheiten</strong><small>OK HEAVYS · UK HEAVYS · OK PUMPS · UK PUMPS.</small></span>
             </div>
             <div>
-              <b>A/B</b>
-              <span><strong>A/B-Wechsel</strong><small>A läuft in Woche 1, 3 und 5 · B in 2, 4 und 6. Der Wechsel bringt Abwechslung und Motivation.</small></span>
+              <b>7</b>
+              <span><strong>7 Cycles</strong><small>Nach jeder Pause machst du einfach mit der nächsten Einheit weiter.</small></span>
             </div>
             <div>
-              <b>3</b>
-              <span><strong>3 Satzarten</strong><small>Heavy ist schwer · Pump leichter und versagensnah · Clusters sind 6 × 4.</small></span>
+              <b>2</b>
+              <span><strong>2 Satzarten</strong><small>HEAVYS sind schwer · PUMPS leichter und versagensnah.</small></span>
             </div>
           </div>
           <div class="tutorial-heavyinfo">
             <strong>Was du jetzt festlegst</strong>
-            <p>Nur für Heavy wählst du feste Übungen: einmal für A und einmal für B.
-              LOGMAN übernimmt sie danach automatisch. Pump und Clusters wählst du im Training frei.</p>
-            <p>Je nach Muskel fragt Heavy nach einer großen Grundübung und/oder einer gezielten Übung:</p>
+            <p>Für HEAVYS wählst du jetzt feste Übungen für Ober- und Unterkörper.
+              LOGMAN übernimmt sie in alle sieben Cycles. PUMPS wählst du im Training frei.</p>
+            <p>Die Felder unterscheiden zwei Übungsarten:</p>
             <div class="tutorial-rollen">
               <span><b>Comp</b><small>mehrere Gelenke und Muskeln</small></span>
               <span><b>Iso</b><small>ein Muskel möglichst gezielt</small></span>
             </div>
           </div>
           <button type="button" class="log-tutorial-weiter" data-tutorial-beginnen>
-            Heavy-Übungen auswählen <span class="tutorial-pf">→</span>
+            HEAVYS auswählen <span class="tutorial-pf">→</span>
           </button>`;
         karte.querySelector('[data-tutorial-beginnen]').onclick = () => {
           tutorialZielSetzen(0);
@@ -1006,20 +966,18 @@ export async function mountLog(container, { userId, readOnly = false }) {
           : alsNaechstes?.rolle === 'Iso'
             ? '<b>Iso-Feld:</b> Wähle eine Übung, die den angezeigten Muskel möglichst gezielt belastet.'
             : '';
-        const auswahlName = schritt.gruppe.startsWith('A') ? 'A-Auswahl' : 'B-Auswahl';
-        const wochenText = schritt.week === 1 ? 'Wochen 1 · 3 · 5' : 'Wochen 2 · 4 · 6';
         karte.innerHTML = `
           <div class="log-tutorial-kopf">
-            <span>Setup ${tutorialSchritt + 1} / 4</span>
+            <span>Setup ${tutorialSchritt + 1} / ${TUTORIAL_SETUP.length}</span>
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
           </div>
           <div class="tutorial-fortschritt" aria-hidden="true">
             ${TUTORIAL_SETUP.map((_, i) => `<i class="${i <= tutorialSchritt ? 'an' : ''}"></i>`).join('')}
           </div>
-          <div class="tutorial-zielkopf"><h2>${schritt.titel}</h2><span>Heavy</span></div>
-          <p class="tutorial-kurzziel"><b>${auswahlName}</b> · wird automatisch für ${wochenText} übernommen.</p>
+          <div class="tutorial-zielkopf"><h2>${schritt.titel}</h2><span>HEAVYS</span></div>
+          <p class="tutorial-kurzziel"><b>Feste Auswahl</b> · wird automatisch in Cycle 1–7 übernommen.</p>
           ${rollenHilfe ? `<p class="log-tutorial-typen">${rollenHilfe}</p>` : ''}
-          <p class="log-tutorial-stand"><b>${tutorialStatus.gewaehlt} / ${tutorialStatus.gesamt}</b> Heavy-Übungen gewählt</p>
+          <p class="log-tutorial-stand"><b>${tutorialStatus.gewaehlt} / ${tutorialStatus.gesamt}</b> HEAVYS gewählt</p>
           <button type="button" class="log-tutorial-weiter" data-tutorial-weiter ${fertig ? '' : 'data-offen'}>
             ${fertig
               ? `Weiter: ${schritt.folgt} <span class="tutorial-pf">→</span>`
@@ -1036,7 +994,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <span>Satzeingabe</span>
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
           </div>
-          <h2>Heavy protokollieren</h2>
+          <h2>HEAVYS protokollieren</h2>
           <div class="tutorial-eingabe">
             <span><b>kg</b><small>Gewicht</small></span>
             <span><b>Wdh.</b><small>Wiederholungen</small></span>
@@ -1060,7 +1018,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const weiter = document.createElement('button');
       weiter.type = 'button';
       weiter.className = 'log-weiter';
-      weiter.innerHTML = `<span>Diese Einheit ist vollständig</span><b>Weiter mit Woche ${naechste.week} · Tag ${naechste.tagNummer} →</b>`;
+      weiter.innerHTML = `<span>Diese Einheit ist vollständig</span><b>Weiter mit ${naechste.week >= 8 ? 'Deload' : `Cycle ${naechste.week}`} · ${TPL[naechste.day].short} →</b>`;
       weiter.onclick = () => {
         state.week = naechste.week;
         state.day = naechste.day;
@@ -1079,7 +1037,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     wrap.querySelector('#lg-pool').innerHTML = '';
 
   let tutorialWahlMarkiert = false;
-    tpl.blocks.forEach((blk) => {
+    const blocks = [...tpl.blocks, ...prioBloecke(payloadOut(), state.week, state.day)];
+    blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
       if (tgt === 0) return;   // Block bei diesem Tier nicht dabei (z.B. optionale MRs bei Tier I)
       if (!cell[blk.id]) {
@@ -1091,16 +1050,18 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const effType = effTypeOf(blk, tier);              // Typ je Tier (Pump-Ausnahme bei MR)
       if (freeEx) entry.names = entry.names || (entry.name != null ? [entry.name] : []);  // frei pro Woche/Feld
       const names = freeEx ? null : dayNames(state.day, blk);
-      const effRest = effektivePause(blk, effType, state.day);
+      const effRest = effektivePause(blk);
       const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
       const blockMus = blk.mus;
 
       const el = document.createElement('div'); el.className = `block block-${effType}`;
       const cues = [];
       if (effType === 'load') {
-        cues.push('<span class="chip">' + effReps + ' · 0–2 RIR</span>', '<span class="chip">Versagen nur letzter Comp</span>');
+        const hatComp = exOf(blk, tier).some((exDef) => exDef.r === 'Comp');
+        cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '1–3 RIR') + '</span>',
+          `<span class="chip">${blk.deload ? 'Kein Versagen' : (hatComp ? 'Versagen nur letzter Comp' : 'Kein erzwungenes Versagen')}</span>`);
       }
-      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · leicht</span>', '<span class="chip">versagensnah · Partials optional</span>');
+      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '0–1 RIR') + '</span>', '<span class="chip">leicht · versagensnah · Partials optional</span>');
       if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
       cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + pausenLabel(effRest) + '</button>');
 
@@ -1111,6 +1072,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
           <span class="target" data-tgt="${blk.id}">Sätze <b>${tgt}</b></span>
         </div>
         <div class="cue">${cues.join('')}</div>`;
+      if (blk.prio) el.classList.add('prioritaets-block');
       // Muskelname mitgeben: Die Mitteilung soll sagen, wovon die Pause war.
       if (!readOnly) el.querySelectorAll('.chip.rest').forEach((b) => (
         b.onclick = () => startePause(Number(b.dataset.rest), blockMus)
@@ -1170,13 +1132,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
         // Anzahl Sätze: Pump-Paare sind Supersets und Cluster-Felder eigenständig -> jede Übung
         // bekommt die volle Zahl. Nur Heavy wird im Wechsel auf Comp/Iso aufgeteilt.
-        const geplant = freeEx ? targetSets(blk, tier) : setsForExercise(blk, tier, xi);
+        const geplant = setsForExercise(blk, tier, xi);
         const prioDelta = prio.delta[slotKey(state.day, blk.id, xi)] || 0;
         const count = Math.max(0, geplant + prioDelta);
         if (prioDelta) {
           const vc = document.createElement('span');
           vc.className = 'volrolle ' + (prioDelta > 0 ? 'prio' : 'minus');
-          vc.textContent = prioDelta > 0 ? 'Priorität +1' : 'Umverteilung −1';
+          vc.textContent = prioDelta > 0 ? `Priorität +${prioDelta}` : `Umverteilung ${prioDelta}`;
           hd.appendChild(vc);
         }
         entry.sets[xi] = entry.sets[xi] || [];
@@ -1248,17 +1210,17 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tutorialClipPlanen();
     tutorialScrollen();
 
-    // Nach den sechs Belastungswochen bewusst entscheiden: direkt eine neue
-    // Phase beginnen oder eine Woche deloaden. Im Deload bleibt nur noch der
-    // Weg in die neue Phase.
+    // Nach sieben Cycles bewusst entscheiden: neuer Trainingsblock oder Deload.
     phaseResetEl.innerHTML = '';
-    if (!readOnly && state.week >= 6) {
+    const letzterCycleFertig = state.week === 7 &&
+      daysOfWeek(7).every((day) => dayProgress(day, 7).met);
+    if (!readOnly && (letzterCycleFertig || state.week >= 8)) {
       const box = document.createElement('div');
       box.className = 'phase-ende';
-      box.innerHTML = `<p>${state.week === 6 ? '6 Wochen abgeschlossen. Wie geht es weiter?' : 'Deload abgeschlossen.'}</p>
+      box.innerHTML = `<p>${state.week === 7 ? '7 Cycles abgeschlossen. Wie geht es weiter?' : 'Deload abgeschlossen.'}</p>
         <div class="phase-ende-aktionen">
           <button class="phase-reset" data-phase-neu>↻ Weitertrainieren · neue Phase</button>
-          ${state.week === 6 ? '<button class="phase-reset phase-deload" data-phase-deload>1 Woche Deload</button>' : ''}
+          ${state.week === 7 ? '<button class="phase-reset phase-deload" data-phase-deload>1 Woche Deload</button>' : ''}
         </div>`;
       box.querySelector('[data-phase-neu]').onclick = resetAllData;
       box.querySelector('[data-phase-deload]')?.addEventListener('click', startDeload);
@@ -1267,8 +1229,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   function startDeload() {
-    state.week = 7;
-    state.day = 'MRs';
+    state.week = 8;
+    state.day = 'OK-D';
     queuePersist();
     renderAll();
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -1276,12 +1238,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   async function resetAllData() {
-    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein Pump- und Clusters-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
+    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein PUMPS-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
     // Pool retten, bevor die Wochendaten fallen. Neuere Werte gewinnen.
     state.mem = Object.assign({}, state.mem, harvestMem(state.data));
-    state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.rot = {}; state.datum = {};
+    state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.datum = {};
     state.volumen = { prioritaet: {} };
-    state.week = 1; state.day = 'OK-A';
+    state.week = 1; state.day = 'OK-H';
     clearTimeout(saveTimer);
     // Leeren ist eine Absicht: Dieser Stand ersetzt den Server, auch wenn der
     // Upload erst spaeter gelingt. Sonst holt der Abgleich alles wieder zurueck.
@@ -1295,14 +1257,15 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function renderVolume(cell, tpl, tier) {
     let total = 0, tgtTotal = 0;
     const prio = prioritaetsAnpassungen(payloadOut(), state.week);
-    tpl.blocks.forEach((blk) => {
+    const blocks = [...tpl.blocks, ...prioBloecke(payloadOut(), state.week, state.day)];
+    blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
       if (tgt === 0) return;
       const entry = cell[blk.id];
       let sets = 0;
       let blockTgt = 0;
       exOf(blk, tier).forEach((_, xi) => {
-        const basis = blk.type === 'load' ? setsForExercise(blk, tier, xi) : targetSets(blk, tier);
+        const basis = setsForExercise(blk, tier, xi);
         const cnt = Math.max(0, basis + (prio.delta[slotKey(state.day, blk.id, xi)] || 0));
         blockTgt += cnt;
         const arr = (entry && entry.sets && entry.sets[xi]) || [];
@@ -1318,19 +1281,19 @@ export async function mountLog(container, { userId, readOnly = false }) {
       '<div class="voltot">' + total + ' <span>/ ' + tgtTotal + ' ARBEITSSÄTZE</span></div>';
 
     contentEl.querySelectorAll('.target[data-tgt]').forEach((el) => {
-      const blk = tpl.blocks.find((b) => b.id === el.dataset.tgt); if (!blk) return;
+      const blk = blocks.find((b) => b.id === el.dataset.tgt); if (!blk) return;
       const entry = cell[blk.id]; let sets = 0;
       const tgt = targetSets(blk, tier);
       let blockTgt = 0;
       exOf(blk, tier).forEach((_, xi) => {
-        const basis = blk.type === 'load' ? setsForExercise(blk, tier, xi) : targetSets(blk, tier);
+        const basis = setsForExercise(blk, tier, xi);
         const cnt = Math.max(0, basis + (prio.delta[slotKey(state.day, blk.id, xi)] || 0));
         blockTgt += cnt;
         const arr = (entry && entry.sets && entry.sets[xi]) || [];
         (arr || []).slice(0, cnt).forEach((s) => { if (s && (s.w || s.r)) sets++; });
       });
       el.classList.toggle('met', blockTgt > 0 && sets >= blockTgt);
-      el.innerHTML = 'Sätze <b>' + tgt + '</b>';
+      el.innerHTML = 'Sätze <b>' + blockTgt + '</b>';
     });
   }
   // Das Set-O-Meter haengt mit dran: Jeder eingetragene Satz aendert es, und ein
@@ -1346,7 +1309,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   if (mergedOffline && !readOnly) {
     // Offline geladen oder zusammengefuehrt: Der lokale Stand ist jetzt der
     // gueltige und muss noch hoch. Markieren und (falls Netz da ist) senden.
-    writeLog(userId, payloadOut(), true);
+    writeLog(userId, payloadOut(), true, schemaReset);
     setStatus('offline');
     if (navigator.onLine) persist();
   } else if (serverOk && !readOnly) {

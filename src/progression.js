@@ -1,6 +1,6 @@
 import { TPL } from './template.js';
 
-// Auswertung der Heavy-Progression aus den Wochendaten.
+// Auswertung der HEAVYS-Progression aus den Cycle-Daten.
 //
 // Warum e1RM und nicht einfach das Gewicht: 80 kg × 8 und 85 kg × 6 sind beide
 // ein Fortschritt, aber ueber die reine Last nicht vergleichbar. Das geschaetzte
@@ -22,8 +22,8 @@ export const bestE1 = (saetze) =>
 
 /**
  * Reihen je Heavy-Uebung aus dem gespeicherten Payload.
- * @returns [{ name, punkte: [{ week, e1 }] }] – nur Uebungen mit mind. zwei
- *          Wochen, laengste Reihe zuerst (die ist am aussagekraeftigsten).
+ * @returns [{ name, punkte: [{ week, e1 }] }] – `week` bleibt als interner
+ *          Zahlenkey erhalten, bezeichnet in Schema v4 aber den CYCLE.
  */
 export function heavyReihen(payload) {
   const data = (payload && payload.data) || {};
@@ -35,11 +35,13 @@ export function heavyReihen(payload) {
     if (!tplTag) return;
     Object.keys(data[tag] || {}).forEach((wkStr) => {
       const woche = Number(wkStr);
+      if (woche >= 8 || !tag.endsWith('-H')) return;
       const zelle = data[tag][wkStr] || {};
       Object.keys(zelle).forEach((bid) => {
         const blk = tplTag.blocks.find((b) => b.id === bid);
-        // Nur Heavy: Pump und Cluster sind laut Konzept keine Progressions-Marker.
-        if (!blk || blk.type !== 'load') return;
+        const istPrio = bid.startsWith('prio:');
+        // Nur HEAVYS: PUMPS und Deload sind keine Progressions-Marker.
+        if ((!blk || blk.type !== 'load') && !istPrio) return;
         const namen = (namenAll[tag] || {})[bid] || [];
         (((zelle[bid] || {}).sets) || []).forEach((saetze, xi) => {
           const name = String(namen[xi] || '').trim();

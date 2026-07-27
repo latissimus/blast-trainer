@@ -1,5 +1,4 @@
-// FAQ als Nachschlagewerk mit kurzer Einstiegsebene. Erst kommt, was man beim
-// ersten Training braucht; Systembegriffe und Hintergrund folgen spaeter.
+// FAQ als Nachschlagewerk für das rollierende LOGMAN-Cycle-System.
 
 export function mountFaq(container) {
   container.innerHTML = '';
@@ -17,7 +16,7 @@ export function mountFaq(container) {
     <div class="faq-suche" role="search">
       <label for="faq-suche-input">FAQ durchsuchen</label>
       <div class="faq-suche-zeile">
-        <input id="faq-suche-input" type="search" placeholder="z. B. Pause, RIR oder Clusters" autocomplete="off">
+        <input id="faq-suche-input" type="search" placeholder="z. B. Cycle, RIR oder Priorität" autocomplete="off">
         <button type="button" id="faq-suche-loeschen" aria-label="Suche löschen" hidden>×</button>
       </div>
       <p id="faq-suche-kein" hidden>Keine passende FAQ-Antwort gefunden.</p>
@@ -29,140 +28,156 @@ export function mountFaq(container) {
       <span class="faq-start-kicker">Start in 60 Sekunden</span>
       <h2 id="faq-starttitel">So legst du los</h2>
       <ol>
-        <li><b>Tutorial starten</b> und die Heavy-Übungen für Woche 1 und 2 festlegen.</li>
-        <li><b>Woche, Tag und Level</b> unten im Log prüfen.</li>
-        <li><b>Gewicht, Wiederholungen und bei Heavy RIR</b> eintragen – gespeichert wird automatisch.</li>
+        <li><b>Tutorial starten</b> und deine festen OK- und UK-HEAVYS auswählen.</li>
+        <li><b>Cycle, Einheit und Level</b> unten im Log prüfen.</li>
+        <li><b>Gewicht, Wiederholungen und bei HEAVYS RIR</b> eintragen – gespeichert wird automatisch.</li>
       </ol>
     </section>
 
     <details class="faq" open><summary>Wie starte ich mein erstes Training?</summary>
       <div class="faq-a">
-        <p><b>Starte im Log das kurze Tutorial.</b> Es erklärt zuerst die drei Satzarten und führt dich danach durch die feste Übungsauswahl für Woche 1 und 2. Anschließend lernst du die Satzeingabe. Du kannst es jederzeit beenden.</p>
-        <p>Einen Speichern-Knopf brauchst du nicht. Jede Eingabe wird sofort auf dem Gerät gesichert und bei Verbindung automatisch hochgeladen.</p>
+        <p><b>Starte im Log das kurze Tutorial.</b> Es erklärt den rollierenden Split und führt dich durch die feste Übungsauswahl für OK HEAVYS und UK HEAVYS. PUMPS wählst du später direkt im Training frei.</p>
+        <p>Danach beginnst du mit <b>Cycle 1 · OK HEAVYS</b>. Einen Speichern-Knopf brauchst du nicht: Jede Eingabe wird sofort auf dem Gerät gesichert und bei Verbindung hochgeladen.</p>
         <a class="faq-tutorial-start" href="#log" data-tutorial-start>Tutorial starten</a>
       </div>
     </details>
 
     <details class="faq"><summary>Was muss ich pro Satz eintragen?</summary>
       <div class="faq-a">
-        <p><b>Gewicht und Wiederholungen.</b> Bei Heavy kommt <b>RIR</b> hinzu. Das steht für <i>Reps in Reserve</i>, also <b>Wiederholungen in Reserve</b>: die Wiederholungen, die mit sauberer Technik noch möglich gewesen wären. RIR 1 bedeutet also: Eine Wiederholung wäre noch gegangen.</p>
-        <p>Bei Clusters trägst du das Gewicht und die Wiederholungen im letzten der sechs Minisätze ein.</p>
+        <p><b>Gewicht und Wiederholungen.</b> Bei HEAVYS kommt <b>RIR</b> hinzu. Das steht für <i>Reps in Reserve</i>, also Wiederholungen in Reserve. RIR 1 bedeutet: Eine saubere Wiederholung wäre noch möglich gewesen.</p>
+        <p>Die App speichert automatisch. Beim nächsten vergleichbaren Cycle stehen deine letzten HEAVYS-Werte direkt über der Eingabe.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Welches Level soll ich wählen?</summary>
       <div class="faq-a">
-        <p>Das Level regelt nur die <b>Satzanzahl dieser Einheit</b>. Die ausgeführten Sätze bleiben auf jedem Level produktiv und versagensnah.</p>
-        <p><b>Level I – Kompakt · weniger Volumen:</b> für einen schwachen oder bereits ermüdeten Tag.<br>
-        <b>Level II – Standard · normales Volumen:</b> die Vorauswahl für normale Trainingstage.<br>
-        <b>Level III – Voll · höchstes Volumen:</b> für einen guten Tag mit passender Leistung und Erholung.</p>
-        <p>Wähle nach Tagesform, nicht nach Ehrgeiz. Wenn Technik, Zielmuskel oder Leistung unter den späteren Sätzen leiden, nimm beim nächsten Mal weniger Volumen.</p>
+        <p>Das Level regelt die <b>Satzanzahl der aktuellen Einheit</b>. Die ausgeführten Sätze bleiben auf jedem Level produktiv und ausreichend nah am Versagen.</p>
+        <p><b>Level I – Kompakt · weniger Volumen:</b> für den Einstieg, schwächere Tage, geringe Erholung oder Erhalt.<br>
+        <b>Level II – Standard · normales Volumen:</b> die Vorauswahl und der vollständige Standardplan.<br>
+        <b>Level III – Voll · höchstes Volumen:</b> nur für nachweislich gut erholende Muskeln oder zeitlich begrenzt als Plateau-Breaker.</p>
+        <p>Wähle nach Leistung und Erholung, nicht nach Ehrgeiz. Wenn Technik, Zielmuskel oder Leistung unter späteren Sätzen leiden, reduziere das Level.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Wie finde ich mich in der App zurecht?</summary>
       <div class="faq-a">
-        <p><b>Im Log</b> stellst du unten Woche, Tag, Level und Datum ein. Das violette Menü führt zu Notizbuch, Set-O-Meter, Progression und FAQs. Auf Unterseiten bringt dich „← Log" direkt zurück.</p>
-        <p>Das Zeichen neben dem Profilbild zeigt den Speicherstand: <b>✓</b> gespeichert · <b>↻</b> speichert · <b>↑</b> wartet auf Verbindung · <b>⚠</b> Upload fehlgeschlagen. Auch in den letzten beiden Fällen liegt deine Eingabe bereits sicher auf dem Gerät.</p>
+        <p><b>Im Log</b> stellst du unten Cycle, Einheit, Level und Datum ein. Das violette Menü führt zu Notizbuch, Set-O-Meter, Progression und FAQs. Auf Unterseiten bringt dich „← Log“ zurück.</p>
+        <p>Der Speicherstatus neben dem Profilbild bedeutet: <b>✓</b> gespeichert · <b>↻</b> speichert · <b>↑</b> wartet auf Verbindung · <b>⚠</b> Upload fehlgeschlagen. Deine Eingabe liegt auch in den letzten beiden Fällen bereits auf dem Gerät.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Wie exportiere oder lösche ich meine Daten?</summary>
       <div class="faq-a">
-        <p>Tippe oben rechts auf dein Profilbild. Unter <b>„Meine Daten"</b> kannst du Profil, Trainingslog und Notizen als JSON-Datei exportieren.</p>
+        <p>Tippe oben rechts auf dein Profilbild. Unter <b>„Meine Daten“</b> kannst du Profil, Trainingslog und Notizen als JSON-Datei exportieren.</p>
         <p>Dort kannst du auch Account und App-Daten endgültig löschen. Zur Sicherheit musst du das Wort <b>LÖSCHEN</b> vollständig bestätigen.</p>
       </div>
     </details>
 
     <p class="faq-sektion" id="faq-training">Im Training</p>
 
-    <details class="faq"><summary>Wie trainiere ich Heavy?</summary>
+    <details class="faq"><summary>Wie trainiere ich HEAVYS?</summary>
       <div class="faq-a">
-        <p><b>6–12 Wiederholungen, 0–2 RIR.</b> Beim Comp-Satz nur der letzte Satz bis zum Versagen; Iso-Sätze dürfen ans Versagen. Pause: UK Heavy / OK Pump 3 min / 1.5 min, OK Heavy / UK Pump 2.5 min / 2 min und zwischen vollständigen Clusters etwa 3 min.</p>
-        <p>Heavy ist die vergleichbare Messlatte. Trage diese Sätze deshalb besonders genau ein.</p>
+        <p><b>5–8 Wiederholungen und meistens 1–3 RIR.</b> Gezielte Iso-Arbeit liegt meist bei 1–2 RIR. Die Übungsauswahl bleibt über den Trainingsblock fest, damit die Leistung sauber vergleichbar ist.</p>
+        <p>Die Last steigt, wenn du das obere Ende des Wiederholungsbereichs mit passender Technik und Ziel-RIR erreichst. Nicht jede Übung muss in jedem Cycle besser werden.</p>
       </div>
     </details>
 
-    <details class="faq"><summary>Wie trainiere ich Pump?</summary>
+    <details class="faq"><summary>Wie trainiere ich PUMPS?</summary>
       <div class="faq-a">
-        <p><b>15–25 Wiederholungen mit leichterer Last, aber versagensnah.</b> „Pump" ist kein eigener metabolischer Wachstumsmechanismus. Das leichtere Gewicht erlaubt nur mehr Wiederholungen; entscheidend bleiben die anstrengenden Wiederholungen nahe am Versagen.</p>
-        <p><b>Lengthened Partials sind optional.</b> Nutze sie nur bei passenden Übungen und nur im belasteten, gedehnten Bereich – nicht automatisch nach jedem Satz.</p>
-      </div>
-    </details>
-
-    <details class="faq"><summary>Wie funktionieren Clusters?</summary>
-      <div class="faq-a">
-        <p>Ein Clusters besteht aus <b>6 Minisätzen mit je 4 Wiederholungen</b> und ungefähr 10 Sekunden Pause dazwischen. Nur der letzte Minisatz geht bis zum Versagen.</p>
-        <p><b>15RM</b> bedeutet „15-Repetition Maximum“: ein Gewicht, mit dem du ungefähr 15 saubere Wiederholungen schaffst. Als Startgewicht für Clusters dient ungefähr dieses Gewicht. Zwischen vollständigen Clusters liegen etwa 3 Minuten Pause.</p>
+        <p><b>10–20 Wiederholungen mit leichterer Last, aber versagensnah.</b> „PUMPS“ bezeichnet keinen eigenen metabolischen Wachstumsmechanismus. Entscheidend bleiben produktive Wiederholungen nahe am Versagen.</p>
+        <p>Die Übungen dürfen freier wechseln. <b>Lengthened Partials sind optional</b> und nur bei passenden, sicheren Übungen sinnvoll – nicht automatisch nach jedem Satz.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Was heißen Comp und Iso?</summary>
       <div class="faq-a">
-        <p><b>Comp = Verbundübung:</b> mehrere Gelenke und mehrere beteiligte Muskeln, zum Beispiel Bankdrücken. <b>Iso = Isolationsübung:</b> gezielte Arbeit über hauptsächlich ein Gelenk, zum Beispiel Fliegende oder Curls.</p>
+        <p><b>Comp = Verbundübung:</b> mehrere Gelenke und Muskeln arbeiten zusammen, zum Beispiel Bankdrücken. <b>Iso = Isolationsübung:</b> ein Muskel wird möglichst gezielt über meist ein Gelenk trainiert, zum Beispiel Fliegende oder Curls.</p>
         <p>Die App zeigt im jeweiligen Feld nur Übungen an, die zu Muskelgruppe und Rolle passen.</p>
       </div>
     </details>
 
-    <details class="faq"><summary>Wofür sind Timer und Notizen?</summary>
+    <details class="faq"><summary>Welche Pausenzeiten gelten?</summary>
       <div class="faq-a">
-        <p>Ein Tipp auf den Uhr-Chip startet die vorgesehene Satzpause. Die <b>Übungsnotiz</b> ist für dauerhafte Einstellungen und Cues wie Sitzhöhe, Griff oder Fußposition.</p>
-        <p>Das <b>Notizbuch</b> ist davon getrennt: Dort kannst du allgemeine Gedanken, Links und Bilder sammeln. Es bleibt auch nach dem Start einer neuen Phase erhalten.</p>
+        <p>Die Pause steht direkt im jeweiligen Muskelblock und passt zur Übung: große HEAVYS-Comps meist <b>3 Minuten</b>, HEAVYS-Isos meist <b>2–2.5 Minuten</b>, PUMPS meist <b>1–2 Minuten</b>.</p>
+        <p>Ein Tipp auf den Uhr-Chip startet den Timer. Wenn deine Leistung trotz passender Anstrengung deutlich einbricht, darfst du etwas länger pausieren.</p>
+      </div>
+    </details>
+
+    <details class="faq"><summary>Wofür sind die Übungsnotizen?</summary>
+      <div class="faq-a">
+        <p>Die Notiz unter einer Übung ist für dauerhafte Einstellungen und Cues wie Sitzhöhe, Griff oder Fußposition. Das getrennte <b>Notizbuch</b> sammelt allgemeine Gedanken, Links und Bilder und bleibt bei einer neuen Phase erhalten.</p>
+      </div>
+    </details>
+
+    <details class="faq"><summary>Kann ich Intensitätstechniken verwenden?</summary>
+      <div class="faq-a">
+        <p>Rest-Pause, Drop-Sätze, Clusters und Lengthened Partials sind <b>optional</b>. Sie ersetzen reguläre Sätze und werden nicht zusätzlich auf bereits maximales Volumen gesetzt.</p>
+        <p>Bei <b>Clusters</b> sind zum Beispiel 4×4 bis 6×4 mit 10–15 Sekunden innerhalb des Clusters möglich. <b>15RM</b> bedeutet „15-Repetition Maximum“: ein Gewicht, mit dem ungefähr 15 saubere Wiederholungen möglich sind.</p>
       </div>
     </details>
 
     <p class="faq-sektion" id="faq-plan">Plan verstehen</p>
 
-    <details class="faq"><summary>Wie sieht die Trainingswoche aus?</summary>
+    <details class="faq"><summary>Was ist ein CYCLE?</summary>
       <div class="faq-a">
-        <p><b>Drei Einheiten:</b> Tag 1 Oberkörper Heavy und Unterkörper Pump, Tag 2 Unterkörper Heavy und Oberkörper Pump, Tag 3 Clusters für den ganzen Körper.</p>
-        <p>So erhält jeder Muskel mehrere unterschiedliche Reize pro Woche, ohne dass eine einzelne Einheit unnötig groß wird.</p>
+        <p>Ein Cycle besteht aus vier Einheiten: <b>OK HEAVYS → UK HEAVYS → OK PUMPS → UK PUMPS</b>. Danach beginnt der nächste Cycle wieder mit OK HEAVYS.</p>
+        <p>Der Split rolliert unabhängig von Kalenderwochen. Du setzt je nach Erholung Pausentage und machst beim nächsten Training einfach mit der nächsten Einheit weiter.</p>
       </div>
     </details>
 
-    <details class="faq"><summary>Was bedeutet die A/B-Woche?</summary>
+    <details class="faq"><summary>Warum ein rollierender OK/UK-Split?</summary>
       <div class="faq-a">
-        <p>In <b>Woche 1</b> trägst du die Heavy-Übungen für <b>Tag 1 und Tag 2</b> ein. Diese A-Auswahl übernimmt die App automatisch in alle ungeraden Wochen: <b>Woche 1, 3 und 5</b>.</p>
-        <p>In <b>Woche 2</b> wählst du Heavy für <b>Tag 1 und Tag 2</b> ein zweites Mal. Diese B-Auswahl gilt automatisch für die geraden Wochen <b>2, 4 und 6</b>. Verglichen wird deshalb immer A mit A und B mit B.</p>
-        <p>Der Wechsel bringt regelmäßig andere Übungen in den Plan. Das sorgt für <b>mehr Abwechslung und Motivation</b>, ohne dass die Heavy-Leistung unpassend miteinander verglichen wird.</p>
-        <p>Pump- und Clusters-Übungen dürfen jede Woche frei wechseln. Zuletzt verwendete Übungen stehen im Suchdialog oben.</p>
+        <p>In jeder Einheit konzentrierst du dich nur auf Ober- oder Unterkörper. Dadurch bleiben Fokus, technische Qualität und Motivation höher, ohne nach schwerer Arbeit noch die andere Körperhälfte abarbeiten zu müssen.</p>
+        <p>Die meisten Muskeln erhalten ungefähr zwei Kontakte pro Cycle. Die Verteilung hält einzelne Einheiten praktikabel und trennt systemisch ermüdende Belastungen.</p>
+      </div>
+    </details>
+
+    <details class="faq"><summary>Wie lange läuft ein Trainingsblock?</summary>
+      <div class="faq-a">
+        <p>Standardmäßig trainierst du bis zu <b>sieben Cycles</b>. Das ist keine starre Zahl an Kalenderwochen: Ein Cycle ist erst beendet, wenn seine vier Einheiten absolviert wurden.</p>
+        <p>Nach Cycle 7 kannst du direkt eine neue Phase beginnen oder den empfohlenen Deload wählen.</p>
+      </div>
+    </details>
+
+    <details class="faq"><summary>Was passiert im Deload?</summary>
+      <div class="faq-a">
+        <p>Der Deload dauert ungefähr eine Woche und enthält <b>ein OK- und ein UK-Training</b>. Die Übungen und Lasten bleiben, die Sätze sinken ungefähr um 50 Prozent und du hältst 3–5 RIR.</p>
+        <p>Es gibt kein Muskelversagen und keine Intensitätstechniken. Danach beginnt die nächste Phase wieder auf Level II.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Wie kommen die Satzzahlen zustande?</summary>
       <div class="faq-a">
-        <p>Die App kennt die Satzanzahl bereits. Sie hängt vom gewählten Level ab – du musst nichts ausrechnen und kannst nicht versehentlich zusätzliche Heavy- oder Clusters-Sätze anhängen.</p>
-        <p>Bei Heavy wird die Satzanzahl auf Comp und Iso verteilt. Bei gekoppelten Pump- und Clusters-Feldern gilt die angezeigte Zahl je Übung.</p>
+        <p>Level II entspricht dem voreingestellten Standardplan. Große Muskelgruppen erhalten ihre Arbeit über HEAVYS und PUMPS; kleinere Muskeln sammeln zusätzlich indirekte Belastung.</p>
+        <p>Level I reduziert die Dosis, Level III erhöht sie. Die App gibt die Satzzahlen vor – du musst nichts ausrechnen und kannst reguläre Sätze nicht versehentlich über das Soll hinaus hinzufügen.</p>
+      </div>
+    </details>
+
+    <details class="faq"><summary>Wie funktioniert ein Prioritätsmuskel?</summary>
+      <div class="faq-a">
+        <p>Öffne im Set-O-Meter einen Muskel und setze ihn auf Priorität. LOGMAN fügt dann unten eine eigene Muskelbox mit <b>2 Sätzen in beiden passenden Einheiten</b> ein.</p>
+        <p>Beispiel Unterarme: +2 Sätze in OK HEAVYS und +2 Sätze in OK PUMPS. Du kannst das Volumen <b>aufschlagen</b> oder von einem geeigneten Muskel derselben Körperhälfte <b>umverteilen</b>.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Muss ich das Set-O-Meter benutzen?</summary>
       <div class="faq-a">
-        <p><b>Nein.</b> Ohne Änderung bleibt dein Trainingsplan vollständig. Das Set-O-Meter ist nur für die Feinverteilung des Wochenvolumens.</p>
-        <p>Wenn du einen Muskel priorisieren möchtest: Muskel öffnen, Priorität setzen und zwischen <b>Umverteilen</b> und <b>Aufschlagen</b> wählen. Umverteilen gibt dem Ziel +1 Pump-Satz und nimmt nach deiner Bestätigung −1 Satz aus einem anderen Pumpfeld derselben Einheit. Aufschlagen erhöht das Gesamtvolumen um einen Satz.</p>
-        <p>Direkte Sätze treffen den Muskel als Hauptziel. Indirekte Sätze belasten ihn unterstützend; sie werden als 1 angezeigt, im Balken aber mit 0,5 gewichtet.</p>
+        <p><b>Nein.</b> Der Standardplan ist ohne Änderung vollständig. Das Set-O-Meter zeigt nur die Verteilung innerhalb des aktuellen Cycles und ermöglicht gezielte Prioritäten.</p>
+        <p>Direkte Sätze treffen den Muskel als Hauptziel. Indirekte Sätze belasten ihn unterstützend; sie werden als 1 angezeigt, im Vergleichsbalken aber mit 0,5 gewichtet.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Was zeigt die Progression?</summary>
       <div class="faq-a">
-        <p>Die Kurve zeigt den <b>Trend deiner Heavy-Leistung</b>. Dafür berechnet die App aus dem besten Heavy-Satz jeder vergleichbaren Woche ein geschätztes <b>1RM</b>. Das steht für <i>One-Repetition Maximum</i>, also das geschätzte Gewicht für eine maximale Wiederholung. Es ist eine Rechengröße, kein echter Maximalkrafttest und kein direkter Beweis für Muskelwachstum.</p>
-        <p>Einzelne schwächere Einheiten sind normal. Bleibt der Trend über <b>mehrere vergleichbare Einheiten</b> aus, prüfe zuerst Technik, Schlaf, Ernährung und Erholung. Erst danach ist ein Übungswechsel sinnvoll – nicht automatisch nach zwei Einheiten.</p>
+        <p>Die Kurve zeigt den <b>Trend deiner HEAVYS-Leistung</b>. Dafür berechnet LOGMAN aus dem besten Satz jedes Cycles ein geschätztes <b>1RM</b>. Das steht für <i>One-Repetition Maximum</i>, also das geschätzte Gewicht für eine maximale Wiederholung.</p>
+        <p>Es ist eine Rechengröße, kein echter Maximalkrafttest und kein direkter Beweis für Muskelwachstum. Einzelne schwächere Einheiten sind normal; entscheidend ist der Trend über mehrere Cycles.</p>
       </div>
     </details>
 
-    <details class="faq"><summary>Was passiert nach Woche 6?</summary>
+    <details class="faq"><summary>Was ist der PUMPS-Übungspool?</summary>
       <div class="faq-a">
-        <p>Du entscheidest zwischen <b>„Weitertrainieren · neue Phase"</b> und standardmäßig <b>1 Woche Deload</b>. Im Deload sinken Volumen und Frequenz; danach beginnt die nächste Phase wieder auf Level II.</p>
-        <p>Eine neue Phase leert Übungen, Gewichte, Wiederholungen, RIR und Übungsnotizen. Der Pump- und Clusters-Pool sowie das getrennte Notizbuch bleiben erhalten.</p>
-      </div>
-    </details>
-
-    <details class="faq"><summary>Was ist der Pump- und Clusters-Pool?</summary>
-      <div class="faq-a">
-        <p>Pump- und Clusters-Übungen dürfen frei rotieren. Deshalb merkt sich der <b>Pool zu jedem Übungsnamen</b> das zuletzt verwendete Gewicht und die Wiederholungen – unabhängig davon, an welchem Tag du die Übung wieder auswählst.</p>
-        <p>Gibt es einen Wert aus der laufenden Phase, zeigt die App die passende Woche an. Stammt der letzte Wert aus einer früheren Phase, steht daneben <b>„Pool"</b>, weil eine alte Wochennummer nach dem Neustart irreführend wäre.</p>
-        <p>Der Pool bleibt beim Start einer neuen Phase bewusst erhalten. Er gibt nur eine Orientierung für den Einstieg; Pump und Clusters werden nicht als eigene Progressionskurve bewertet.</p>
+        <p>PUMPS dürfen frei rotieren. Deshalb merkt sich der Pool zu jedem Übungsnamen das zuletzt verwendete Gewicht und die Wiederholungen – unabhängig davon, in welchem Cycle du die Übung wieder auswählst.</p>
+        <p>Der Pool bleibt beim Start einer neuen Phase erhalten und dient nur als Orientierung. PUMPS werden nicht als eigene Progressionskurve bewertet.</p>
       </div>
     </details>
 
@@ -170,35 +185,36 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Was ist LOGMAN?</summary>
       <div class="faq-a">
-        <p>LOGMAN ist ein <b>Trainingstagebuch für ein festes Muskelaufbau-System</b>, keine allgemeine Fitness-App. Der Plan, die Satzarten und die Level sind vorgegeben; du wählst Übungen und protokollierst deine Leistung.</p>
+        <p>LOGMAN ist ein <b>Trainingstagebuch für ein festes, aber anpassbares Muskelaufbau-System</b>. Es verbindet produktive Sätze nahe am Versagen, dokumentierbare HEAVYS, versagensnahe PUMPS, individuell erholbares Volumen und einen rollierenden OK/UK-Split.</p>
         <p>Die App funktioniert auch ohne Empfang. Trainingsdaten werden zuerst lokal gespeichert und später synchronisiert.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Worauf kommt es beim Muskelaufbau an?</summary>
       <div class="faq-a">
-        <p>Wichtig sind <b>produktive Sätze nahe genug am Versagen, langfristige Leistungsentwicklung und ausreichende Erholung</b>. Ein Satz mit größerer Reserve kann trotzdem beitragen, setzt aber meist einen kleineren Reiz als ein vergleichbarer versagensnaher Satz.</p>
-        <p>Volumen ist der Dosisregler. Die häufig genannten 10–20 Sätze sind eine grobe Faustregel, kein persönlicher Pflichtbereich. Heavy, leichte versagensnahe Pump-Arbeit und Clusters lassen sich außerdem nicht mit einem festen Faktor ineinander umrechnen.</p>
-        <p><b>Muskelkater ist kein verlässliches Maß</b> für Trainingsqualität oder Muskelwachstum. Ungewöhnlich starker Muskelkater kann aber ein Hinweis sein, dass Belastung oder Übung neu beziehungsweise schlecht vertragen war.</p>
+        <p>Wichtig sind <b>produktive Sätze nahe genug am Versagen, langfristige Leistungsentwicklung und ausreichende Erholung</b>. Nicht der maximal mögliche Reiz einer einzelnen Einheit zählt, sondern der höchste wiederholbar produktive Reiz.</p>
+        <p>Volumen ist der Dosisregler. Die häufig genannten 10–20 Sätze sind eine grobe Faustregel, kein persönlicher Pflichtbereich. Direkte und indirekte Arbeit sowie unterschiedliche Versagensnähe müssen im Zusammenhang betrachtet werden.</p>
+        <p><b>Muskelkater ist kein verlässliches Maß</b> für Trainingsqualität oder Muskelwachstum.</p>
       </div>
     </details>
 
-    <details class="faq"><summary>Was sind Overreach und Deload?</summary>
+    <details class="faq"><summary>Wann sollte ich Volumen verändern?</summary>
       <div class="faq-a">
-        <p><b>Overreach</b> ist die sechswöchige Belastungsphase. Das Volumen darf im Verlauf fordernd werden, soll aber nicht Technik und Leistung dauerhaft zerstören.</p>
-        <p>Der anschließende <b>Deload</b> senkt Belastungsmenge und Häufigkeit, damit aufgelaufene Ermüdung zurückgeht. Du kannst ihn überspringen, wenn du dich nach Woche 6 nachweislich erholt und leistungsfähig fühlst.</p>
+        <p><b>Erhöhen:</b> Wenn Entwicklung über mehrere Cycles ausbleibt, Technik und Progression stabil sind und du vollständig erholt bist. Ergänze zunächst 1–2 Sätze und beobachte mindestens zwei bis drei Cycles.</p>
+        <p><b>Reduzieren:</b> Wenn Leistung wiederholt fällt, der Muskel bis zur nächsten Einheit nicht erholt ist, Beschwerden zunehmen oder zusätzliche Sätze nur noch geringe Qualität liefern.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Soll ich stretchen?</summary>
       <div class="faq-a">
         <p>Für Muskelaufbau und allgemeinen Verletzungsschutz ist zusätzliches langes Dehnen nicht notwendig. Krafttraining über eine kontrollierte, möglichst volle Bewegungsamplitude trainiert Beweglichkeit bereits mit.</p>
-        <p>Dehnen ist sinnvoll, wenn eine konkrete Bewegungseinschränkung deine Übungstechnik stört. Vor dem Training eher kurz und dynamisch; langes statisches Dehnen unmittelbar vor schweren Sätzen kann die Leistung vorübergehend senken.</p>
+        <p>Dehnen ist sinnvoll, wenn eine konkrete Bewegungseinschränkung deine Übungstechnik stört. Vor dem Training eher kurz und dynamisch.</p>
       </div>
     </details>
 
-    <p class="src">Evidenz: Pelland et al. · Baz-Valle et al. · Schoenfeld et al. · Wolf/Schoenfeld · Bell et al. (Deload).</p>`;
+    <p class="src">Grundlage: LOGMAN-Training · produktive Versagensnähe · progressive Belastung · erholbares Volumen · standardisierte Ausführung.</p>`;
   container.appendChild(wrap);
+
   const faqSuche = wrap.querySelector('#faq-suche-input');
   const faqLoeschen = wrap.querySelector('#faq-suche-loeschen');
   const faqKein = wrap.querySelector('#faq-suche-kein');
@@ -209,8 +225,11 @@ export function mountFaq(container) {
     if (kind.classList.contains('faq-sektion')) {
       faqBereich = { kopf: kind, fragen: [] };
       faqBereiche.push(faqBereich);
-    } else if (faqBereich && kind.matches('details.faq')) faqBereich.fragen.push(kind);
+    } else if (faqBereich && kind.matches('details.faq')) {
+      faqBereich.fragen.push(kind);
+    }
   });
+
   const normalisiere = (s) => String(s || '').toLocaleLowerCase('de-DE').trim();
   const faqFiltern = () => {
     const suchwort = normalisiere(faqSuche.value);
@@ -229,6 +248,7 @@ export function mountFaq(container) {
     faqKein.hidden = !suchwort || treffer > 0;
     faqLoeschen.hidden = !suchwort;
   };
+
   faqSuche?.addEventListener('input', faqFiltern);
   faqLoeschen?.addEventListener('click', () => {
     faqSuche.value = '';

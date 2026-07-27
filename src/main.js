@@ -56,8 +56,8 @@ const WILLKOMMEN_EMAIL = 'blast:willkommen-email';
 // laeuft; jede muss breiter als der Bildschirm sein.
 const MQ_TEXT = [
   'SCHLAG DEIN LETZTES MAL',
-  'HEAVY · PUMP · CLUSTERS',
-  '6 WOCHEN OVERREACH · OPTIONAL 1 WOCHE DELOAD',
+  'HEAVYS · PUMPS · CYCLES',
+  '7 CYCLES · DANACH OPTIONAL 1 WOCHE DELOAD',
   'LEVEL NACH TAGESFORM, NICHT NACH EHRGEIZ',
 ].join(' ◆ ') + ' ◆ ';
 const MARQUEE = `<div class="marquee" aria-hidden="true"><span>${MQ_TEXT.repeat(2)}</span><span>${MQ_TEXT.repeat(2)}</span></div>`;
@@ -253,10 +253,10 @@ function renderChrome() {
           <button class="x" id="app-timerx" aria-label="Timer abbrechen">×</button>
         </div>
         <div class="slots" id="app-slots">
-          <label class="ci"><span class="wert" id="ci-wo-w">Wo 1</span><span class="lbl" id="ci-wo-l">Woche</span>
-            <select id="lg-woche" aria-label="Woche" disabled></select></label>
-          <label class="ci"><span class="wert" id="ci-tag-w">Tag 1</span><span class="lbl" id="ci-tag-l">—</span>
-            <select id="lg-tag" aria-label="Tag" disabled></select></label>
+          <label class="ci"><span class="wert" id="ci-wo-w">C 1</span><span class="lbl" id="ci-wo-l">Cycle</span>
+            <select id="lg-woche" aria-label="Cycle" disabled></select></label>
+          <label class="ci"><span class="wert" id="ci-tag-w">OK</span><span class="lbl" id="ci-tag-l">HEAVYS</span>
+            <select id="lg-tag" aria-label="Einheit" disabled></select></label>
           <label class="ci"><span class="wert" id="ci-lvl-w">II</span><span class="lbl" id="ci-lvl-l">Standard</span>
             <select id="lg-tier" aria-label="Level" disabled>
               <option value="0">Kompakt · weniger Volumen</option>

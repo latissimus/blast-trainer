@@ -10,7 +10,7 @@ import { heavyReihen, verlauf } from './progression.js';
 
 const fmt = (n) => (Math.round(n * 10) / 10).toString().replace('.', ',');
 
-export function mountFortschritt(wrap, { session, payload: fertig = null, titel = 'Heavy-Progression' }) {
+export function mountFortschritt(wrap, { session, payload: fertig = null, titel = 'HEAVYS-Progression' }) {
   const karte = document.createElement('div');
   karte.className = 'card';
   karte.innerHTML = `${titel ? `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">${titel}</h2>` : ''}
@@ -44,7 +44,7 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
       inhalt.innerHTML = `<div class="prog-leer">
         <span class="prog-leer-icon" aria-hidden="true">↗</span>
         <b>Noch kein Verlauf</b>
-        <p>Sobald dieselbe Heavy-Übung in zwei Wochen im Log steht, erscheint hier ihre Entwicklung.</p>
+        <p>Sobald dieselbe HEAVYS-Übung in zwei Cycles im Log steht, erscheint hier ihre Entwicklung.</p>
       </div>`;
       return;
     }
@@ -67,12 +67,12 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
       karte.querySelector('#fs-kopf').innerHTML = `${titel}
         <small class="mess-label">Aktueller Leistungswert</small>
         <div class="mess-wert">${fmt(v.letzt)} <span>kg e1RM</span> ${delta}</div>
-        <div class="mess-datum">Woche ${r.punkte[0].week} → ${r.punkte[r.punkte.length - 1].week} · bester Satz je Woche</div>`;
+        <div class="mess-datum">Cycle ${r.punkte[0].week} → ${r.punkte[r.punkte.length - 1].week} · bester Satz je Cycle</div>`;
       karte.querySelector('#fs-kurve').innerHTML = `
-        <div class="prog-kurvenkopf"><b>Leistungstrend</b><span>Heavy · e1RM</span></div>
+        <div class="prog-kurvenkopf"><b>Leistungstrend</b><span>HEAVYS · e1RM</span></div>
         ${kurveSvg(
           [{ werte: r.punkte.map((p) => ({ x: p.week, wert: p.e1 })), klasse: 'trend', punkte: true }],
-          { einheit: 'kg', xText: (w) => 'Wo ' + w },
+          { einheit: 'kg', xText: (w) => 'C ' + w },
         )}`;
     };
 

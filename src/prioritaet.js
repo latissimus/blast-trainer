@@ -1,270 +1,209 @@
-import { TPL } from './template.js';
-import { KATALOG, KONTEN } from './katalog.js';
-import { targetSets, exOf } from './saetze.js';
+import { TPL, CYCLE_TAGE, DELOAD_TAGE } from './template.js';
+import { KONTEN } from './katalog.js';
+import { targetSets, exOf, setsForExercise } from './saetze.js';
 
-// Muskel-Priorisierung ist eine PLANUNGSREGEL ueber dem Tages-Level:
-// Auf jedem Level bekommt genau ein geeignetes Pumpfeld pro Zielmuskel einen
-// Satz mehr. Bei einer Umverteilung werden Ziel- und Spenderfeld schon vor der
-// Uebungswahl verbindlich reserviert. So bleibt die Bilanz immer +1/−1 und aus
-// einer noch leeren Spender-Uebung wird nie still ein Volumenaufschlag.
+// Prioritäten erhalten in jeder passenden OK- oder UK-Einheit einen eigenen
+// Zwei-Satz-Slot. Das Ziel muss deshalb nicht schon als reguläre Übung im Plan
+// stehen. Beispiel Unterarme: +2 in OK HEAVYS und +2 in OK PUMPS.
 
-const klein = (s) => String(s || '').trim().toLowerCase();
-const slotKey = (tag, blockId, xi) => `${tag}|${blockId}|${xi}`;
+export const slotKey = (tag, blockId, xi) => `${tag}|${blockId}|${xi}`;
+export const prioBlockId = (konto) => `prio:${konto}`;
+export const istDeload = (cycle) => Number(cycle) >= 8;
+export const tageDerWoche = (_payload, cycle) => istDeload(cycle) ? [...DELOAD_TAGE] : [...CYCLE_TAGE];
 
-export const istDeload = (woche) => Number(woche) >= 7;
-
-export function tageDerWoche(payload, woche) {
-  if (istDeload(woche)) return ['MRs', 'MRs-2', 'MRs-3'];
-  const rot = ((payload && payload.rot) || {})[woche] || (Number(woche) % 2 === 1 ? 'A' : 'B');
-  return ['OK-' + rot, 'UK-' + rot, 'MRs'];
-}
-
-export function tierVon(payload, tag, woche) {
-  if (istDeload(woche)) return 0;
-  const t = ((payload && payload.tier) || {})[tag + '|' + woche];
+export function tierVon(payload, tag, cycle) {
+  if (istDeload(cycle)) return 0;
+  const t = ((payload && payload.tier) || {})[`${tag}|${cycle}`];
   return (t === 0 || t === 1 || t === 2) ? t : 1;
 }
 
+const UK_KONTEN = new Set(['Quads', 'Hams', 'Glutes', 'Waden', 'Abduktoren', 'Abs']);
+export const koerperhaelfte = (konto) => UK_KONTEN.has(konto) ? 'UK' : 'OK';
 const volumenVon = (payload) => (payload && payload.volumen) || {};
 export const prioritaetenVon = (payload) => volumenVon(payload).prioritaet || {};
+const gueltigePrio = (cfg) => cfg && (cfg.modus === 'plus' || cfg.modus === 'tausch');
 
-function katalogIndex(katalog) {
-  return new Map((katalog || KATALOG).map((e) => [klein(e.n), e]));
+function passendeTage(cycle, konto) {
+  if (istDeload(cycle)) return [];
+  const prefix = `${koerperhaelfte(konto)}-`;
+  return CYCLE_TAGE.filter((tag) => tag.startsWith(prefix));
 }
 
-// Alle in dieser Woche tatsaechlich gewaehlten, regulaeren Pumpfelder.
-// Pump-Ausnahmen innerhalb des Cluster-Tags bleiben absichtlich draussen:
-// eine Priorisierung soll normale Arbeit verschieben, keine weitere
-// Cluster-Runde bzw. einen Sonderfall im Deload erzeugen.
-export function pumpFelder(payload, woche, katalog = KATALOG) {
-  const idx = katalogIndex(katalog);
-  const data = (payload && payload.data) || {};
-  const felder = [];
+export function prioBlock(konto, tag) {
+  const heavy = tag.endsWith('-H');
+  const ok = tag.startsWith('OK-');
+  return {
+    id: prioBlockId(konto),
+    mus: konto,
+    konten: [konto],
+    type: heavy ? 'load' : 'pump',
+    sets: [2, 2, 2],
+    rest: heavy ? (ok ? 150 : 180) : (ok ? 60 : 120),
+    reps: heavy ? '5–8' : '15–20',
+    rir: heavy ? '1–3 RIR' : '0–1 RIR',
+    free: heavy ? 0 : 1,
+    prio: 1,
+    ex: [{ n: '', konten: [konto] }],
+  };
+}
 
-  tageDerWoche(payload, woche).forEach((tag) => {
-    const tpl = TPL[tag];
-    if (!tpl) return;
-    const tier = tierVon(payload, tag, woche);
-    const zelle = ((data[tag] || {})[woche]) || {};
+export function prioMoeglichkeiten(payload, cycle, konto) {
+  return passendeTage(cycle, konto).map((tag) => {
+    const block = prioBlock(konto, tag);
+    return {
+      key: slotKey(tag, block.id, 0),
+      tag,
+      blockId: block.id,
+      xi: 0,
+      mus: konto,
+      konto,
+      anzahl: 2,
+      erlaubt: [konto],
+      block,
+    };
+  });
+}
 
+// Kompatibler Name für die Set-O-Meter-Oberfläche.
+export const pumpMoeglichkeiten = prioMoeglichkeiten;
+
+function regulaereFelder(payload, cycle, konto, tag = null) {
+  const result = [];
+  tageDerWoche(payload, cycle).forEach((day) => {
+    if (tag && day !== tag) return;
+    const tpl = TPL[day];
+    if (!tpl || tpl.nameSource) return;
+    const tier = tierVon(payload, day, cycle);
     tpl.blocks.forEach((blk) => {
-      if (blk.type !== 'pump' || !targetSets(blk, tier)) return;
-      const eintragBlock = zelle[blk.id] || {};
-      const namen = eintragBlock.names || [];
-
       exOf(blk, tier).forEach((exDef, xi) => {
-        const name = String(namen[xi] || '').trim();
-        const eintrag = idx.get(klein(name));
-        if (!eintrag) return;
-        // Alte Logs koennen noch eine Uebung enthalten, die frueher wegen
-        // eines zu breiten Blocks erlaubt war. Sie darf keine Prioritaet auf
-        // das falsche Feld ziehen; massgeblich ist immer das konkrete Feld.
         const erlaubt = exDef.konten || blk.konten || [];
-        if (!erlaubt.includes(eintrag.haupt)) return;
-        felder.push({
-          key: slotKey(tag, blk.id, xi), tag, blockId: blk.id, xi,
-          mus: blk.mus, name, konto: eintrag.haupt, neben: eintrag.neben || [],
-          tier, anzahl: targetSets(blk, tier),
+        if (!erlaubt.includes(konto)) return;
+        result.push({
+          key: slotKey(day, blk.id, xi),
+          tag: day,
+          blockId: blk.id,
+          xi,
+          mus: blk.mus,
+          konto,
+          anzahl: setsForExercise(blk, tier, xi),
           erlaubt,
         });
       });
     });
   });
-  return felder;
+  return result;
 }
-
-// Schon vor der Uebungswahl ist damit bekannt, an welchem Tag und in welchem
-// leeren Feld ein Muskel einen regulaeren Pumpplatz haben kann.
-export function pumpMoeglichkeiten(payload, woche, konto) {
-  const treffer = [];
-  tageDerWoche(payload, woche).forEach((tag) => {
-    const tpl = TPL[tag];
-    if (!tpl) return;
-    const tier = tierVon(payload, tag, woche);
-    tpl.blocks.forEach((blk) => {
-      if (blk.type !== 'pump' || !targetSets(blk, tier)) return;
-      exOf(blk, tier).forEach((exDef, xi) => {
-        const erlaubt = exDef.konten || blk.konten || [];
-        if (erlaubt.includes(konto)) treffer.push({
-          key: slotKey(tag, blk.id, xi), tag, blockId: blk.id, xi,
-          mus: blk.mus, tier, anzahl: targetSets(blk, tier), erlaubt,
-        });
-      });
-    });
-  });
-  return treffer;
-}
-
-const gueltigePrio = (cfg) => cfg && (cfg.modus === 'plus' || cfg.modus === 'tausch');
 
 function bestesFeld(felder) {
   return [...felder].sort((a, b) => b.anzahl - a.anzahl || a.key.localeCompare(b.key))[0] || null;
 }
 
-// Die Log-Ueberschrift darf nie als Spendername durchrutschen: Kombibloecke
-// haben mehrere eigenstaendige Felder. Die feste Feldzuordnung migriert auch
-// alte gespeicherte Namen wie "Schultern + Abs" automatisch.
-function pumpFeldName(f) {
-  const festeNamen = {
-    'p_bk|0': 'Brust', 'p_bk|1': 'Rücken',
-    'p_da|0': 'Schulter', 'p_da|1': 'Abs',
-    'p_arm|0': 'Bizeps/Unterarme', 'p_arm|1': 'Trizeps',
-  };
-  const fest = festeNamen[`${f.blockId}|${f.xi}`];
-  if (fest) return fest;
-  if (f.blockId === 'p_gh' && f.tier > 0) return f.xi === 0 ? 'Quads' : 'Hams/Glutes';
-
-  const erlaubt = f.erlaubt || [];
-  const genau = (...konten) => erlaubt.length === konten.length && konten.every((k) => erlaubt.includes(k));
-  if (genau('Lat', 'Oberer Rücken')) return 'Rücken';
-  if (genau('Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter')) return 'Schulter';
-  if (genau('Bizeps', 'Unterarme')) return 'Bizeps/Unterarme';
-  if (genau('Hams', 'Glutes')) return 'Hams/Glutes';
-  if (erlaubt.length === 1) return erlaubt[0];
-  return f.name && f.name !== 'Pumpfeld noch leer' ? f.konto : f.mus;
-}
-
-/**
- * Abgeleitete Satzverschiebungen fuer die aktuelle Woche.
- * @returns {{ delta: Record<string, number>, ergebnisse: Record<string, object> }}
- */
-export function prioritaetsAnpassungen(payload, woche, katalog = KATALOG) {
-  const felder = pumpFelder(payload, woche, katalog);
+export function prioritaetsAnpassungen(payload, cycle) {
   const prioritaet = prioritaetenVon(payload);
   const delta = {};
   const ergebnisse = {};
-  const belegteFelder = new Set(felder.map((f) => f.key));
-  const reservierteZiele = new Set();
+  const slots = [];
   const reservierteSpender = new Set();
 
   KONTEN.forEach((ziel) => {
     const cfg = prioritaet[ziel];
     if (!gueltigePrio(cfg)) return;
-    const echtesZiel = bestesFeld(felder.filter((f) =>
-      f.konto === ziel && !reservierteSpender.has(f.key)));
-    const freiesZiel = bestesFeld(pumpMoeglichkeiten(payload, woche, ziel).filter((f) =>
-      !belegteFelder.has(f.key) && !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key)));
-    const zielFeld = echtesZiel || freiesZiel;
-    if (!zielFeld) {
+    const zielSlots = prioMoeglichkeiten(payload, cycle, ziel);
+    if (!zielSlots.length) {
       ergebnisse[ziel] = { status: 'ziel-fehlt', modus: cfg.modus };
       return;
     }
-    reservierteZiele.add(zielFeld.key);
-    const vorgemerkt = !echtesZiel;
 
     if (cfg.modus === 'plus') {
-      delta[zielFeld.key] = (delta[zielFeld.key] || 0) + 1;
-      ergebnisse[ziel] = { status: 'aktiv', modus: 'plus', zielFeld, vorgemerkt };
+      slots.push(...zielSlots);
+      ergebnisse[ziel] = { status: 'aktiv', modus: 'plus', slots: zielSlots };
       return;
     }
 
     const spender = cfg.spender;
-    // Ein priorisierter Muskel darf nicht gleichzeitig still als Spender
-    // dienen. Die Konfiguration bleibt sichtbar, wirkt aber nicht halb.
-    if (!spender || gueltigePrio(prioritaet[spender])) {
-      ergebnisse[ziel] = { status: 'spender-fehlt', modus: 'tausch', zielFeld, spender };
+    if (!spender || spender === ziel || gueltigePrio(prioritaet[spender]) ||
+        koerperhaelfte(spender) !== koerperhaelfte(ziel)) {
+      ergebnisse[ziel] = { status: 'spender-fehlt', modus: 'tausch', spender };
       return;
     }
-    // Eine freie Wahl speichert den konkreten Pumpplatz. Dadurch bleibt z. B.
-    // "Rücken" derselbe Spender, egal ob dort später Lat oder oberer Rücken
-    // als konkrete Übung gewählt wird.
-    const festBelegt = cfg.spenderFeld ? bestesFeld(felder.filter((f) =>
-      f.key === cfg.spenderFeld && f.tag === zielFeld.tag && f.key !== zielFeld.key &&
-      !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key) &&
-      f.anzahl + (delta[f.key] || 0) > 0)) : null;
-    const festLeer = cfg.spenderFeld && !festBelegt ? bestesFeld(pumpMoeglichkeiten(payload, woche, spender).filter((f) =>
-      f.key === cfg.spenderFeld && f.tag === zielFeld.tag && f.key !== zielFeld.key &&
-      !belegteFelder.has(f.key) && !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key) &&
-      f.anzahl + (delta[f.key] || 0) > 0)) : null;
-    const echterSpender = festBelegt || bestesFeld(felder.filter((f) =>
-      f.tag === zielFeld.tag && f.konto === spender && f.key !== zielFeld.key &&
-      !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key) &&
-      f.anzahl + (delta[f.key] || 0) > 0));
-    const freierSpender = festLeer || bestesFeld(pumpMoeglichkeiten(payload, woche, spender).filter((f) =>
-      f.tag === zielFeld.tag && f.key !== zielFeld.key && !belegteFelder.has(f.key) &&
-      !reservierteZiele.has(f.key) && !reservierteSpender.has(f.key) &&
-      f.anzahl + (delta[f.key] || 0) > 0));
-    const spenderFeld = echterSpender || freierSpender;
-    if (!spenderFeld) {
-      ergebnisse[ziel] = { status: 'spender-fehlt', modus: 'tausch', zielFeld, spender };
-      return;
-    }
-    reservierteSpender.add(spenderFeld.key);
 
-    delta[zielFeld.key] = (delta[zielFeld.key] || 0) + 1;
-    delta[spenderFeld.key] = (delta[spenderFeld.key] || 0) - 1;
+    const spenderFelder = [];
+    let vollstaendig = true;
+    zielSlots.forEach((slot) => {
+      const feld = bestesFeld(regulaereFelder(payload, cycle, spender, slot.tag)
+        .filter((f) => !reservierteSpender.has(f.key) && f.anzahl >= 2));
+      if (!feld) vollstaendig = false;
+      else spenderFelder.push(feld);
+    });
+    if (!vollstaendig || spenderFelder.length !== zielSlots.length) {
+      ergebnisse[ziel] = { status: 'spender-fehlt', modus: 'tausch', spender };
+      return;
+    }
+
+    spenderFelder.forEach((feld) => {
+      reservierteSpender.add(feld.key);
+      delta[feld.key] = (delta[feld.key] || 0) - 2;
+    });
+    slots.push(...zielSlots);
     ergebnisse[ziel] = {
-      status: 'aktiv', modus: 'tausch', zielFeld, spenderFeld, spender,
-      spenderName: cfg.spenderFeld ? pumpFeldName(spenderFeld) : (cfg.spenderName || spender),
-      vorgemerkt: vorgemerkt || !felder.includes(spenderFeld),
+      status: 'aktiv',
+      modus: 'tausch',
+      slots: zielSlots,
+      spender,
+      spenderName: cfg.spenderName || spender,
+      spenderFelder,
     };
   });
 
-  return { delta, ergebnisse };
+  return { delta, ergebnisse, slots };
 }
 
-// Vorschlaege sind keine automatische Entscheidung. Viel bereits geplante
-// direkte+indirekte Arbeit steht oben; danach direkte Arbeit und Feldgroesse.
-// Die UI zeigt die Gruende, der Nutzer bestaetigt den Spender selbst.
-export function spenderKandidaten(payload, woche, ziel, wochenwerte = {}, katalog = KATALOG) {
-  const felder = pumpFelder(payload, woche, katalog);
-  // Eine Prioritaet darf vor der Uebungswahl entstehen. Ist noch kein echtes
-  // Zielfeld befuellt, reicht der vorgesehene Pumpplatz, um dieselbe Einheit
-  // fuer die Spendervorschlaege zu bestimmen.
-  const zielFeld = bestesFeld(felder.filter((f) => f.konto === ziel)) ||
-    bestesFeld(pumpMoeglichkeiten(payload, woche, ziel));
-  if (!zielFeld) return [];
-
-  const prios = prioritaetenVon(payload);
-  // Beim Aendern einer vorhandenen Umverteilung ihren bisherigen Abzug zuerst
-  // herausnehmen, sonst saehe derselbe Spender kuenstlich knapper aus.
-  const ohneZiel = Object.assign({}, prios);
-  delete ohneZiel[ziel];
-  const probePayload = Object.assign({}, payload, {
-    volumen: Object.assign({}, volumenVon(payload), { prioritaet: ohneZiel }),
-  });
-  const bestehend = prioritaetsAnpassungen(probePayload, woche, katalog).delta;
-
-  const konten = wochenwerte.konten || {};
-  const direkt = wochenwerte.direkt || {};
-  const indirekt = wochenwerte.indirekt || {};
-  const proFeld = new Map();
-  KONTEN.forEach((konto) => {
-    if (konto === ziel || gueltigePrio(prios[konto])) return;
-    const echt = bestesFeld(felder.filter((f) => f.tag === zielFeld.tag && f.konto === konto && f.key !== zielFeld.key));
-    const frei = bestesFeld(pumpMoeglichkeiten(payload, woche, konto).filter((f) =>
-      f.tag === zielFeld.tag && f.key !== zielFeld.key && !felder.some((belegt) => belegt.key === f.key)));
-    const f = echt || frei;
-    if (!f) return;
-    const verfuegbar = f.anzahl + (bestehend[f.key] || 0);
-    if (verfuegbar <= 0) return;
-    const kandidat = {
-      ...f, konto, name: f.name || 'Pumpfeld noch leer', verfuegbar,
-      wert: konten[konto] || 0, direkt: direkt[konto] || 0, indirekt: indirekt[konto] || 0,
-    };
-    const alt = proFeld.get(f.key);
-    if (!alt || kandidat.wert > alt.wert ||
-      (kandidat.wert === alt.wert && kandidat.direkt > alt.direkt)) proFeld.set(f.key, kandidat);
-  });
-
-  const liste = [...proFeld.values()].map((f) => ({
-    konto: f.konto, tag: f.tag, mus: f.mus, name: f.name,
-    key: f.key, label: pumpFeldName(f), verfuegbar: f.verfuegbar,
-    wert: f.wert, direkt: f.direkt, indirekt: f.indirekt,
-  }));
-  const sortierteListe = liste.sort((a, b) =>
-    b.wert - a.wert || b.direkt - a.direkt || b.verfuegbar - a.verfuegbar ||
-    KONTEN.indexOf(a.konto) - KONTEN.indexOf(b.konto));
-  const max = Math.max(0, ...sortierteListe.map((e) => e.wert));
-  sortierteListe.forEach((e, index) => {
-    e.viel = max > 0 && e.wert >= max * 0.75;
-    e.gruende = [
-      'Pump · gleiche Einheit',
-      ...(index === 0 && max > 0 ? ['höchste Wochenarbeit'] : e.viel ? ['viel Wochenarbeit'] : []),
-      ...(e.name === 'Pumpfeld noch leer' ? ['Block noch frei'] : []),
-    ];
-  });
-  return sortierteListe;
+export function prioBloecke(payload, cycle, tag) {
+  const anpassung = prioritaetsAnpassungen(payload, cycle);
+  return anpassung.slots
+    .filter((slot) => slot.tag === tag)
+    .map((slot) => slot.block);
 }
 
-export { slotKey };
+// Ein Spender muss in beiden passenden Einheiten mindestens zwei Sätze
+// bereitstellen können. Vorschläge stehen nach bereits geplanter Cycle-Arbeit.
+export function spenderKandidaten(payload, cycle, ziel, cycleWerte = {}) {
+  if (istDeload(cycle)) return [];
+  const prioritaet = prioritaetenVon(payload);
+  const zielHaelfte = koerperhaelfte(ziel);
+  const tage = passendeTage(cycle, ziel);
+  const konten = cycleWerte.konten || {};
+  const direkt = cycleWerte.direkt || {};
+  const indirekt = cycleWerte.indirekt || {};
+
+  return KONTEN
+    .filter((konto) => konto !== ziel &&
+      koerperhaelfte(konto) === zielHaelfte &&
+      !gueltigePrio(prioritaet[konto]))
+    .map((konto) => {
+      const felder = tage.map((tag) => bestesFeld(regulaereFelder(payload, cycle, konto, tag)
+        .filter((f) => f.anzahl >= 2)));
+      if (felder.some((f) => !f)) return null;
+      return {
+        konto,
+        key: konto,
+        label: konto,
+        name: `${koerperhaelfte(konto)} HEAVYS + PUMPS`,
+        direkt: direkt[konto] || 0,
+        indirekt: indirekt[konto] || 0,
+        wert: konten[konto] || 0,
+        verfuegbar: Math.min(...felder.map((f) => f.anzahl)),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.wert - a.wert || b.direkt - a.direkt ||
+      KONTEN.indexOf(a.konto) - KONTEN.indexOf(b.konto))
+    .map((e, index, alle) => ({
+      ...e,
+      viel: alle[0]?.wert > 0 && e.wert >= alle[0].wert * 0.75,
+      gruende: [
+        'beide Einheiten',
+        ...(index === 0 && e.wert > 0 ? ['höchste Cycle-Arbeit'] : []),
+      ],
+    }));
+}

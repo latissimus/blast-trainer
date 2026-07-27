@@ -1,6 +1,6 @@
 import { supabase } from './supabase.js';
 import { readLog, writeLog } from './localstore.js';
-import { zaehleWoche, sortiert, zeigName } from './setometer.js';
+import { zaehleCycle, sortiert, zeigName } from './setometer.js';
 import { KONTEN } from './katalog.js';
 import {
   prioritaetenVon,
@@ -63,9 +63,10 @@ export async function mountMeter(container, { userId }) {
       payload = lokal?.payload || {};
     }
   }
+  if (payload?.v !== 4) payload = { v: 4, week: 1 };
   payload.volumen = { prioritaet: payload.volumen?.prioritaet || {} };
 
-  const woche = Math.min(7, Math.max(1, Number(payload.week) || 1));
+  const cycle = Math.min(8, Math.max(1, Number(payload.week) || 1));
   const lage = wrap.querySelector('#som-lage');
   const body = wrap.querySelector('#som-body');
   const speicher = wrap.querySelector('#som-speicher');
@@ -87,18 +88,18 @@ export async function mountMeter(container, { userId }) {
   function statusText(ergebnis, cfg) {
     if (!ergebnis) return '';
     if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt && ergebnis.modus === 'plus')
-      return 'Aktiv: Der Zusatzsatz steht im passenden Pumpfeld bereit; die Übung kannst du später wählen.';
+      return 'Aktiv: Je 2 Zusatzsätze stehen in beiden passenden Einheiten bereit.';
     if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt)
-      return `Aktiv vorgemerkt: +1 im Pumpfeld, −1 ${ergebnis.spenderName || ergebnis.spender} in derselben Einheit.`;
+      return `Aktiv: je +2 Priorität und −2 ${ergebnis.spenderName || ergebnis.spender} in beiden passenden Einheiten.`;
     if (ergebnis.status === 'aktiv' && ergebnis.modus === 'plus')
-      return `Aktiv: +1 Satz bei ${ergebnis.zielFeld.mus}.`;
+      return 'Aktiv: je +2 Sätze in HEAVYS und PUMPS.';
     if (ergebnis.status === 'aktiv')
-      return `Aktiv: +1 bei ${ergebnis.zielFeld.mus}, −1 ${ergebnis.spenderName || ergebnis.spender} in derselben Einheit.`;
+      return `Aktiv: je +2 Priorität und −2 ${ergebnis.spenderName || ergebnis.spender} in HEAVYS und PUMPS.`;
     if (ergebnis.status === 'spender-fehlt' && !cfg?.spender)
-      return 'Wähle noch einen Pump-Spender aus derselben Einheit.';
+      return 'Wähle noch einen Spender aus derselben Körperhälfte.';
     if (ergebnis.status === 'spender-fehlt')
       return 'Pausiert: Der gewählte Spender ist derzeit nicht verfügbar.';
-    return 'Vorgemerkt: Die Priorität greift, sobald die passende Pump-Übung gewählt ist.';
+    return 'Vorgemerkt: Wähle noch die Art der Priorisierung.';
   }
 
   function donorVon(konto, prioErgebnisse) {
@@ -111,10 +112,10 @@ export async function mountMeter(container, { userId }) {
   }
 
   function basisWerte() {
-    return zaehleWoche({
+    return zaehleCycle({
       ...payload,
       volumen: { ...payload.volumen, prioritaet: {} },
-    }, woche);
+    }, cycle);
   }
 
   function inlineEditor(konto, werte, prioErgebnisse) {
@@ -122,9 +123,9 @@ export async function mountMeter(container, { userId }) {
     const cfg = prios[konto];
     const ergebnis = prioErgebnisse[konto];
     const spenderFuer = donorVon(konto, prioErgebnisse);
-    const hatPumpplatz = pumpMoeglichkeiten(payload, woche, konto).length > 0;
+    const hatPumpplatz = pumpMoeglichkeiten(payload, cycle, konto).length > 0;
     const alleKandidaten = cfg?.modus === 'tausch'
-      ? spenderKandidaten(payload, woche, konto, basisWerte())
+      ? spenderKandidaten(payload, cycle, konto, basisWerte())
       : [];
     const kandidaten = alleKandidaten.slice(0, 3);
     const istGewaehlt = (k) => cfg?.spenderFeld ? cfg.spenderFeld === k.key : cfg?.spender === k.konto;
@@ -136,29 +137,29 @@ export async function mountMeter(container, { userId }) {
         ${quellen.map((q) => `<small><b>${q.saetze}×</b> ${html(q.name)}</small>`).join('')}
       </div></div>` : ''}
       ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
-      ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt je 1 Satz ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
+      ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt je 2 Sätze in HEAVYS und PUMPS ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
       <span class="som-ed-label">1 · Muskel priorisieren</span>
       <button type="button" class="som-prio-toggle${cfg ? ' on' : ''}" data-prio-toggle ${!hatPumpplatz ? ' disabled' : ''}>
-        <span aria-hidden="true">${cfg ? '✓' : '○'}</span> ${cfg ? 'Priorität aktiv' : 'Als Priorität setzen (+ 1 Satz)'}
+        <span aria-hidden="true">${cfg ? '✓' : '○'}</span> ${cfg ? 'Priorität aktiv' : 'Als Priorität setzen (+ 2 je Einheit)'}
       </button>
-      ${!hatPumpplatz ? '<p class="som-hinweis">Für diesen Muskel gibt es in dieser Woche keinen regulären Pumpplatz.</p>' : ''}
+      ${!hatPumpplatz ? '<p class="som-hinweis">Im Deload sind keine Prio-Slots vorgesehen.</p>' : ''}
       ${zeigeModus && hatPumpplatz ? `<div class="som-inline-plan">
         <span class="som-ed-label">2 · Art wählen</span>
         <div class="som-modusseg" role="group" aria-label="Art der Priorisierung">
-          <button type="button" data-modus="tausch" class="${cfg?.modus === 'tausch' ? 'on' : ''}"><b>Umverteilen</b><small>−1 anderswo</small></button>
-          <button type="button" data-modus="plus" class="${cfg?.modus === 'plus' ? 'on' : ''}"><b>Aufschlagen</b><small>+1 gesamt</small></button>
+          <button type="button" data-modus="tausch" class="${cfg?.modus === 'tausch' ? 'on' : ''}"><b>Umverteilen</b><small>je −2 anderswo</small></button>
+          <button type="button" data-modus="plus" class="${cfg?.modus === 'plus' ? 'on' : ''}"><b>Aufschlagen</b><small>+4 pro Cycle</small></button>
         </div>
         ${cfg?.modus === 'tausch' ? `<div class="som-spender">
-          <span class="som-ed-label">3 · Spender bestätigen · meiste Wochenarbeit zuerst</span>
+          <span class="som-ed-label">3 · Spender bestätigen · meiste Cycle-Arbeit zuerst</span>
           ${kandidaten.length ? kandidaten.map((k) => `<button type="button" class="som-spender-wahl${istGewaehlt(k) ? ' on' : ''}"
             data-spender="${html(k.konto)}" data-spender-feld="${html(k.key)}" data-spender-name="${html(k.label)}">
             <span><b>${html(k.label)}</b><small>${html(k.name)}</small></span>
             <span class="som-spender-zahlen">${k.direkt} direkt · ${k.indirekt} indirekt</span>
             <em>${k.gruende.map(html).join(' · ')}</em>
-          </button>`).join('') : '<p class="som-hinweis">Kein verfügbares, nicht priorisiertes Pumpfeld in derselben Einheit.</p>'}
+          </button>`).join('') : '<p class="som-hinweis">Kein Muskel kann in beiden passenden Einheiten je 2 Sätze abgeben.</p>'}
           ${alleKandidaten.length ? `<label class="som-spender-frei"><span class="som-ed-label">Oder frei wählen</span>
             <select data-spender-frei>
-              <option value="">Pumpblock auswählen…</option>
+              <option value="">Muskel auswählen…</option>
               ${alleKandidaten.map((k) => `<option value="${html(k.key)}" data-konto="${html(k.konto)}" data-name="${html(k.label)}"${istGewaehlt(k) ? ' selected' : ''}>${html(k.label)} · ${html(k.name)}</option>`).join('')}
             </select>
           </label>` : ''}
@@ -189,12 +190,12 @@ export async function mountMeter(container, { userId }) {
   }
 
   function render() {
-    const werte = zaehleWoche(payload, woche);
+    const werte = zaehleCycle(payload, cycle);
     const { konten, ohneZuordnung, unbekannte, gesamt, prioritaet } = werte;
     const prios = prioritaetenVon(payload);
     const aktiv = Object.keys(prios).filter((k) => prios[k]).length;
     lage.innerHTML = `
-      <span class="som-stat"><small>Woche</small><b>${woche}</b></span>
+      <span class="som-stat"><small>Cycle</small><b>${cycle >= 8 ? 'Deload' : cycle}</b></span>
       <span class="som-stat"><small>Prioritäten</small><b>${aktiv}</b></span>`;
 
     const sortiertNachVolumen = sortiert(konten);

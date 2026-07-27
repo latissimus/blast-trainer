@@ -4,7 +4,7 @@ import { e1rm, bestE1, heavyReihen, verlauf } from './progression.js';
 // Eine falsche Progressionskurve sieht aus wie eine richtige – und sie ist der
 // Wert, an dem man das ganze Training misst. Deshalb festgezurrt.
 
-// payload: data[Tag][Woche][Block].sets[xi] = Sätze, ex[Tag][Block][xi] = Name
+// payload: data[Einheit][Cycle][Block].sets[xi] = Sätze
 const payload = (tag, block, name, proWoche) => ({
   ex: { [tag]: { [block]: [name] } },
   data: {
@@ -45,8 +45,8 @@ describe('bestE1', () => {
 });
 
 describe('heavyReihen', () => {
-  it('baut eine Reihe je Übung über die Wochen', () => {
-    const p = payload('OK-A', 'back', 'Multipresse Rudern', {
+  it('baut eine Reihe je Übung über die Cycles', () => {
+    const p = payload('OK-H', 'back_thick', 'Multipresse Rudern', {
       1: [{ w: 80, r: 8 }],
       3: [{ w: 85, r: 8 }],
     });
@@ -59,29 +59,31 @@ describe('heavyReihen', () => {
 
   it('lässt Übungen mit nur einer Woche weg', () => {
     // Aus einem Punkt laesst sich keine Entwicklung lesen.
-    const p = payload('OK-A', 'back', 'Rudern', { 1: [{ w: 80, r: 8 }] });
+    const p = payload('OK-H', 'back_thick', 'Rudern', { 1: [{ w: 80, r: 8 }] });
     expect(heavyReihen(p)).toHaveLength(0);
   });
 
-  it('ignoriert Pump- und Cluster-Blöcke', () => {
+  it('ignoriert PUMPS-Blöcke', () => {
     // Der Pool ist dort das Werkzeug, nicht die Progression.
-    const p = payload('MRs', 'm_bkth', 'PL Rudern', { 1: [{ w: 40, r: 4 }], 2: [{ w: 45, r: 4 }] });
+    const p = payload('OK-P', 'back_thick', 'PL Rudern', { 1: [{ w: 40, r: 12 }], 2: [{ w: 45, r: 12 }] });
     expect(heavyReihen(p)).toHaveLength(0);
   });
 
   it('führt gleiche Übung trotz anderer Schreibweise zusammen', () => {
     const p = {
-      ex: { 'OK-A': { back: ['Rudern'] }, 'OK-B': { back: ['rudern'] } },
+      ex: { 'OK-H': { back_thick: ['Rudern'] } },
       data: {
-        'OK-A': { 1: { back: { sets: [[{ w: 80, r: 8 }]] } } },
-        'OK-B': { 2: { back: { sets: [[{ w: 82, r: 8 }]] } } },
+        'OK-H': {
+          1: { back_thick: { sets: [[{ w: 80, r: 8 }]] } },
+          2: { back_thick: { sets: [[{ w: 82, r: 8 }]] } },
+        },
       },
     };
     expect(heavyReihen(p)).toHaveLength(1);
   });
 
-  it('nimmt pro Woche den besten Satz', () => {
-    const p = payload('OK-A', 'back', 'Rudern', {
+  it('nimmt pro Cycle den besten Satz', () => {
+    const p = payload('OK-H', 'back_thick', 'Rudern', {
       1: [{ w: 80, r: 5 }, { w: 80, r: 9 }],
       2: [{ w: 85, r: 5 }],
     });
@@ -89,7 +91,7 @@ describe('heavyReihen', () => {
   });
 
   it('überspringt Sätze ohne Eintrag und Felder ohne Namen', () => {
-    const p = payload('OK-A', 'back', '', { 1: [{ w: 80, r: 8 }], 2: [{ w: 85, r: 8 }] });
+    const p = payload('OK-H', 'back_thick', '', { 1: [{ w: 80, r: 8 }], 2: [{ w: 85, r: 8 }] });
     expect(heavyReihen(p)).toHaveLength(0);
   });
 
@@ -100,12 +102,12 @@ describe('heavyReihen', () => {
 
   it('sortiert die längste Reihe nach vorn', () => {
     const p = {
-      ex: { 'OK-A': { back: ['Kurz'], chest: ['Lang'] } },
+      ex: { 'OK-H': { back_thick: ['Kurz'], chest_comp: ['Lang'] } },
       data: {
-        'OK-A': {
-          1: { back: { sets: [[{ w: 50, r: 5 }]] }, chest: { sets: [[{ w: 60, r: 5 }]] } },
-          2: { chest: { sets: [[{ w: 62, r: 5 }]] } },
-          3: { back: { sets: [[{ w: 52, r: 5 }]] }, chest: { sets: [[{ w: 64, r: 5 }]] } },
+        'OK-H': {
+          1: { back_thick: { sets: [[{ w: 50, r: 5 }]] }, chest_comp: { sets: [[{ w: 60, r: 5 }]] } },
+          2: { chest_comp: { sets: [[{ w: 62, r: 5 }]] } },
+          3: { back_thick: { sets: [[{ w: 52, r: 5 }]] }, chest_comp: { sets: [[{ w: 64, r: 5 }]] } },
         },
       },
     };

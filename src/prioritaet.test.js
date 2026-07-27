@@ -1,202 +1,150 @@
 import { describe, it, expect } from 'vitest';
 import {
-  pumpMoeglichkeiten,
+  istDeload,
+  tageDerWoche,
+  tierVon,
+  koerperhaelfte,
+  prioMoeglichkeiten,
   prioritaetsAnpassungen,
+  prioBloecke,
   spenderKandidaten,
 } from './prioritaet.js';
-import { KATALOG, KONTEN } from './katalog.js';
 
-const K = [
-  { n: 'Brustpumpe', haupt: 'Brust', neben: ['Vordere Schulter'], typ: 'Iso' },
-  { n: 'Rückenpumpe', haupt: 'Oberer Rücken', neben: ['Bizeps'], typ: 'Iso' },
-  { n: 'Latpumpe', haupt: 'Lat', neben: ['Bizeps'], typ: 'Iso' },
-  { n: 'Seitheben', haupt: 'Seitliche Schulter', neben: [], typ: 'Iso' },
-  { n: 'Crunch', haupt: 'Abs', neben: [], typ: 'Iso' },
-  { n: 'Reverse Curls', haupt: 'Unterarme', neben: ['Bizeps'], typ: 'Iso' },
-  { n: 'Trizepsdrücken', haupt: 'Trizeps', neben: [], typ: 'Iso' },
-];
+const payload = (tier = 1) => ({
+  tier: {
+    'OK-H|1': tier,
+    'UK-H|1': tier,
+    'OK-P|1': tier,
+    'UK-P|1': tier,
+  },
+  data: {},
+  ex: {},
+  volumen: { prioritaet: {} },
+});
 
-function payload(tier = 1) {
-  return {
-    week: 1,
-    tier: { 'UK-A|1': tier },
-    data: {
-      'UK-A': { 1: {
-        p_bk: { names: ['Brustpumpe', 'Rückenpumpe'], sets: [[], []] },
-        p_da: { names: ['Seitheben', 'Crunch'], sets: [[], []] },
-        p_arm: { names: ['Reverse Curls', 'Trizepsdrücken'], sets: [[], []] },
-      } },
-    },
-    volumen: { prioritaet: {} },
-  };
-}
-
-describe('Priorisierung – Wirkung', () => {
-  it('legt Glutes auf das Hams/Glutes-Pumpfeld', () => {
-    const r = prioritaetsAnpassungen({
-      week: 1,
-      data: {},
-      tier: { 'OK-A|1': 1 },
-      volumen: { prioritaet: { Glutes: { modus: 'plus' } } },
-    }, 1, KATALOG);
-    expect(r.delta['OK-A|p_gh|1']).toBe(1);
-    expect(r.delta['OK-A|p_quad|0']).toBeUndefined();
+describe('Cycle-Struktur', () => {
+  it('liefert vier rollierende Einheiten', () => {
+    expect(tageDerWoche({}, 1)).toEqual(['OK-H', 'UK-H', 'OK-P', 'UK-P']);
+    expect(tageDerWoche({}, 7)).toEqual(['OK-H', 'UK-H', 'OK-P', 'UK-P']);
   });
 
-  it('schlägt genau einen Pump-Satz auf', () => {
-    const p = payload(1);
-    p.volumen.prioritaet.Unterarme = { modus: 'plus' };
-    const r = prioritaetsAnpassungen(p, 1, K);
-    expect(r.delta['UK-A|p_arm|0']).toBe(1);
-    expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
+  it('liefert im Deload genau OK und UK', () => {
+    expect(tageDerWoche({}, 8)).toEqual(['OK-D', 'UK-D']);
+    expect(istDeload(7)).toBe(false);
+    expect(istDeload(8)).toBe(true);
   });
 
-  it('wirkt auch auf Level I', () => {
-    const p = payload(0);
-    p.volumen.prioritaet.Unterarme = { modus: 'plus' };
-    const r = prioritaetsAnpassungen(p, 1, K);
-    expect(r.delta['UK-A|p_arm|0']).toBe(1);
-    expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
-  });
-
-  it('verteilt atomar innerhalb derselben Einheit um', () => {
-    const p = payload(1);
-    p.volumen.prioritaet.Unterarme = { modus: 'tausch', spender: 'Abs' };
-    expect(prioritaetsAnpassungen(p, 1, K).delta).toEqual({
-      'UK-A|p_arm|0': 1,
-      'UK-A|p_da|1': -1,
-    });
-  });
-
-  it('reserviert den Spenderplatz schon vor der Übungswahl', () => {
-    const p = payload(1);
-    p.data['UK-A'][1].p_da.names[1] = '';
-    p.volumen.prioritaet.Unterarme = { modus: 'tausch', spender: 'Abs' };
-    const r = prioritaetsAnpassungen(p, 1, K);
-    expect(r.delta).toEqual({ 'UK-A|p_arm|0': 1, 'UK-A|p_da|1': -1 });
-    expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
-    expect(r.ergebnisse.Unterarme.vorgemerkt).toBe(true);
-  });
-
-  it('behält einen frei gewählten Rücken-Pumpplatz bei einem späteren Übungswechsel', () => {
-    const p = payload(1);
-    p.data['UK-A'][1].p_bk.names[1] = 'Latpumpe';
-    p.volumen.prioritaet.Unterarme = {
-      modus: 'tausch', spender: 'Oberer Rücken', spenderFeld: 'UK-A|p_bk|1', spenderName: 'Rücken',
-    };
-    const r = prioritaetsAnpassungen(p, 1, K);
-    expect(r.delta['UK-A|p_bk|1']).toBe(-1);
-    expect(r.ergebnisse.Unterarme.spenderName).toBe('Rücken');
-  });
-
-  it('stellt den Zusatzsatz bereit, obwohl die Zielübung noch fehlt', () => {
-    const p = payload(1);
-    p.data['UK-A'][1].p_arm.names[0] = '';
-    p.volumen.prioritaet.Unterarme = { modus: 'plus' };
-    const r = prioritaetsAnpassungen(p, 1, K);
-    expect(r.delta['UK-A|p_arm|0']).toBe(1);
-    expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
-    expect(r.ergebnisse.Unterarme.vorgemerkt).toBe(true);
-  });
-
-  it('stapelt zwei Prioritäten nicht in dasselbe leere Pumpfeld', () => {
-    const p = payload(1);
-    p.data['UK-A'][1].p_arm.names[0] = '';
-    p.volumen.prioritaet.Bizeps = { modus: 'plus' };
-    p.volumen.prioritaet.Unterarme = { modus: 'plus' };
-    const r = prioritaetsAnpassungen(p, 1, K);
-    expect(r.delta['UK-A|p_arm|0']).toBe(1);
-    expect(r.ergebnisse.Bizeps.status).toBe('aktiv');
-    expect(r.ergebnisse.Unterarme.status).toBe('ziel-fehlt');
+  it('nimmt Level II als Standard und Level I im Deload', () => {
+    expect(tierVon({}, 'OK-H', 1)).toBe(1);
+    expect(tierVon({ tier: { 'OK-H|1': 2 } }, 'OK-H', 1)).toBe(2);
+    expect(tierVon({ tier: { 'OK-D|8': 2 } }, 'OK-D', 8)).toBe(0);
   });
 });
 
-describe('Priorisierung – Planung', () => {
-  it('bietet für jedes Muskelkonto einen regulären Pumpplatz an', () => {
-    const p = payload(2);
-    // Abduktoren haben im Unterkoerper-Tag ein eigenes Heavy-Feld, aber kein
-    // regulaeres Pumpfeld. Eine Pump-Prioritaet waere dort daher irrefuehrend.
-    KONTEN.filter((konto) => konto !== 'Abduktoren').forEach((konto) => {
-      expect(pumpMoeglichkeiten(p, 1, konto).length, konto).toBeGreaterThan(0);
+describe('Prio-Slots', () => {
+  it('ordnet Muskeln der passenden Körperhälfte zu', () => {
+    expect(koerperhaelfte('Unterarme')).toBe('OK');
+    expect(koerperhaelfte('Quads')).toBe('UK');
+    expect(koerperhaelfte('Abs')).toBe('UK');
+  });
+
+  it('erzeugt für Unterarme je zwei Sätze in beiden OK-Einheiten', () => {
+    const slots = prioMoeglichkeiten({}, 1, 'Unterarme');
+    expect(slots.map((s) => s.tag)).toEqual(['OK-H', 'OK-P']);
+    expect(slots.every((s) => s.anzahl === 2)).toBe(true);
+  });
+
+  it('erzeugt für Glutes je zwei Sätze in beiden UK-Einheiten', () => {
+    expect(prioMoeglichkeiten({}, 1, 'Glutes').map((s) => s.tag))
+      .toEqual(['UK-H', 'UK-P']);
+  });
+
+  it('deaktiviert Prioritäten im Deload', () => {
+    expect(prioMoeglichkeiten({}, 8, 'Unterarme')).toEqual([]);
+  });
+
+  it('schlägt vier Sätze pro Cycle auf – unabhängig vom Level', () => {
+    [0, 1, 2].forEach((tier) => {
+      const p = payload(tier);
+      p.volumen.prioritaet.Unterarme = { modus: 'plus' };
+      const r = prioritaetsAnpassungen(p, 1);
+      expect(r.slots).toHaveLength(2);
+      expect(r.slots.reduce((sum, s) => sum + s.anzahl, 0)).toBe(4);
+      expect(r.delta).toEqual({});
+      expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
     });
-    expect(pumpMoeglichkeiten(p, 1, 'Abduktoren')).toHaveLength(0);
   });
 
-  it('ordnet hohes Gesamtvolumen zuerst und schließt andere Prioritäten aus', () => {
-    const p = payload(1);
-    p.volumen.prioritaet.Brust = { modus: 'plus' };
-    const r = spenderKandidaten(p, 1, 'Unterarme', {
-      konten: { Brust: 20, 'Oberer Rücken': 12, 'Seitliche Schulter': 14, Abs: 4, Trizeps: 10 },
-      direkt: { Abs: 4 }, indirekt: { Abs: 0 },
-    }, K);
-    expect(r[0].konto).toBe('Seitliche Schulter');
-    expect(r.some((e) => e.konto === 'Brust')).toBe(false);
-    expect(r[0].gruende).toContain('Pump · gleiche Einheit');
-    expect(r[0].gruende).toContain('höchste Wochenarbeit');
-  });
-
-  it('kann Spender schon vor der Wahl der Zielübung vorschlagen', () => {
-    const p = payload(1);
-    p.data['UK-A'][1].p_arm.names[0] = '';
-    const r = spenderKandidaten(p, 1, 'Unterarme', {
-      konten: { Abs: 8, Trizeps: 6 }, direkt: { Abs: 8, Trizeps: 6 }, indirekt: {},
-    }, K);
-    expect(r.map((e) => e.konto)).toContain('Abs');
-    expect(r.every((e) => e.tag === 'UK-A')).toBe(true);
-  });
-
-  it('bietet Umverteilung auch ganz ohne eingetragene Übungen an', () => {
-    const p = payload(1);
-    p.data['UK-A'][1] = {};
-    p.volumen.prioritaet.Unterarme = { modus: 'tausch', spender: 'Abs' };
-    expect(prioritaetsAnpassungen(p, 1, K).delta).toEqual({
-      'UK-A|p_arm|0': 1,
-      'UK-A|p_da|1': -1,
+  it('liefert die zusätzliche Muskelbox am Ende der passenden Einheit', () => {
+    const p = payload();
+    p.volumen.prioritaet.Unterarme = { modus: 'plus' };
+    const blocks = prioBloecke(p, 1, 'OK-H');
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0]).toMatchObject({
+      id: 'prio:Unterarme',
+      mus: 'Unterarme',
+      type: 'load',
+      sets: [2, 2, 2],
     });
-    const r = spenderKandidaten(p, 1, 'Unterarme', {}, K);
-    expect(r.map((e) => e.konto)).toContain('Abs');
-    expect(r.find((e) => e.konto === 'Abs').name).toBe('Pumpfeld noch leer');
+    expect(prioBloecke(p, 1, 'UK-H')).toEqual([]);
   });
 
-  it('fasst Lat und oberen Rücken unabhängig von der Übungswahl als Rücken zusammen', () => {
-    const p = payload(1);
-    const r = spenderKandidaten(p, 1, 'Unterarme', {
-      konten: { 'Oberer Rücken': 12, Lat: 8 },
-      direkt: { 'Oberer Rücken': 8, Lat: 6 }, indirekt: {},
-    }, K);
-    const ruecken = r.filter((e) => e.key === 'UK-A|p_bk|1');
-    expect(ruecken).toHaveLength(1);
-    expect(ruecken[0].label).toBe('Rücken');
-    expect(ruecken[0].konto).toBe('Oberer Rücken');
-  });
-
-  it('bietet Schulter und Abs aus dem gemeinsamen Log-Block getrennt an', () => {
-    const p = payload(1);
-    p.data['UK-A'][1] = {};
-    const r = spenderKandidaten(p, 1, 'Unterarme', {}, K);
-    expect(r.find((e) => e.key === 'UK-A|p_da|0')?.label).toBe('Schulter');
-    expect(r.find((e) => e.key === 'UK-A|p_da|1')?.label).toBe('Abs');
-    expect(r.map((e) => e.label)).not.toContain('Schultern + Abs');
-    expect(r.map((e) => e.label)).not.toContain('Bi/Untera. + Tri');
-  });
-
-  it('ersetzt einen alten kombinierten Spendernamen anhand des Feldes', () => {
-    const p = payload(1);
-    p.volumen.prioritaet.Brust = {
-      modus: 'tausch', spender: 'Seitliche Schulter',
-      spenderFeld: 'UK-A|p_da|0', spenderName: 'Schultern + Abs',
+  it('verteilt atomar je zwei Sätze in HEAVYS und PUMPS um', () => {
+    const p = payload();
+    p.volumen.prioritaet.Unterarme = {
+      modus: 'tausch',
+      spender: 'Brust',
+      spenderName: 'Brust',
     };
-    expect(prioritaetsAnpassungen(p, 1, K).ergebnisse.Brust.spenderName).toBe('Schulter');
+    const r = prioritaetsAnpassungen(p, 1);
+    expect(r.slots).toHaveLength(2);
+    expect(r.delta['OK-H|chest_comp|0']).toBe(-2);
+    expect(r.delta['OK-P|chest_comp|0']).toBe(-2);
+    expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
   });
 
-  it('verhindert, dass ein Zielfeld zugleich als Spender verwendet wird', () => {
-    const p = payload(1);
-    const kKonflikt = [...K, { n: 'Reverse Fly', haupt: 'Hintere Schulter', neben: [], typ: 'Iso' }];
-    p.data['UK-A'][1] = {};
-    p.volumen.prioritaet.Lat = { modus: 'tausch', spender: 'Seitliche Schulter' };
-    p.volumen.prioritaet['Hintere Schulter'] = { modus: 'plus' };
-    const r = prioritaetsAnpassungen(p, 1, kKonflikt);
-    expect(r.ergebnisse['Hintere Schulter'].status).toBe('ziel-fehlt');
-    expect(r.delta[r.ergebnisse.Lat.spenderFeld.key]).toBe(-1);
+  it('pausiert eine unvollständige oder körperfremde Umverteilung', () => {
+    const p = payload();
+    p.volumen.prioritaet.Unterarme = { modus: 'tausch', spender: 'Quads' };
+    const r = prioritaetsAnpassungen(p, 1);
+    expect(r.slots).toEqual([]);
+    expect(r.delta).toEqual({});
+    expect(r.ergebnisse.Unterarme.status).toBe('spender-fehlt');
+  });
+
+  it('legt mehrere Prioritäten nicht auf denselben Spenderblock', () => {
+    const p = payload();
+    p.volumen.prioritaet.Unterarme = { modus: 'tausch', spender: 'Brust' };
+    p.volumen.prioritaet.Bizeps = { modus: 'tausch', spender: 'Brust' };
+    const r = prioritaetsAnpassungen(p, 1);
+    expect(Object.values(r.ergebnisse).filter((e) => e.status === 'aktiv')).toHaveLength(2);
+    expect(Object.keys(r.delta)).toHaveLength(4);
+  });
+});
+
+describe('Spender-Vorschläge', () => {
+  it('bleibt in derselben Körperhälfte und verlangt zwei Sätze je Einheit', () => {
+    const p = payload();
+    const r = spenderKandidaten(p, 1, 'Unterarme', {
+      konten: { Brust: 12, Trizeps: 8, Quads: 20 },
+      direkt: { Brust: 10, Trizeps: 4, Quads: 10 },
+      indirekt: { Brust: 4, Trizeps: 8, Quads: 0 },
+    });
+    expect(r[0].konto).toBe('Brust');
+    expect(r.map((e) => e.konto)).not.toContain('Quads');
+    expect(r.every((e) => e.verfuegbar >= 2)).toBe(true);
+    expect(r[0].gruende).toContain('höchste Cycle-Arbeit');
+  });
+
+  it('schließt andere Prioritäten als Spender aus', () => {
+    const p = payload();
+    p.volumen.prioritaet.Brust = { modus: 'plus' };
+    expect(spenderKandidaten(p, 1, 'Unterarme', {}).map((e) => e.konto))
+      .not.toContain('Brust');
+  });
+
+  it('funktioniert ohne eingetragene Übungen', () => {
+    const p = payload();
+    expect(spenderKandidaten(p, 1, 'Unterarme', {}).length).toBeGreaterThan(0);
   });
 });

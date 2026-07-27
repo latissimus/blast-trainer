@@ -25,13 +25,13 @@ export async function mountProg(container, { userId }) {
       <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
     </div>
     <div class="som-statuskopf prog-statuskopf">
-      <p class="prog-info-titel">Heavy-Progression</p>
+      <p class="prog-info-titel">HEAVYS-Progression</p>
       <button class="som-info-knopf" id="prog-info-knopf" type="button" aria-expanded="false" aria-controls="prog-info">i</button>
     </div>
     <div class="som-kurzhilfe" id="prog-info" hidden>
-      <p>Diese Kurve zeigt den <b>Trend deiner Heavy-Leistung</b>. Einzelne schwächere Einheiten sind normal; aussagekräftig wird erst die Entwicklung über mehrere vergleichbare Einheiten.</p>
-      <p>Gezeigt wird das <b>geschätzte 1RM nach Epley</b> aus deinem besten Satz je Woche. Dadurch zählen sowohl mehr Gewicht als auch mehr Wiederholungen bei gleichem Gewicht. Es ist eine Rechengröße, kein Maximalkrafttest und kein direkter Beweis für Muskelwachstum.</p>
-      <p>Ausgewertet werden nur <b>Heavy-Sätze</b>. Pump- und Clusters-Sätze sind nicht als vergleichbarer Leistungstest gedacht.</p>
+      <p>Diese Kurve zeigt den <b>Trend deiner HEAVYS-Leistung</b>. Einzelne schwächere Einheiten sind normal; aussagekräftig wird erst die Entwicklung über mehrere vergleichbare Cycles.</p>
+      <p>Gezeigt wird das <b>geschätzte 1RM nach Epley</b> aus deinem besten Satz je Cycle. Dadurch zählen sowohl mehr Gewicht als auch mehr Wiederholungen bei gleichem Gewicht. Es ist eine Rechengröße, kein Maximalkrafttest und kein direkter Beweis für Muskelwachstum.</p>
+      <p>Ausgewertet werden nur <b>HEAVYS-Sätze</b>. PUMPS sind nicht als vergleichbarer Leistungstest gedacht.</p>
     </div>
     <div id="prog-inhalt"></div>`;
   container.appendChild(wrap);
@@ -55,6 +55,7 @@ export async function mountProg(container, { userId }) {
       payload = {};
     }
   }
+  if (payload?.v !== 4) payload = { v: 4 };
 
   // Ohne eigenen Kartentitel – die Seitenueberschrift sagt es bereits.
   mountFortschritt(wrap.querySelector('#prog-inhalt'), { session: null, payload, titel: '' });

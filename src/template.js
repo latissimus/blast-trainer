@@ -1,105 +1,94 @@
-// LOGMAN-Trainingsvorlage v3 — feste Satzzahlen je Level.
-// sets: [Level I, II, III]  (Gesamt-Sätze des Blocks; Wechsel-Split Comp/Iso auf die Übungen).
-// typeByTier: optionaler Typ-Wechsel je Level (z.B. Cluster-Tag: Tris/Bis & Abs sind bei
-// niedrigen Leveln Pump statt Cluster).
+// LOGMAN-Trainingsvorlage v4 — rollierender OK/UK-Split in CYCLES.
 //
-// konten: welche Muskelkonten dieser Block bedienen darf. Steuert, welche
-// Übungen der Katalog im Auswahlfeld anbietet. Die Beschriftung (mus) bleibt
-// bewusst grob ("Schultern"), die Konten sind fein: Welcher Schulterkopf
-// drankommt, ist eine Entscheidung beim Auswählen, keine der Vorlage.
+// Ein CYCLE besteht aus:
+//   OK HEAVYS -> UK HEAVYS -> OK PUMPS -> UK PUMPS
 //
-// Ein Feld darf eigene konten mitbringen – dann gelten seine statt der des
-// Blocks. Genau dafür sind die zusammengesetzten Blöcke da: "Brust + Rücken"
-// hat zwei Felder, und das erste ist die Brust, das zweite der Rücken. Ohne das
-// böte jedes der beiden Felder alle 65 Übungen beider Muskelgruppen an – auf
-// einem Telefon ein Scrollrad, durch das man sich zweimal durchdreht.
-//
-// Kein Feld hat mehr eine voreingetragene Übung. Früher standen hier Kürzel aus
-// Florians Studio ("PL Flach", "Brustpresse Aqua"); seit die Auswahl
-// ausschliesslich aus dem Katalog kommt, wären das Namen, die es dort nicht gibt.
-// Einmal auswählen genügt – die Wahl gilt für alle Wochen der Rotation.
+// sets: [Level I, Level II, Level III]. Level II bildet den Standardplan aus
+// LOGMAN-Training.md exakt ab. Level I reduziert die Dosis, Level III erhöht
+// sie auf den vorgesehenen Voll-Umfang. Jede Tabellenzeile bleibt ein eigener
+// Block, damit Wiederholungen, RIR und Pausen exakt zur Übung passen.
+
+const feld = (rolle, konten) => ({ r: rolle, n: '', konten });
+
 export const TPL = {
-  'OK-A': { short: 'OK · Heavy', sub: 'Oberkörper Heavy · Unterkörper Pump', rot: 'A', blocks: [
-    { id: 'back',  mus: 'Rücken',    konten: ['Lat', 'Oberer Rücken'], type: 'load', sets: [2, 3, 4], rest: 90,  reps: '6–12', ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
-    { id: 'chest', mus: 'Brust',     konten: ['Brust'], type: 'load', sets: [1, 2, 4], rest: 90,  reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
-    { id: 'delt',  mus: 'Schultern', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'], type: 'load', sets: [1, 2, 4], rest: 90,  reps: '6–12', ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
-    // Der einzelne Beine-Pump ist nur fuer die Quads. Hams/Glutes haben im
-    // folgenden p_gh-Feld einen eigenen Platz und werden hier nicht doppelt
-    // im Katalog angeboten.
-    { id: 'p_quad', mus: 'Beine',         konten: ['Quads'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
-    // Fussnote ‡: Level I nur ein Satz fuer den schwaecheren von beiden, Level II/III je einer.
-    { id: 'p_gh',   mus: 'Quads + Hams/Glutes',  konten: ['Quads', 'Hams', 'Glutes'], type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1,
-      ex: [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }],
-      // Level I hat nur ein Feld (der schwaechere von beiden) – dort beide anbieten.
-      exByTier: [[{ n: '', konten: ['Quads', 'Hams', 'Glutes'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }]] },
-    { id: 'p_calf', mus: 'Waden',         konten: ['Waden'], type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },  ] },
-  'UK-A': { short: 'UK · Heavy', sub: 'Unterkörper Heavy · Oberkörper Pump', rot: 'A', blocks: [
-    { id: 'legs', mus: 'Beine',       konten: ['Quads', 'Glutes'], type: 'load', sets: [1, 2, 3], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }] },
-    { id: 'quad', mus: 'Quads',       konten: ['Quads'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
-    { id: 'gh',   mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', ex: [{ r: 'Iso', n: '' }] },
-    { id: 'add',  mus: 'Abduktoren',  konten: ['Abduktoren'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', free: 1, ex: [{ r: 'Iso', n: '' }] },
-    // Waden sind im Katalog durchgehend Iso – es gibt keine Verbund-Wadenübung.
-    // Stand hier frueher auf Comp, dann bot die Auswahl nichts an.
-    { id: 'calf', mus: 'Waden',       konten: ['Waden'], type: 'load', sets: [2, 4, 5], rest: 60,  reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
-    { id: 'p_bk', mus: 'Brust + Rücken',  konten: ['Brust', 'Lat', 'Oberer Rücken'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, stretch: 1,
-      ex: [{ n: '', konten: ['Brust'] }, { n: '', konten: ['Lat', 'Oberer Rücken'] }] },
-    { id: 'p_da', mus: 'Schultern + Abs', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter', 'Abs'], type: 'pump', sets: [1, 2, 3], rest: 60, reps: '15–25', free: 1,
-      ex: [{ n: '', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'] }, { n: '', konten: ['Abs'] }] },
-    { id: 'p_arm', mus: 'Bi/Untera. + Tri', konten: ['Bizeps', 'Trizeps', 'Unterarme'], type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, stretch: 1,
-      // Unterarme laufen beim Bizeps mit: Reverse und Hammercurls gehoeren dorthin.
-      ex: [{ n: '', konten: ['Bizeps', 'Unterarme'] }, { n: '', konten: ['Trizeps'] }] },  ] },
-  'OK-B': { short: 'OK · Heavy', sub: 'Oberkörper Heavy · Unterkörper Pump', rot: 'B', blocks: [
-    { id: 'back',  mus: 'Rücken',    konten: ['Lat', 'Oberer Rücken'], type: 'load', sets: [2, 3, 4], rest: 90, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
-    { id: 'chest', mus: 'Brust',     konten: ['Brust'], type: 'load', sets: [1, 2, 4], rest: 90, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
-    { id: 'delt',  mus: 'Schultern', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'], type: 'load', sets: [1, 2, 4], rest: 90, reps: '6–12', ex: [{ r: 'Comp', n: '' }, { r: 'Iso', n: '' }] },
-    { id: 'p_quad', mus: 'Beine',         konten: ['Quads'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },
-    { id: 'p_gh',   mus: 'Quads + Hams/Glutes',  konten: ['Quads', 'Hams', 'Glutes'], type: 'pump', sets: [1, 1, 1], rest: 60, reps: '15–25', free: 1,
-      ex: [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }],
-      // Level I hat nur ein Feld (der schwaechere von beiden) – dort beide anbieten.
-      exByTier: [[{ n: '', konten: ['Quads', 'Hams', 'Glutes'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }], [{ n: '', konten: ['Quads'] }, { n: '', konten: ['Hams', 'Glutes'] }]] },
-    { id: 'p_calf', mus: 'Waden',         konten: ['Waden'], type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, ex: [{ n: '' }] },  ] },
-  'UK-B': { short: 'UK · Heavy', sub: 'Unterkörper Heavy · Oberkörper Pump', rot: 'B', blocks: [
-    { id: 'legs', mus: 'Beine',       konten: ['Quads', 'Glutes'], type: 'load', sets: [1, 2, 3], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Comp', n: '' }] },
-    { id: 'quad', mus: 'Quads',       konten: ['Quads'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
-    { id: 'gh',   mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', ex: [{ r: 'Iso', n: '' }] },
-    { id: 'add',  mus: 'Abduktoren',  konten: ['Abduktoren'], type: 'load', sets: [1, 1, 1], rest: 120, reps: '6–12', free: 1, ex: [{ r: 'Iso', n: '' }] },
-    { id: 'calf', mus: 'Waden',       konten: ['Waden'], type: 'load', sets: [2, 4, 5], rest: 60,  reps: '6–12', stretch: 1, ex: [{ r: 'Iso', n: '' }] },
-    { id: 'p_bk', mus: 'Brust + Rücken',  konten: ['Brust', 'Lat', 'Oberer Rücken'], type: 'pump', sets: [1, 2, 2], rest: 60, reps: '15–25', free: 1, stretch: 1,
-      ex: [{ n: '', konten: ['Brust'] }, { n: '', konten: ['Lat', 'Oberer Rücken'] }] },
-    { id: 'p_da', mus: 'Schultern + Abs', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter', 'Abs'], type: 'pump', sets: [1, 2, 3], rest: 60, reps: '15–25', free: 1,
-      ex: [{ n: '', konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'] }, { n: '', konten: ['Abs'] }] },
-    { id: 'p_arm', mus: 'Bi/Untera. + Tri', konten: ['Bizeps', 'Trizeps', 'Unterarme'], type: 'pump', sets: [1, 1, 2], rest: 60, reps: '15–25', free: 1, stretch: 1,
-      // Unterarme laufen beim Bizeps mit: Reverse und Hammercurls gehoeren dorthin.
-      ex: [{ n: '', konten: ['Bizeps', 'Unterarme'] }, { n: '', konten: ['Trizeps'] }] },  ] },
-  'MRs': { short: 'Clusters', sub: '6×4 · ~15RM · 10 s zwischen Minisätzen', rot: '*', blocks: [
-    // Dicke/Breite deckt sich mit den Konten: Dicke = oberer Rücken (Rudern),
-    // Breite = Lat (Ziehen von oben).
-    { id: 'm_bkth', mus: 'Rücken Dicke',  konten: ['Oberer Rücken'], type: 'mr', sets: [1, 2, 2], rest: 10, reps: '6×4', free: 1, ex: [{ n: '' }] },
-    { id: 'm_bkwi', mus: 'Rücken Breite', konten: ['Lat'], type: 'mr', sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1, stretch: 1, ex: [{ n: '' }] },
-    { id: 'm_ch',   mus: 'Brust',         konten: ['Brust'], type: 'mr', sets: [1, 2, 2], rest: 10, reps: '6×4', free: 1, stretch: 1, ex: [{ n: '' }] },
-    { id: 'm_de',   mus: 'Schultern',     konten: ['Vordere Schulter', 'Seitliche Schulter', 'Hintere Schulter'], type: 'mr', sets: [1, 1, 2], rest: 10, reps: '6×4', free: 1, ex: [{ n: '' }] },
-    { id: 'm_arm',  mus: 'Tri u/o Bi',    konten: ['Trizeps', 'Bizeps', 'Unterarme'], type: 'mr', typeByTier: ['pump', 'mr', 'mr'], sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1, stretch: 1,
-      ex: [{ n: '', konten: ['Trizeps'] }, { n: '', konten: ['Bizeps', 'Unterarme'] }] },
-    { id: 'm_gh',   mus: 'Beine (Hams)',  konten: ['Hams'], type: 'mr', sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1, ex: [{ n: '' }] },
-    { id: 'm_calf', mus: 'Waden',  konten: ['Waden'], type: 'mr', sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1,
-      ex: [{ n: '', konten: ['Waden'] }] },
-    { id: 'm_abs',  mus: 'Abs',           konten: ['Abs'], type: 'mr', typeByTier: ['pump', 'pump', 'mr'], sets: [1, 1, 1], rest: 10, reps: '6×4', free: 1, ex: [{ n: '' }] },
-  ] },
+  'OK-H': {
+    short: 'OK · HEAVYS',
+    sub: 'Oberkörper · HEAVYS',
+    blocks: [
+      { id: 'chest_comp', mus: 'Brust', konten: ['Brust'], type: 'load', sets: [2, 3, 4], rest: 180, reps: '5–8', rir: '1–3 RIR', ex: [feld('Comp', ['Brust'])] },
+      { id: 'chest_iso', mus: 'Brust', konten: ['Brust'], type: 'load', sets: [1, 2, 3], rest: 150, reps: '5–8', rir: '1–2 RIR', ex: [feld('Iso', ['Brust'])] },
+      { id: 'back_thick', mus: 'Rücken · Dicke', konten: ['Oberer Rücken'], type: 'load', sets: [2, 3, 4], rest: 180, reps: '5–8', rir: '1–3 RIR', ex: [feld('Comp', ['Oberer Rücken'])] },
+      { id: 'back_wide', mus: 'Rücken · Weite', konten: ['Lat'], type: 'load', sets: [1, 2, 3], rest: 180, reps: '5–8', rir: '1–3 RIR', ex: [feld('Comp', ['Lat'])] },
+      { id: 'delt_iso', mus: 'Seitl./Hint. Schulter', konten: ['Seitliche Schulter', 'Hintere Schulter'], type: 'load', sets: [2, 3, 5], rest: 150, reps: '5–8', rir: '1–2 RIR', ex: [feld('Iso', ['Seitliche Schulter', 'Hintere Schulter'])] },
+      { id: 'biceps_iso', mus: 'Bizeps', konten: ['Bizeps'], type: 'load', sets: [1, 2, 3], rest: 150, reps: '5–8', rir: '1–2 RIR', ex: [feld('Iso', ['Bizeps'])] },
+      { id: 'triceps_iso', mus: 'Trizeps', konten: ['Trizeps'], type: 'load', sets: [1, 2, 3], rest: 150, reps: '5–8', rir: '1–2 RIR', ex: [feld('Iso', ['Trizeps'])] },
+    ],
+  },
+  'UK-H': {
+    short: 'UK · HEAVYS',
+    sub: 'Unterkörper · HEAVYS',
+    blocks: [
+      { id: 'legs_comp', mus: 'Beine', konten: ['Quads', 'Glutes'], type: 'load', sets: [2, 3, 4], rest: 180, reps: '5–8', rir: '1–3 RIR', ex: [feld('Comp', ['Quads', 'Glutes'])] },
+      { id: 'quads_iso', mus: 'Quads', konten: ['Quads'], type: 'load', sets: [1, 2, 3], rest: 180, reps: '5–8', rir: '1–2 RIR', ex: [feld('Iso', ['Quads'])] },
+      { id: 'hams_glutes_iso', mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'load', sets: [1, 2, 3], rest: 180, reps: '5–8', rir: '1–2 RIR', ex: [feld('Iso', ['Hams', 'Glutes'])] },
+      { id: 'calves_iso', mus: 'Waden', konten: ['Waden'], type: 'load', sets: [3, 3, 5], rest: 120, reps: '5–8', rir: '1–2 RIR', ex: [feld('Iso', ['Waden'])] },
+      { id: 'abs_iso', mus: 'Abs', konten: ['Abs'], type: 'load', sets: [2, 2, 3], rest: 120, reps: '5–8', rir: '1–2 RIR', ex: [feld('Iso', ['Abs'])] },
+    ],
+  },
+  'OK-P': {
+    short: 'OK · PUMPS',
+    sub: 'Oberkörper · PUMPS',
+    blocks: [
+      { id: 'chest_comp', mus: 'Brust', konten: ['Brust'], type: 'pump', sets: [2, 3, 4], rest: 120, reps: '10–15', rir: '1–2 RIR', free: 1, ex: [feld('Comp', ['Brust'])] },
+      { id: 'chest_iso', mus: 'Brust', konten: ['Brust'], type: 'pump', sets: [1, 2, 3], rest: 60, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Brust'])] },
+      { id: 'back_thick', mus: 'Rücken · Dicke', konten: ['Oberer Rücken'], type: 'pump', sets: [2, 3, 4], rest: 120, reps: '10–15', rir: '1–2 RIR', free: 1, ex: [feld('Comp', ['Oberer Rücken'])] },
+      { id: 'back_wide', mus: 'Rücken · Weite', konten: ['Lat'], type: 'pump', sets: [1, 2, 3], rest: 120, reps: '10–15', rir: '1–2 RIR', free: 1, ex: [feld('Comp', ['Lat'])] },
+      { id: 'delt_iso', mus: 'Seitl./Hint. Schulter', konten: ['Seitliche Schulter', 'Hintere Schulter'], type: 'pump', sets: [2, 3, 5], rest: 60, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Seitliche Schulter', 'Hintere Schulter'])] },
+      { id: 'biceps_iso', mus: 'Bizeps', konten: ['Bizeps'], type: 'pump', sets: [1, 2, 3], rest: 120, reps: '10–15', rir: '1–2 RIR', free: 1, ex: [feld('Iso', ['Bizeps'])] },
+      { id: 'triceps_iso', mus: 'Trizeps', konten: ['Trizeps'], type: 'pump', sets: [1, 2, 3], rest: 120, reps: '10–15', rir: '1–2 RIR', free: 1, ex: [feld('Iso', ['Trizeps'])] },
+    ],
+  },
+  'UK-P': {
+    short: 'UK · PUMPS',
+    sub: 'Unterkörper · PUMPS',
+    blocks: [
+      { id: 'legs_comp', mus: 'Beine', konten: ['Quads', 'Glutes'], type: 'pump', sets: [2, 3, 4], rest: 120, reps: '10–15', rir: '1–2 RIR', free: 1, ex: [feld('Comp', ['Quads', 'Glutes'])] },
+      { id: 'quads_iso', mus: 'Quads', konten: ['Quads'], type: 'pump', sets: [1, 2, 3], rest: 120, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Quads'])] },
+      { id: 'hams_glutes_iso', mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'pump', sets: [1, 2, 3], rest: 120, reps: '10–20', rir: '1–2 RIR', free: 1, ex: [feld('Iso', ['Hams', 'Glutes'])] },
+      { id: 'calves_iso', mus: 'Waden', konten: ['Waden'], type: 'pump', sets: [3, 3, 5], rest: 60, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Waden'])] },
+      { id: 'abs_iso', mus: 'Abs', konten: ['Abs'], type: 'pump', sets: [2, 2, 3], rest: 60, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Abs'])] },
+    ],
+  },
 };
 
-// Deload (Woche 7): 2–3× pro Woche, ausschliesslich Clusters. Drei Slots teilen sich
-// dieselbe Vorlage, damit jede Einheit einzeln geloggt wird; der dritte ist optional.
-// Gleiche Referenz genuegt – TPL wird nur gelesen.
-TPL['MRs-2'] = TPL['MRs'];
-TPL['MRs-3'] = TPL['MRs'];
-
-// Migration alter index-basierter Daten (v1) auf id-basierte Blöcke.
-export const LEGACY = {
-  'OK-A': ['back', 'chest', 'delt', 'p_quad', 'p_gh', 'p_calf'],
-  'OK-B': ['back', 'chest', 'delt', 'p_quad', 'p_gh', 'p_calf'],
-  'UK-A': ['legs', 'quad', 'gh', 'add', 'calf', 'p_bk', 'p_da', 'p_arm'],
-  'UK-B': ['legs', 'quad', 'gh', 'add', 'calf', 'p_bk', 'p_da', 'p_arm'],
-  'MRs':  ['m_bkth', 'm_bkwi', 'm_ch', 'm_de', 'm_arm', 'm_gh', 'm_calf', 'm_abs'],
+// Deload: dieselben HEAVYS-Übungen, ungefähr 50 % der Standardsätze, 3–5 RIR.
+// nameSource sorgt dafür, dass keine Übungen ein zweites Mal gewählt werden.
+TPL['OK-D'] = {
+  short: 'OK · DELOAD',
+  sub: 'Oberkörper · Deload',
+  nameSource: 'OK-H',
+  blocks: TPL['OK-H'].blocks.map((b) => ({
+    ...b,
+    sets: [Math.ceil(b.sets[1] / 2), Math.ceil(b.sets[1] / 2), Math.ceil(b.sets[1] / 2)],
+    rir: '3–5 RIR',
+    deload: 1,
+  })),
+};
+TPL['UK-D'] = {
+  short: 'UK · DELOAD',
+  sub: 'Unterkörper · Deload',
+  nameSource: 'UK-H',
+  blocks: TPL['UK-H'].blocks.map((b) => ({
+    ...b,
+    sets: [Math.ceil(b.sets[1] / 2), Math.ceil(b.sets[1] / 2), Math.ceil(b.sets[1] / 2)],
+    rir: '3–5 RIR',
+    deload: 1,
+  })),
 };
 
+// Alte Logs werden beim Wechsel auf Schema v4 bewusst geleert. LEGACY bleibt
+// als leerer Export bestehen, damit der Import in log.js stabil bleibt.
+export const LEGACY = {};
 export const TIER_NAMES = ['I', 'II', 'III'];
+export const CYCLE_TAGE = ['OK-H', 'UK-H', 'OK-P', 'UK-P'];
+export const DELOAD_TAGE = ['OK-D', 'UK-D'];
