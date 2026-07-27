@@ -188,7 +188,7 @@ export function mountFaq(container) {
       </div>
     </details>
 
-    <p class="faq-sektion" id="faq-hintergrund">Hintergrund</p>
+    <p class="faq-sektion" id="faq-hintergrund">Hintergrund & Weiteres</p>
 
     <details class="faq"><summary>Was ist LOGMAN?</summary>
       <div class="faq-a">
