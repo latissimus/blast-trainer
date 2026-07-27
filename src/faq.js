@@ -309,7 +309,7 @@ export function mountFaq(container) {
 <details class="faq"><summary>Wer steckt hinter LOGMAN?</summary>
   <div class="faq-a">
     <div style="display: flex; align-items: center; gap: 15px; margin-top: 5px;">
-      <img src="Flo.JPG" alt="Florian Rau" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #fff;">
+      <img src="./Flo.JPG" alt="Florian Rau" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #fff;">
       <div>
         <p style="margin: 0;"><b>Entwickelt von Florian Rau</b></p>
         <p style="margin: 5px 0 0 0;">LOGMAN ist aus dem Anspruch heraus entstanden, ein evidenzbasiertes Werkzeug für intelligentes Krafttraining mit dem Ziel der Hypertrophie zu schaffen – mit maximalem Fokus auf Progression und Regeneration im Retro-Look. 👊🏼</p>
@@ -318,11 +318,12 @@ export function mountFaq(container) {
   </div>
 </details>
 
-    <p class="src"><b>Grundlagen:</b> LOGMAN-Training · produktive Versagensnähe · progressive Belastung · erholbares Volumen · standardisierte Ausführung.</p>
-    <div class="faq-credit">
-      <p>LOGMAN – Concept &amp; Code by <b>Florian Rau</b></p>
-    </div>`;
+    <p class="src"><b>Grundlagen:</b> LOGMAN-Training · produktive Versagensnähe · progressive Belastung · erholbares Volumen · standardisierte Ausführung.</p>`;
   container.appendChild(wrap);
+
+<div style="text-align: left; margin-top: 30px; opacity: 1; font-size: 0.85em;">
+  <p>LOGMAN – Concept & Code by <b>Florian Rau</b></p>
+</div>
 
   const faqSuche = wrap.querySelector('#faq-suche-input');
   const faqLoeschen = wrap.querySelector('#faq-suche-loeschen');
