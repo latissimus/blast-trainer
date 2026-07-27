@@ -220,7 +220,7 @@ export function mountFaq(container) {
     </details>
 
     <p class="src"><b>Grundlagen:</b> LOGMAN-Training · produktive Versagensnähe · progressive Belastung · erholbares Volumen · standardisierte Ausführung.</p>
-<p><b>Evidenz:</b>https://www.sciencedirect.com/science/article/pii/S2095254625000869</p>`;
+<p class="src"><b>Evidenz:</b>https://www.sciencedirect.com/science/article/pii/S2095254625000869</p>`;
   container.appendChild(wrap);
 
   const faqSuche = wrap.querySelector('#faq-suche-input');
