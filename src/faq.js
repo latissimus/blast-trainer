@@ -225,7 +225,16 @@ export function mountFaq(container) {
   <details class="faq"><summary>Wann sollte ich Volumen verändern?</summary>
       <div class="faq-a">
         <p><b>Erhöhen:</b> Wenn Entwicklung über mehrere Cycles ausbleibt, Technik und Progression stabil sind und du vollständig erholt bist. Ergänze zunächst 1–2 Sätze und beobachte mindestens zwei bis drei Cycles.</p>
-        <p><b>Reduzieren:</b> Wenn Leistung wiederholt fällt, der Muskel bis zur nächsten Einheit nicht erholt ist, Beschwerden zunehmen oder zusätzliche Sätze nur noch geringe Qualität liefern.</p>
+        
+<p><b>Indikation für eine Drosselung:</b><br>
+    • Hoher Alltagsstress oder schwierige Lebensphasen.<br>
+    • Urlaub oder fehlende Motivation.<br>
+    • Aufkeimende Gelenkschmerzen oder schlechte Regeneration.</p>
+
+    <p><b>Konkrete Maßnahmen:</b><br>
+    • <b>Volumenstufe Level I wählen</b> (Erhaltung / Basis-Reiz).<br>
+    • <b>Weniger systemisch ermüdende Übungen:</b> Freie Mehrgelenksübungen reduzieren, häufiger auf Maschinen ausweichen.<br>
+    • <b>Keine starre Progressionspflicht:</b> Das Training dient in diesen Phasen dem Krafterhalt und der Stressbewältigung, nicht dem Erzwingen neuer Rekorde.</p>
       </div>
     </details>
 
@@ -249,20 +258,6 @@ export function mountFaq(container) {
     • Die systemische Ermüdung unverhältnismäßig hoch ist.</p>
 
     <p><b>Wichtig:</b> Übungen werden niemals allein wegen fehlendem Muskelkater oder fehlendem Pump ausgetauscht!</p>
-  </div>
-</details>
-
-<details class="faq"><summary>Wann sollte ich das Volumen individuell anpassen?</summary>
-  <div class="faq-a">
-    <p><b>Indikation für eine Drosselung:</b><br>
-    • Hoher Alltagsstress oder schwierige Lebensphasen.<br>
-    • Urlaub oder fehlende Motivation.<br>
-    • Aufkeimende Gelenkschmerzen oder schlechte Regeneration.</p>
-
-    <p><b>Konkrete Maßnahmen:</b><br>
-    • <b>Volumenstufe Level I wählen</b> (Erhaltung / Basis-Reiz).<br>
-    • <b>Weniger systemisch ermüdende Übungen:</b> Freie Mehrgelenksübungen reduzieren, häufiger auf Maschinen ausweichen.<br>
-    • <b>Keine starre Progressionspflicht:</b> Das Training dient in diesen Phasen dem Krafterhalt und der Stressbewältigung, nicht dem Erzwingen neuer Rekorde.</p>
   </div>
 </details>
 
