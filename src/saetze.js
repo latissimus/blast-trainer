@@ -29,3 +29,12 @@ export function setsForExercise(blk, tier, xi) {
   const E = exOf(blk, tier).length || 1;
   return Math.floor(N / E) + (xi < (N % E) ? 1 : 0);
 }
+
+// Level III erhöht nichts automatisch. Zusatzsätze liegen deshalb direkt am
+// jeweiligen Übungsfeld des aktuellen Cycles. Außerhalb von Level III werden
+// sie aufbewahrt, aber weder angezeigt noch gezählt.
+export function extraSets(entry, tier, xi) {
+  if (tier !== 2) return 0;
+  const wert = Number(entry?.extra?.[xi]);
+  return Number.isFinite(wert) ? Math.max(0, Math.floor(wert)) : 0;
+}

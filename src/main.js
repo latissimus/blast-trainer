@@ -253,7 +253,7 @@ function renderChrome() {
           <button class="x" id="app-timerx" aria-label="Timer abbrechen">×</button>
         </div>
         <div class="slots" id="app-slots">
-          <label class="ci"><span class="wert" id="ci-wo-w">C 1</span><span class="lbl" id="ci-wo-l">Cycle</span>
+          <label class="ci"><span class="wert" id="ci-wo-w">1</span><span class="lbl" id="ci-wo-l">Cycle</span>
             <select id="lg-woche" aria-label="Cycle" disabled></select></label>
           <label class="ci"><span class="wert" id="ci-tag-w">OK</span><span class="lbl" id="ci-tag-l">HEAVYS</span>
             <select id="lg-tag" aria-label="Einheit" disabled></select></label>
@@ -261,7 +261,7 @@ function renderChrome() {
             <select id="lg-tier" aria-label="Level" disabled>
               <option value="0">Kompakt · weniger Volumen</option>
               <option value="1">Standard · normales Volumen</option>
-              <option value="2">Voll · höchstes Volumen</option>
+              <option value="2">Selektiv · Volumen selbst erhöhen</option>
             </select></label>
           <label class="ci"><span class="wert" id="ci-dat-w">—</span><span class="lbl">Datum</span>
             <input id="lg-datum" type="date" aria-label="Datum der Einheit" disabled></label>

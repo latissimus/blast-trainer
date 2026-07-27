@@ -45,10 +45,22 @@ describe('zaehleCycle – Standardplan', () => {
     expect(zaehleCycle(basis(), 1).gesamt).toBe(0);
   });
 
-  it('bildet Level I, II und III ab', () => {
+  it('bildet Level I ab und startet Level III auf Standardniveau', () => {
     expect(zaehleCycle(mitBrust(0), 1).direkt.Brust).toBe(6);
     expect(zaehleCycle(mitBrust(1), 1).direkt.Brust).toBe(10);
-    expect(zaehleCycle(mitBrust(2), 1).direkt.Brust).toBe(14);
+    expect(zaehleCycle(mitBrust(2), 1).direkt.Brust).toBe(10);
+  });
+
+  it('zählt auf Level III nur gezielt gewählte Zusatzsätze', () => {
+    const p = mitBrust(2);
+    p.data['OK-P'][1].chest_comp.extra = { 0: 2 };
+    expect(zaehleCycle(p, 1).direkt.Brust).toBe(12);
+  });
+
+  it('ignoriert gespeicherte Zusatzsätze außerhalb von Level III', () => {
+    const p = mitBrust(1);
+    p.data['OK-P'][1].chest_comp.extra = { 0: 3 };
+    expect(zaehleCycle(p, 1).direkt.Brust).toBe(10);
   });
 
   it('nimmt Level II, wenn keine Auswahl gespeichert ist', () => {
@@ -89,6 +101,12 @@ describe('zaehleCycle – Priorität', () => {
     expect(zaehleCycle(p, 1).direkt.Unterarme).toBe(4);
   });
 
+  it('zählt auf Wunsch nur einen Prioritätssatz je passender Einheit', () => {
+    const p = basis();
+    p.volumen.prioritaet.Unterarme = { modus: 'plus', saetze: 1 };
+    expect(zaehleCycle(p, 1).direkt.Unterarme).toBe(2);
+  });
+
   it('schlägt Priorität auf und zieht bei Umverteilung je Einheit zwei ab', () => {
     const p = mitBrust();
     p.volumen.prioritaet.Unterarme = {
@@ -99,6 +117,18 @@ describe('zaehleCycle – Priorität', () => {
     const r = zaehleCycle(p, 1);
     expect(r.direkt.Unterarme).toBe(4);
     expect(r.direkt.Brust).toBe(6);
+  });
+
+  it('verteilt bei der kleinen Priorität je Einheit nur einen Satz um', () => {
+    const p = mitBrust();
+    p.volumen.prioritaet.Unterarme = {
+      modus: 'tausch',
+      saetze: 1,
+      spender: 'Brust',
+    };
+    const r = zaehleCycle(p, 1);
+    expect(r.direkt.Unterarme).toBe(2);
+    expect(r.direkt.Brust).toBe(8);
   });
 
   it('zählt indirekte Arbeit einer gewählten Prio-Übung', () => {

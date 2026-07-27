@@ -54,8 +54,8 @@ export function mountFaq(container) {
         <p>Das Level regelt die <b>Satzanzahl der aktuellen Einheit</b>. Die ausgeführten Sätze bleiben auf jedem Level produktiv und ausreichend nah am Versagen.</p>
         <p><b>Level I – Kompakt · weniger Volumen:</b> für den Einstieg, schwächere Tage, geringe Erholung oder Erhalt.<br>
         <b>Level II – Standard · normales Volumen:</b> die Vorauswahl und der vollständige Standardplan.<br>
-        <b>Level III – Voll · höchstes Volumen:</b> nur für nachweislich gut erholende Muskeln oder zeitlich begrenzt als Plateau-Breaker.</p>
-        <p>Wähle nach Leistung und Erholung, nicht nach Ehrgeiz. Wenn Technik, Zielmuskel oder Leistung unter späteren Sätzen leiden, reduziere das Level.</p>
+        <b>Level III – Selektiv · Volumen selbst erhöhen:</b> startet mit Level II. Über den + Satz-Chip ergänzt du nur bei einzelnen Übungen Volumen.</p>
+        <p>Wähle nach Leistung und Erholung, nicht nach Ehrgeiz. Erhöhe einzelne Muskeln schrittweise; wenn Technik, Zielmuskel oder Leistung unter späteren Sätzen leiden, entferne die Zusatzsätze wieder.</p>
       </div>
     </details>
 
@@ -79,6 +79,7 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p><b>5–8 Wiederholungen und meistens 1–3 RIR.</b> Gezielte Iso-Arbeit liegt meist bei 1–2 RIR. Die Übungsauswahl bleibt über den Trainingsblock fest, damit die Leistung sauber vergleichbar ist.</p>
         <p>Die Last steigt, wenn du das obere Ende des Wiederholungsbereichs mit passender Technik und Ziel-RIR erreichst. Nicht jede Übung muss in jedem Cycle besser werden.</p>
+        <p><b>Evidenz:</b> Muskelaufbau ist über verschiedene Lastbereiche möglich, wenn Sätze ausreichend anstrengend sind. Schwerere Lasten machen die Leistung zusätzlich gut vergleichbar und fördern besonders die Maximalkraft.</p>
       </div>
     </details>
 
@@ -86,6 +87,7 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p><b>10–20 Wiederholungen mit leichterer Last, aber versagensnah.</b> „PUMPS“ bezeichnet keinen eigenen metabolischen Wachstumsmechanismus. Entscheidend bleiben produktive Wiederholungen nahe am Versagen.</p>
         <p>Die Übungen dürfen freier wechseln. <b>Lengthened Partials sind optional</b> und nur bei passenden, sicheren Übungen sinnvoll – nicht automatisch nach jedem Satz.</p>
+        <p><b>Evidenz:</b> Leichtere Lasten können ähnlich Muskelmasse aufbauen wie schwere, wenn die Sätze nah genug ans Versagen geführt werden.</p>
       </div>
     </details>
 
@@ -100,6 +102,7 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p>Die Pause steht direkt im jeweiligen Muskelblock und passt zur Übung: große HEAVYS-Comps meist <b>3 Minuten</b>, HEAVYS-Isos meist <b>2–2.5 Minuten</b>, PUMPS meist <b>1–2 Minuten</b>.</p>
         <p>Ein Tipp auf den Uhr-Chip startet den Timer. Wenn deine Leistung trotz passender Anstrengung deutlich einbricht, darfst du etwas länger pausieren.</p>
+        <p><b>Evidenz:</b> Sehr kurze Pausen sind für Muskelaufbau nicht überlegen. Ausreichende Pausen helfen, Wiederholungen und Satzqualität zu erhalten.</p>
       </div>
     </details>
 
@@ -129,6 +132,7 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p>In jeder Einheit konzentrierst du dich nur auf Ober- oder Unterkörper. Dadurch bleiben Fokus, technische Qualität und Motivation höher, ohne nach schwerer Arbeit noch die andere Körperhälfte abarbeiten zu müssen.</p>
         <p>Die meisten Muskeln erhalten ungefähr zwei Kontakte pro Cycle. Die Verteilung hält einzelne Einheiten praktikabel und trennt systemisch ermüdende Belastungen.</p>
+        <p><b>Evidenz:</b> Bei vergleichbarem Gesamtvolumen zeigt die Forschung keinen klaren Muskelaufbau-Vorteil einer bestimmten Frequenz. Die Aufteilung dient hier vor allem Qualität, Erholung und Umsetzbarkeit.</p>
       </div>
     </details>
 
@@ -143,20 +147,23 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p>Der Deload dauert ungefähr eine Woche und enthält <b>ein OK- und ein UK-Training</b>. Die Übungen und Lasten bleiben, die Sätze sinken ungefähr um 50 Prozent und du hältst 3–5 RIR.</p>
         <p>Es gibt kein Muskelversagen und keine Intensitätstechniken. Danach beginnt die nächste Phase wieder auf Level II.</p>
+        <p><b>Evidenz:</b> Für eine exakt beste Deload-Methode gibt es wenig direkte Forschung. Die reduzierte Woche ist deshalb eine praktische Ermüdungssteuerung, keine starre biologische Pflicht.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Wie kommen die Satzzahlen zustande?</summary>
       <div class="faq-a">
         <p>Level II entspricht dem voreingestellten Standardplan. Große Muskelgruppen erhalten ihre Arbeit über HEAVYS und PUMPS; kleinere Muskeln sammeln zusätzlich indirekte Belastung.</p>
-        <p>Level I reduziert die Dosis, Level III erhöht sie. Die App gibt die Satzzahlen vor – du musst nichts ausrechnen und kannst reguläre Sätze nicht versehentlich über das Soll hinaus hinzufügen.</p>
+        <p><b>Evidenz:</b> Mehr harte Sätze führen im Durchschnitt zu mehr Muskelaufbau, der Zusatznutzen wird aber kleiner und unterscheidet sich stark zwischen Muskeln und Personen. Außerdem zählen Versagensnähe und indirekte Arbeit mit – deshalb liegt der Standard bewusst unter pauschalen „10–20 direkte Sätze“-Vorgaben.</p>
+        <p>Level I reduziert die Dosis. Level III startet mit denselben Satzzahlen wie Level II und zeigt an jeder Übung einen <b>+ Satz</b>-Chip. So erhöhst du nur dort, wo Entwicklung und Erholung tatsächlich mehr Volumen erlauben.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Wie funktioniert ein Prioritätsmuskel?</summary>
       <div class="faq-a">
-        <p>Öffne im Set-O-Meter einen Muskel und setze ihn auf Priorität. LOGMAN fügt dann unten eine eigene Muskelbox mit <b>2 Sätzen in beiden passenden Einheiten</b> ein.</p>
-        <p>Beispiel Unterarme: +2 Sätze in OK HEAVYS und +2 Sätze in OK PUMPS. Du kannst das Volumen <b>aufschlagen</b> oder von einem geeigneten Muskel derselben Körperhälfte <b>umverteilen</b>.</p>
+        <p>Öffne im Set-O-Meter einen Muskel, wähle <b>1 oder 2 Sätze je passender Einheit</b> und setze ihn auf Priorität. LOGMAN fügt dafür eine kompakte eigene Muskelbox ein. Comp- und Iso-Übungen sind möglich.</p>
+        <p>Beispiel Unterarme mit zwei Sätzen: +2 in OK HEAVYS und +2 in OK PUMPS. Du kannst das Volumen <b>aufschlagen</b> oder dieselbe Satzanzahl von einem geeigneten Muskel derselben Körperhälfte <b>umverteilen</b>.</p>
+        <p><b>Evidenz:</b> Kleine Erhöhungen um ein bis zwei Sätze sind besser kontrollierbar als große Sprünge. Beurteile Wirkung und Erholung über mehrere Cycles.</p>
       </div>
     </details>
 

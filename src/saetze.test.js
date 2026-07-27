@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
+import { targetSets, effTypeOf, exOf, setsForExercise, extraSets } from './saetze.js';
+import { TPL, CYCLE_TAGE } from './template.js';
 
 // Diese Rechnungen scheitern nie laut: Steht eine falsche Satzzahl da, sieht sie
 // aus wie eine richtige. Deshalb liegen die Regeln hier fest.
@@ -67,5 +68,25 @@ describe('Typ- und Feld-Ausnahmen je Level', () => {
 
   it('fällt ohne exByTier auf die Standardfelder zurück', () => {
     expect(exOf(zwei, 1).length).toBe(2);
+  });
+});
+
+describe('Selektive Zusatzsätze', () => {
+  it('setzt jeden regulären Block in Level III auf die Level-II-Basis', () => {
+    CYCLE_TAGE.forEach((tag) => {
+      TPL[tag].blocks.forEach((block) => expect(block.sets[2]).toBe(block.sets[1]));
+    });
+  });
+
+  it('zählt sie ausschließlich auf Level III', () => {
+    const entry = { extra: { 0: 2 } };
+    expect(extraSets(entry, 0, 0)).toBe(0);
+    expect(extraSets(entry, 1, 0)).toBe(0);
+    expect(extraSets(entry, 2, 0)).toBe(2);
+  });
+
+  it('fängt ungültige oder negative Werte ab', () => {
+    expect(extraSets({ extra: { 0: -3 } }, 2, 0)).toBe(0);
+    expect(extraSets({ extra: { 0: 'x' } }, 2, 0)).toBe(0);
   });
 });

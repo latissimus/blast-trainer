@@ -80,6 +80,14 @@ describe('mergePayload – Uebungsnamen und Notizen', () => {
 });
 
 describe('mergePayload – Pool und Einstellungen', () => {
+  it('behält eine lokale Level-III-Satzerhöhung einschließlich bewusster Null', () => {
+    const m = mergePayload(
+      { data: { 'OK-P': { 1: { chest_comp: { sets: [[]], extra: { 0: 2 } } } } } },
+      { data: { 'OK-P': { 1: { chest_comp: { sets: [[]], extra: { 0: 0 } } } } } },
+    );
+    expect(m.data['OK-P'][1].chest_comp.extra[0]).toBe(0);
+  });
+
   it('vereinigt den Uebungs-Pool, ohne etwas zu verwerfen', () => {
     const m = mergePayload(
       { mem: { 'mr|beinpresse': { w: '150' } } },

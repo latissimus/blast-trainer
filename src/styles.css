@@ -881,7 +881,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   background:var(--surface);color:var(--muted);font-size:12px;line-height:1.45}
 .som-einfach p{margin:0 0 7px}
 .som-einfach b{color:var(--text)}
-.som-ablauf{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.som-ablauf{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 .som-ablauf span{display:flex;align-items:center;gap:5px;min-width:0;font-size:10.5px;
   font-weight:700;line-height:1.2;color:var(--text)}
 .som-ablauf i{display:grid;place-items:center;flex:0 0 21px;height:21px;border:1.5px solid var(--ink);
@@ -980,6 +980,22 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   padding:2px 6px;font-size:9px;font-weight:800;text-transform:uppercase;white-space:nowrap}
 .volrolle.prio{background:var(--prio);color:#fff}
 .volrolle.minus{background:var(--prio-soft);border-color:var(--prio);color:var(--text)}
+
+/* Prioritätskarten ergänzen nur den gewählten Slot. Die ausführlichen
+   Trainingshinweise stehen schon im regulären Muskelblock direkt darüber. */
+.prioritaets-block.prioritaets-angedockt{margin-top:-7px}
+.prioritaets-block .bhead{padding-top:12px;padding-bottom:7px}
+.prioritaets-block .ex{padding-top:9px;padding-bottom:10px}
+.prioritaets-block .volrolle{font-size:8.5px}
+
+/* Level III: Zusatzvolumen bewusst je Übung statt pauschal für den ganzen Plan. */
+.satz-extra{display:inline-flex;align-items:center;gap:4px;margin-left:auto}
+.satz-extra button{min-height:30px;border:var(--bw) solid var(--ink);background:var(--surface);
+  color:var(--text);border-radius:999px;font-family:var(--mono);font-size:11px;font-weight:800}
+.satz-extra-plus{padding:4px 9px}
+.satz-extra-plus span{font-size:16px;line-height:.7;vertical-align:-1px}
+.satz-extra-minus{width:30px;padding:0;font-size:16px!important}
+.satz-extra b{min-width:22px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--prio-text)}
 
 .volbar{background:var(--navy-panel);color:#fff;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);padding:14px 15px;margin-bottom:14px}
 .volbar h3{margin:0 0 4px;font-size:13px;color:#fff}

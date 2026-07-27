@@ -1,7 +1,7 @@
 import { supabase } from './supabase.js';
 import { readLog, writeLog, mergePayload } from './localstore.js';
 import { TPL, TIER_NAMES, CYCLE_TAGE, DELOAD_TAGE } from './template.js';
-import { targetSets, effTypeOf, exOf, setsForExercise } from './saetze.js';
+import { targetSets, effTypeOf, exOf, setsForExercise, extraSets } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
 import { auswahlGruppen, sucheAuswahlGruppen, imKatalog } from './auswahl.js';
 import { prioritaetsAnpassungen, prioBloecke, slotKey } from './prioritaet.js';
@@ -22,7 +22,7 @@ function pausenLabel(sekunden) {
 // Anzeige-Labels der Set-Typen. Die internen Keys (load/pump/mr) bleiben, damit
 // gespeicherte Logs gueltig bleiben – nur die Beschriftung wechselt.
 const TYPE_LABEL = { load: 'HEAVYS', pump: 'PUMPS', mr: 'CLUSTERS' };
-const LEVEL_LABEL = ['Kompakt', 'Standard', 'Voll'];
+const LEVEL_LABEL = ['Kompakt', 'Standard', 'Selektiv'];
 const TUTORIAL_SETUP = [
   { week: 1, day: 'OK-H', titel: 'OK HEAVYS', folgt: 'UK HEAVYS' },
   { week: 1, day: 'UK-H', titel: 'UK HEAVYS', folgt: 'Satzeingabe' },
@@ -239,6 +239,34 @@ export async function mountLog(container, { userId, readOnly = false }) {
       state.day = TUTORIAL_SETUP[0].day;
     }
   } catch (e) { /* sessionStorage darf den Log nicht aufhalten */ }
+
+  // Existiert der Prioritätsmuskel bereits regulär in der Einheit, steht seine
+  // kompakte Zusatzkarte direkt hinter dem letzten passenden Muskelblock.
+  // Neue Muskeln wie Unterarme bleiben als eigener Slot am Ende.
+  function sortierteBloecke(tpl, week, day) {
+    const basis = [...tpl.blocks];
+    const extras = prioBloecke(payloadOut(), week, day);
+    const verwendet = new Set();
+    const result = [];
+    basis.forEach((blk, index) => {
+      result.push(blk);
+      extras.forEach((extra, extraIndex) => {
+        const konto = extra.konten[0];
+        const passt = (blk.konten || []).includes(konto);
+        const spaeter = basis.slice(index + 1).some((b) => (b.konten || []).includes(konto));
+        if (passt && !spaeter) {
+          extra.angedockt = 1;
+          result.push(extra);
+          verwendet.add(extraIndex);
+        }
+      });
+    });
+    extras.forEach((extra, index) => {
+      if (!verwendet.has(index)) result.push(extra);
+    });
+    return result;
+  }
+
   // Fortschritt einer Einheit fuer den Punkt auf dem Tab. Zaehlt wie die Volumen-Leiste,
   // damit Punkt und "X / Y ARBEITSSÄTZE" nie widersprechen.
   function dayProgress(day, week) {
@@ -247,13 +275,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (!tpl || !cell) return { any: false, met: false };
     const tier = tierOf(day, week);
     const prio = prioritaetsAnpassungen(payloadOut(), week);
-    const blocks = [...tpl.blocks, ...prioBloecke(payloadOut(), week, day)];
+    const blocks = sortierteBloecke(tpl, week, day);
     let done = 0, tgtTotal = 0;
     blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier); if (tgt === 0) return;
       const entry = cell[blk.id];
       exOf(blk, tier).forEach((_, xi) => {
-        const basis = setsForExercise(blk, tier, xi);
+        const basis = setsForExercise(blk, tier, xi) + extraSets(entry, tier, xi);
         const cnt = Math.max(0, basis + (prio.delta[slotKey(day, blk.id, xi)] || 0));
         tgtTotal += cnt;
         const arr = (entry && entry.sets && entry.sets[xi]) || [];
@@ -282,6 +310,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
       }
     }
     return null;
+  }
+  function cycleFertig(cycle) {
+    return daysOfWeek(cycle).every((day) => dayProgress(day, cycle).met);
   }
   function heavyAuswahlStatus(tpl, tier) {
     const felder = [];
@@ -667,8 +698,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const cruise = isCruise(state.week);
 
     wocheSel.value = String(state.week);
-    woWert.textContent = cruise ? 'Deload' : 'C ' + state.week;
+    woWert.textContent = cruise ? 'Deload' : String(state.week);
     woLbl.textContent = cruise ? 'aktiv' : 'Cycle';
+    [...wocheSel.options].forEach((option) => {
+      const cycle = Number(option.value);
+      const basis = cycle >= 8 ? 'Deload' : `Cycle ${cycle}`;
+      const text = `${cycleFertig(cycle) ? '✓ ' : ''}${basis}`;
+      if (option.textContent !== text) option.textContent = text;
+    });
 
     // Der Fortschritt der ANDEREN Tage war frueher als Punkt auf den drei
     // Reitern sichtbar. In einer Klappliste faellt das weg, also steht er jetzt
@@ -762,7 +799,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const upd = () => {
         s.w = wIn.value; s.r = rIn.value;
         renderPrev(prevLine, prevSets, entry.sets[xi].slice(0, count), prev ? prev.week : null);
-        refreshVolume(); queuePersist();
+        refreshVolume(); renderControls(); queuePersist();
       };
       wIn.oninput = upd; rIn.oninput = upd;
     }
@@ -842,7 +879,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     row.appendChild(rF);
 
     if (!readOnly) {
-      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMem(memNode, entry.names[xi], 'mr'); refreshVolume(); queuePersist(); };
+      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMem(memNode, entry.names[xi], 'mr'); refreshVolume(); renderControls(); queuePersist(); };
       wIn.oninput = upd; rIn.oninput = upd;
     }
     return row;
@@ -868,7 +905,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     row.appendChild(rF);
 
     if (!readOnly) {
-      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMem(memNode, entry.names[xi], kind); refreshVolume(); queuePersist(); };
+      const upd = () => { s.w = wIn.value; s.r = rIn.value; renderMem(memNode, entry.names[xi], kind); refreshVolume(); renderControls(); queuePersist(); };
       wIn.oninput = upd; rIn.oninput = upd;
     }
     return row;
@@ -1037,7 +1074,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     wrap.querySelector('#lg-pool').innerHTML = '';
 
   let tutorialWahlMarkiert = false;
-    const blocks = [...tpl.blocks, ...prioBloecke(payloadOut(), state.week, state.day)];
+    const blocks = sortierteBloecke(tpl, state.week, state.day);
     blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
       if (tgt === 0) return;   // Block bei diesem Tier nicht dabei (z.B. optionale MRs bei Tier I)
@@ -1056,23 +1093,25 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
       const el = document.createElement('div'); el.className = `block block-${effType}`;
       const cues = [];
-      if (effType === 'load') {
+      if (!blk.prio && effType === 'load') {
         const hatComp = exOf(blk, tier).some((exDef) => exDef.r === 'Comp');
         cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '1–3 RIR') + '</span>',
           `<span class="chip">${blk.deload ? 'Kein Versagen' : (hatComp ? 'Versagen nur letzter Comp' : 'Kein erzwungenes Versagen')}</span>`);
       }
-      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '0–1 RIR') + '</span>', '<span class="chip">leicht · versagensnah · Partials optional</span>');
-      if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
-      cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + pausenLabel(effRest) + '</button>');
+      if (!blk.prio && effType === 'pump') cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '0–1 RIR') + '</span>', '<span class="chip">leicht · versagensnah · Partials optional</span>');
+      if (!blk.prio && effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
+      if (!blk.prio) cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + pausenLabel(effRest) + '</button>');
 
       el.innerHTML = `
         <div class="bhead">
           <span class="mus">${blockMus}</span>
           <span class="badge b-${effType}">${TYPE_LABEL[effType] || effType}</span>
+          ${blk.prio ? '<span class="volrolle prio">Priorisiert</span>' : ''}
           <span class="target" data-tgt="${blk.id}">Sätze <b>${tgt}</b></span>
         </div>
-        <div class="cue">${cues.join('')}</div>`;
+        ${cues.length ? `<div class="cue">${cues.join('')}</div>` : ''}`;
       if (blk.prio) el.classList.add('prioritaets-block');
+      if (blk.angedockt) el.classList.add('prioritaets-angedockt');
       // Muskelname mitgeben: Die Mitteilung soll sagen, wovon die Pause war.
       if (!readOnly) el.querySelectorAll('.chip.rest').forEach((b) => (
         b.onclick = () => startePause(Number(b.dataset.rest), blockMus)
@@ -1082,7 +1121,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const exDiv = document.createElement('div'); exDiv.className = 'ex';
 
         const hd = document.createElement('div'); hd.className = 'exhead';
-        if (exDef.r) { const rl = document.createElement('span'); rl.className = 'role' + (exDef.r === 'Comp' ? ' comp' : ''); rl.textContent = exDef.r; hd.appendChild(rl); }
+        if (exDef.r || blk.prio) {
+          const rl = document.createElement('span');
+          rl.className = 'role' + (exDef.r === 'Comp' ? ' comp' : '');
+          rl.textContent = blk.prio ? 'Comp / Iso' : exDef.r;
+          hd.appendChild(rl);
+        }
         // Auswahl statt Freitext: Nur was im Katalog steht, laesst sich
         // eintragen. Sonst wuesste das Wochenkonto nicht, auf welches
         // Muskelkonto ein Satz laeuft – und ein Tippfehler waere still eine
@@ -1132,7 +1176,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const prevLine = document.createElement('div'); prevLine.className = 'prev';
         // Anzahl Sätze: Pump-Paare sind Supersets und Cluster-Felder eigenständig -> jede Übung
         // bekommt die volle Zahl. Nur Heavy wird im Wechsel auf Comp/Iso aufgeteilt.
-        const geplant = setsForExercise(blk, tier, xi);
+        const geplant = setsForExercise(blk, tier, xi) + extraSets(entry, tier, xi);
         const prioDelta = prio.delta[slotKey(state.day, blk.id, xi)] || 0;
         const count = Math.max(0, geplant + prioDelta);
         if (prioDelta) {
@@ -1140,6 +1184,41 @@ export async function mountLog(container, { userId, readOnly = false }) {
           vc.className = 'volrolle ' + (prioDelta > 0 ? 'prio' : 'minus');
           vc.textContent = prioDelta > 0 ? `Priorität +${prioDelta}` : `Umverteilung ${prioDelta}`;
           hd.appendChild(vc);
+        }
+        if (tier === 2 && !blk.prio && !readOnly) {
+          entry.extra = entry.extra || {};
+          const extra = extraSets(entry, tier, xi);
+          const steuerung = document.createElement('span');
+          steuerung.className = 'satz-extra';
+          if (extra > 0) {
+            const minus = document.createElement('button');
+            minus.type = 'button';
+            minus.className = 'satz-extra-minus';
+            minus.textContent = '−';
+            minus.setAttribute('aria-label', 'Einen Zusatzsatz entfernen');
+            minus.onclick = () => {
+              entry.extra[xi] = Math.max(0, extra - 1);
+              queuePersist();
+              renderAll();
+            };
+            steuerung.appendChild(minus);
+            const stand = document.createElement('b');
+            stand.textContent = `+${extra}`;
+            stand.title = `${extra} zusätzliche ${extra === 1 ? 'Satz' : 'Sätze'}`;
+            steuerung.appendChild(stand);
+          }
+          const plus = document.createElement('button');
+          plus.type = 'button';
+          plus.className = 'satz-extra-plus';
+          plus.innerHTML = '<span aria-hidden="true">+</span> Satz';
+          plus.setAttribute('aria-label', 'Einen Zusatzsatz hinzufügen');
+          plus.onclick = () => {
+            entry.extra[xi] = extra + 1;
+            queuePersist();
+            renderAll();
+          };
+          steuerung.appendChild(plus);
+          hd.appendChild(steuerung);
         }
         entry.sets[xi] = entry.sets[xi] || [];
         while (entry.sets[xi].length < count) entry.sets[xi].push({ w: '', r: '', rir: '' });
@@ -1257,7 +1336,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function renderVolume(cell, tpl, tier) {
     let total = 0, tgtTotal = 0;
     const prio = prioritaetsAnpassungen(payloadOut(), state.week);
-    const blocks = [...tpl.blocks, ...prioBloecke(payloadOut(), state.week, state.day)];
+    const blocks = sortierteBloecke(tpl, state.week, state.day);
     blocks.forEach((blk) => {
       const tgt = targetSets(blk, tier);
       if (tgt === 0) return;
@@ -1265,7 +1344,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       let sets = 0;
       let blockTgt = 0;
       exOf(blk, tier).forEach((_, xi) => {
-        const basis = setsForExercise(blk, tier, xi);
+        const basis = setsForExercise(blk, tier, xi) + extraSets(entry, tier, xi);
         const cnt = Math.max(0, basis + (prio.delta[slotKey(state.day, blk.id, xi)] || 0));
         blockTgt += cnt;
         const arr = (entry && entry.sets && entry.sets[xi]) || [];
@@ -1286,7 +1365,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const tgt = targetSets(blk, tier);
       let blockTgt = 0;
       exOf(blk, tier).forEach((_, xi) => {
-        const basis = setsForExercise(blk, tier, xi);
+        const basis = setsForExercise(blk, tier, xi) + extraSets(entry, tier, xi);
         const cnt = Math.max(0, basis + (prio.delta[slotKey(state.day, blk.id, xi)] || 0));
         blockTgt += cnt;
         const arr = (entry && entry.sets && entry.sets[xi]) || [];

@@ -83,7 +83,8 @@ export function clearUserData(uid) {
 // lokal nur, wenn dort tatsaechlich etwas steht.
 const blockHasData = (b) =>
   ((b && b.sets) || []).some((arr) => (arr || []).some((s) => s && (s.w || s.r))) ||
-  ((b && b.names) || []).some((n) => n && String(n).trim());
+  ((b && b.names) || []).some((n) => n && String(n).trim()) ||
+  !!(b && b.extra && Object.keys(b.extra).length);
 
 const pickBlock = (srv, loc) => (blockHasData(loc) ? loc : (srv || loc));
 

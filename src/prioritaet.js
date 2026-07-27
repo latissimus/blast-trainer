@@ -1,10 +1,10 @@
 import { TPL, CYCLE_TAGE, DELOAD_TAGE } from './template.js';
 import { KONTEN } from './katalog.js';
-import { targetSets, exOf, setsForExercise } from './saetze.js';
+import { targetSets, exOf, setsForExercise, extraSets } from './saetze.js';
 
 // Prioritäten erhalten in jeder passenden OK- oder UK-Einheit einen eigenen
-// Zwei-Satz-Slot. Das Ziel muss deshalb nicht schon als reguläre Übung im Plan
-// stehen. Beispiel Unterarme: +2 in OK HEAVYS und +2 in OK PUMPS.
+// Slot mit einem oder zwei Sätzen. Das Ziel muss deshalb nicht schon als
+// reguläre Übung im Plan stehen.
 
 export const slotKey = (tag, blockId, xi) => `${tag}|${blockId}|${xi}`;
 export const prioBlockId = (konto) => `prio:${konto}`;
@@ -22,6 +22,7 @@ export const koerperhaelfte = (konto) => UK_KONTEN.has(konto) ? 'UK' : 'OK';
 const volumenVon = (payload) => (payload && payload.volumen) || {};
 export const prioritaetenVon = (payload) => volumenVon(payload).prioritaet || {};
 const gueltigePrio = (cfg) => cfg && (cfg.modus === 'plus' || cfg.modus === 'tausch');
+export const prioSatzanzahl = (cfg) => Number(cfg?.saetze) === 1 ? 1 : 2;
 
 function passendeTage(cycle, konto) {
   if (istDeload(cycle)) return [];
@@ -29,27 +30,29 @@ function passendeTage(cycle, konto) {
   return CYCLE_TAGE.filter((tag) => tag.startsWith(prefix));
 }
 
-export function prioBlock(konto, tag) {
+export function prioBlock(konto, tag, anzahl = 2) {
   const heavy = tag.endsWith('-H');
   const ok = tag.startsWith('OK-');
+  const saetze = anzahl === 1 ? 1 : 2;
   return {
     id: prioBlockId(konto),
     mus: konto,
     konten: [konto],
     type: heavy ? 'load' : 'pump',
-    sets: [2, 2, 2],
+    sets: [saetze, saetze, saetze],
     rest: heavy ? (ok ? 150 : 180) : (ok ? 60 : 120),
     reps: heavy ? '5–8' : '15–20',
     rir: heavy ? '1–3 RIR' : '0–1 RIR',
     free: heavy ? 0 : 1,
     prio: 1,
-    ex: [{ n: '', konten: [konto] }],
+    ex: [{ n: '', konten: [konto], prioRollen: ['Comp', 'Iso'] }],
   };
 }
 
 export function prioMoeglichkeiten(payload, cycle, konto) {
+  const anzahl = prioSatzanzahl(prioritaetenVon(payload)[konto]);
   return passendeTage(cycle, konto).map((tag) => {
-    const block = prioBlock(konto, tag);
+    const block = prioBlock(konto, tag, anzahl);
     return {
       key: slotKey(tag, block.id, 0),
       tag,
@@ -57,7 +60,7 @@ export function prioMoeglichkeiten(payload, cycle, konto) {
       xi: 0,
       mus: konto,
       konto,
-      anzahl: 2,
+      anzahl,
       erlaubt: [konto],
       block,
     };
@@ -85,7 +88,8 @@ function regulaereFelder(payload, cycle, konto, tag = null) {
           xi,
           mus: blk.mus,
           konto,
-          anzahl: setsForExercise(blk, tier, xi),
+          anzahl: setsForExercise(blk, tier, xi) +
+            extraSets((((payload?.data || {})[day] || {})[cycle] || {})[blk.id], tier, xi),
           erlaubt,
         });
       });
@@ -131,7 +135,7 @@ export function prioritaetsAnpassungen(payload, cycle) {
     let vollstaendig = true;
     zielSlots.forEach((slot) => {
       const feld = bestesFeld(regulaereFelder(payload, cycle, spender, slot.tag)
-        .filter((f) => !reservierteSpender.has(f.key) && f.anzahl >= 2));
+        .filter((f) => !reservierteSpender.has(f.key) && f.anzahl >= slot.anzahl));
       if (!feld) vollstaendig = false;
       else spenderFelder.push(feld);
     });
@@ -142,7 +146,7 @@ export function prioritaetsAnpassungen(payload, cycle) {
 
     spenderFelder.forEach((feld) => {
       reservierteSpender.add(feld.key);
-      delta[feld.key] = (delta[feld.key] || 0) - 2;
+      delta[feld.key] = (delta[feld.key] || 0) - prioSatzanzahl(cfg);
     });
     slots.push(...zielSlots);
     ergebnisse[ziel] = {
@@ -165,7 +169,7 @@ export function prioBloecke(payload, cycle, tag) {
     .map((slot) => slot.block);
 }
 
-// Ein Spender muss in beiden passenden Einheiten mindestens zwei Sätze
+// Ein Spender muss in beiden passenden Einheiten die gewählte Satzanzahl
 // bereitstellen können. Vorschläge stehen nach bereits geplanter Cycle-Arbeit.
 export function spenderKandidaten(payload, cycle, ziel, cycleWerte = {}) {
   if (istDeload(cycle)) return [];
@@ -175,6 +179,7 @@ export function spenderKandidaten(payload, cycle, ziel, cycleWerte = {}) {
   const konten = cycleWerte.konten || {};
   const direkt = cycleWerte.direkt || {};
   const indirekt = cycleWerte.indirekt || {};
+  const anzahl = prioSatzanzahl(prioritaet[ziel]);
 
   return KONTEN
     .filter((konto) => konto !== ziel &&
@@ -182,7 +187,7 @@ export function spenderKandidaten(payload, cycle, ziel, cycleWerte = {}) {
       !gueltigePrio(prioritaet[konto]))
     .map((konto) => {
       const felder = tage.map((tag) => bestesFeld(regulaereFelder(payload, cycle, konto, tag)
-        .filter((f) => f.anzahl >= 2)));
+        .filter((f) => f.anzahl >= anzahl)));
       if (felder.some((f) => !f)) return null;
       return {
         konto,

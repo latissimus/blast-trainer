@@ -1,6 +1,6 @@
 import { TPL } from './template.js';
 import { KATALOG, KONTEN } from './katalog.js';
-import { targetSets, setsForExercise, exOf } from './saetze.js';
+import { targetSets, setsForExercise, exOf, extraSets } from './saetze.js';
 import {
   istDeload,
   tageDerWoche,
@@ -62,6 +62,7 @@ export function zaehleCycle(payload, cycle, katalog = KATALOG) {
         if (!name) return;
         const anzahl = Math.max(0,
           setsForExercise(blk, tier, xi) +
+          extraSets(eintragBlock, tier, xi) +
           (prio.delta[slotKey(tag, blk.id, xi)] || 0));
         if (!anzahl) return;
 

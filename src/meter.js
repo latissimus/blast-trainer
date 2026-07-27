@@ -4,6 +4,7 @@ import { zaehleCycle, sortiert, zeigName } from './setometer.js';
 import { KONTEN } from './katalog.js';
 import {
   prioritaetenVon,
+  prioSatzanzahl,
   pumpMoeglichkeiten,
   spenderKandidaten,
 } from './prioritaet.js';
@@ -34,8 +35,9 @@ export async function mountMeter(container, { userId }) {
         <p><b>Optional:</b> Dein Plan funktioniert auch ohne Priorität.</p>
         <div class="som-ablauf" aria-label="So setzt du eine Priorität">
           <span><i>1</i>Muskel</span>
-          <span><i>2</i>Art</span>
-          <span><i>3</i>Spender</span>
+          <span><i>2</i>Sätze</span>
+          <span><i>3</i>Art</span>
+          <span><i>4</i>Spender</span>
         </div>
       </div>
       <div class="som-legende" aria-label="Balkenlegende">
@@ -74,6 +76,7 @@ export async function mountMeter(container, { userId }) {
   const infoKnopf = wrap.querySelector('#som-info-knopf');
   let ausgewaehlt = null;
   let modusOffen = false;
+  let entwurfSaetze = 2;
   let revision = 0;
 
   const html = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({
@@ -87,14 +90,12 @@ export async function mountMeter(container, { userId }) {
 
   function statusText(ergebnis, cfg) {
     if (!ergebnis) return '';
-    if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt && ergebnis.modus === 'plus')
-      return 'Aktiv: Je 2 Zusatzsätze stehen in beiden passenden Einheiten bereit.';
-    if (ergebnis.status === 'aktiv' && ergebnis.vorgemerkt)
-      return `Aktiv: je +2 Priorität und −2 ${ergebnis.spenderName || ergebnis.spender} in beiden passenden Einheiten.`;
+    const n = prioSatzanzahl(cfg);
+    const satz = n === 1 ? 'Satz' : 'Sätze';
     if (ergebnis.status === 'aktiv' && ergebnis.modus === 'plus')
-      return 'Aktiv: je +2 Sätze in HEAVYS und PUMPS.';
+      return `Aktiv: je +${n} ${satz} in HEAVYS und PUMPS.`;
     if (ergebnis.status === 'aktiv')
-      return `Aktiv: je +2 Priorität und −2 ${ergebnis.spenderName || ergebnis.spender} in HEAVYS und PUMPS.`;
+      return `Aktiv: je +${n} Priorität und −${n} ${ergebnis.spenderName || ergebnis.spender} in HEAVYS und PUMPS.`;
     if (ergebnis.status === 'spender-fehlt' && !cfg?.spender)
       return 'Wähle noch einen Spender aus derselben Körperhälfte.';
     if (ergebnis.status === 'spender-fehlt')
@@ -121,6 +122,7 @@ export async function mountMeter(container, { userId }) {
   function inlineEditor(konto, werte, prioErgebnisse) {
     const prios = prioritaetenVon(payload);
     const cfg = prios[konto];
+    const satzanzahl = cfg ? prioSatzanzahl(cfg) : entwurfSaetze;
     const ergebnis = prioErgebnisse[konto];
     const spenderFuer = donorVon(konto, prioErgebnisse);
     const hatPumpplatz = pumpMoeglichkeiten(payload, cycle, konto).length > 0;
@@ -137,26 +139,32 @@ export async function mountMeter(container, { userId }) {
         ${quellen.map((q) => `<small><b>${q.saetze}×</b> ${html(q.name)}</small>`).join('')}
       </div></div>` : ''}
       ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
-      ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt je 2 Sätze in HEAVYS und PUMPS ab für: <b>${spenderFuer.map(html).join(', ')}</b></p>` : ''}
+      ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt in HEAVYS und PUMPS ab für: <b>${spenderFuer.map((ziel) =>
+        `${html(ziel)} (je ${prioSatzanzahl(prios[ziel])})`).join(', ')}</b></p>` : ''}
       <span class="som-ed-label">1 · Muskel priorisieren</span>
       <button type="button" class="som-prio-toggle${cfg ? ' on' : ''}" data-prio-toggle ${!hatPumpplatz ? ' disabled' : ''}>
-        <span aria-hidden="true">${cfg ? '✓' : '○'}</span> ${cfg ? 'Priorität aktiv' : 'Als Priorität setzen (+ 2 je Einheit)'}
+        <span aria-hidden="true">${cfg ? '✓' : '○'}</span> ${cfg ? 'Priorität aktiv' : 'Als Priorität setzen'}
       </button>
       ${!hatPumpplatz ? '<p class="som-hinweis">Im Deload sind keine Prio-Slots vorgesehen.</p>' : ''}
       ${zeigeModus && hatPumpplatz ? `<div class="som-inline-plan">
-        <span class="som-ed-label">2 · Art wählen</span>
+        <span class="som-ed-label">2 · Zusatz je Einheit</span>
+        <div class="som-modusseg som-satzwahl" role="group" aria-label="Zusatzsätze je Einheit">
+          <button type="button" data-prio-saetze="1" class="${satzanzahl === 1 ? 'on' : ''}"><b>1 Satz</b><small>+2 pro Cycle</small></button>
+          <button type="button" data-prio-saetze="2" class="${satzanzahl === 2 ? 'on' : ''}"><b>2 Sätze</b><small>+4 pro Cycle</small></button>
+        </div>
+        <span class="som-ed-label">3 · Art wählen</span>
         <div class="som-modusseg" role="group" aria-label="Art der Priorisierung">
-          <button type="button" data-modus="tausch" class="${cfg?.modus === 'tausch' ? 'on' : ''}"><b>Umverteilen</b><small>je −2 anderswo</small></button>
-          <button type="button" data-modus="plus" class="${cfg?.modus === 'plus' ? 'on' : ''}"><b>Aufschlagen</b><small>+4 pro Cycle</small></button>
+          <button type="button" data-modus="tausch" class="${cfg?.modus === 'tausch' ? 'on' : ''}"><b>Umverteilen</b><small>je −${satzanzahl} anderswo</small></button>
+          <button type="button" data-modus="plus" class="${cfg?.modus === 'plus' ? 'on' : ''}"><b>Aufschlagen</b><small>+${satzanzahl * 2} pro Cycle</small></button>
         </div>
         ${cfg?.modus === 'tausch' ? `<div class="som-spender">
-          <span class="som-ed-label">3 · Spender bestätigen · meiste Cycle-Arbeit zuerst</span>
+          <span class="som-ed-label">4 · Spender bestätigen · meiste Cycle-Arbeit zuerst</span>
           ${kandidaten.length ? kandidaten.map((k) => `<button type="button" class="som-spender-wahl${istGewaehlt(k) ? ' on' : ''}"
             data-spender="${html(k.konto)}" data-spender-feld="${html(k.key)}" data-spender-name="${html(k.label)}">
             <span><b>${html(k.label)}</b><small>${html(k.name)}</small></span>
             <span class="som-spender-zahlen">${k.direkt} direkt · ${k.indirekt} indirekt</span>
             <em>${k.gruende.map(html).join(' · ')}</em>
-          </button>`).join('') : '<p class="som-hinweis">Kein Muskel kann in beiden passenden Einheiten je 2 Sätze abgeben.</p>'}
+          </button>`).join('') : `<p class="som-hinweis">Kein Muskel kann in beiden passenden Einheiten je ${satzanzahl} ${satzanzahl === 1 ? 'Satz' : 'Sätze'} abgeben.</p>`}
           ${alleKandidaten.length ? `<label class="som-spender-frei"><span class="som-ed-label">Oder frei wählen</span>
             <select data-spender-frei>
               <option value="">Muskel auswählen…</option>
@@ -228,8 +236,22 @@ export async function mountMeter(container, { userId }) {
         speichern();
       } else {
         modusOffen = true;
+        entwurfSaetze = 2;
         render();
       }
+    });
+    body.querySelectorAll('[data-prio-saetze]').forEach((b) => {
+      b.onclick = () => {
+        const saetze = Number(b.dataset.prioSaetze) === 1 ? 1 : 2;
+        const cfg = prios[ausgewaehlt];
+        if (!cfg) {
+          entwurfSaetze = saetze;
+          render();
+          return;
+        }
+        cfg.saetze = saetze;
+        speichern();
+      };
     });
     body.querySelectorAll('[data-modus]').forEach((b) => {
       b.onclick = () => {
@@ -241,11 +263,15 @@ export async function mountMeter(container, { userId }) {
           const alt = payload.volumen.prioritaet[ausgewaehlt];
           payload.volumen.prioritaet[ausgewaehlt] = {
             modus: 'tausch',
+            saetze: prioSatzanzahl(alt || { saetze: entwurfSaetze }),
             spender: alt?.modus === 'tausch' ? (alt.spender || null) : null,
             spenderFeld: alt?.modus === 'tausch' ? (alt.spenderFeld || null) : null,
             spenderName: alt?.modus === 'tausch' ? (alt.spenderName || null) : null,
           };
-        } else payload.volumen.prioritaet[ausgewaehlt] = { modus: 'plus' };
+        } else payload.volumen.prioritaet[ausgewaehlt] = {
+          modus: 'plus',
+          saetze: prioSatzanzahl(payload.volumen.prioritaet[ausgewaehlt] || { saetze: entwurfSaetze }),
+        };
         modusOffen = false;
         speichern(springtNachOben);
       };
@@ -255,7 +281,9 @@ export async function mountMeter(container, { userId }) {
         if (p?.modus === 'tausch' && p.spender === ausgewaehlt) p.spender = null;
       });
       payload.volumen.prioritaet[ausgewaehlt] = {
-        modus: 'tausch', spender, spenderFeld, spenderName,
+        modus: 'tausch',
+        saetze: prioSatzanzahl(payload.volumen.prioritaet[ausgewaehlt]),
+        spender, spenderFeld, spenderName,
       };
       speichern();
     };

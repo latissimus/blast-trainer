@@ -54,6 +54,13 @@ describe('Prio-Slots', () => {
     expect(slots.every((s) => s.anzahl === 2)).toBe(true);
   });
 
+  it('erzeugt wahlweise nur einen Satz in beiden passenden Einheiten', () => {
+    const p = payload();
+    p.volumen.prioritaet.Unterarme = { modus: 'plus', saetze: 1 };
+    const slots = prioMoeglichkeiten(p, 1, 'Unterarme');
+    expect(slots.map((s) => s.anzahl)).toEqual([1, 1]);
+  });
+
   it('erzeugt für Glutes je zwei Sätze in beiden UK-Einheiten', () => {
     expect(prioMoeglichkeiten({}, 1, 'Glutes').map((s) => s.tag))
       .toEqual(['UK-H', 'UK-P']);
@@ -103,6 +110,18 @@ describe('Prio-Slots', () => {
     expect(r.ergebnisse.Unterarme.status).toBe('aktiv');
   });
 
+  it('verteilt bei kleiner Priorität atomar je einen Satz um', () => {
+    const p = payload();
+    p.volumen.prioritaet.Unterarme = {
+      modus: 'tausch',
+      saetze: 1,
+      spender: 'Brust',
+    };
+    const r = prioritaetsAnpassungen(p, 1);
+    expect(r.delta['OK-H|chest_comp|0']).toBe(-1);
+    expect(r.delta['OK-P|chest_comp|0']).toBe(-1);
+  });
+
   it('pausiert eine unvollständige oder körperfremde Umverteilung', () => {
     const p = payload();
     p.volumen.prioritaet.Unterarme = { modus: 'tausch', spender: 'Quads' };
@@ -146,5 +165,13 @@ describe('Spender-Vorschläge', () => {
   it('funktioniert ohne eingetragene Übungen', () => {
     const p = payload();
     expect(spenderKandidaten(p, 1, 'Unterarme', {}).length).toBeGreaterThan(0);
+  });
+
+  it('erlaubt bei einem Satz auch Felder mit nur einem Standardsatz', () => {
+    const p = payload(0);
+    p.volumen.prioritaet.Unterarme = { modus: 'tausch', saetze: 1 };
+    const kandidaten = spenderKandidaten(p, 1, 'Unterarme', {});
+    expect(kandidaten.length).toBeGreaterThan(0);
+    expect(kandidaten.every((e) => e.verfuegbar >= 1)).toBe(true);
   });
 });
