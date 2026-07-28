@@ -1438,7 +1438,7 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
    44×44-px-Trefferflaeche. Das Pseudoelement gehoert zum jeweiligen Button
    und ist damit ebenfalls anklickbar. */
 .ibtn,.delrow,.ex-picker-zu,.log-tutorial-kopf button,.som-info-knopf,
-.nb-lupe-zu,.pb-x{position:relative}
+.pb-x{position:relative}
 .ibtn::after,.delrow::after,.ex-picker-zu::after,.log-tutorial-kopf button::after,
 .som-info-knopf::after,.faq-suche button::after,.nb-bildweg::after,
 .nb-lupe-zu::after,.timerfeld .x::after,.pb-x::after{
