@@ -394,6 +394,20 @@ async function routeView() {
   if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
   if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'feedback', 'notizbuch'].includes(hash)) hash = 'log';
   setNavActive(hash);
+
+  // ===== VORUEBERGEHENDE SONDE P – mit src/sonde.js wieder entfernen! =====
+  // HALBIERUNG statt naechster Verdaechtiger. Zwoelf Einzelproben haben nichts
+  // gebracht, also wird der Seitenwechsel in seine zwei Haelften zerlegt:
+  //   1. Umschalten   – Farben, data-seite, Klassen der Bedienleiste, Chip weg
+  //   2. Inhaltstausch – alte Seite raus, neue rein
+  // Diese Sonde fuehrt NUR Teil 1 aus und bricht davor ab. Der Bildschirm zeigt
+  // danach den alten Inhalt in den neuen Farben – sichtbar falsch, aber genau
+  // das ist der Zweck.
+  //   Flackert es weiter -> die Ursache steckt im Umschalten
+  //   Flackert es nicht  -> die Ursache steckt im Inhaltstausch
+  // Beide Ausgaenge halbieren den Suchraum; bisher konnte keine Sonde das.
+  if (sondeLesen() === 'p') return;
+
   cleanupActive();
 
   // ===== VORUEBERGEHENDE SONDE G – mit src/sonde.js wieder entfernen! =====
