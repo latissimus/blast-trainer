@@ -186,6 +186,15 @@ html[data-sonde="a"] .topbar::before{height:120px}
 html[data-sonde="b"] .topbar::after{background:transparent}
 /* C: Ohne eigenen Stapelkontext auf der Kopfzeile. */
 html[data-sonde="c"] .topbar{isolation:auto}
+/* D: Die Silhouette hinter dem Schriftzug ganz weg.
+      Sie ist das EINZIGE Element im Logobereich, das an einer extern geladenen
+      Datei haengt (silhouette-navy.png). A bis C waren reine Layoutfragen und
+      haben nichts gebracht; dass das Flackern erst nach einer Weile einsetzt,
+      passt dagegen zu einem Bild, dessen dekodierte Fassung der Browser
+      irgendwann aus dem Speicher wirft und beim naechsten Zeichnen neu
+      aufbauen muss. Verschwindet das Flackern hier, ist die Ursache gefunden.
+      Das Logo sieht waehrend des Tests nackt aus – das ist beabsichtigt. */
+html[data-sonde="d"] .brand::before{display:none}
 .sondenmarke{position:fixed;left:0;bottom:0;z-index:9999;
   background:#FF0000;color:#fff;font:700 11px/1 ui-monospace,Menlo,monospace;
   padding:6px 9px;pointer-events:none;letter-spacing:.04em}
@@ -443,9 +452,17 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* Durchsuchbarer Uebungswaehler statt des System-Scrollrads. Die feste Lage
    fängt Gesten selbst ab und liegt auch innerhalb des Tutorials über der
    Erklärungskarte. Sie verändert weder Body-Scroll noch Statusleiste. */
+/* Die Abdunklung MUSS auf dieser Flaeche liegen und nicht woanders: Sie ist
+   fest positioniert mit inset:0 und reicht damit bis zum Displayrand, also
+   auch hinter Uhrzeit und Akku. In der installierten App ist die Statusleiste
+   durchsichtig (black-translucent in index.html) – iOS schaut sich an, was die
+   Seite dort zeichnet, und faerbt die Systemsymbole selbst weiss, sobald es
+   dunkel ist. Genau so verhaelt es sich beim Navy-Laufband auf der Loginseite.
+   Kein theme-color noetig, keine Sonderbehandlung. */
 .ex-picker-lage{position:fixed;inset:0;z-index:80;
   display:flex;align-items:center;justify-content:center;padding:9px;
-  background:transparent;
+  background:rgba(5,10,24,.82);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
   overscroll-behavior:contain}
 .ex-picker-lage[hidden]{display:none}
 /* Bei offener Tastatur klebt das Feld oben – aber UNTERHALB der Safe-Area.
