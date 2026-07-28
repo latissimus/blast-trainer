@@ -12,7 +12,7 @@
 // zusaetzlich erhalten – im Browser ist er der schnellere Weg.
 
 const KEY = 'blast:sonde';
-export const SONDEN = ['a', 'b', 'c', 'd'];
+export const SONDEN = ['a', 'b', 'c', 'd', 'm'];
 
 export function sondeLesen() {
   let aus = '';
@@ -48,5 +48,46 @@ export function sondeAnwenden() {
     marke.className = 'sondenmarke';
     document.body.appendChild(marke);
   }
-  marke.textContent = `SONDE ${aktiv.toUpperCase()}`;
+  marke.textContent = aktiv === 'm' ? 'MESSUNG' : `SONDE ${aktiv.toUpperCase()}`;
+  if (aktiv === 'm') messungStarten();
+}
+
+// ---- Sonde M: Messung statt Vermutung -------------------------------------
+//
+// Vier Sonden haben nichts gebracht, also wird jetzt aufgezeichnet, was beim
+// Seitenwechsel wirklich passiert. Ein Flackern hat genau zwei moegliche
+// Ursachen, und die lassen sich an den Bildabstaenden unterscheiden:
+//
+//   lange Bilder (>32ms)  -> der Hauptthread war blockiert, also JavaScript
+//   alle Bilder kurz      -> reines Zeichen-/Kompositionsproblem, also CSS
+//
+// Long-Task- und Layout-Shift-Messung gibt es in Safari nicht; Bildabstaende
+// ueber requestAnimationFrame dagegen schon. Gemessen wird ab jedem
+// Adresswechsel fuer 1,5 Sekunden, das Ergebnis steht unten links.
+let messungLaeuft = false;
+function messungStarten() {
+  if (messungLaeuft) return;
+  messungLaeuft = true;
+  const anzeigen = (text) => {
+    const marke = document.querySelector('.sondenmarke');
+    if (marke) marke.textContent = text;
+  };
+  const aufzeichnen = () => {
+    const start = performance.now();
+    let vorher = start;
+    let laengste = 0, lang = 0, bilder = 0;
+    const schritt = (jetzt) => {
+      const abstand = jetzt - vorher;
+      vorher = jetzt;
+      bilder++;
+      if (abstand > laengste) laengste = abstand;
+      if (abstand > 32) lang++;
+      if (jetzt - start < 1500) requestAnimationFrame(schritt);
+      else anzeigen(`MESSUNG · längstes Bild ${laengste.toFixed(0)}ms · ${lang} lange von ${bilder}`);
+    };
+    anzeigen('MESSUNG · läuft…');
+    requestAnimationFrame(schritt);
+  };
+  window.addEventListener('hashchange', aufzeichnen);
+  aufzeichnen();
 }

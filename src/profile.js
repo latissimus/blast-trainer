@@ -393,6 +393,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
       <button type="button" data-sonde="b">B</button>
       <button type="button" data-sonde="c">C</button>
       <button type="button" data-sonde="d">D</button>
+      <button type="button" data-sonde="m">Messen</button>
     </div>
     <p class="profile-hinweis" id="sonden-info"></p>`;
   const SONDEN_TEXT = {
@@ -401,6 +402,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     b: 'B · Deckfläche unter dem Logo transparent. Der Zurück-Chip wird dabei sichtbar – das ist normal.',
     c: 'C · Kopfzeile ohne eigenen Stapelkontext (isolation).',
     d: 'D · Silhouette hinter dem Schriftzug aus. Das Logo sieht dabei nackt aus – das ist beabsichtigt.',
+    m: 'Messen · Ändert nichts am Aussehen. Zeichnet bei jedem Seitenwechsel 1,5 s lang die Bildabstände auf und zeigt sie unten links.',
   };
   const sondenInfo = sondenKarte.querySelector('#sonden-info');
   const sondenZeigen = () => {
