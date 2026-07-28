@@ -368,17 +368,17 @@ function setNavActive(view) {
 
 async function routeView() {
   if (aktiveAnsicht === 'log') logScrollY = window.scrollY;
-  cleanupActive();
-  // Der Zurueck-Chip haengt physisch am Sticky-Header. Vor dem
-  // Ansichtswechsel alte angedockte Elemente entfernen.
-  app.querySelectorAll('.topbar > .zurueck')
-    .forEach((el) => el.remove());
   const view = document.getElementById('view');
   if (!view) return;
   let hash = (location.hash.replace('#', '') || 'log');
   if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
   if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'feedback', 'notizbuch'].includes(hash)) hash = 'log';
   setNavActive(hash);
+  cleanupActive();
+  // Der Zurueck-Chip haengt physisch am Sticky-Header. Vor dem
+  // Ansichtswechsel alte angedockte Elemente entfernen.
+  app.querySelectorAll('.topbar > .zurueck')
+    .forEach((el) => el.remove());
 
   const token = ++routeToken;
   const guard = (v) => { if (token !== routeToken) { v?.destroy?.(); return; } active = v; };

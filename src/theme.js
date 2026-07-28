@@ -4,6 +4,7 @@
 // Abends am Handy dunkel, tagsueber am Rechner hell – das waere kaputt, wenn die
 // Wahl am Konto haengt. Ausserdem greift sie so ohne Netz und ohne Wartezeit.
 const KEY = 'blast:theme';
+const LOG_BG = '#B1E7FF';
 const overlayQuellen = new Set();
 let overlayScrollY = 0;
 
@@ -25,14 +26,16 @@ function metaFarbeSetzen(farbe) {
   alt.replaceWith(neu);
 }
 
-// Eine einzige Quelle steuert die geschuetzte iOS-Leiste. Ist ein Overlay offen,
-// traegt sie denselben dunklen Ton wie dessen Abdunklung; sonst die Seitenfarbe.
+// Eine einzige Quelle steuert die geschuetzte iOS-Leiste. Tutorial und Einstieg
+// bekommen den LOGMAN-Grundton, damit FAQ-Gelb oder andere Unterseiten nicht
+// in die iOS-Leiste hineinblitzen; sonst gilt die jeweilige Seitenfarbe.
 // Ein Set statt eines Booleans ist wichtig: Der Uebungskatalog kann innerhalb
 // des Tutorials aufgehen. Schliesst er, muss das Tutorial die Leiste weiterhin
-// dunkel halten.
+// auf dem LOGMAN-Grundton halten.
 export function statusleisteAnSeite() {
-  // Overlays lock scrolling but do not alter the page or status-bar colour.
-  const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  const root = document.documentElement;
+  const overlayBg = root.style.getPropertyValue('--statusbar-bg').trim();
+  const bg = overlayBg || getComputedStyle(root).getPropertyValue('--bg').trim();
   if (bg) metaFarbeSetzen(bg);
 }
 
@@ -44,6 +47,11 @@ export function setStatusleistenOverlay(quelle, offen) {
   const istOffen = overlayQuellen.size > 0;
   const root = document.documentElement;
   root.classList.toggle('statusleiste-overlay', istOffen);
+  if (istOffen && (overlayQuellen.has('tutorial') || overlayQuellen.has('einstieg'))) {
+    root.style.setProperty('--statusbar-bg', LOG_BG);
+  } else {
+    root.style.removeProperty('--statusbar-bg');
+  }
 
   // In der installierten iOS-App liegt die Statusleiste transparent ueber der
   // Seite. Scrollt das Browserfenster, bewertet WebKit die Flaeche darunter
