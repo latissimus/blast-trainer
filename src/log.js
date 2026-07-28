@@ -987,7 +987,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             </div>
             <div>
               <b>3</b>
-              <span><strong>3 Satzarten</strong><small>HEAVYS 5–10 (Isos 6–10) · MIDDLES 10–15 · PUMPS 15–25 Wiederholungen.</small></span>
+              <span><strong>3 Satzarten</strong><small>HEAVYS 6–10 · MIDDLES 10–15 · PUMPS 15–25 Wiederholungen.</small></span>
             </div>
           </div>
           <div class="tutorial-heavyinfo">

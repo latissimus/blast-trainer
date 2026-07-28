@@ -20,8 +20,7 @@ describe('Satzarten der Cycle-Vorlage', () => {
   it('trennt die drei Wiederholungsbereiche sauber', () => {
     const heavy = [...TPL['OK-H'].blocks, ...TPL['UK-H'].blocks];
     const bTage = [...TPL['OK-P'].blocks, ...TPL['UK-P'].blocks];
-    expect(heavy.filter((b) => b.ex[0].r === 'Comp').every((b) => b.reps === '5–10')).toBe(true);
-    expect(heavy.filter((b) => b.ex[0].r === 'Iso').every((b) => b.reps === '6–10')).toBe(true);
+    expect(heavy.every((b) => b.reps === '6–10')).toBe(true);
     expect(bTage.filter((b) => b.type === 'middle').every((b) => b.reps === '10–15')).toBe(true);
     expect(bTage.filter((b) => b.type === 'pump').every((b) => b.reps === '15–25')).toBe(true);
   });

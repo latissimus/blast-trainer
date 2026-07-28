@@ -26,7 +26,7 @@ export const prioSatzanzahl = (cfg) => Number(cfg?.saetze) === 1 ? 1 : 2;
 
 const prioWdhBereich = (konto, heavy) => {
   if (!heavy) return '15–25';
-  return konto === 'Unterarme' ? '8–15' : '5–10';
+  return konto === 'Unterarme' ? '8–15' : '6–10';
 };
 
 function passendeTage(cycle, konto) {
