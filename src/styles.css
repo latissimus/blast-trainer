@@ -1107,66 +1107,43 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
    Beide liegen ton-in-ton in der Tintenfarbe statt in einem festen Lila –
    so tragen sie jeden Seitengrund und kippen im Dark-Mode von selbst mit.
    Welches Muster eine Seite bekommt, ist unten eine Zeile. */
-/* Auf :root (html), nicht auf body: Body ist nur so hoch wie sein Inhalt,
-   html traegt die Farbe des kompletten Scrollbereichs (siehe --bg oben).
-   Stand das Muster nur auf body, endete es an dessen Unterkante – auf kurzen
-   Seiten wie Progression war die untere Haelfte einfarbig statt gemustert. */
+/* Der Root hält nur die jeweilige Grundfarbe. Das Muster liegt weiter unten
+   einheitlich auf einem mindestens displayhohen Body. So rendert WebKit FAQ,
+   Feedback und die übrigen Unterseiten aus exakt derselben Ebene. */
 :root[data-seite="meter"],:root[data-seite="prog"],:root[data-seite="feedback"],
 :root[data-seite="faq"],:root[data-seite="profile"],:root[data-seite="notizbuch"]{
-  background-image:var(--muster-dreieck);background-size:auto}
-:root[data-theme="dark"][data-seite="meter"],
-:root[data-theme="dark"][data-seite="prog"],
-:root[data-theme="dark"][data-seite="feedback"],
-:root[data-theme="dark"][data-seite="faq"],
-:root[data-theme="dark"][data-seite="profile"],
-:root[data-theme="dark"][data-seite="notizbuch"]{
-  background-image:var(--muster-dreieck-dunkel)}
+  background-image:none}
 :root[data-theme="dark"][data-seite="log"]{background-image:none}
 
-/* Der bisherige Set-O-Hintergrund liegt jetzt auf Progression und Notizbuch. */
-:root[data-seite="prog"],:root[data-seite="notizbuch"]{
-  background-image:var(--muster-tropfen);background-size:112px}
-:root[data-theme="dark"][data-seite="prog"],
-:root[data-theme="dark"][data-seite="notizbuch"]{
-  background-image:var(--muster-tropfen-dunkel)}
-
-/* body traegt auf allen Seiten eine eigene, deckende --bg-Flaeche (siehe
-   oben, "html,body"). Bekommt eine Seite ihr Muster vom html-Element, liegt
-   diese deckende Body-Flaeche genau darueber und verschluckt das Muster
-   ersatzlos – sichtbar wird nur der schmale Rand, wo html unter body
-   hervorschaut. Deshalb hier transparent: html scheint durch, inklusive
-   Muster, und liefert exakt dieselbe --bg-Farbe. */
-body[data-seite="meter"],body[data-seite="prog"],body[data-seite="feedback"],
-body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
-  background:transparent}
-
-/* Kurze Seiten enden auf iOS teils vor dem unteren Rand. Das Muster nur auf
-   dem html-Canvas zu zeichnen reicht dort nicht zuverlässig: WebKit bemisst
-   dessen Kachelfläche gelegentlich nach der Inhaltshöhe. Progression, Feedback
-   und Notizbuch tragen ihr Muster deshalb zusätzlich selbst und sind immer
-   mindestens so hoch wie der sichtbare Bildschirm. Auf diesen drei Seiten
-   wird es vom Root entfernt, damit zwei identische Ebenen die Deckkraft nicht
-   versehentlich fast verdoppeln. */
-:root[data-seite="prog"],:root[data-seite="feedback"],
-:root[data-seite="notizbuch"]{
-  background-image:none}
-body[data-seite="prog"],body[data-seite="notizbuch"]{
-  min-height:100vh;min-height:100dvh;
-  background-color:transparent;
-  background-image:var(--muster-tropfen);
-  background-size:112px;
-  background-repeat:repeat}
-body[data-seite="feedback"]{
+/* Eine Ebene und eine Höhe für alle Unterseiten. Das verhindert sowohl
+   abgeschnittene Muster auf kurzen Seiten als auch doppelte Deckkraft. */
+body[data-seite="meter"],body[data-seite="feedback"],body[data-seite="faq"],
+body[data-seite="profile"],body[data-seite="prog"],body[data-seite="notizbuch"]{
   min-height:100vh;min-height:100dvh;
   background-color:transparent;
   background-image:var(--muster-dreieck);
   background-size:auto;
   background-repeat:repeat}
+
+/* Tropfen bedecken wesentlich mehr Fläche als die kleinen Dreiecke und wirken
+   bei identischen 7 % deshalb kräftiger. Eine transparente Schicht in exakt
+   der Seitenfarbe senkt ihren sichtbaren Kontrast auf rund 4,5 %, ohne den
+   Grundton zu verändern. */
+body[data-seite="prog"],body[data-seite="notizbuch"]{
+  background-image:
+    linear-gradient(color-mix(in srgb,var(--bg) 35%,transparent),color-mix(in srgb,var(--bg) 35%,transparent)),
+    var(--muster-tropfen);
+  background-size:auto,112px}
+:root[data-theme="dark"] body[data-seite="meter"],
+:root[data-theme="dark"] body[data-seite="feedback"],
+:root[data-theme="dark"] body[data-seite="faq"],
+:root[data-theme="dark"] body[data-seite="profile"]{
+  background-image:var(--muster-dreieck-dunkel)}
 :root[data-theme="dark"] body[data-seite="prog"],
 :root[data-theme="dark"] body[data-seite="notizbuch"]{
-  background-image:var(--muster-tropfen-dunkel)}
-:root[data-theme="dark"] body[data-seite="feedback"]{
-  background-image:var(--muster-dreieck-dunkel)}
+  background-image:
+    linear-gradient(color-mix(in srgb,var(--bg) 35%,transparent),color-mix(in srgb,var(--bg) 35%,transparent)),
+    var(--muster-tropfen-dunkel)}
 
 /* ---------- Feedback ---------- */
 .feedback-intro{margin:0;padding:12px 13px;background:var(--surface);
