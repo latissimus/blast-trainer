@@ -42,7 +42,16 @@
   --down:#E8785B;
   --hold:#C7912A;
 
-  --mq-h:34px;      /* Hoehe des Laufbands – auth-shell rechnet damit */
+  /* Sichtbare Hoehe des Laufbands. --mq-platz ist der Platz, den es insgesamt
+     wegnimmt: Auf den abgemeldeten Ansichten ist das Laufband das oberste
+     Element, liegt also mit viewport-fit=cover unter Uhrzeit und Akku. Es
+     bekommt den geschuetzten Bereich als Polster obendrauf – die Schrift
+     rutscht darunter, die Flaeche reicht weiter bis zum Displayrand.
+     Wer mit der Hoehe rechnet (auth-shell, ladebild), nimmt --mq-platz,
+     sonst wuerde die Seite genau um den Safe-Area-Betrag zu hoch. */
+  --mq-h:34px;
+  --mq-platz:calc(var(--mq-h) + env(safe-area-inset-top));
+  --brand-outline:#001454;   /* Kontur und Schatten des Schriftzugs */
   --brand-outline:#001454;   /* Kontur und Schatten des Schriftzugs */
   --sil-filter:none;         /* Silhouette hinter dem Schriftzug */
 
@@ -162,6 +171,24 @@ a{color:var(--link)}
    erscheinen. Sichtbar ist ausschliesslich der Teil unterhalb der Kontur. */
 .topbar::after{content:"";position:absolute;z-index:1;left:0;right:0;top:0;bottom:0;
   background:var(--bg);pointer-events:none}
+
+/* ===== VORUEBERGEHENDE SONDEN – wieder entfernen! =====
+   Suchen die Ursache des kurzen Flackerns im Logobereich beim Seitenwechsel.
+   In der Kopfzeile liegen drei deckende Schichten uebereinander, die ALLE
+   var(--bg) tragen und beim Wechsel gleichzeitig die Farbe wechseln; das Logo
+   (.topbar .wrap, z-index 2) sitzt obendrauf. Jede Sonde schaltet genau einen
+   Verdaechtigen ab, damit sich die Ursache eingrenzen laesst.
+   Aufruf: ?sonde=a / ?sonde=b / ?sonde=c – ohne Parameter aendert sich nichts. */
+/* A: Die Flaeche ueber dem Header ist eine ganze Bildschirmhoehe hoch. */
+html[data-sonde="a"] .topbar::before{height:120px}
+/* B: Die deckende Flaeche direkt unter dem Logo faerbt nicht mehr mit.
+      Der Zurueck-Chip wird dabei sichtbar – das ist beim Test normal. */
+html[data-sonde="b"] .topbar::after{background:transparent}
+/* C: Ohne eigenen Stapelkontext auf der Kopfzeile. */
+html[data-sonde="c"] .topbar{isolation:auto}
+.sondenmarke{position:fixed;left:0;bottom:0;z-index:9999;
+  background:#FF0000;color:#fff;font:700 11px/1 ui-monospace,Menlo,monospace;
+  padding:6px 9px;pointer-events:none;letter-spacing:.04em}
 /* Der Header liegt in der installierten iOS-App direkt unter Uhrzeit und Akku.
    Bei einem Overlay muss deshalb die komplette Kopfzeile denselben dunklen
    Grund tragen – sonst bleibt zwischen Statusleiste und Tutorialkarte ein
@@ -231,7 +258,7 @@ html.statusleiste-overlay .topbar::before{background:var(--statusbar-bg,var(--bg
    overflow:visible – Kontur, Schatten und Silhouette werden AUSSERHALB der Box
    gezeichnet, und die Skalierung auf 125% traegt weiter auf. Das Layout weiss
    von beidem nichts, mit knappem Abstand lag "lädt…" unter dem Logo. */
-.ladebild{min-height:calc(100dvh - var(--mq-h) - 90px);display:flex;flex-direction:column;
+.ladebild{min-height:calc(100dvh - var(--mq-platz) - 90px);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:38px;
   padding:20px 20px calc(20px + env(safe-area-inset-bottom))}
 .ladebild .brand{font-size:40px;
@@ -278,7 +305,11 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Zwei gleiche Haelften laufen um je 100% ihrer Breite nach links – dadurch
    rueckt die zweite exakt dorthin, wo die erste war, und die Schleife hat
    keinen Sprung. */
-.marquee{display:flex;overflow:hidden;height:var(--mq-h);align-items:center;
+/* box-sizing:border-box gilt global (*-Regel oben): Die Hoehe enthaelt das
+   Polster, der Inhaltsbereich bleibt also exakt --mq-h hoch und align-items
+   zentriert die Schrift darin – unterhalb der iOS-Zeile. */
+.marquee{display:flex;overflow:hidden;height:var(--mq-platz);
+  padding-top:env(safe-area-inset-top);align-items:center;
   background:var(--navy);color:#fff;border-bottom:var(--bw) solid var(--ink);
   font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.09em;white-space:nowrap}
 .marquee span{flex:0 0 auto;animation:mq 26s linear infinite}
@@ -289,7 +320,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* Polster unten groesser als oben: schiebt den zentrierten Block etwas ueber die Mitte.
    Die Banner-Hoehe abziehen, sonst waechst die Seite darueber hinaus. */
 .auth-shell{max-width:420px;margin:0 auto;padding:24px 14px 96px;
-  min-height:calc(100vh - var(--mq-h));min-height:calc(100dvh - var(--mq-h));
+  min-height:calc(100vh - var(--mq-platz));min-height:calc(100dvh - var(--mq-platz));
   display:flex;flex-direction:column;justify-content:center}
 .auth-title{font-size:26px;margin:0 0 4px;text-align:center}
 .auth-sub{text-align:center;color:var(--muted);font-size:14.5px;margin:0 0 22px}
