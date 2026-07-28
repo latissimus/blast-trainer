@@ -119,7 +119,7 @@ html.statusleiste-overlay{background:var(--statusbar-bg,var(--bg))}
    Der eigentliche App-Inhalt behaelt separat seine Seitenfarbe und wird wie
    bisher vom Overlay abgedunkelt. */
 html.statusleiste-overlay body{background:var(--statusbar-bg,var(--bg))}
-html.statusleiste-overlay #app{min-height:100dvh;background:var(--bg)}
+html.statusleiste-overlay #app{min-height:100dvh;background:var(--statusbar-bg,var(--bg))}
 html.statusleiste-overlay #view{min-height:100dvh;background:var(--bg)}
 /* Nicht das iOS-Fenster und auch nicht der Body, sondern nur der eigentliche
    Seiteninhalt #view scrollt waehrend eines Overlays.
@@ -144,12 +144,14 @@ h1,h2,h3,.display{
 button{font-family:inherit;cursor:pointer}
 a{color:var(--link)}
 .wrap{max-width:580px;margin:0 auto;padding:0 14px}
-body:not([data-seite="log"]) #view>.wrap{animation:seiteEin .18s cubic-bezier(.22,.75,.3,1)}
-@keyframes seiteEin{from{opacity:.72;transform:translateY(5px)}to{opacity:1;transform:none}}
+/* Unterseiten erscheinen direkt. Die frühere Transform-Animation zwang
+   WebKit beim Wechsel dazu, den benachbarten Sticky-Header neu zu rasterisieren
+   – Logo und Profilbild blitzten dadurch kurz auf. */
 
 /* ---------- Top bar / nav ---------- */
 .topbar{position:sticky;top:0;z-index:20;isolation:isolate;background:var(--bg);
-  border-bottom:var(--bw) solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
+  border-bottom:var(--bw) solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px;
+  transform:translateZ(0);backface-visibility:hidden}
 /* Beim iOS-Gummiband wandert der Sticky-Header kurz nach unten, waehrend
    fixed Elemente am Viewport bleiben. Diese unsichtbare Fortsetzung deckt
    den Bereich oberhalb des Headers ab, damit Set-O-Meter und Zurueck-Chip
@@ -167,7 +169,7 @@ body:not([data-seite="log"]) #view>.wrap{animation:seiteEin .18s cubic-bezier(.2
    heller Streifen stehen. */
 html.statusleiste-overlay .topbar,
 html.statusleiste-overlay .topbar::after,
-html.statusleiste-overlay .topbar::before{background:var(--bg)}
+html.statusleiste-overlay .topbar::before{background:var(--statusbar-bg,var(--bg))}
 .topbar .wrap{position:relative;z-index:2;display:flex;align-items:center;gap:10px}
 /* LOGMAN-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
    Kein Layout-Effekt (Kontur/Schatten ändern die Header-Höhe nicht). */
@@ -767,9 +769,6 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .log-tutorial-weiter[data-offen]{background:var(--prio);color:#fff}
 .log-tutorial-ende{display:grid;gap:12px;margin-top:17px}
 .block.tutorial-aktiv{position:relative;z-index:41;outline:4px solid var(--pink);outline-offset:3px;
-  /* Negative Seiten lassen die pinke Kontur normal stehen; nur der Bereich,
-     der hinter der Tutorialkarte liegt, wird oben abgeschnitten. */
-  clip-path:inset(var(--tutorial-clip-top,0px) -8px -8px -8px);
   transition:outline-color .3s ease,transform .3s ease}
 .tutorial-ziel{position:relative;z-index:2;outline:4px solid var(--pink)!important;outline-offset:3px;
   animation:tutorialPuls 1.3s ease-in-out infinite}

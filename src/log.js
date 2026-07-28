@@ -428,7 +428,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       // naechste Uebungsfeld richtet sich deshalb an ihrer TATSAECHLICHEN
       // Unterkante aus, nicht an Headerhoehe + geschaetzter Kartenhoehe. So
       // scrollt kein Feld vor oder sichtbar hinter die Einrichtungsbox.
-      const zielOben = karte.getBoundingClientRect().bottom + 10;
+      const zielOben = karte.getBoundingClientRect().bottom + 14;
       const appScroller = document.documentElement.classList.contains('overlay-scroll-gesperrt')
         ? container
         : null;
@@ -523,10 +523,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function tutorialClipAktualisieren() {
     tutorialClipRaf = null;
     const karte = tutorialEbene.querySelector('.log-tutorial');
-    const block = contentEl.querySelector('.block.tutorial-aktiv');
     if (!tutorialAktiv || !karte) {
       container.style.removeProperty('--tutorial-kartenraum');
-      block?.style.removeProperty('--tutorial-clip-top');
       return;
     }
     // Weil die Karte nun ausserhalb des Scrollcontainers fest am Display
@@ -535,17 +533,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     // zu werden. Beim naechsten Feld kann #view diesen Raum intern wegscrollen.
     container.style.setProperty(
       '--tutorial-kartenraum',
-      `${Math.ceil(karte.getBoundingClientRect().bottom + 10)}px`,
+      `${Math.ceil(karte.getBoundingClientRect().bottom + 14)}px`,
     );
-    if (!block) return;
-    const blockRect = block.getBoundingClientRect();
-    // Nur die hervorgehobene Muskelkarte abschneiden. Anders als die fruehere
-    // Vollflaechenmaske veraendert das keine Flaeche im iOS-Statusbereich.
-    const verdeckt = Math.max(0, Math.min(
-      blockRect.height + 8,
-      Math.ceil(karte.getBoundingClientRect().bottom - blockRect.top),
-    ));
-    block.style.setProperty('--tutorial-clip-top', `${verdeckt}px`);
   }
   function tutorialClipPlanen() {
     if (tutorialClipRaf != null) return;

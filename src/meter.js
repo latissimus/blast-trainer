@@ -54,22 +54,18 @@ export async function mountMeter(container, { userId }) {
     <p class="som-speicher" id="som-speicher" aria-live="polite"></p>`;
   container.appendChild(wrap);
 
-  let payload = null;
   const lokal = readLog(userId);
-  if (lokal?.payload && lokal.dirty) payload = lokal.payload;
-  else {
-    try {
-      const { data } = await supabase
-        .from('training_logs').select('payload').eq('user_id', userId).maybeSingle();
-      payload = data?.payload || lokal?.payload || {};
-    } catch (e) {
-      payload = lokal?.payload || {};
-    }
-  }
-  if (payload?.v !== 4) payload = { v: 4, week: 1 };
-  payload.volumen = { prioritaet: payload.volumen?.prioritaet || {} };
+  const normalisiere = (stand) => {
+    const payload = stand?.v === 4 ? stand : { v: 4, week: 1 };
+    payload.volumen = { prioritaet: payload.volumen?.prioritaet || {} };
+    return payload;
+  };
+  // Der lokale Spiegel erscheint sofort. Der Server ist nur die nachgelagerte
+  // Aktualisierung; so bleibt das Meter offline und ohne leere Wartephase
+  // nutzbar.
+  let payload = normalisiere(lokal?.payload || {});
 
-  const cycle = Math.min(8, Math.max(1, Number(payload.week) || 1));
+  let cycle = Math.min(8, Math.max(1, Number(payload.week) || 1));
   const lage = wrap.querySelector('#som-lage');
   const body = wrap.querySelector('#som-body');
   const speicher = wrap.querySelector('#som-speicher');
@@ -79,6 +75,7 @@ export async function mountMeter(container, { userId }) {
   let modusOffen = false;
   let entwurfSaetze = 2;
   let revision = 0;
+  let destroyed = false;
 
   const html = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -324,4 +321,30 @@ export async function mountMeter(container, { userId }) {
   }
 
   render();
+
+  // Einen sauberen lokalen Stand im Hintergrund aktualisieren. Beginnt der
+  // Nutzer vorher mit einer Änderung, darf eine langsamere Serverantwort diese
+  // lokale Eingabe nicht mehr überschreiben.
+  if (!lokal?.dirty && navigator.onLine) {
+    const startRevision = revision;
+    supabase
+      .from('training_logs').select('payload').eq('user_id', userId).maybeSingle()
+      .then(({ data, error }) => {
+        if (error || destroyed || revision !== startRevision || !data?.payload) return;
+        const serverSignatur = JSON.stringify(data.payload);
+        const lokaleSignatur = JSON.stringify(payload);
+        if (serverSignatur === lokaleSignatur) return;
+        payload = normalisiere(data.payload);
+        cycle = Math.min(8, Math.max(1, Number(payload.week) || 1));
+        writeLog(userId, payload, false, false);
+        render();
+      })
+      .catch(() => {});
+  }
+
+  return {
+    destroy() {
+      destroyed = true;
+    },
+  };
 }

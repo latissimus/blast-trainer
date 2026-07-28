@@ -396,7 +396,8 @@ async function routeView() {
     } else if (hash === 'faq') {
       mountFaq(view);
     } else if (hash === 'meter') {
-      await mountMeter(view, { userId: session.user.id });
+      const v = await mountMeter(view, { userId: session.user.id });
+      guard(v);
     } else if (hash === 'prog') {
       await mountProg(view, { userId: session.user.id });
     } else if (hash === 'feedback') {
