@@ -262,6 +262,22 @@ html[data-sonde="k"] .topbar::before,
 html[data-sonde="k"] .topbar::after{display:none}
 html[data-sonde="k"] .topbar .wrap{position:static;z-index:auto}
 html[data-sonde="k"] .zurueck{display:none}
+/* L: Die untere Bedienleiste bleibt im Ebenenbaum stehen.
+      Neuer Verdaechtiger, und der erste ausserhalb der Kopfzeile – die hat
+      Sonde K vollstaendig entlastet.
+      Bei jedem Seitenwechsel schaltet setNavActive die Klasse nur-menue um,
+      und die schaltet die ganze Leiste per display:none an und aus. Sie ist
+      fest positioniert, hat z-index 30 und ein backdrop-filter: Genau die
+      Sorte Element, fuer die WebKit eine eigene Ebene anlegt. Anlegen und
+      Wegwerfen einer solchen Ebene zwingt zum Neuaufbau des Ebenenbaums – und
+      der Kommentar weiter oben im CSS beschreibt fuer die frueher entfernte
+      Einblend-Animation exakt dieselbe Folge: der benachbarte Sticky-Header
+      wird neu rasterisiert, Logo und Profilbild blitzen auf.
+      visibility statt display haelt die Ebene am Leben, ohne sie zu zeigen.
+      Der Platzbedarf bleibt dabei erhalten, deshalb faellt der Fussabstand
+      wieder auf den vollen Wert – im Test ist das unten etwas mehr Luft. */
+html[data-sonde="l"] .ctrlbar.nur-menue:not(.timer-an){
+  display:block;visibility:hidden;pointer-events:none}
 .sondenmarke{position:fixed;left:0;bottom:0;z-index:9999;
   background:#FF0000;color:#fff;font:700 11px/1 ui-monospace,Menlo,monospace;
   padding:6px 9px;pointer-events:none;letter-spacing:.04em}
