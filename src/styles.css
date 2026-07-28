@@ -133,9 +133,10 @@ html.statusleiste-overlay #view{background:var(--bg)}
 /* Angemeldete App: feste Huelle statt Fenster-Scroll. Die Kopfzeile ist ein
    ruhendes Geschwister des einzigen Scrollbereichs #view. Damit muss WebKit
    beim Austauschen des Seiteninhalts keine aktive Sticky-Ebene neu aufbauen. */
-html.app-shell,html.app-shell body{width:100%;height:100%;overflow:hidden}
-html.app-shell body{position:fixed;inset:0}
-html.app-shell #app{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden}
+html.app-shell{width:100%;height:100vh;height:100dvh;overflow:hidden}
+html.app-shell body{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;overflow:hidden}
+html.app-shell #app{display:flex;flex-direction:column;width:100%;
+  height:100vh;height:100dvh;overflow:hidden}
 html.app-shell #view{flex:1 1 auto;min-height:0;overflow-y:auto;
   padding-top:var(--tutorial-kartenraum,0px);
   overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
