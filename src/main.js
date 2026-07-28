@@ -325,6 +325,22 @@ function renderChrome() {
     <option value="faq">FAQs</option>
     ${isAdmin ? '<option value="admin">ADMIN</option>' : ''}`;
   menue.onchange = () => {
+    // ===== VORUEBERGEHENDE SONDE I – mit src/sonde.js wieder entfernen! =====
+    // Die Bildschirmfotos zeigen den Fehler in einem Zustand, den keine der
+    // bisherigen Sonden abgedeckt hat: Das native iOS-Auswahlrad ist noch
+    // sichtbar, die neue Seite steht bereits, und die Kopfzeile fehlt. Der
+    // Platz ist da, nur die Pixel fehlen.
+    //
+    // onchange feuert auf iOS, WAEHREND das Rad noch zufaehrt. Der Seitenwechsel
+    // faellt damit mitten in die Schliessanimation eines System-Overlays – und
+    // waehrend Safari die animiert, verliert die klebende Kopfzeile ihre Ebene.
+    // Diese Sonde wartet, bis das Rad weg ist, und wechselt erst danach.
+    // Der Wechsel fuehlt sich dadurch traeger an; das ist der Preis der Probe.
+    if (sondeLesen() === 'i') {
+      const ziel = menue.value;
+      setTimeout(() => { location.hash = ziel; }, 350);
+      return;
+    }
     location.hash = menue.value;
   };
 
