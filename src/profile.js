@@ -393,6 +393,8 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
       <button type="button" data-sonde="b">B</button>
       <button type="button" data-sonde="c">C</button>
       <button type="button" data-sonde="d">D</button>
+      <button type="button" data-sonde="e">E</button>
+      <button type="button" data-sonde="f">F</button>
       <button type="button" data-sonde="m">Messen</button>
     </div>
     <p class="profile-hinweis" id="sonden-info"></p>`;
@@ -402,6 +404,8 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     b: 'B · Deckfläche unter dem Logo transparent. Der Zurück-Chip wird dabei sichtbar – das ist normal.',
     c: 'C · Kopfzeile ohne eigenen Stapelkontext (isolation).',
     d: 'D · Silhouette hinter dem Schriftzug aus. Das Logo sieht dabei nackt aus – das ist beabsichtigt.',
+    e: 'E · Alle Milchglas-Effekte (backdrop-filter) aus: Zurück-Chip, untere Leiste, Übungskatalog. Flächen wirken flach – gewollt.',
+    f: 'F · Nur der Zurück-Chip ohne Milchglas. Er ist der einzige, der beim Seitenwechsel in die Kopfzeile eingehängt wird.',
     m: 'Messen · Ändert nichts am Aussehen. Zeichnet bei jedem Seitenwechsel 1,5 s lang die Bildabstände auf und zeigt sie unten links.',
   };
   const sondenInfo = sondenKarte.querySelector('#sonden-info');
