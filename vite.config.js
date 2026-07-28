@@ -38,7 +38,10 @@ export default defineConfig({
       manifest: false,
       injectManifest: {
         // Nur App-Dateien. Nichts davon spricht mit Supabase.
-        globPatterns: ['**/*.{js,css,html,png,svg,webmanifest}'],
+        // webp gehoert dazu: Ohne die Endung blieb das Portraet in der FAQ
+        // ausserhalb des Caches – im Keller ohne Empfang zeigte die Seite
+        // dort ein kaputtes Bild.
+        globPatterns: ['**/*.{js,css,html,png,svg,webp,webmanifest}'],
       },
       devOptions: { enabled: true, type: 'module' },
     }),

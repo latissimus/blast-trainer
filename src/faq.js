@@ -1,6 +1,9 @@
 // FAQ als Nachschlagewerk für das rollierende LOGMAN-Cycle-System.
 
-import floFotoUrl from '../Flo.JPG?url';
+// 500x689 WebP statt der 1148x1581-Kameradatei: Angezeigt wird das Bild mit
+// 250x300 CSS-Pixeln, die Vorlage lieferte also gut das Zehnfache der noetigen
+// Flaeche (261 KB gegen 50 KB). Die Breite reicht fuer 2x-Displays.
+import floFotoUrl from './assets/flo.webp?url';
 
 export function mountFaq(container) {
   container.innerHTML = '';
