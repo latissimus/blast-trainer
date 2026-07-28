@@ -769,7 +769,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tagWert.textContent = koerper;
     // Im nativen Menü steht der volle Name. In der deutlich schmaleren
     // unteren Leiste verhindert diese lesbare Kurzform ein „MIDDLES …“.
-    tagLbl.textContent = typ === 'MIDDLES & PUMPS' ? 'MID.+PUMPS' : typ;
+    tagLbl.textContent = typ === 'MIDDLES & PUMPS' ? 'M&P' : typ;
 
     const tier = tierOf(state.day, state.week);
     tierSeg.value = String(tier);
@@ -1000,7 +1000,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             </div>
             <div>
               <b>3</b>
-              <span><strong>3 Satzarten</strong><small>HEAVYS 5–10 · MIDDLES 10–15 · PUMPS 15–25 Wiederholungen.</small></span>
+              <span><strong>3 Satzarten</strong><small>HEAVYS 5–10 (Isos 6–10) · MIDDLES 10–15 · PUMPS 15–25 Wiederholungen.</small></span>
             </div>
           </div>
           <div class="tutorial-heavyinfo">

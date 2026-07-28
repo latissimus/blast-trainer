@@ -79,7 +79,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie trainiere ich HEAVYS?</summary>
       <div class="faq-a">
-        <p><b>A-Tage · 5–10 Wiederholungen.</b> HEAVYS nutzen feste Übungen. Ziel sind technisch standardisierte Leistungsprogression, hohe mechanische Belastung und zuverlässige Logbuchvergleiche.</p>
+        <p><b>A-Tage · Comps 5–10, Isos 6–10 Wiederholungen.</b> HEAVYS nutzen feste Übungen. Ziel sind technisch standardisierte Leistungsprogression, hohe mechanische Belastung und zuverlässige Logbuchvergleiche.</p>
         <p>Du nutzt <b>Double Progression</b>: Steigere zuerst die Wiederholungen innerhalb des Bereichs. Erreichst du das obere Ende mit passender Technik und Ziel-RIR, erhöhst du die Last und beginnst wieder weiter unten im Bereich.</p>
         <p>Die Übung bleibt, solange sie <b>schmerzfrei, technisch reproduzierbar und progressierbar</b> ist. Nicht jede Übung muss in jedem Cycle besser werden.</p>
         <p><b>Evidenz:</b> Muskelaufbau ist über verschiedene Lastbereiche möglich, wenn Sätze ausreichend anstrengend sind. Schwerere Lasten machen die Leistung zusätzlich gut vergleichbar und fördern besonders die Maximalkraft.</p>
@@ -135,7 +135,16 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wofür sind die Übungsnotizen?</summary>
       <div class="faq-a">
-        <p>Die Notiz unter einer Übung ist für dauerhafte Einstellungen und Cues wie Sitzhöhe, Griff oder Fußposition. Das getrennte <b>Notizbuch</b> sammelt allgemeine Gedanken, Links und Bilder und bleibt bei einer neuen Phase erhalten.</p>
+        <p>Die Notiz unter einer Übung ist für dauerhafte Einstellungen und Cues wie Sitzhöhe, Griff oder Fußposition. Bei HEAVYS und MIDDLES wird sie zusammen mit der festen Übung in allen Cycles angezeigt.</p>
+        <p>Das getrennte <b>Notizbuch</b> sammelt allgemeine Gedanken, Links und Bilder und bleibt bei einer neuen Phase erhalten.</p>
+      </div>
+    </details>
+
+    <details class="faq"><summary>Wo notiere ich Griffvarianten oder studiospezifische Maschinen?</summary>
+      <div class="faq-a">
+        <p>Wähle im Übungskatalog den <b>allgemeinen Übungsnamen</b>. Die konkrete Griffbreite, Handstellung oder Griffart trägst du direkt darunter in die <b>Übungsnotiz</b> ein.</p>
+        <p>Dasselbe gilt für Maschinen, die nur in deinem Studio stehen: Notiere zum Beispiel Hersteller, Modell, Sitzhöhe, Hebelstellung oder Studio. So bleibt der Katalog übersichtlich, während deine Ausführung eindeutig reproduzierbar ist.</p>
+        <p>Bei festen HEAVYS und MIDDLES werden diese Angaben automatisch in allen Cycles übernommen.</p>
       </div>
     </details>
 

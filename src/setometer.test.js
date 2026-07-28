@@ -41,7 +41,7 @@ function mitBrust(tier = 1) {
 describe('zaehleCycle – Standardplan', () => {
   it('zählt den Plan, bevor Satzfelder ausgefüllt sind', () => {
     const r = zaehleCycle(mitBrust(), 1);
-    expect(r.direkt.Brust).toBe(10);
+    expect(r.direkt.Brust).toBe(8);
   });
 
   it('zählt leere Übungsfelder nicht', () => {
@@ -50,26 +50,26 @@ describe('zaehleCycle – Standardplan', () => {
 
   it('bildet Level I ab und startet Level III auf Standardniveau', () => {
     expect(zaehleCycle(mitBrust(0), 1).direkt.Brust).toBe(6);
-    expect(zaehleCycle(mitBrust(1), 1).direkt.Brust).toBe(10);
-    expect(zaehleCycle(mitBrust(2), 1).direkt.Brust).toBe(10);
+    expect(zaehleCycle(mitBrust(1), 1).direkt.Brust).toBe(8);
+    expect(zaehleCycle(mitBrust(2), 1).direkt.Brust).toBe(8);
   });
 
   it('zählt auf Level III nur gezielt gewählte Zusatzsätze', () => {
     const p = mitBrust(2);
     p.data['OK-P'][1].chest_comp.extra = { 0: 2 };
-    expect(zaehleCycle(p, 1).direkt.Brust).toBe(12);
+    expect(zaehleCycle(p, 1).direkt.Brust).toBe(10);
   });
 
   it('ignoriert gespeicherte Zusatzsätze außerhalb von Level III', () => {
     const p = mitBrust(1);
     p.data['OK-P'][1].chest_comp.extra = { 0: 3 };
-    expect(zaehleCycle(p, 1).direkt.Brust).toBe(10);
+    expect(zaehleCycle(p, 1).direkt.Brust).toBe(8);
   });
 
   it('nimmt Level II, wenn keine Auswahl gespeichert ist', () => {
     const p = mitBrust();
     p.tier = {};
-    expect(zaehleCycle(p, 1).direkt.Brust).toBe(10);
+    expect(zaehleCycle(p, 1).direkt.Brust).toBe(8);
   });
 
   it('ignoriert zusätzliche ausgefüllte Satzzeilen', () => {
@@ -78,15 +78,15 @@ describe('zaehleCycle – Standardplan', () => {
       { w: 80, r: 12 }, { w: 80, r: 11 }, { w: 80, r: 10 },
       { w: 80, r: 9 }, { w: 80, r: 8 }, { w: 80, r: 7 },
     ]];
-    expect(zaehleCycle(p, 1).direkt.Brust).toBe(10);
+    expect(zaehleCycle(p, 1).direkt.Brust).toBe(8);
   });
 
   it('weist indirekte Sätze als ganze Sätze aus und gewichtet sie mit 0,5', () => {
     const r = zaehleCycle(mitBrust(), 1);
-    // Nur die beiden Comp-Blöcke: 3 HEAVYS + 3 MIDDLES.
-    expect(r.indirekt.Trizeps).toBe(6);
-    expect(r.konten.Trizeps).toBe(3);
-    expect(r.indirektQuellen.Trizeps[0].saetze).toBe(6);
+    // Nur die beiden Comp-Blöcke: 2 HEAVYS + 2 MIDDLES.
+    expect(r.indirekt.Trizeps).toBe(4);
+    expect(r.konten.Trizeps).toBe(2);
+    expect(r.indirektQuellen.Trizeps[0].saetze).toBe(4);
   });
 
   it('summiert alle vier Einheiten desselben Cycles', () => {
@@ -94,7 +94,7 @@ describe('zaehleCycle – Standardplan', () => {
     p.ex['OK-H'] = { chest_comp: [bank] };
     p.ex['OK-P'] = { chest_comp: [bank] };
     p.data['OK-P'] = { 1: { chest_comp: { sets: [[]] } } };
-    expect(zaehleCycle(p, 1).direkt.Brust).toBe(6);
+    expect(zaehleCycle(p, 1).direkt.Brust).toBe(4);
   });
 });
 
@@ -120,7 +120,7 @@ describe('zaehleCycle – Priorität', () => {
     };
     const r = zaehleCycle(p, 1);
     expect(r.direkt.Unterarme).toBe(4);
-    expect(r.direkt.Brust).toBe(6);
+    expect(r.direkt.Brust).toBe(4);
   });
 
   it('verteilt bei der kleinen Priorität je Einheit nur einen Satz um', () => {
@@ -132,7 +132,7 @@ describe('zaehleCycle – Priorität', () => {
     };
     const r = zaehleCycle(p, 1);
     expect(r.direkt.Unterarme).toBe(2);
-    expect(r.direkt.Brust).toBe(8);
+    expect(r.direkt.Brust).toBe(6);
   });
 
   it('zählt indirekte Arbeit einer gewählten Prio-Übung', () => {
@@ -164,7 +164,7 @@ describe('Cycle und Deload', () => {
   it('übernimmt im Deload die HEAVYS-Auswahl und halbiert die Standardsätze', () => {
     const p = basis();
     p.ex['OK-H'] = { chest_comp: [bank], chest_iso: [fly] };
-    expect(zaehleCycle(p, 8).direkt.Brust).toBe(3);
+    expect(zaehleCycle(p, 8).direkt.Brust).toBe(2);
   });
 
   it('setzt im Deload keine Priorität ein', () => {
@@ -179,7 +179,7 @@ describe('Robustheit und Sortierung', () => {
     const p = basis();
     p.ex['OK-H'] = { chest_comp: ['Nicht im Katalog'] };
     const r = zaehleCycle(p, 1, KATALOG);
-    expect(r.ohneZuordnung).toBe(3);
+    expect(r.ohneZuordnung).toBe(2);
     expect(r.unbekannte).toEqual(['Nicht im Katalog']);
   });
 
