@@ -10,6 +10,7 @@ import {
 } from './prioritaet.js';
 import { synchronisiereTraining } from './trainingssync.js';
 import { strukturellGleich } from './datenvergleich.js';
+import { appScrollBy } from './app-scroll.js';
 
 // Der Pfeil steht aufrecht in Monospace – wie in der unteren Bedienleiste.
 export function zurueckChip() {
@@ -310,7 +311,7 @@ export async function mountMeter(container, { userId }) {
       const nachher = body.querySelector('.som-muskel.offen');
       if (!nachher) return;
       const delta = nachher.getBoundingClientRect().top - vorherTop;
-      if (Math.abs(delta) > 1) window.scrollBy({ top: delta, behavior: 'smooth' });
+      if (Math.abs(delta) > 1) appScrollBy({ top: delta, behavior: 'smooth' });
     });
     await synchronisiereTraining(userId, payload, (status) => {
       if (rev !== revision) return;

@@ -14,6 +14,7 @@ import { mountNotizbuch } from './notizbuch.js';
 import { mountAdmin } from './admin.js';
 import { mountFeedback } from './feedback.js';
 import { verbindePausenAnzeige, stoppePause } from './pause.js';
+import { appScrollTo, appScrollTop } from './app-scroll.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
 applyTheme(getTheme());
@@ -47,6 +48,10 @@ let aktiveAnsicht = null;    // fuer die Rueckkehr an dieselbe Stelle im Log
 let logScrollY = 0;
 const WILLKOMMEN_EMAIL = 'blast:willkommen-email';
 
+function appHuelleSetzen(aktiv) {
+  document.documentElement.classList.toggle('app-shell', aktiv);
+}
+
 // Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
 // Fehler). In der App selbst bleibt es draussen: Dort willst du eintragen, nicht
 // angesprochen werden.
@@ -69,6 +74,7 @@ function cleanupActive() {
 
 /* ------------------------------------------------------------ auth UI */
 function renderAuth() {
+  appHuelleSetzen(false);
   cleanupActive();
   stoppePause(false);
   const isLogin = authMode === 'login';
@@ -159,6 +165,7 @@ function renderAuth() {
 // eine Sitzung angelegt, es fehlt nur noch das neue Passwort. Ohne diese Maske
 // landete man direkt im Log – mit dem alten, unbekannten Passwort.
 function renderRecovery() {
+  appHuelleSetzen(false);
   cleanupActive();
   app.innerHTML = `
     ${MARQUEE}
@@ -220,6 +227,7 @@ function navAvatar() {
 
 /* ------------------------------------------------------------ app chrome */
 function renderChrome() {
+  appHuelleSetzen(true);
   aktiveAnsicht = null;
   logScrollY = 0;
   const isAdmin = profile?.role === 'admin';
@@ -367,7 +375,7 @@ function setNavActive(view) {
 }
 
 async function routeView() {
-  if (aktiveAnsicht === 'log') logScrollY = window.scrollY;
+  if (aktiveAnsicht === 'log') logScrollY = appScrollTop();
   const view = document.getElementById('view');
   if (!view) return;
   let hash = (location.hash.replace('#', '') || 'log');
@@ -385,7 +393,7 @@ async function routeView() {
   const token = ++routeToken;
   const guard = (v) => { if (token !== routeToken) { v?.destroy?.(); return; } active = v; };
 
-  // OFFEN: Beim Seitenwechsel flackert auf dem installierten iPhone kurz die
+  // iOS-WebKit zeichnete beim Seitenwechsel kurz die Kopfzeile nicht:
   // Kopfzeile – Logo, Chip, Sync-Punkt und Avatar verschwinden fuer ein Bild,
   // manchmal auch ihr Hintergrund. Ausschliesslich dann, wenn vorher gescrollt
   // wurde, und ausschliesslich in der installierten App, nie im Safari-Tab.
@@ -399,15 +407,9 @@ async function routeView() {
   // Die Bildabstaende bleiben dabei sauber bei 60 fps – der Hauptthread ist
   // frei, es ist reine Kompositor-Arbeit.
   //
-  // Arbeitshypothese: Ganz oben ueberlappt die Kopfzeile den Inhalt nicht und
-  // kann mit ihm zusammen gezeichnet werden. Nach dem Scrollen liegt sie
-  // darueber und braucht eine eigene Ebene – die beim Tausch verworfen und zu
-  // langsam neu aufgebaut wird.
-  // Naechster sinnvoller Ansatz waere eine App-Huelle, bei der nicht das
-  // Fenster scrollt, sondern #view (Muster: html.overlay-scroll-gesperrt in
-  // styles.css). Dann entfaellt die Ueberlappung. Das muss AM GERAET
-  // entwickelt werden – im Vorschaubrowser ist die Fensterhoehe 0, dort laesst
-  // sich so ein Layout nicht pruefen.
+  // Deshalb scrollt die angemeldete App nicht mehr das Fenster, sondern nur
+  // #view. Die Kopfzeile liegt ausserhalb dieses Scrollbereichs und muss beim
+  // Inhaltstausch keine aktive Sticky-Ebene mehr verlieren.
 
   // Unterseiten zunächst außerhalb des sichtbaren Views aufbauen und erst
   // vollständig einsetzen. Das bisherige sofortige Leeren zeigte auf iOS für
@@ -461,17 +463,9 @@ async function routeView() {
   // (Das kurze Flackern der Kopfzeile behebt das NICHT – siehe die Notiz beim
   // Inhaltstausch weiter oben. Richtig ist es trotzdem.)
   //
-  // Ein offenes Tutorial/Overlay haelt iOS-Fenster und Body bewusst bei 0 und
-  // scrollt nur den Seiteninhalt #view. Sonst wuerde dieser Routen-Scroll die
-  // Sperre direkt nach dem Mounten wieder aushebeln.
   const scrollSetzen = () => {
     if (token !== routeToken) return;
-    if (document.documentElement.classList.contains('overlay-scroll-gesperrt')) {
-      view.scrollTo({ top: zielY, behavior: 'instant' });
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    } else {
-      window.scrollTo({ top: zielY, behavior: 'instant' });
-    }
+    appScrollTo({ top: zielY, behavior: 'instant' });
   };
   scrollSetzen();
   // Nachfassen im naechsten Bild: Wird die Seite durch spaet fertige Bilder
@@ -485,6 +479,7 @@ async function routeView() {
 // laden waehrenddessen im Hintergrund. Wer schneller fertig ist, wartet auf den
 // anderen.
 function showSplash() {
+  appHuelleSetzen(false);
   cleanupActive();
   app.innerHTML = `<div class="splash"><span class="brand">${brandSvg()}</span></div>`;
   return new Promise((r) => setTimeout(r, 2000));
@@ -494,6 +489,7 @@ function showSplash() {
 // Tutorial. Er laeuft parallel zum Laden des Profils und verlaengert den Start
 // deshalb nur dann, wenn das Profil schneller als die Animation da ist.
 function showWillkommen() {
+  appHuelleSetzen(false);
   cleanupActive();
   localStorage.removeItem(WILLKOMMEN_EMAIL);
   app.innerHTML = '';

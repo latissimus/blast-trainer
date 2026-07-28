@@ -10,6 +10,7 @@ import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
 import { synchronisiereTraining } from './trainingssync.js';
 import { strukturellGleich } from './datenvergleich.js';
+import { appScroller as holeAppScroller, appScrollTo } from './app-scroll.js';
 
 function effektivePause(blk) {
   return blk.rest || 120;
@@ -387,7 +388,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (tutorialDunkel) tutorialDunkel.hidden = true;
     queuePersist();
     renderAll();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    appScrollTo({ top: 0, behavior: 'smooth' });
   }
   function tutorialStartAnimation() {
     if (tutorialFx) return;
@@ -430,12 +431,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
       // Unterkante aus, nicht an Headerhoehe + geschaetzter Kartenhoehe. So
       // scrollt kein Feld vor oder sichtbar hinter die Einrichtungsbox.
       const zielOben = karte.getBoundingClientRect().bottom + 14;
-      const appScroller = document.documentElement.classList.contains('overlay-scroll-gesperrt')
-        ? container
-        : null;
-      const aktuellePosition = appScroller ? appScroller.scrollTop : window.scrollY;
+      const scroller = holeAppScroller();
+      const aktuellePosition = scroller.scrollTop;
       const scrollZiel = Math.max(0, aktuellePosition + ziel.getBoundingClientRect().top - zielOben);
-      (appScroller || window).scrollTo({
+      scroller.scrollTo({
         top: scrollZiel,
         behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
       });
@@ -548,8 +547,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tutorialClipRaf = requestAnimationFrame(tutorialClipAktualisieren);
   }
   window.addEventListener('resize', tutorialClipPlanen);
-  window.addEventListener('scroll', tutorialClipPlanen, { passive: true });
-  container.addEventListener('scroll', tutorialClipPlanen, { passive: true });
+  const seitenScroller = holeAppScroller();
+  seitenScroller.addEventListener('scroll', tutorialClipPlanen, { passive: true });
 
   function oeffneUebungswahl({ titel, gruppen, aktuell, onSelect }) {
     picker.innerHTML = '';
@@ -672,8 +671,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
       `<option value="${i + 1}">Cycle ${i + 1}</option>`),
     '<option value="8">Deload</option>',
   ].join('');
-  wocheSel.onchange = () => { state.week = Number(wocheSel.value); queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
-  tagSel.onchange = () => { state.day = tagSel.value; queuePersist(); renderAll(); window.scrollTo({ top: 0, behavior: 'instant' }); };
+  wocheSel.onchange = () => { state.week = Number(wocheSel.value); queuePersist(); renderAll(); appScrollTo({ top: 0, behavior: 'instant' }); };
+  tagSel.onchange = () => { state.day = tagSel.value; queuePersist(); renderAll(); appScrollTo({ top: 0, behavior: 'instant' }); };
   tierSeg.onchange = () => { setTier(state.day, state.week, Number(tierSeg.value)); queuePersist(); renderAll(); };
 
   // Datum der Einheit. Ohne das weiss man beim Blick auf Woche 3 nie, wann sie
@@ -1077,7 +1076,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         if (!state.datum[key]) state.datum[key] = lokalesDatum();
         queuePersist();
         renderAll();
-        window.scrollTo({ top: 0, behavior: 'instant' });
+        appScrollTo({ top: 0, behavior: 'instant' });
       };
       contentEl.appendChild(weiter);
     }
@@ -1336,7 +1335,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     state.day = 'OK-D';
     queuePersist();
     renderAll();
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    appScrollTo({ top: 0, behavior: 'instant' });
     toast('Deload · 1 Woche');
   }
 
@@ -1354,7 +1353,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     writeLog(userId, payloadOut(), true, true);
     await persist();
     renderAll();
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    appScrollTo({ top: 0, behavior: 'instant' });
     toast('Neue Phase – alles zurückgesetzt');
   }
 
@@ -1526,8 +1525,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       container.style.removeProperty('--tutorial-kartenraum');
       cancelAnimationFrame(tutorialClipRaf);
       window.removeEventListener('resize', tutorialClipPlanen);
-      window.removeEventListener('scroll', tutorialClipPlanen);
-      container.removeEventListener('scroll', tutorialClipPlanen);
+      seitenScroller.removeEventListener('scroll', tutorialClipPlanen);
       tutorialFxTimer.forEach(clearTimeout);
       tutorialFxTimer = [];
       tutorialFx?.remove();
