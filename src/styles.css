@@ -1140,6 +1140,29 @@ body[data-seite="meter"],body[data-seite="prog"],body[data-seite="feedback"],
 body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
   background:transparent}
 
+/* Kurze Seiten enden auf iOS teils vor dem unteren Rand. Das Muster nur auf
+   dem html-Canvas zu zeichnen reicht dort nicht zuverlässig: WebKit bemisst
+   dessen Kachelfläche gelegentlich nach der Inhaltshöhe. Progression, Feedback
+   und Notizbuch tragen ihr Muster deshalb zusätzlich selbst und sind immer
+   mindestens so hoch wie der sichtbare Bildschirm. */
+body[data-seite="prog"],body[data-seite="notizbuch"]{
+  min-height:100vh;min-height:100dvh;
+  background-color:transparent;
+  background-image:var(--muster-tropfen);
+  background-size:112px;
+  background-repeat:repeat}
+body[data-seite="feedback"]{
+  min-height:100vh;min-height:100dvh;
+  background-color:transparent;
+  background-image:var(--muster-dreieck);
+  background-size:auto;
+  background-repeat:repeat}
+:root[data-theme="dark"] body[data-seite="prog"],
+:root[data-theme="dark"] body[data-seite="notizbuch"]{
+  background-image:var(--muster-tropfen-dunkel)}
+:root[data-theme="dark"] body[data-seite="feedback"]{
+  background-image:var(--muster-dreieck-dunkel)}
+
 /* ---------- Feedback ---------- */
 .feedback-intro{margin:0;padding:12px 13px;background:var(--surface);
   border:var(--bw) solid var(--ink);border-bottom:0;border-radius:var(--r-karte) var(--r-karte) 0 0}
