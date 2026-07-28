@@ -210,6 +210,25 @@ html[data-sonde="e"] .ex-picker-lage{-webkit-backdrop-filter:none;backdrop-filte
 /* F: nur der Zurueck-Chip – er ist der einzige, der beim Seitenwechsel IN die
       Kopfzeile eingehaengt wird. Greift F, ist die Ursache genau benannt. */
 html[data-sonde="f"] .zurueck{-webkit-backdrop-filter:none;backdrop-filter:none}
+/* H: Kopfzeile fest statt klebend.
+      Der beschriebene Fehler ist eindeutig: Logo, Chip, Sync-Punkt UND
+      Profilbild verschwinden gleichzeitig, und man sieht den Hintergrund der
+      Unterseite hindurch. Die Kopfzeile wird also fuer ein Bild komplett nicht
+      gezeichnet – nicht ein einzelnes Element darin.
+      Genau das kann position:sticky: Die klebende Position haengt an der Hoehe
+      des Scrollbereichs. Beim Seitenwechsel aendert sich diese Hoehe schlagartig
+      (gemessen: 7829 -> 5103 Pixel), die Klebe-Position muss neu berechnet
+      werden, und fuer ein Bild sitzt das Element an seiner urspruenglichen
+      Stelle – ausserhalb des Bildschirms, wenn man gescrollt hat.
+      Das erklaert auch, warum es NUR nach dem Scrollen auftritt: Ganz oben ist
+      die klebende Position mit der urspruenglichen identisch, eine Neuberechnung
+      aendert also nichts.
+      position:fixed haengt dagegen am Fenster, nicht am Inhalt. Aenderungen der
+      Dokumenthoehe koennen es nicht aus der Bahn werfen. Weil ein festes Element
+      aus dem Fluss faellt, bekommt das darauffolgende Element denselben Betrag
+      als Polster – die Hoehe steht bereits in --topbar-h. */
+html[data-sonde="h"] .topbar{position:fixed;left:0;right:0}
+html[data-sonde="h"] .topbar + *{padding-top:var(--topbar-h,99px)}
 .sondenmarke{position:fixed;left:0;bottom:0;z-index:9999;
   background:#FF0000;color:#fff;font:700 11px/1 ui-monospace,Menlo,monospace;
   padding:6px 9px;pointer-events:none;letter-spacing:.04em}

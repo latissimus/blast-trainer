@@ -396,6 +396,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
       <button type="button" data-sonde="e">E</button>
       <button type="button" data-sonde="f">F</button>
       <button type="button" data-sonde="g">G</button>
+      <button type="button" data-sonde="h">H</button>
       <button type="button" data-sonde="m">Messen</button>
     </div>
     <p class="profile-hinweis" id="sonden-info"></p>`;
@@ -408,6 +409,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     e: 'E · Alle Milchglas-Effekte (backdrop-filter) aus: Zurück-Chip, untere Leiste, Übungskatalog. Flächen wirken flach – gewollt.',
     f: 'F · Nur der Zurück-Chip ohne Milchglas. Er ist der einzige, der beim Seitenwechsel in die Kopfzeile eingehängt wird.',
     g: 'G · Kein Scroll-Sprung mehr: Jeder Wechsel beginnt und endet ganz oben. Das Log merkt sich seine Position dabei NICHT – nur zum Test.',
+    h: 'H · Kopfzeile fest statt klebend. Der wahrscheinlichste Kandidat: Eine klebende Leiste haengt an der Dokumenthoehe, und die aendert sich beim Wechsel schlagartig.',
     m: 'Messen · Ändert nichts am Aussehen. Zeichnet bei jedem Seitenwechsel 1,5 s lang die Bildabstände auf und zeigt sie unten links.',
   };
   const sondenInfo = sondenKarte.querySelector('#sonden-info');
