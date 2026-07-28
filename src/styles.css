@@ -292,6 +292,28 @@ html[data-sonde="l"] .ctrlbar.nur-menue:not(.timer-an){
       positionierte Elemente darin. Die Tutorialkarte koennte sich waehrend des
       Tests anders verhalten – fuer die Fehlersuche hinnehmbar. */
 html[data-sonde="r"] #view{contain:layout paint}
+/* T: Die Voraussetzung beseitigen statt die Folge reparieren.
+      Der entscheidende Hinweis vom Geraet: "der Header laedt nochmal neu, aber
+      zu langsam – und nur wenn man gescrollt hat."
+      Ganz oben ueberlappt die Kopfzeile den Inhalt nicht, sie kann im selben
+      Zeichenvorgang wie die Seite entstehen. Sobald gescrollt wird, schiebt
+      sich der Inhalt DARUNTER – ab da braucht sie zwingend eine eigene Ebene
+      ueber dem bewegten Inhalt. Genau die wird beim Inhaltstausch verworfen.
+      Alle Sonden davor wollten diese Ebene retten. Diese hier sorgt dafuer,
+      dass es sie gar nicht erst braucht: Nicht mehr das Fenster scrollt,
+      sondern #view. Die Kopfzeile steht dann ausserhalb des Scrollbereichs,
+      ueberlappt nie und bleibt Teil der ruhenden App-Huelle.
+      Das Muster gibt es in dieser Datei bereits – html.overlay-scroll-gesperrt
+      macht fuer Overlays genau dasselbe.
+      IM TEST: Die gemerkte Scrollposition des Logs greift nicht, weil die
+      Wiederherstellung noch mit window.scrollY rechnet. Das waere bei einer
+      echten Umstellung nachzuziehen. */
+html[data-sonde="t"]{height:100%;overflow:hidden}
+html[data-sonde="t"] body{height:100%;overflow:hidden}
+html[data-sonde="t"] #app{display:flex;flex-direction:column;height:100%;overflow:hidden}
+html[data-sonde="t"] #view{flex:1 1 auto;min-height:0;overflow-y:auto;
+  overscroll-behavior:none;-webkit-overflow-scrolling:touch}
+html[data-sonde="t"] .topbar{position:static}
 .sondenmarke{position:fixed;left:0;bottom:0;z-index:9999;
   background:#FF0000;color:#fff;font:700 11px/1 ui-monospace,Menlo,monospace;
   padding:9px 12px;letter-spacing:.04em;cursor:pointer;
