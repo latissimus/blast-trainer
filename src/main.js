@@ -14,7 +14,7 @@ import { mountNotizbuch } from './notizbuch.js';
 import { mountAdmin } from './admin.js';
 import { mountFeedback } from './feedback.js';
 import { verbindePausenAnzeige, stoppePause } from './pause.js';
-import { sondeAnwenden } from './sonde.js';   // VORUEBERGEHEND
+import { sondeAnwenden, sondeLesen } from './sonde.js';   // VORUEBERGEHEND
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
 applyTheme(getTheme());
@@ -379,6 +379,21 @@ async function routeView() {
   if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'feedback', 'notizbuch'].includes(hash)) hash = 'log';
   setNavActive(hash);
   cleanupActive();
+
+  // ===== VORUEBERGEHENDE SONDE G – mit src/sonde.js wieder entfernen! =====
+  // Prueft die Vermutung, dass der SPRUNG der Scrollposition das Flackern
+  // ausloest, nicht dessen Zeitpunkt. Nachgemessen: Beim Wechsel von einer
+  // runtergescrollten FAQ (scrollY 1200) ins Log stand der Inhalt schon auf
+  // Log, waehrend scrollY noch 1200 war – danach sprang es auf 700.
+  //
+  // Diese Sonde beseitigt JEDEN Sprung: Erst wird die alte, noch sichtbare
+  // Seite nach oben gescrollt (ein gewoehnlicher Scrollvorgang, kein
+  // Zwischenbild), dann getauscht, und die Zielposition bleibt 0. Damit
+  // beginnt und endet jeder Wechsel bei 0. Der Preis: Das Log merkt sich
+  // seine Position nicht mehr – genau deshalb ist es eine Sonde und kein Fix.
+  const sondeOhneSprung = sondeLesen() === 'g';
+  if (sondeOhneSprung) window.scrollTo({ top: 0, behavior: 'instant' });
+
   // Der Zurueck-Chip haengt physisch am Sticky-Header. Vor dem
   // Ansichtswechsel alte angedockte Elemente entfernen.
   app.querySelectorAll('.topbar > .zurueck')
@@ -430,7 +445,7 @@ async function routeView() {
     if (zurueck) topbar.appendChild(zurueck);
   }
   aktiveAnsicht = hash;
-  const zielY = hash === 'log' ? logScrollY : 0;
+  const zielY = sondeOhneSprung ? 0 : (hash === 'log' ? logScrollY : 0);
 
   // SYNCHRON, nicht im naechsten Bild. Genau hier sass das kurze Flackern der
   // Kopfzeile: Der Inhalt war schon getauscht, die Scrollposition aber noch die
