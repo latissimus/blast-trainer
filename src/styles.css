@@ -129,16 +129,17 @@ html.statusleiste-overlay{background:var(--statusbar-bg,var(--bg))}
    bisher vom Overlay abgedunkelt. */
 html.statusleiste-overlay body{background:var(--statusbar-bg,var(--bg))}
 html.statusleiste-overlay #app{min-height:100dvh;background:var(--statusbar-bg,var(--bg))}
-html.statusleiste-overlay #view{background:var(--bg)}
-/* Angemeldete App: feste Huelle statt Fenster-Scroll. Die Kopfzeile ist ein
-   ruhendes Geschwister des einzigen Scrollbereichs #view. Damit muss WebKit
-   beim Austauschen des Seiteninhalts keine aktive Sticky-Ebene neu aufbauen. */
-html.app-shell,html.app-shell body{width:100%;height:100%;overflow:hidden}
-html.app-shell body{position:fixed;inset:0}
-html.app-shell #app{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden}
-html.app-shell #view{flex:1 1 auto;min-height:0;overflow-y:auto;
+html.statusleiste-overlay #view{min-height:100dvh;background:var(--bg)}
+/* Nicht das iOS-Fenster und auch nicht der Body, sondern nur der eigentliche
+   Seiteninhalt #view scrollt waehrend eines Overlays.
+   Dadurch bleibt der transparente Statusbereich auf derselben dunklen Flaeche,
+   auch wenn das Tutorial automatisch zur naechsten Uebung faehrt. */
+html.overlay-scroll-gesperrt{height:100%;overflow:hidden}
+html.overlay-scroll-gesperrt body{position:fixed;inset:0;width:100%;height:100%;overflow:hidden}
+html.overlay-scroll-gesperrt #app{display:flex;flex-direction:column;height:100%;overflow:hidden}
+html.overlay-scroll-gesperrt #view{flex:1 1 auto;min-height:0;overflow-y:auto;
   padding-top:var(--tutorial-kartenraum,0px);
-  overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+  overscroll-behavior:none;-webkit-overflow-scrolling:touch}
 body{
   background:var(--bg);color:var(--text);font-family:var(--mono);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
@@ -159,8 +160,6 @@ a{color:var(--link)}
 /* ---------- Top bar / nav ---------- */
 .topbar{position:sticky;top:0;z-index:20;isolation:isolate;background:var(--bg);
   border-bottom:var(--bw) solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
-html.app-shell .topbar{position:static;flex:0 0 auto}
-html.app-shell .topbar::before{display:none}
 /* Beim iOS-Gummiband wandert der Sticky-Header kurz nach unten, waehrend
    fixed Elemente am Viewport bleiben. Diese unsichtbare Fortsetzung deckt
    den Bereich oberhalb des Headers ab, damit Set-O-Meter und Zurueck-Chip
@@ -1219,7 +1218,6 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
    gemischt geschrieben sind. */
 .faq{scroll-margin-top:calc(var(--topbar-h) + 10px);border:var(--bw) solid var(--ink);
   border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;overflow:hidden}
-html.app-shell .faq-sektion,html.app-shell .faq{scroll-margin-top:10px}
 .faq>summary{list-style:none;cursor:pointer;padding:18px 46px 18px 18px;position:relative;
   font-family:var(--mono);font-weight:400;text-transform:uppercase;font-size:16px;
   line-height:1.35;color:var(--text)}

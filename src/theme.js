@@ -6,6 +6,7 @@
 const KEY = 'blast:theme';
 const LOG_BG = '#B1E7FF';
 const overlayQuellen = new Set();
+let overlayScrollY = 0;
 
 export const gueltig = (t) => (t === 'dark' ? 'dark' : 'retro');
 
@@ -39,6 +40,7 @@ export function statusleisteAnSeite() {
 
 export function setStatusleistenOverlay(quelle, offen) {
   if (!quelle) return;
+  const warOffen = overlayQuellen.size > 0;
   if (offen) overlayQuellen.add(quelle);
   else overlayQuellen.delete(quelle);
   const istOffen = overlayQuellen.size > 0;
@@ -50,9 +52,25 @@ export function setStatusleistenOverlay(quelle, offen) {
     root.style.removeProperty('--statusbar-bg');
   }
 
-  // #view ist innerhalb der angemeldeten App dauerhaft der einzige
-  // Scrollbereich. Overlays muessen den Scrollzustand deshalb nicht mehr
-  // zwischen Fenster und Inhalt verschieben.
+  // In der installierten iOS-App liegt die Statusleiste transparent ueber der
+  // Seite. Scrollt das Browserfenster, bewertet WebKit die Flaeche darunter
+  // neu – beim Tutorial war das die weisse sticky Karte. Solange ein Overlay
+  // offen ist, bleibt das Fenster deshalb bei 0; stattdessen scrollt nur #view
+  // innerhalb der feststehenden App. Verschachtelte Overlays teilen sich
+  // diesen Zustand ueber overlayQuellen.
+  if (!warOffen && istOffen) {
+    overlayScrollY = window.scrollY;
+    root.classList.add('overlay-scroll-gesperrt');
+    const scroller = document.querySelector('#view');
+    if (scroller) scroller.scrollTop = overlayScrollY;
+    window.scrollTo(0, 0);
+  } else if (warOffen && !istOffen) {
+    const scroller = document.querySelector('#view');
+    overlayScrollY = scroller?.scrollTop || 0;
+    root.classList.remove('overlay-scroll-gesperrt');
+    if (scroller) scroller.scrollTop = 0;
+    window.scrollTo(0, overlayScrollY);
+  }
   statusleisteAnSeite();
 }
 
