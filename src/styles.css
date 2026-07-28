@@ -278,6 +278,20 @@ html[data-sonde="k"] .zurueck{display:none}
       wieder auf den vollen Wert – im Test ist das unten etwas mehr Luft. */
 html[data-sonde="l"] .ctrlbar.nur-menue:not(.timer-an){
   display:block;visibility:hidden;pointer-events:none}
+/* R: CSS-Containment auf dem Seiteninhalt.
+      Stand nach P, Q und H: Es liegt am Inhaltstausch – aber weder an der
+      Dokumenthoehe (Q) noch an der Positionierung der Kopfzeile (H). Der Tausch
+      reisst sie also mit, egal wie sie befestigt ist.
+      Genau dafuer gibt es contain: Es sagt dem Browser ZU, dass Aenderungen in
+      diesem Kasten nichts ausserhalb beeinflussen koennen – er darf den Rest
+      der Seite beim Neuaufbau dann unangetastet lassen. Diese Zusicherung fehlt
+      bisher voellig, und ohne sie darf WebKit konservativ alles neu bewerten,
+      auch die Kopfzeile. Es ist die erste Sonde, die dem Browser etwas
+      ERLAUBT, statt ihm etwas wegzunehmen.
+      NEBENWIRKUNG: contain macht #view zum Bezugsrahmen fuer absolut und fest
+      positionierte Elemente darin. Die Tutorialkarte koennte sich waehrend des
+      Tests anders verhalten – fuer die Fehlersuche hinnehmbar. */
+html[data-sonde="r"] #view{contain:layout paint}
 .sondenmarke{position:fixed;left:0;bottom:0;z-index:9999;
   background:#FF0000;color:#fff;font:700 11px/1 ui-monospace,Menlo,monospace;
   padding:9px 12px;letter-spacing:.04em;cursor:pointer;

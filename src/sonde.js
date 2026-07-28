@@ -12,7 +12,7 @@
 // zusaetzlich erhalten – im Browser ist er der schnellere Weg.
 
 const KEY = 'blast:sonde';
-export const SONDEN = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'p', 'q'];
+export const SONDEN = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r'];
 
 export function sondeLesen() {
   let aus = '';
