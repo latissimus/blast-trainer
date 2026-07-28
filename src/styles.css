@@ -280,7 +280,11 @@ html[data-sonde="l"] .ctrlbar.nur-menue:not(.timer-an){
   display:block;visibility:hidden;pointer-events:none}
 .sondenmarke{position:fixed;left:0;bottom:0;z-index:9999;
   background:#FF0000;color:#fff;font:700 11px/1 ui-monospace,Menlo,monospace;
-  padding:6px 9px;pointer-events:none;letter-spacing:.04em}
+  padding:9px 12px;letter-spacing:.04em;cursor:pointer;
+  /* Anfassbar, nicht nur Anzeige: Die Marke ist der Notausgang aus jeder
+     Sonde. Grosszuegig gepolstert, damit sie sich am Telefon sicher treffen
+     laesst. */
+  border-top-right-radius:8px}
 .sondenwahl{display:flex;gap:6px;margin:8px 0}
 .sondenwahl button{flex:1;padding:10px 0;border:var(--bw) solid var(--ink);
   border-radius:var(--r);background:var(--surface);color:var(--ink);

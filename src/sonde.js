@@ -46,10 +46,18 @@ export function sondeAnwenden() {
   if (!marke) {
     marke = document.createElement('div');
     marke.className = 'sondenmarke';
+    // NOTAUSGANG: Ein Tipp auf die Marke schaltet jede Sonde ab, egal in
+    // welchem Zustand die App steckt. Sonde P hatte sich selbst eingesperrt –
+    // sie verhinderte den Seitenwechsel ins Profil, wo ihr Schalter sitzt.
+    // Dieser Ausweg haengt an nichts als der Marke selbst.
+    marke.addEventListener('click', () => {
+      try { localStorage.removeItem(KEY); } catch (e) { /* egal */ }
+      location.reload();
+    });
     document.body.appendChild(marke);
   }
-  marke.textContent = aktiv === 'm' ? 'MESSUNG'
-    : aktiv === 'n' ? 'NACHWEIS' : `SONDE ${aktiv.toUpperCase()}`;
+  marke.textContent = (aktiv === 'm' ? 'MESSUNG'
+    : aktiv === 'n' ? 'NACHWEIS' : `SONDE ${aktiv.toUpperCase()}`) + '  ✕';
   if (aktiv === 'm') messungStarten();
   if (aktiv === 'n') nachweisStarten();
 }

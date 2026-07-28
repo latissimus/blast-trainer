@@ -406,7 +406,11 @@ async function routeView() {
   //   Flackert es weiter -> die Ursache steckt im Umschalten
   //   Flackert es nicht  -> die Ursache steckt im Inhaltstausch
   // Beide Ausgaenge halbieren den Suchraum; bisher konnte keine Sonde das.
-  if (sondeLesen() === 'p') return;
+  //
+  // NIEMALS auf dem Profil: Dort sitzt der Schalter, mit dem man die Sonde
+  // wieder ausmacht. Ohne diese Ausnahme sperrt sie sich selbst ein – genau
+  // das ist passiert, und es war ein vermeidbarer Fehler.
+  if (sondeLesen() === 'p' && hash !== 'profile') return;
 
   cleanupActive();
 
