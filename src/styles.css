@@ -4,7 +4,6 @@
    ============================================================ */
 :root{
   --bg:#B1E7FF;      /* gemessen auf retromuscle.net */
-  --chrome-bg:#B1E7FF; /* ruhige, seitenübergreifende Kopf-/Statusleiste */
   --surface:#FFFFFF;
   --surface2:#EAF4FC;
   --navy:#001454;
@@ -73,7 +72,6 @@
    ============================================================ */
 :root[data-theme="dark"]{
   --bg:#101A2B;       /* einheitliches tiefes Navy aus dem Notizbuch */
-  --chrome-bg:#101A2B;
   --surface:#191C24;
   --surface2:#232733;
   --ink:#697486;
@@ -151,26 +149,26 @@ a{color:var(--link)}
    – Logo und Profilbild blitzten dadurch kurz auf. */
 
 /* ---------- Top bar / nav ---------- */
-.topbar{position:sticky;top:0;z-index:20;isolation:isolate;background:var(--chrome-bg);
+.topbar{position:sticky;top:0;z-index:20;isolation:isolate;background:var(--bg);
   border-bottom:var(--bw) solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
 /* Beim iOS-Gummiband wandert der Sticky-Header kurz nach unten, waehrend
    fixed Elemente am Viewport bleiben. Diese unsichtbare Fortsetzung deckt
    den Bereich oberhalb des Headers ab, damit Set-O-Meter und Zurueck-Chip
    dort auch bei starkem Herunterziehen nicht hervorscheinen. */
 .topbar::before{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:100%;
-  height:100vh;background:var(--chrome-bg);pointer-events:none}
+  height:100vh;background:var(--bg);pointer-events:none}
 /* Eigene Deckflaeche zwischen Lasche und Header-Inhalt: So kann die Lasche
    innerhalb der Kopfzeile hochfahren, ohne jemals vor Logo oder Avatar zu
    erscheinen. Sichtbar ist ausschliesslich der Teil unterhalb der Kontur. */
 .topbar::after{content:"";position:absolute;z-index:1;left:0;right:0;top:0;bottom:0;
-  background:var(--chrome-bg);pointer-events:none}
+  background:var(--bg);pointer-events:none}
 /* Der Header liegt in der installierten iOS-App direkt unter Uhrzeit und Akku.
    Bei einem Overlay muss deshalb die komplette Kopfzeile denselben dunklen
    Grund tragen – sonst bleibt zwischen Statusleiste und Tutorialkarte ein
    heller Streifen stehen. */
 html.statusleiste-overlay .topbar,
 html.statusleiste-overlay .topbar::after,
-html.statusleiste-overlay .topbar::before{background:var(--statusbar-bg,var(--chrome-bg))}
+html.statusleiste-overlay .topbar::before{background:var(--statusbar-bg,var(--bg))}
 .topbar .wrap{position:relative;z-index:2;display:flex;align-items:center;gap:10px}
 /* LOGMAN-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
    Kein Layout-Effekt (Kontur/Schatten ändern die Header-Höhe nicht). */

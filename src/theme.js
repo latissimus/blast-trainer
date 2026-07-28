@@ -26,22 +26,15 @@ function metaFarbeSetzen(farbe) {
   alt.replaceWith(neu);
 }
 
-// Eine einzige Quelle steuert die geschuetzte iOS-Leiste. Die App-Hülle bleibt
-// über Unterseiten hinweg gleich; Tutorial und Einstieg setzen denselben
+// Eine einzige Quelle steuert die geschuetzte iOS-Leiste. Normalerweise trägt
+// sie die Farbe der jeweiligen Unterseite; Tutorial und Einstieg setzen den
 // LOGMAN-Grundton ausdrücklich fest.
 // Ein Set statt eines Booleans hält auch verschachtelte Marken-/Tutorial-
 // Zustände sauber zusammen.
 export function statusleisteAnSeite() {
   const root = document.documentElement;
   const overlayBg = root.style.getPropertyValue('--statusbar-bg').trim();
-  const styles = getComputedStyle(root);
-  // Die native iOS-Leiste gehört optisch zur dauerhaft hellblauen bzw.
-  // dunkelblauen App-Hülle, nicht zum wechselnden Unterseitenhintergrund.
-  // Dadurch muss WebKit den oberen Displaybereich beim Routenwechsel nicht
-  // jedes Mal mit einer neuen theme-color neu aufbauen.
-  const bg = overlayBg ||
-    styles.getPropertyValue('--chrome-bg').trim() ||
-    styles.getPropertyValue('--bg').trim();
+  const bg = overlayBg || getComputedStyle(root).getPropertyValue('--bg').trim();
   if (bg) metaFarbeSetzen(bg);
 }
 

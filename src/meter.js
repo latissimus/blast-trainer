@@ -9,6 +9,7 @@ import {
   spenderKandidaten,
 } from './prioritaet.js';
 import { synchronisiereTraining } from './trainingssync.js';
+import { strukturellGleich } from './datenvergleich.js';
 
 // Der Pfeil steht aufrecht in Monospace – wie in der unteren Bedienleiste.
 export function zurueckChip() {
@@ -331,9 +332,7 @@ export async function mountMeter(container, { userId }) {
       .from('training_logs').select('payload').eq('user_id', userId).maybeSingle()
       .then(({ data, error }) => {
         if (error || destroyed || revision !== startRevision || !data?.payload) return;
-        const serverSignatur = JSON.stringify(data.payload);
-        const lokaleSignatur = JSON.stringify(payload);
-        if (serverSignatur === lokaleSignatur) return;
+        if (strukturellGleich(data.payload, payload)) return;
         payload = normalisiere(data.payload);
         cycle = Math.min(8, Math.max(1, Number(payload.week) || 1));
         writeLog(userId, payload, false, false);

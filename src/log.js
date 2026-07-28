@@ -9,6 +9,7 @@ import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
 import { synchronisiereTraining } from './trainingssync.js';
+import { strukturellGleich } from './datenvergleich.js';
 
 function effektivePause(blk) {
   return blk.rest || 120;
@@ -1409,11 +1410,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function renderAll() { renderHeader(); renderDay(); }
   renderAll();
 
-  const payloadGleich = (a, b) => {
-    try { return JSON.stringify(a) === JSON.stringify(b); }
-    catch (e) { return false; }
-  };
-
   async function serverAbgleichen(serverPayload) {
     if (destroyed) return;
     const serverAltschema = hatInhalt(serverPayload) && serverPayload.v !== 4;
@@ -1441,7 +1437,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const vereinigt = lokalSollErsetzen
         ? lokalerStand
         : mergePayload(serverPayload, lokalerStand);
-      if (!payloadGleich(vereinigt, lokalerStand)) {
+      if (!strukturellGleich(vereinigt, lokalerStand)) {
         uebernehmePayload(vereinigt);
         migriereMiddleNamen();
         renderAll();
@@ -1454,7 +1450,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
     // Ohne lokale Aenderung ist der Server der aktuelle gemeinsame Stand. Nur
     // wenn er wirklich abweicht, wird die bereits sichtbare Seite neu gezeichnet.
-    if (!payloadGleich(serverPayload, lokalerStand)) {
+    if (!strukturellGleich(serverPayload, lokalerStand)) {
       uebernehmePayload(serverPayload);
       const migriert = migriereMiddleNamen();
       renderAll();
@@ -1464,8 +1460,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
         await persist();
         return;
       }
+      // Nur ein tatsächlich neuer Serverstand muss nach dem sichtbaren Aufbau
+      // in den Offline-Spiegel geschrieben werden. Der alte Code schrieb auch
+      // identische, bereits saubere Payloads erneut synchron in localStorage
+      // und blockierte damit kurz den Hauptthread.
+      if (!readOnly) writeLog(userId, payloadOut(), false, false);
     }
-    if (!readOnly) writeLog(userId, payloadOut(), false, false);
   }
 
   if (!readOnly) {
