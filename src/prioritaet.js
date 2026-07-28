@@ -24,6 +24,11 @@ export const prioritaetenVon = (payload) => volumenVon(payload).prioritaet || {}
 const gueltigePrio = (cfg) => cfg && (cfg.modus === 'plus' || cfg.modus === 'tausch');
 export const prioSatzanzahl = (cfg) => Number(cfg?.saetze) === 1 ? 1 : 2;
 
+const prioWdhBereich = (konto, heavy) => {
+  if (!heavy) return '15–25';
+  return konto === 'Unterarme' ? '8–15' : '5–10';
+};
+
 function passendeTage(cycle, konto) {
   if (istDeload(cycle)) return [];
   const prefix = `${koerperhaelfte(konto)}-`;
@@ -41,7 +46,7 @@ export function prioBlock(konto, tag, anzahl = 2) {
     type: heavy ? 'load' : 'pump',
     sets: [saetze, saetze, saetze],
     rest: heavy ? (ok ? 150 : 180) : (ok ? 60 : 120),
-    reps: heavy ? '5–10' : '15–25',
+    reps: prioWdhBereich(konto, heavy),
     rir: heavy ? '1–3 RIR' : '0–1 RIR',
     free: heavy ? 0 : 1,
     prio: 1,

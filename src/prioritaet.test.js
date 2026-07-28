@@ -96,6 +96,13 @@ describe('Prio-Slots', () => {
     expect(prioBloecke(p, 1, 'UK-H')).toEqual([]);
   });
 
+  it('trainiert neue Unterarm-Priorität an HEAVYS mit 8–15 Wiederholungen', () => {
+    const p = payload();
+    p.volumen.prioritaet.Unterarme = { modus: 'plus' };
+    expect(prioBloecke(p, 1, 'OK-H')[0].reps).toBe('8–15');
+    expect(prioBloecke(p, 1, 'OK-P')[0].reps).toBe('15–25');
+  });
+
   it('verteilt atomar je zwei Sätze in HEAVYS und PUMPS um', () => {
     const p = payload();
     p.volumen.prioritaet.Unterarme = {
