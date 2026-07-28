@@ -436,6 +436,19 @@ async function routeView() {
   // vollständig einsetzen. Das bisherige sofortige Leeren zeigte auf iOS für
   // einen Frame nur den Seitenhintergrund – sichtbar als kurzes Flackern.
   // Das Log bleibt wegen seiner festen Tutorial-/Picker-Ebenen am echten View.
+  // ===== VORUEBERGEHENDE SONDE Q – mit src/sonde.js wieder entfernen! =====
+  // Haelt die Dokumenthoehe waehrend des Tauschs fest.
+  // Sonde P hat das Umschalten entlastet, es liegt am Inhaltstausch. Und der
+  // Nebenbefund vom Geraet nennt den Mechanismus: Auch das Zuklappen eines
+  // <details> laesst die Kopfzeile flackern. Beides hat nur eines gemeinsam –
+  // die Dokumenthoehe aendert sich schlagartig (beim Wechsel gemessen:
+  // 7829 -> 5103 Pixel). Eine klebende Leiste haengt genau daran.
+  // Diese Sonde friert die bisherige Hoehe ein, bis der Tausch durch ist, und
+  // gibt sie erst im naechsten Bild wieder frei. Schrumpfen kann das Dokument
+  // dadurch waehrend des Tauschs nicht mehr.
+  const sondeHoeheHalten = sondeLesen() === 'q';
+  if (sondeHoeheHalten) view.style.minHeight = `${view.getBoundingClientRect().height}px`;
+
   const ziel = hash === 'log' ? view : document.createElement('div');
   if (ziel === view) view.innerHTML = '';
   try {
@@ -502,7 +515,11 @@ async function routeView() {
   // Nachfassen im naechsten Bild: Wird die Seite durch spaet fertige Bilder
   // oder Schriften noch hoeher, war das Ziel eben noch nicht erreichbar. Steht
   // die Position schon richtig, ist der zweite Aufruf wirkungslos.
-  requestAnimationFrame(scrollSetzen);
+  requestAnimationFrame(() => {
+    scrollSetzen();
+    // Sonde Q: Hoehensperre erst jetzt loesen – der Tausch ist durch.
+    if (sondeHoeheHalten) view.style.minHeight = '';
+  });
 }
 
 // Begruessung nach dem Einloggen: nur das Logo, das aufzieht.
