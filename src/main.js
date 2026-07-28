@@ -431,18 +431,33 @@ async function routeView() {
   }
   aktiveAnsicht = hash;
   const zielY = hash === 'log' ? logScrollY : 0;
-  requestAnimationFrame(() => {
+
+  // SYNCHRON, nicht im naechsten Bild. Genau hier sass das kurze Flackern der
+  // Kopfzeile: Der Inhalt war schon getauscht, die Scrollposition aber noch die
+  // der alten Seite – nachgemessen stand die Seite bereits auf "prog", waehrend
+  // scrollY noch bei 600 lag. Der Browser durfte diesen Zwischenstand zeichnen,
+  // erst ein Bild spaeter sprang er an die richtige Stelle.
+  //
+  // Deshalb trat es auch nur nach dem Scrollen auf: Ohne Scrollen sind alte und
+  // neue Position beide 0, und es gibt nichts zu springen.
+  //
+  // Ein offenes Tutorial/Overlay haelt iOS-Fenster und Body bewusst bei 0 und
+  // scrollt nur den Seiteninhalt #view. Sonst wuerde dieser Routen-Scroll die
+  // Sperre direkt nach dem Mounten wieder aushebeln.
+  const scrollSetzen = () => {
     if (token !== routeToken) return;
-    // Ein offenes Tutorial/Overlay haelt iOS-Fenster und Body bewusst bei 0
-    // und scrollt nur den Seiteninhalt #view. Sonst wuerde dieser spaete
-    // Routen-Scroll die Sperre direkt nach dem Mounten wieder aushebeln.
     if (document.documentElement.classList.contains('overlay-scroll-gesperrt')) {
       view.scrollTo({ top: zielY, behavior: 'instant' });
       window.scrollTo({ top: 0, behavior: 'instant' });
     } else {
       window.scrollTo({ top: zielY, behavior: 'instant' });
     }
-  });
+  };
+  scrollSetzen();
+  // Nachfassen im naechsten Bild: Wird die Seite durch spaet fertige Bilder
+  // oder Schriften noch hoeher, war das Ziel eben noch nicht erreichbar. Steht
+  // die Position schon richtig, ist der zweite Aufruf wirkungslos.
+  requestAnimationFrame(scrollSetzen);
 }
 
 // Begruessung nach dem Einloggen: nur das Logo, das aufzieht.
