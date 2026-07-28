@@ -47,6 +47,8 @@ let aktiveAnsicht = null;    // fuer die Rueckkehr an dieselbe Stelle im Log
 let logScrollY = 0;
 const WILLKOMMEN_EMAIL = 'blast:willkommen-email';
 
+const naechstesBild = () => new Promise((resolve) => requestAnimationFrame(resolve));
+
 // Laufband – nur auf den abgemeldeten Ansichten (Login, neues Passwort, Laden,
 // Fehler). In der App selbst bleibt es draussen: Dort willst du eintragen, nicht
 // angesprochen werden.
@@ -227,13 +229,16 @@ function renderChrome() {
     <header class="topbar">
       <div class="wrap">
         <span class="brand">${brandSvg()}</span>
-        <span class="phasechip" id="app-phase" hidden></span>
+        <span class="phasechip chrome-slot" id="app-phase"></span>
         <nav class="nav">
-          <span class="save-dot ok" id="app-save" title="gespeichert" hidden>✓</span>
+          <span class="save-dot ok chrome-slot" id="app-save" title="gespeichert">✓</span>
           ${navAvatar()}
         </nav>
       </div>
+      <a class="zurueck app-zurueck" id="app-zurueck" href="#log"
+        aria-hidden="true" tabindex="-1"><span class="pf">←</span> Log</a>
     </header>
+    <div class="seitenwechsel-decke" id="app-seitenwechsel" aria-hidden="true"></div>
     ${pushHinweisZeigen() ? `
       <div class="wrap"><div class="pushbar" id="pushbar">
         <button class="pb-go" id="pb-go">🔔 Benachrichtigungen aktivieren</button>
@@ -373,41 +378,34 @@ async function routeView() {
   let hash = (location.hash.replace('#', '') || 'log');
   if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
   if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'feedback', 'notizbuch'].includes(hash)) hash = 'log';
-  setNavActive(hash);
-
-  cleanupActive();
-
-  // Der Zurueck-Chip haengt physisch am Sticky-Header. Vor dem
-  // Ansichtswechsel alte angedockte Elemente entfernen.
-  app.querySelectorAll('.topbar > .zurueck')
-    .forEach((el) => el.remove());
-
   const token = ++routeToken;
   const guard = (v) => { if (token !== routeToken) { v?.destroy?.(); return; } active = v; };
+  const zielY = hash === 'log' ? logScrollY : 0;
+  const fensterScrollt = !document.documentElement.classList.contains('overlay-scroll-gesperrt');
+  const warGesrollt = fensterScrollt && window.scrollY > 1;
+  const decke = document.querySelector('#app-seitenwechsel');
+  const abdecken = warGesrollt || zielY > 1;
+  if (!abdecken) decke?.classList.remove('an');
 
-  // OFFEN: Beim Seitenwechsel flackert auf dem installierten iPhone kurz die
-  // Kopfzeile – Logo, Chip, Sync-Punkt und Avatar verschwinden fuer ein Bild,
-  // manchmal auch ihr Hintergrund. Ausschliesslich dann, wenn vorher gescrollt
-  // wurde, und ausschliesslich in der installierten App, nie im Safari-Tab.
-  //
-  // Eingegrenzt (jeweils per Sonde am Geraet geprueft, alle ergebnislos ausser
-  // der ersten): Der Inhaltstausch loest es aus – laesst man ihn weg und macht
-  // nur das Umschalten, flackert nichts. NICHT die Ursache sind: Dokumenthoehe
-  // einfrieren, Kopfzeile fest statt klebend, eigene GPU-Ebene, alle
-  // Milchglas-Effekte, Stapelkontext und Pseudo-Elemente der Kopfzeile, die
-  // untere Bedienleiste, das native Auswahlrad, CSS-Containment auf #view.
-  // Die Bildabstaende bleiben dabei sauber bei 60 fps – der Hauptthread ist
-  // frei, es ist reine Kompositor-Arbeit.
-  //
-  // Arbeitshypothese: Ganz oben ueberlappt die Kopfzeile den Inhalt nicht und
-  // kann mit ihm zusammen gezeichnet werden. Nach dem Scrollen liegt sie
-  // darueber und braucht eine eigene Ebene – die beim Tausch verworfen und zu
-  // langsam neu aufgebaut wird.
-  // Naechster sinnvoller Ansatz waere eine App-Huelle, bei der nicht das
-  // Fenster scrollt, sondern #view (Muster: html.overlay-scroll-gesperrt in
-  // styles.css). Dann entfaellt die Ueberlappung. Das muss AM GERAET
-  // entwickelt werden – im Vorschaubrowser ist die Fensterhoehe 0, dort laesst
-  // sich so ein Layout nicht pruefen.
+  // iOS verwirft beim DOM-Tausch die aktive Zeichenebene eines Sticky-Headers.
+  // Erst die alte Seite an den Anfang setzen und WebKit zwei volle Bilder Zeit
+  // geben, den Sticky-Zustand zu verlassen; erst danach wird #view angefasst.
+  // Die deckende Flaeche beginnt UNTER dem Header und versteckt nur den kurzen
+  // Sprung des Inhalts.
+  if (abdecken && decke) {
+    decke.classList.add('an');
+    await naechstesBild();
+    if (token !== routeToken) return;
+  }
+  if (warGesrollt) {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    await naechstesBild();
+    await naechstesBild();
+    if (token !== routeToken) return;
+  }
+
+  setNavActive(hash);
+  cleanupActive();
 
   // Unterseiten zunächst außerhalb des sichtbaren Views aufbauen und erst
   // vollständig einsetzen. Das bisherige sofortige Leeren zeigte auf iOS für
@@ -445,14 +443,19 @@ async function routeView() {
     ziel.innerHTML = `<div class="wrap" style="padding-top:20px"><div class="msg err">Fehler: ${e.message}</div></div>`;
   }
   if (token !== routeToken) return;
+  // Jede Unterseite liefert den Chip weiterhin in ihrem Markup, damit die
+  // Module eigenstaendig bleiben. Sichtbar ist aber nur das dauerhafte Exemplar
+  // im Header; so wird dessen DOM beim Seitenwechsel nie mehr umgebaut.
+  ziel.querySelectorAll('.zurueck').forEach((el) => el.remove());
   if (ziel !== view) view.replaceChildren(...ziel.childNodes);
-  const topbar = app.querySelector('.topbar');
-  if (topbar) {
-    const zurueck = view.querySelector('.zurueck');
-    if (zurueck) topbar.appendChild(zurueck);
+  const zurueck = document.querySelector('#app-zurueck');
+  if (zurueck) {
+    const sichtbar = hash !== 'log';
+    zurueck.classList.toggle('chrome-sichtbar', sichtbar);
+    zurueck.setAttribute('aria-hidden', String(!sichtbar));
+    zurueck.tabIndex = sichtbar ? 0 : -1;
   }
   aktiveAnsicht = hash;
-  const zielY = hash === 'log' ? logScrollY : 0;
 
   // SYNCHRON, nicht erst im naechsten Bild: Sonst ist der Inhalt schon
   // getauscht, waehrend die Scrollposition noch die der alten Seite ist –
@@ -474,10 +477,16 @@ async function routeView() {
     }
   };
   scrollSetzen();
-  // Nachfassen im naechsten Bild: Wird die Seite durch spaet fertige Bilder
-  // oder Schriften noch hoeher, war das Ziel eben noch nicht erreichbar. Steht
-  // die Position schon richtig, ist der zweite Aufruf wirkungslos.
-  requestAnimationFrame(scrollSetzen);
+  // Erst die neue Seite samt Zielposition zeichnen, dann den Inhaltsvorhang
+  // entfernen. Ohne Vorhang bleibt der bisherige schnelle Wechsel unveraendert.
+  if (abdecken && decke) {
+    await naechstesBild();
+    scrollSetzen();
+    await naechstesBild();
+    if (token === routeToken) decke.classList.remove('an');
+  } else {
+    requestAnimationFrame(scrollSetzen);
+  }
 }
 
 // Begruessung nach dem Einloggen: nur das Logo, das aufzieht.

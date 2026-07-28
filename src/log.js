@@ -143,7 +143,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (!saveStateEl) return;
     const [icon, cls, title] = STATUS[kind] || STATUS.saved;
     saveStateEl.textContent = icon;
-    saveStateEl.className = 'save-dot ' + cls;
+    saveStateEl.className = 'save-dot chrome-slot chrome-sichtbar ' + cls;
     saveStateEl.title = title;
   }
   function payloadOut() {
@@ -469,7 +469,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // und die Wochen-Leiste bleibt frei fuer Woche, A/B und Phase. Die Kopfleiste
   // haelt den Platz bereit, das Log fuellt ihn – und raeumt ihn beim Verlassen.
   saveStateEl = readOnly ? null : document.querySelector('#app-save');
-  if (saveStateEl) saveStateEl.hidden = false;
+  if (saveStateEl) saveStateEl.classList.add('chrome-sichtbar');
   const contentEl = wrap.querySelector('#lg-content');
   const volEl = wrap.querySelector('#lg-vol');
   const phaseEl = document.querySelector('#app-phase');
@@ -693,7 +693,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     // Normalzustand und bleibt eine Beschriftung; der Deload ist die Ausnahme,
     // in der sich wirklich etwas aendert – der darf auffallen.
     const imDeload = isCruise(state.week);
-    phaseEl.hidden = false;
+    phaseEl.classList.add('chrome-sichtbar');
     phaseEl.textContent = imDeload ? 'Deload' : 'Cycle ' + state.week;
     phaseEl.classList.toggle('laut', imDeload);
     renderControls();
@@ -1517,9 +1517,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (slots) slots.querySelectorAll('select,input').forEach((el) => { el.disabled = true; });
       // Der Phasen-Chip gehoert dem Log – ausserhalb gibt es keine Phase.
       const ph = document.querySelector('#app-phase');
-      if (ph) ph.hidden = true;
+      if (ph) ph.classList.remove('chrome-sichtbar');
       // Der Punkt gehoert dem Log – ausserhalb gibt es nichts zu synchronisieren.
-      if (saveStateEl) saveStateEl.hidden = true;
+      if (saveStateEl) saveStateEl.classList.remove('chrome-sichtbar');
       pickerLage.remove();
       tutorialDunkel.remove();
       tutorialEbene.remove();
