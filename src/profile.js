@@ -398,6 +398,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
       <button type="button" data-sonde="g">G</button>
       <button type="button" data-sonde="h">H</button>
       <button type="button" data-sonde="i">I</button>
+      <button type="button" data-sonde="j">J</button>
       <button type="button" data-sonde="m">Messen</button>
       <button type="button" data-sonde="n">Nachweis</button>
     </div>
@@ -413,6 +414,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     g: 'G · Kein Scroll-Sprung mehr: Jeder Wechsel beginnt und endet ganz oben. Das Log merkt sich seine Position dabei NICHT – nur zum Test.',
     h: 'H · Kopfzeile fest statt klebend. Der wahrscheinlichste Kandidat: Eine klebende Leiste haengt an der Dokumenthoehe, und die aendert sich beim Wechsel schlagartig.',
     i: 'I · Seitenwechsel erst, wenn das native Auswahlrad zu ist (0,35 s spaeter). Der Wechsel wirkt dadurch traeger – nur zum Test.',
+    j: 'J · Eigene GPU-Ebene fuer die Kopfzeile – der Kandidat aus der Messung. Der Zurueck-Chip verliert dabei sein Milchglas und wird schlicht deckend.',
     m: 'Messen · Ändert nichts am Aussehen. Zeichnet bei jedem Seitenwechsel 1,5 s lang die Bildabstände auf und zeigt sie unten links.',
     n: 'Nachweis · Ändert nichts. Beobachtet 30 Bilder nach dem Wechsel, was mit der Kopfzeile passiert: neu gebaut, aus dem Bild gerutscht oder nur nicht gezeichnet.',
   };

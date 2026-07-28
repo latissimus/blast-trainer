@@ -229,6 +229,21 @@ html[data-sonde="f"] .zurueck{-webkit-backdrop-filter:none;backdrop-filter:none}
       als Polster – die Hoehe steht bereits in --topbar-h. */
 html[data-sonde="h"] .topbar{position:fixed;left:0;right:0}
 html[data-sonde="h"] .topbar + *{padding-top:var(--topbar-h,99px)}
+/* J: Eigene, dauerhafte GPU-Ebene fuer die Kopfzeile.
+      Die Messung (Sonde N) hat es eingegrenzt: top bleibt konstant 0, der
+      DOM-Knoten wird nie ersetzt, Sichtbarkeit und Deckkraft bleiben unberuehrt.
+      Layout und DOM sind also in Ordnung – Safari verwirft beim Neuaufbau des
+      Seiteninhalts nur die Rasterung der Leiste und baut sie ein Bild spaeter
+      neu auf. Eine eigene Ebene bleibt bei so einer Aenderung bestehen.
+      MIT NEBENWIRKUNG: Ein transformierter Vorfahr verschiebt die Bezugsflaeche
+      von backdrop-filter – der Zurueck-Chip in der Leiste wuerde dann die Leiste
+      statt der Seite dahinter weichzeichnen. Sonde F hat gezeigt, dass sein
+      Milchglas fuer das Flackern ohnehin keine Rolle spielt, deshalb bekommt er
+      hier eine schlichte deckende Flaeche. */
+html[data-sonde="j"] .topbar{will-change:transform;transform:translateZ(0)}
+html[data-sonde="j"] .zurueck{-webkit-backdrop-filter:none;backdrop-filter:none;
+  background:rgba(255,255,255,.86)}
+html[data-sonde="j"][data-theme="dark"] .zurueck{background:rgba(30,33,42,.86)}
 .sondenmarke{position:fixed;left:0;bottom:0;z-index:9999;
   background:#FF0000;color:#fff;font:700 11px/1 ui-monospace,Menlo,monospace;
   padding:6px 9px;pointer-events:none;letter-spacing:.04em}
