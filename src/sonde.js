@@ -12,7 +12,7 @@
 // zusaetzlich erhalten – im Browser ist er der schnellere Weg.
 
 const KEY = 'blast:sonde';
-export const SONDEN = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'm'];
+export const SONDEN = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'm', 'n'];
 
 export function sondeLesen() {
   let aus = '';
@@ -48,8 +48,60 @@ export function sondeAnwenden() {
     marke.className = 'sondenmarke';
     document.body.appendChild(marke);
   }
-  marke.textContent = aktiv === 'm' ? 'MESSUNG' : `SONDE ${aktiv.toUpperCase()}`;
+  marke.textContent = aktiv === 'm' ? 'MESSUNG'
+    : aktiv === 'n' ? 'NACHWEIS' : `SONDE ${aktiv.toUpperCase()}`;
   if (aktiv === 'm') messungStarten();
+  if (aktiv === 'n') nachweisStarten();
+}
+
+// ---- Sonde N: Was passiert mit der Kopfzeile beim Wechsel? -----------------
+//
+// Neun Sonden haben nichts gebracht, also wird wieder gemessen statt geraten.
+// Beobachtet werden die 30 Bilder nach einem Seitenwechsel, und zwar drei
+// Dinge, die sich gegenseitig ausschliessen:
+//
+//   Knoten ERSETZT      -> die Kopfzeile wird neu gebaut, nicht nur neu gemalt
+//   top wird negativ    -> sie rutscht aus dem Bild (Klebe-Position verliert sich)
+//   top bleibt 0, gleich-> Layout und DOM sind in Ordnung; es fehlt allein die
+//                          Zeichenebene. Dann hilft nur, ihr eine eigene, feste
+//                          Ebene zu geben – ganz andere Baustelle als bisher.
+//
+// Zusaetzlich wird geprueft, ob sie fuer ein Bild unsichtbar geschaltet wird
+// (opacity/visibility), was bisher niemand ausgeschlossen hat.
+let nachweisLaeuft = false;
+function nachweisStarten() {
+  if (nachweisLaeuft) return;
+  nachweisLaeuft = true;
+  const anzeigen = (text) => {
+    const marke = document.querySelector('.sondenmarke');
+    if (marke) marke.textContent = text;
+  };
+  const beobachte = () => {
+    const vorher = document.querySelector('.topbar');
+    let minTop = Infinity, maxTop = -Infinity;
+    let ersetzt = false, verschwunden = false, unsichtbar = false;
+    let n = 0;
+    const schritt = () => {
+      const tb = document.querySelector('.topbar');
+      if (!tb) { verschwunden = true; }
+      else {
+        if (tb !== vorher) ersetzt = true;
+        const cs = getComputedStyle(tb);
+        if (cs.visibility !== 'visible' || Number(cs.opacity) < 1) unsichtbar = true;
+        const t = tb.getBoundingClientRect().top;
+        if (t < minTop) minTop = t;
+        if (t > maxTop) maxTop = t;
+      }
+      if (++n < 30) requestAnimationFrame(schritt);
+      else anzeigen(`N · top ${Math.round(minTop)}…${Math.round(maxTop)}`
+        + ` · Knoten ${ersetzt ? 'ERSETZT' : 'gleich'}`
+        + (verschwunden ? ' · ZEITWEISE WEG' : '')
+        + (unsichtbar ? ' · UNSICHTBAR GESCHALTET' : ''));
+    };
+    anzeigen('N · messe…');
+    requestAnimationFrame(schritt);
+  };
+  window.addEventListener('hashchange', beobachte);
 }
 
 // ---- Sonde M: Messung statt Vermutung -------------------------------------
