@@ -8,6 +8,7 @@ import {
   pumpMoeglichkeiten,
   spenderKandidaten,
 } from './prioritaet.js';
+import { synchronisiereTraining } from './trainingssync.js';
 
 // Der Pfeil steht aufrecht in Monospace – wie in der unteren Bedienleiste.
 export function zurueckChip() {
@@ -313,23 +314,13 @@ export async function mountMeter(container, { userId }) {
       const delta = nachher.getBoundingClientRect().top - vorherTop;
       if (Math.abs(delta) > 1) window.scrollBy({ top: delta, behavior: 'smooth' });
     });
-    if (!navigator.onLine) {
-      speicher.textContent = 'Auf diesem Gerät gespeichert · wartet auf Verbindung';
-      return;
-    }
-    try {
-      const { error } = await supabase.from('training_logs').upsert(
-        { user_id: userId, payload, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id' },
-      );
-      if (error) throw error;
-      if (rev === revision) {
-        writeLog(userId, payload, false, false);
-        speicher.textContent = 'Gespeichert';
-      }
-    } catch (e) {
-      if (rev === revision) speicher.textContent = 'Auf diesem Gerät gespeichert · Upload fehlgeschlagen';
-    }
+    await synchronisiereTraining(userId, payload, (status) => {
+      if (rev !== revision) return;
+      if (status === 'saving') speicher.textContent = 'Auf diesem Gerät gespeichert · synchronisiert…';
+      if (status === 'saved') speicher.textContent = 'Gespeichert';
+      if (status === 'offline') speicher.textContent = 'Auf diesem Gerät gespeichert · wartet auf Verbindung';
+      if (status === 'error') speicher.textContent = 'Auf diesem Gerät gespeichert · Upload fehlgeschlagen';
+    });
   }
 
   render();

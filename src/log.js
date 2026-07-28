@@ -8,6 +8,7 @@ import { prioritaetsAnpassungen, prioBloecke, slotKey } from './prioritaet.js';
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
+import { synchronisiereTraining } from './trainingssync.js';
 
 function effektivePause(blk) {
   return blk.rest || 120;
@@ -39,70 +40,62 @@ const TUTORIAL_SETUP = [
    Returns { destroy } to remove the sticky save bar on nav.
    ------------------------------------------------------------------ */
 export async function mountLog(container, { userId, readOnly = false }) {
-  // Local-first laden: Der Server ist die Sicherungskopie, nicht die Voraussetzung.
-  // Nur wenn lokal ungespeicherte Aenderungen liegen, wird zusammengefuehrt –
-  // sonst gewinnt der Server (sein Stand ist dann identisch mit dem lokalen).
+  // Local-first laden: Ein vorhandener Geraetestand wird sofort gezeichnet.
+  // Der Serverabgleich laeuft danach im Hintergrund. Nur beim allerersten
+  // Oeffnen auf einem Geraet muessen wir auf den Server warten.
   const local = readLog(userId);
-  let server = null, serverOk = false;
-  // Sagt das Geraet selbst, dass es offline ist, den Serverversuch ueberspringen.
-  // Er laeuft sonst nur in einen Timeout, und solange starrt man auf den
-  // Ladebildschirm – auf ein Scheitern, das schon feststeht. navigator.onLine
-  // ist umgekehrt unzuverlaessig (WLAN ohne Internet meldet "online"), aber ein
-  // klares "offline" stimmt: Dann gibt es keine Verbindung.
-  if (navigator.onLine) {
-    try {
-      const { data, error } = await supabase
-        .from('training_logs')
-        .select('payload')
-        .eq('user_id', userId)
-        .maybeSingle();
-      if (error) throw error;
-      server = data?.payload || {};
-      serverOk = true;
-    } catch (e) {
-      // Kein Netz und nichts lokal -> wie bisher scheitern. Sonst: offline weiter.
-      if (!local) throw e;
+  const serverLaden = async () => {
+    const { data, error } = await supabase
+      .from('training_logs')
+      .select('payload')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error) throw error;
+    return data?.payload || {};
+  };
+  const serverPromise = navigator.onLine ? serverLaden() : null;
+  let server = null;
+  let serverSchonVerarbeitet = false;
+
+  // Ohne lokalen Spiegel bleibt der erste Online-Abruf zwingend. Offline gibt
+  // es dann noch keine Daten, die die App verlaesslich anzeigen koennte.
+  if (!local?.payload) {
+    if (!serverPromise) {
+      throw new Error('Keine Verbindung – und auf diesem Gerät liegt noch kein Log. Bitte einmal mit Internet öffnen.');
     }
-  } else if (!local) {
-    throw new Error('Keine Verbindung – und auf diesem Gerät liegt noch kein Log. Bitte einmal mit Internet öffnen.');
+    try {
+      server = await serverPromise;
+      serverSchonVerarbeitet = true;
+    } catch (e) {
+      throw e;
+    }
   }
 
-  let p, mergedOffline = false;
+  let p = local?.payload || server || {};
   const hatInhalt = (wert) => !!(wert && Object.keys(wert).length);
-  const lokalesAltschema = hatInhalt(local?.payload) && local.payload.v !== 4;
-  const serverAltschema = hatInhalt(server) && server.v !== 4;
-  const lokalesNeuschema = local?.payload?.v === 4;
-  const schemaReset = !lokalesNeuschema && (lokalesAltschema || serverAltschema);
-  if (serverAltschema && lokalesNeuschema) {
-    // Ein bereits lokal begonnenes Cycle-Log darf nicht von einem noch nicht
-    // aktualisierten v3-Serverstand gelöscht werden.
-    p = local.payload;
-    mergedOffline = true;
-  } else if (schemaReset) {
-    p = { v: 4 };
-    mergedOffline = true;
-  } else if (serverOk && local && local.dirty) {
-    // Nach einem Phasen-Reset ersetzt der lokale Stand den Server, statt sich mit
-    // ihm zu vereinigen – sonst kaemen die bewusst geloeschten Wochen zurueck.
-    p = local.replace ? local.payload : mergePayload(server, local.payload);
-    mergedOffline = true;
-  } else if (serverOk) p = server;
-  else { p = local.payload; mergedOffline = true; }
+  const schemaReset = hatInhalt(p) && p.v !== 4;
+  if (schemaReset) p = { v: 4 };
+
   // Schema v4 ist ein neues Trainingssystem. Alte Ganzkörper-/Wochenlogs
   // werden bewusst nicht gemischt, sondern durch diesen leeren Cycle-Stand
   // ersetzt. Der Nutzer hat dieses Löschen ausdrücklich freigegeben.
-  const state = {
+  const normalisiereState = (payload = {}) => ({
     // Cycles 1–7, Eintrag 8 = Deload.
-    week: Math.min(8, Math.max(1, Number(p.week) || 1)),
-    day: TPL[p.day] ? p.day : 'OK-H',
-    data: p.data || {},
-    tier: p.tier || {},
-    ex: p.ex || {},      // feste HEAVYS- und MIDDLES-Namen über alle Cycles
-    notes: p.notes || {}, // gemeinsame Notizen pro Tag/Übung
-    mem: p.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
-    datum: p.datum || {},  // Einheit|Cycle -> ISO-Datum
-    volumen: { prioritaet: p.volumen?.prioritaet || {} }, // Muskel-Prioritaeten
-    meta: p.meta || {},    // phasenuebergreifende Oberflaechen-Zustaende
+    week: Math.min(8, Math.max(1, Number(payload.week) || 1)),
+    day: TPL[payload.day] ? payload.day : 'OK-H',
+    data: payload.data || {},
+    tier: payload.tier || {},
+    ex: payload.ex || {},      // feste HEAVYS- und MIDDLES-Namen über alle Cycles
+    notes: payload.notes || {}, // gemeinsame Notizen pro Tag/Übung
+    mem: payload.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
+    datum: payload.datum || {},  // Einheit|Cycle -> ISO-Datum
+    volumen: { prioritaet: payload.volumen?.prioritaet || {} }, // Muskel-Prioritaeten
+    meta: payload.meta || {},    // phasenuebergreifende Oberflaechen-Zustaende
+  });
+  const state = normalisiereState(p);
+  const uebernehmePayload = (payload) => {
+    const neu = normalisiereState(payload);
+    Object.keys(state).forEach((key) => { state[key] = neu[key]; });
   };
 
   // Vor dieser Version waren die heutigen MIDDLES frei gespeicherte PUMPS.
@@ -128,10 +121,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
     });
     return geaendert;
   }
-  if (migriereMiddleNamen()) mergedOffline = true;
+  let lokaleAenderungenSeitMount = !!local?.dirty || schemaReset;
+  if (migriereMiddleNamen()) lokaleAenderungenSeitMount = true;
 
   let saveTimer = null;
   let saveStateEl = null;
+  let destroyed = false;
 
   // ---- persistence -------------------------------------------------
   // Dezenter Sync-Status als Icon: ✓ gespeichert · ↻ speichert · ⚠ Fehler
@@ -164,22 +159,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (readOnly) return true;
     const payload = payloadOut();
     markLocal(payload, true);                 // lokal zuerst – ueberlebt App-Kill
-    setStatus('saving');
-    const { error: e } = await supabase.from('training_logs').upsert(
-      { user_id: userId, payload, updated_at: new Date().toISOString() },
-      { onConflict: 'user_id' }
-    );
-    if (e) {
-      // Daten sind lokal sicher; nur der Upload fehlt. Wird automatisch nachgeholt.
-      setStatus(navigator.onLine ? 'error' : 'offline');
-      return false;
-    }
-    writeLog(userId, payload, false, false);  // sauber: Server hat denselben Stand
-    setStatus('saved');
-    return true;
+    const result = await synchronisiereTraining(userId, payload, (kind) => {
+      if (!destroyed) setStatus(kind);
+    });
+    return result.status === 'saved' || result.status === 'superseded';
   }
   function queuePersist() {
     if (readOnly) return;
+    lokaleAenderungenSeitMount = true;
     // Synchron und sofort, nicht erst nach der Debounce: Wenn iOS die App
     // dazwischen abraeumt, ist der Satz trotzdem da.
     markLocal(payloadOut(), true);
@@ -1366,6 +1353,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.datum = {};
     state.volumen = { prioritaet: {} };
     state.week = 1; state.day = 'OK-H';
+    lokaleAenderungenSeitMount = true;
     clearTimeout(saveTimer);
     // Leeren ist eine Absicht: Dieser Stand ersetzt den Server, auch wenn der
     // Upload erst spaeter gelingt. Sonst holt der Abgleich alles wieder zurueck.
@@ -1428,19 +1416,95 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function renderAll() { renderHeader(); renderDay(); }
   renderAll();
 
-  if (mergedOffline && !readOnly) {
-    // Offline geladen oder zusammengefuehrt: Der lokale Stand ist jetzt der
-    // gueltige und muss noch hoch. Markieren und (falls Netz da ist) senden.
-    writeLog(userId, payloadOut(), true, schemaReset);
-    setStatus('offline');
-    if (navigator.onLine) persist();
-  } else if (serverOk && !readOnly) {
-    // Frisch vom Server geladen: Spiegel sofort anlegen, sauber (nichts offen).
-    //
-    // Ohne das entstand der Spiegel erst beim ersten Tippen – wer die App nur
-    // oeffnete und schaute, hatte offline nichts und bekam einen Fehler. Jeder
-    // Besuch mit Netz macht die App jetzt fuer das naechste Funkloch bereit.
-    writeLog(userId, payloadOut(), false, false);
+  const payloadGleich = (a, b) => {
+    try { return JSON.stringify(a) === JSON.stringify(b); }
+    catch (e) { return false; }
+  };
+
+  async function serverAbgleichen(serverPayload) {
+    if (destroyed) return;
+    const serverAltschema = hatInhalt(serverPayload) && serverPayload.v !== 4;
+    const lokalJetzt = readLog(userId);
+    const lokalerStand = payloadOut();
+    const lokalSollErsetzen = schemaReset || !!lokalJetzt?.replace;
+
+    // Ein bereits begonnenes Cycle-Log darf nie von einem alten Serverschema
+    // zurueckgesetzt werden. Der aktuelle lokale v4-Stand aktualisiert den
+    // Server stattdessen geordnet ueber dieselbe Speicherwarteschlange.
+    if (serverAltschema) {
+      if (!readOnly) {
+        writeLog(userId, lokalerStand, true, true);
+        lokaleAenderungenSeitMount = true;
+        setStatus(navigator.onLine ? 'pending' : 'offline');
+        if (navigator.onLine) await persist();
+      }
+      return;
+    }
+
+    // Hat der Nutzer lokal gearbeitet, gewinnt nicht blind der Server:
+    // Offline- und Serverstand werden wie bisher blockweise vereinigt. Ein
+    // bewusster Phasenreset ersetzt den Server weiterhin vollstaendig.
+    if (!readOnly && (lokaleAenderungenSeitMount || lokalJetzt?.dirty)) {
+      const vereinigt = lokalSollErsetzen
+        ? lokalerStand
+        : mergePayload(serverPayload, lokalerStand);
+      if (!payloadGleich(vereinigt, lokalerStand)) {
+        uebernehmePayload(vereinigt);
+        migriereMiddleNamen();
+        renderAll();
+      }
+      writeLog(userId, payloadOut(), true, lokalSollErsetzen);
+      setStatus(navigator.onLine ? 'pending' : 'offline');
+      if (navigator.onLine) await persist();
+      return;
+    }
+
+    // Ohne lokale Aenderung ist der Server der aktuelle gemeinsame Stand. Nur
+    // wenn er wirklich abweicht, wird die bereits sichtbare Seite neu gezeichnet.
+    if (!payloadGleich(serverPayload, lokalerStand)) {
+      uebernehmePayload(serverPayload);
+      const migriert = migriereMiddleNamen();
+      renderAll();
+      if (!readOnly && migriert) {
+        lokaleAenderungenSeitMount = true;
+        writeLog(userId, payloadOut(), true, false);
+        await persist();
+        return;
+      }
+    }
+    if (!readOnly) writeLog(userId, payloadOut(), false, false);
+  }
+
+  if (!readOnly) {
+    if (lokaleAenderungenSeitMount) {
+      // Lokal bleibt fuehrend und dirty, bis der Server den exakt gleichen
+      // Stand bestaetigt. Offline wird nichts versucht.
+      writeLog(userId, payloadOut(), true, schemaReset || !!local?.replace);
+      setStatus(navigator.onLine ? 'pending' : 'offline');
+    } else if (serverSchonVerarbeitet) {
+      // Erstes Oeffnen auf diesem Geraet: den Serverstand sofort als
+      // Offline-Spiegel sichern.
+      writeLog(userId, payloadOut(), false, false);
+    }
+  }
+
+  // Bei vorhandenem lokalen Spiegel blockiert der Server das Zeichnen nicht.
+  // Der Abgleich laeuft nach dem Mount weiter und zeichnet nur bei einer echten
+  // Abweichung neu.
+  if (serverPromise && !serverSchonVerarbeitet) {
+    serverPromise
+      .then(serverAbgleichen)
+      .catch(() => {
+        if (destroyed || readOnly) return;
+        const lokalJetzt = readLog(userId);
+        if (lokalJetzt?.dirty) {
+          setStatus(navigator.onLine ? 'error' : 'offline');
+          // Der Retry-Takt und das Online-Ereignis versuchen den sicher lokal
+          // liegenden Stand spaeter erneut.
+        }
+      });
+  } else if (serverSchonVerarbeitet) {
+    await serverAbgleichen(server);
   }
 
   // Der Knopf "Einheit speichern" ist ersatzlos entfallen: Die App
@@ -1450,6 +1514,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   return {
     destroy() {
+      destroyed = true;
       clearTimeout(saveTimer);
       clearInterval(retryId);
       window.removeEventListener('online', retrySync);
