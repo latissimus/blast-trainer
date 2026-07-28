@@ -330,8 +330,6 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 /* wartet auf Verbindung – kein Fehler, die Daten liegen lokal sicher */
 .save-dot.wait{color:var(--link)}
 .save-dot.err{color:var(--down)}
-.chrome-slot{visibility:hidden;opacity:0}
-.chrome-slot.chrome-sichtbar{visibility:visible;opacity:1}
 
 /* ---------- Log: week / rotation ---------- */
 /* Phase. Der Overreach ist der Normalzustand und bleibt eine ruhige
@@ -870,16 +868,8 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);
   color:var(--text);padding:8px 12px;
   font-family:var(--display);font-style:italic;font-weight:700;font-size:13px;text-transform:uppercase}
-.app-zurueck{visibility:hidden;opacity:0;pointer-events:none}
-.app-zurueck.chrome-sichtbar{visibility:visible;opacity:1;pointer-events:auto}
 :root[data-theme="dark"] .zurueck{background:rgba(30,33,42,.41)}
 .zurueck .pf{font-family:var(--mono);font-style:normal;font-size:16px;margin-right:3px;line-height:1}
-
-/* Kurzer Vorhang nur ueber dem Seiteninhalt. Der Header bleibt sichtbar und
-   unveraendert, waehrend iOS seinen Sticky-Zustand vor dem DOM-Tausch abbaut. */
-.seitenwechsel-decke{position:fixed;z-index:19;top:var(--topbar-h,0px);right:0;bottom:0;left:0;
-  visibility:hidden;opacity:0;pointer-events:none;background:var(--bg)}
-.seitenwechsel-decke.an{visibility:visible;opacity:1;pointer-events:auto}
 
 /* ---------- Set-O-Meter ----------
    Eigene Planungsseite, erreichbar ueber das App-Menue. */
