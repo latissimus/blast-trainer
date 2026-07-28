@@ -30,15 +30,15 @@ export function mountFaq(container) {
       <span class="faq-start-kicker">Start in 60 Sekunden</span>
       <h2 id="faq-starttitel">So legst du los</h2>
       <ol>
-        <li><b>Tutorial starten</b> und deine festen OK- und UK-HEAVYS auswählen.</li>
+        <li><b>Tutorial starten</b> und deine festen HEAVYS- und MIDDLES-Übungen auswählen.</li>
         <li><b>Cycle, Einheit und Level</b> unten im Log prüfen.</li>
-        <li><b>Gewicht, Wiederholungen und bei HEAVYS RIR</b> eintragen – gespeichert wird automatisch.</li>
+        <li><b>Gewicht, Wiederholungen und bei HEAVYS/MIDDLES RIR</b> eintragen – gespeichert wird automatisch.</li>
       </ol>
     </section>
 
     <details class="faq" open><summary>Wie starte ich mein erstes Training?</summary>
       <div class="faq-a">
-        <p><b>Starte im Log das kurze Tutorial.</b> Es erklärt den rollierenden Split und führt dich durch die feste Übungsauswahl für OK HEAVYS und UK HEAVYS. PUMPS wählst du später direkt im Training frei.</p>
+        <p><b>Starte im Log das kurze Tutorial.</b> Es erklärt den rollierenden Split und führt dich durch die feste Übungsauswahl für OK/UK HEAVYS sowie OK/UK MIDDLES. PUMPS wählst du später direkt im Training frei.</p>
         <p>Danach beginnst du mit <b>Cycle 1 · OK HEAVYS</b>. Einen Speichern-Knopf brauchst du nicht: Jede Eingabe wird sofort auf dem Gerät gesichert und bei Verbindung hochgeladen.</p>
         <a class="faq-tutorial-start" href="#log" data-tutorial-start>Tutorial starten</a>
       </div>
@@ -46,8 +46,8 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Was muss ich pro Satz eintragen?</summary>
       <div class="faq-a">
-        <p><b>Gewicht und Wiederholungen.</b> Bei HEAVYS kommt <b>RIR</b> hinzu. Das steht für <i>Reps in Reserve</i>, also Wiederholungen in Reserve. RIR 1 bedeutet: Eine saubere Wiederholung wäre noch möglich gewesen.</p>
-        <p>Die App speichert automatisch. Beim nächsten vergleichbaren Cycle stehen deine letzten HEAVYS-Werte direkt über der Eingabe.</p>
+        <p><b>Gewicht und Wiederholungen.</b> Bei HEAVYS und MIDDLES kommt <b>RIR</b> hinzu. Das steht für <i>Reps in Reserve</i>, also Wiederholungen in Reserve. RIR 1 bedeutet: Eine saubere Wiederholung wäre noch möglich gewesen.</p>
+        <p>Die App speichert automatisch. Beim nächsten vergleichbaren Cycle stehen deine letzten HEAVYS- und MIDDLES-Werte direkt über der Eingabe.</p>
       </div>
     </details>
 
@@ -79,16 +79,26 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie trainiere ich HEAVYS?</summary>
       <div class="faq-a">
-        <p><b>5–8 Wiederholungen und meistens 1–3 RIR.</b> Gezielte Iso-Arbeit liegt meist bei 1–2 RIR. Die Übungsauswahl bleibt über den Trainingsblock fest, damit die Leistung sauber vergleichbar ist.</p>
-        <p>Die Last steigt, wenn du das obere Ende des Wiederholungsbereichs mit passender Technik und Ziel-RIR erreichst. Nicht jede Übung muss in jedem Cycle besser werden.</p>
+        <p><b>A-Tage · 5–10 Wiederholungen.</b> HEAVYS nutzen feste Übungen. Ziel sind technisch standardisierte Leistungsprogression, hohe mechanische Belastung und zuverlässige Logbuchvergleiche.</p>
+        <p>Du nutzt <b>Double Progression</b>: Steigere zuerst die Wiederholungen innerhalb des Bereichs. Erreichst du das obere Ende mit passender Technik und Ziel-RIR, erhöhst du die Last und beginnst wieder weiter unten im Bereich.</p>
+        <p>Die Übung bleibt, solange sie <b>schmerzfrei, technisch reproduzierbar und progressierbar</b> ist. Nicht jede Übung muss in jedem Cycle besser werden.</p>
         <p><b>Evidenz:</b> Muskelaufbau ist über verschiedene Lastbereiche möglich, wenn Sätze ausreichend anstrengend sind. Schwerere Lasten machen die Leistung zusätzlich gut vergleichbar und fördern besonders die Maximalkraft.</p>
+      </div>
+    </details>
+
+    <details class="faq"><summary>Wie trainiere ich MIDDLES?</summary>
+      <div class="faq-a">
+        <p><b>B-Tage · 10–15 Wiederholungen.</b> MIDDLES sind feste, vollständig geloggte Übungen und bilden das progressiv getrackte Fundament dieser Einheiten.</p>
+        <p>Sie nutzen dieselbe <b>Double Progression</b> wie HEAVYS: erst Wiederholungen innerhalb des Bereichs steigern, danach die Last erhöhen. Auch MIDDLES bleiben im Plan, solange sie schmerzfrei, technisch reproduzierbar und progressierbar sind.</p>
+        <p><b>Evidenz:</b> Moderate Lasten verbinden wirksame Versagensnähe mit gut kontrollierbarer Technik und meist geringerer absoluter Belastung als HEAVYS. Der eigene Name beschreibt die Rolle im Plan, keinen eigenen Wachstumsmechanismus.</p>
       </div>
     </details>
 
     <details class="faq"><summary>Wie trainiere ich PUMPS?</summary>
       <div class="faq-a">
-        <p><b>10–20 Wiederholungen mit leichterer Last, aber versagensnah.</b> „PUMPS“ bezeichnet keinen eigenen metabolischen Wachstumsmechanismus. Entscheidend bleiben produktive Wiederholungen nahe am Versagen.</p>
-        <p>Die Übungen dürfen freier wechseln. <b>Lengthened Partials sind optional</b> und nur bei passenden, sicheren Übungen sinnvoll – nicht automatisch nach jedem Satz.</p>
+        <p><b>B-Tage · 15–25 Wiederholungen mit leichterer Last, aber versagensnah.</b> PUMPS ergänzen die festen MIDDLES um produktive Arbeit mit geringeren absoluten Lasten. Die Übungen dürfen freier wechseln.</p>
+        <p>Die Mischung aus MIDDLES und PUMPS dient <b>Volumenverteilung, Gelenkverträglichkeit, Übungsvielfalt und langfristiger Adhärenz</b> – nicht der Kombination zweier unabhängiger Wachstumsmechanismen.</p>
+        <p><b>Lengthened Partials sind optional</b> und nur bei passenden, sicheren Übungen sinnvoll – nicht automatisch nach jedem Satz.</p>
         <p><b>Evidenz:</b> Leichtere Lasten können ähnlich Muskelmasse aufbauen wie schwere, wenn die Sätze nah genug ans Versagen geführt werden.</p>
       </div>
     </details>
@@ -117,7 +127,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Welche Pausenzeiten gelten?</summary>
       <div class="faq-a">
-        <p>Die Pause steht direkt im jeweiligen Muskelblock und passt zur Übung: große HEAVYS-Comps meist <b>3 Minuten</b>, HEAVYS-Isos meist <b>2–2.5 Minuten</b>, PUMPS meist <b>1–2 Minuten</b>.</p>
+        <p>Die Pause steht direkt im jeweiligen Muskelblock und passt zur Übung: große HEAVYS-Comps meist <b>3 Minuten</b>, HEAVYS-Isos meist <b>2–2.5 Minuten</b>, MIDDLES meist <b>2 Minuten</b> und PUMPS meist <b>1–2 Minuten</b>.</p>
         <p>Ein Tipp auf den Uhr-Chip startet den Timer. Wenn deine Leistung trotz passender Anstrengung deutlich einbricht, darfst du etwas länger pausieren.</p>
         <p><b>Evidenz:</b> Sehr kurze Pausen sind für Muskelaufbau nicht überlegen. Ausreichende Pausen helfen, Wiederholungen und Satzqualität zu erhalten.</p>
       </div>
@@ -159,7 +169,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Was ist ein CYCLE?</summary>
       <div class="faq-a">
-        <p>Ein Cycle besteht aus vier Einheiten: <b>OK HEAVYS → UK HEAVYS → OK PUMPS → UK PUMPS</b>. Danach beginnt der nächste Cycle wieder mit OK HEAVYS.</p>
+        <p>Ein Cycle besteht aus vier Einheiten: <b>OK HEAVYS → UK HEAVYS → OK MIDDLES &amp; PUMPS → UK MIDDLES &amp; PUMPS</b>. Danach beginnt der nächste Cycle wieder mit OK HEAVYS.</p>
         <p>Der Split rolliert unabhängig von Kalenderwochen. Du setzt je nach Erholung Pausentage und machst beim nächsten Training einfach mit der nächsten Einheit weiter.</p>
       </div>
     </details>
@@ -189,7 +199,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie kommen die Satzzahlen zustande?</summary>
       <div class="faq-a">
-        <p>Level II entspricht dem voreingestellten Standardplan. Große Muskelgruppen erhalten ihre Arbeit über HEAVYS und PUMPS; kleinere Muskeln sammeln zusätzlich indirekte Belastung.</p>
+        <p>Level II entspricht dem voreingestellten Standardplan. Große Muskelgruppen erhalten ihre Arbeit über HEAVYS, MIDDLES und PUMPS; kleinere Muskeln sammeln zusätzlich indirekte Belastung.</p>
         <p><b>Evidenz:</b> Mehr harte Sätze führen im Durchschnitt zu mehr Muskelaufbau, der Zusatznutzen wird aber kleiner und unterscheidet sich stark zwischen Muskeln und Personen. Außerdem zählen Versagensnähe und indirekte Arbeit mit – deshalb liegt der Standard bewusst unter pauschalen „10–20 direkte Sätze“-Vorgaben.</p>
         <p>Level I reduziert die Dosis. Level III startet mit denselben Satzzahlen wie Level II und zeigt an jeder Übung einen <b>+ Satz</b>-Chip. So erhöhst du nur dort, wo Entwicklung und Erholung tatsächlich mehr Volumen erlauben.</p>
       </div>
@@ -198,7 +208,7 @@ export function mountFaq(container) {
     <details class="faq"><summary>Wie funktioniert ein Prioritätsmuskel?</summary>
       <div class="faq-a">
         <p>Öffne im Set-O-Meter einen Muskel, wähle <b>1 oder 2 Sätze je passender Einheit</b> und setze ihn auf Priorität. LOGMAN fügt dafür eine kompakte eigene Muskelbox ein. Comp- und Iso-Übungen sind möglich.</p>
-        <p>Beispiel Unterarme mit zwei Sätzen: +2 in OK HEAVYS und +2 in OK PUMPS. Du kannst das Volumen <b>aufschlagen</b> oder dieselbe Satzanzahl von einem geeigneten Muskel derselben Körperhälfte <b>umverteilen</b>.</p>
+        <p>Beispiel Unterarme mit zwei Sätzen: +2 in OK HEAVYS und +2 in OK MIDDLES &amp; PUMPS. Du kannst das Volumen <b>aufschlagen</b> oder dieselbe Satzanzahl von einem geeigneten Muskel derselben Körperhälfte <b>umverteilen</b>.</p>
         <p><b>Evidenz:</b> Kleine Erhöhungen um ein bis zwei Sätze sind besser kontrollierbar als große Sprünge. Beurteile Wirkung und Erholung über mehrere Cycles.</p>
       </div>
     </details>
@@ -212,7 +222,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Was zeigt die Progression?</summary>
       <div class="faq-a">
-        <p>Die Kurve zeigt den <b>Trend deiner HEAVYS-Leistung</b>. Dafür berechnet LOGMAN aus dem besten Satz jedes Cycles ein geschätztes <b>1RM</b>. Das steht für <i>One-Repetition Maximum</i>, also das geschätzte Gewicht für eine maximale Wiederholung.</p>
+        <p>Die Kurve zeigt getrennt den <b>Trend deiner HEAVYS- und MIDDLES-Leistung</b>. Dafür berechnet LOGMAN aus dem besten Satz jedes Cycles ein geschätztes <b>1RM</b>. Das steht für <i>One-Repetition Maximum</i>, also das geschätzte Gewicht für eine maximale Wiederholung.</p>
         <p>Es ist eine Rechengröße, kein echter Maximalkrafttest und kein direkter Beweis für Muskelwachstum. Einzelne schwächere Einheiten sind normal; entscheidend ist der Trend über mehrere Cycles.</p>
       </div>
     </details>
@@ -245,7 +255,7 @@ export function mountFaq(container) {
     <p><b>Übung bleibt im Plan, wenn:</b><br>
     • Sie vollkommen schmerzfrei ist.<br>
     • Die Technik stabil sitzt und der Zielmuskel klar beteiligt ist.<br>
-    • Sie kontinuierlich progressierbar ist (HEAVYS).<br>
+    • Sie kontinuierlich progressierbar ist (HEAVYS und MIDDLES).<br>
     • Ermüdung und Bewegungsumfang (ROM) angemessen sind.</p>
 
     <p><b>Übung wird modifiziert, wenn:</b><br>
@@ -255,7 +265,7 @@ export function mountFaq(container) {
 
     <p><b>Übung wird ersetzt, wenn:</b><br>
     • Wiederkehrende Schmerzen auftreten.<br>
-    • Über mehrere vergleichbare Einheiten keine Progression möglich ist (HEAVYS).<br>
+    • Über mehrere vergleichbare Einheiten keine Progression möglich ist (HEAVYS und MIDDLES).<br>
     • Der Zielmuskel trotz sauberer Technikarbeit nicht der limitierende Faktor ist.<br>
     • Die systemische Ermüdung unverhältnismäßig hoch ist.</p>
 
@@ -284,7 +294,7 @@ export function mountFaq(container) {
       <div class="faq-a">
 	<p>LOGMAN ist aus dem Anspruch heraus entstanden, ein evidenzbasiertes Werkzeug für intelligentes Krafttraining mit dem Ziel der Hypertrophie zu schaffen – mit maximalem Fokus auf Progression und Regeneration 👊🏼</p>
 
-        <p>Im Ergebnis ist LOGMAN ein <b>Trainingstagebuch im Retro-Look für ein festes, aber anpassbares Muskelaufbau-System</b>. Es verbindet produktive Sätze nahe am Versagen, dokumentierbare HEAVYS, versagensnahe PUMPS, individuell erholbares Volumen und einen rollierenden OK/UK-Split.</p>
+        <p>Im Ergebnis ist LOGMAN ein <b>Trainingstagebuch im Retro-Look für ein festes, aber anpassbares Muskelaufbau-System</b>. Es verbindet progressiv dokumentierte HEAVYS und MIDDLES, ergänzende versagensnahe PUMPS, individuell erholbares Volumen und einen rollierenden OK/UK-Split.</p>
         
 	<p>Die App funktioniert auch ohne Empfang. Trainingsdaten werden zuerst lokal gespeichert und später synchronisiert.</p>
       </div>

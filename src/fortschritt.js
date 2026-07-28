@@ -1,8 +1,8 @@
 import { supabase } from './supabase.js';
 import { kurveSvg } from './kurve.js';
-import { heavyReihen, verlauf } from './progression.js';
+import { progressionsReihen, verlauf } from './progression.js';
 
-// Heavy-Progression im Profil.
+// Progression der festen HEAVYS- und MIDDLES-Übungen.
 //
 // Bewusst ein eigenes Modul und nicht Teil der Koerperwerte: Das hier ist der
 // Trainings-Marker und gehoert dauerhaft zu LOGMAN, waehrend Hautfalten und
@@ -10,7 +10,7 @@ import { heavyReihen, verlauf } from './progression.js';
 
 const fmt = (n) => (Math.round(n * 10) / 10).toString().replace('.', ',');
 
-export function mountFortschritt(wrap, { session, payload: fertig = null, titel = 'HEAVYS-Progression' }) {
+export function mountFortschritt(wrap, { session, payload: fertig = null, titel = 'Leistungsprogression' }) {
   const karte = document.createElement('div');
   karte.className = 'card';
   karte.innerHTML = `${titel ? `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">${titel}</h2>` : ''}
@@ -39,19 +39,19 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
   })();
 
   function zeichneAlles(payload) {
-    const reihen = heavyReihen(payload);
+    const reihen = progressionsReihen(payload);
     if (!reihen.length) {
       inhalt.innerHTML = `<div class="prog-leer">
         <span class="prog-leer-icon" aria-hidden="true">↗</span>
         <b>Noch kein Verlauf</b>
-        <p>Sobald dieselbe HEAVYS-Übung in zwei Cycles im Log steht, erscheint hier ihre Entwicklung.</p>
+        <p>Sobald dieselbe HEAVYS- oder MIDDLES-Übung in zwei Cycles im Log steht, erscheint hier ihre Entwicklung.</p>
       </div>`;
       return;
     }
 
     inhalt.innerHTML = `
       ${reihen.length > 1 ? `<select class="input" id="fs-wahl" style="margin:0 0 12px">
-        ${reihen.map((r, i) => `<option value="${i}">${r.name}</option>`).join('')}
+        ${reihen.map((r, i) => `<option value="${i}">${r.typ} · ${r.name}</option>`).join('')}
       </select>` : ''}
       <div class="mess-kopf" id="fs-kopf"></div>
       <div id="fs-kurve"></div>`;
@@ -60,7 +60,7 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
       const r = reihen[i];
       const v = verlauf(r.punkte);
       // Bei nur einer Uebung ersetzt der Name die fehlende Auswahl.
-      const titel = reihen.length > 1 ? '' : `<div class="mess-datum" style="margin:0 0 4px">${r.name}</div>`;
+      const titel = reihen.length > 1 ? '' : `<div class="mess-datum" style="margin:0 0 4px">${r.typ} · ${r.name}</div>`;
       const delta = v.kg === 0
         ? `<span class="delta d-hold">= gehalten</span>`
         : `<span class="delta ${v.kg > 0 ? 'd-up' : 'd-down'}">${v.kg > 0 ? '▲' : '▼'} ${fmt(Math.abs(v.kg))} kg · ${fmt(Math.abs(v.prozent))} %</span>`;
@@ -69,7 +69,7 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
         <div class="mess-wert">${fmt(v.letzt)} <span>kg e1RM</span> ${delta}</div>
         <div class="mess-datum">Cycle ${r.punkte[0].week} → ${r.punkte[r.punkte.length - 1].week} · bester Satz je Cycle</div>`;
       karte.querySelector('#fs-kurve').innerHTML = `
-        <div class="prog-kurvenkopf"><b>Leistungstrend</b><span>HEAVYS · e1RM</span></div>
+        <div class="prog-kurvenkopf"><b>Leistungstrend</b><span>${r.typ} · e1RM</span></div>
         ${kurveSvg(
           [{ werte: r.punkte.map((p) => ({ x: p.week, wert: p.e1 })), klasse: 'trend', punkte: true }],
           { einheit: 'kg', xText: (w) => 'C ' + w },

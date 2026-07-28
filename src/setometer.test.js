@@ -26,9 +26,12 @@ function mitBrust(tier = 1) {
     chest_comp: [bank],
     chest_iso: [fly],
   };
+  p.ex['OK-P'] = {
+    chest_comp: [bank],
+  };
   p.data['OK-P'] = {
     1: {
-      chest_comp: { names: [bank], sets: [[]] },
+      chest_comp: { sets: [[]] },
       chest_iso: { names: [fly], sets: [[]] },
     },
   };
@@ -80,7 +83,7 @@ describe('zaehleCycle – Standardplan', () => {
 
   it('weist indirekte Sätze als ganze Sätze aus und gewichtet sie mit 0,5', () => {
     const r = zaehleCycle(mitBrust(), 1);
-    // Nur die beiden Comp-Blöcke: 3 HEAVYS + 3 PUMPS.
+    // Nur die beiden Comp-Blöcke: 3 HEAVYS + 3 MIDDLES.
     expect(r.indirekt.Trizeps).toBe(6);
     expect(r.konten.Trizeps).toBe(3);
     expect(r.indirektQuellen.Trizeps[0].saetze).toBe(6);
@@ -89,7 +92,8 @@ describe('zaehleCycle – Standardplan', () => {
   it('summiert alle vier Einheiten desselben Cycles', () => {
     const p = basis();
     p.ex['OK-H'] = { chest_comp: [bank] };
-    p.data['OK-P'] = { 1: { chest_comp: { names: [bank], sets: [[]] } } };
+    p.ex['OK-P'] = { chest_comp: [bank] };
+    p.data['OK-P'] = { 1: { chest_comp: { sets: [[]] } } };
     expect(zaehleCycle(p, 1).direkt.Brust).toBe(6);
   });
 });

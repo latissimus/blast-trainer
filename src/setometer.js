@@ -10,7 +10,7 @@ import {
 } from './prioritaet.js';
 
 // Das Set-O-Meter zählt den geplanten vollständigen CYCLE:
-// OK HEAVYS + UK HEAVYS + OK PUMPS + UK PUMPS.
+// OK HEAVYS + UK HEAVYS + OK/UK MIDDLES & PUMPS.
 // Direkte Sätze zählen 1, indirekte Sätze werden als ganze Sätze angezeigt,
 // tragen im Vergleichsbalken aber weiterhin mit 0,5 bei.
 
@@ -54,8 +54,13 @@ export function zaehleCycle(payload, cycle, katalog = KATALOG) {
     tpl.blocks.forEach((blk) => {
       if (!targetSets(blk, tier)) return;
       const eintragBlock = zelle[blk.id] || {};
-      const frei = blk.type !== 'load';
-      const namen = eintragBlock.names || ((exAlle[nameTag] || {})[blk.id]) || [];
+      const frei = blk.type !== 'load' && blk.type !== 'middle';
+      const festeNamen = ((exAlle[nameTag] || {})[blk.id]) || [];
+      const namen = frei
+        ? (eintragBlock.names || [])
+        : (festeNamen.some((name) => String(name || '').trim())
+          ? festeNamen
+          : (eintragBlock.names || []));
 
       exOf(blk, tier).forEach((exDef, xi) => {
         const name = String(namen[xi] || '').trim();

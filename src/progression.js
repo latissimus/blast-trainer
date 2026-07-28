@@ -1,6 +1,6 @@
 import { TPL } from './template.js';
 
-// Auswertung der HEAVYS-Progression aus den Cycle-Daten.
+// Auswertung der progressiv getrackten HEAVYS und MIDDLES.
 //
 // Warum e1RM und nicht einfach das Gewicht: 80 kg × 8 und 85 kg × 6 sind beide
 // ein Fortschritt, aber ueber die reine Last nicht vergleichbar. Das geschaetzte
@@ -21,11 +21,11 @@ export const bestE1 = (saetze) =>
   (saetze || []).reduce((m, s) => (s ? Math.max(m, e1rm(s.w, s.r)) : m), 0);
 
 /**
- * Reihen je Heavy-Uebung aus dem gespeicherten Payload.
+ * Reihen je getrackter Übung aus dem gespeicherten Payload.
  * @returns [{ name, punkte: [{ week, e1 }] }] – `week` bleibt als interner
  *          Zahlenkey erhalten, bezeichnet in Schema v4 aber den CYCLE.
  */
-export function heavyReihen(payload) {
+function reihenFuerTypen(payload, typen) {
   const data = (payload && payload.data) || {};
   const namenAll = (payload && payload.ex) || {};
   const proUebung = new Map();
@@ -35,25 +35,34 @@ export function heavyReihen(payload) {
     if (!tplTag) return;
     Object.keys(data[tag] || {}).forEach((wkStr) => {
       const woche = Number(wkStr);
-      if (woche >= 8 || !tag.endsWith('-H')) return;
+      if (woche >= 8) return;
       const zelle = data[tag][wkStr] || {};
       Object.keys(zelle).forEach((bid) => {
         const blk = tplTag.blocks.find((b) => b.id === bid);
         const istPrio = bid.startsWith('prio:');
-        // Nur HEAVYS: PUMPS und Deload sind keine Progressions-Marker.
-        if ((!blk || blk.type !== 'load') && !istPrio) return;
-        const namen = (namenAll[tag] || {})[bid] || [];
-        (((zelle[bid] || {}).sets) || []).forEach((saetze, xi) => {
+        const type = blk?.type || (istPrio && tag.endsWith('-H') ? 'load' : null);
+        // PUMPS, CLUSTERS und Deload sind keine Progressions-Marker.
+        if (!typen.includes(type)) return;
+        const eintrag = zelle[bid] || {};
+        // Alte 10–15er-Daten liegen noch als frei gewählte Namen im Cycle.
+        // Neue MIDDLES und alle HEAVYS lesen ihre feste Auswahl aus payload.ex.
+        const namen = eintrag.names || (namenAll[tplTag.nameSource || tag] || {})[bid] || [];
+        (eintrag.sets || []).forEach((saetze, xi) => {
           const name = String(namen[xi] || '').trim();
           if (!name) return;
           const best = bestE1(saetze);
           if (!best) return;
-          // Schluessel kleingeschrieben, damit dieselbe Uebung nicht an der
-          // Schreibweise zerfaellt – angezeigt wird die Originalform.
-          const key = name.toLowerCase();
-          if (!proUebung.has(key)) proUebung.set(key, { name, wochen: new Map() });
-          const eintrag = proUebung.get(key);
-          if (best > (eintrag.wochen.get(woche) || 0)) eintrag.wochen.set(woche, best);
+          // Derselbe Name darf bei HEAVYS und MIDDLES zwei getrennte Reihen
+          // bilden, weil Last und Wiederholungsbereich nicht vergleichbar sind.
+          const key = `${type}|${name.toLowerCase()}`;
+          if (!proUebung.has(key)) proUebung.set(key, {
+            name,
+            type,
+            typ: type === 'middle' ? 'MIDDLES' : 'HEAVYS',
+            wochen: new Map(),
+          });
+          const reihe = proUebung.get(key);
+          if (best > (reihe.wochen.get(woche) || 0)) reihe.wochen.set(woche, best);
         });
       });
     });
@@ -62,6 +71,8 @@ export function heavyReihen(payload) {
   return [...proUebung.values()]
     .map((e) => ({
       name: e.name,
+      type: e.type,
+      typ: e.typ,
       punkte: [...e.wochen.entries()]
         .sort((a, b) => a[0] - b[0])
         .map(([week, wert]) => ({ week, e1: Math.round(wert * 10) / 10 })),
@@ -69,6 +80,12 @@ export function heavyReihen(payload) {
     .filter((e) => e.punkte.length >= 2)
     .sort((a, b) => b.punkte.length - a.punkte.length || a.name.localeCompare(b.name, 'de'));
 }
+
+// Bestehende Schnittstelle für die bisherigen Tests und mögliche Aufrufer.
+export const heavyReihen = (payload) => reihenFuerTypen(payload, ['load']);
+
+// Die Progressionsseite führt beide Double-Progression-Satzarten auf.
+export const progressionsReihen = (payload) => reihenFuerTypen(payload, ['load', 'middle']);
 
 // Veraenderung vom ersten zum letzten Punkt, in kg und Prozent.
 export function verlauf(punkte) {

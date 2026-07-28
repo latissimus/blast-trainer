@@ -93,9 +93,9 @@ export async function mountMeter(container, { userId }) {
     const n = prioSatzanzahl(cfg);
     const satz = n === 1 ? 'Satz' : 'Sätze';
     if (ergebnis.status === 'aktiv' && ergebnis.modus === 'plus')
-      return `Aktiv: je +${n} ${satz} in HEAVYS und PUMPS.`;
+      return `Aktiv: je +${n} ${satz} in HEAVYS sowie MIDDLES & PUMPS.`;
     if (ergebnis.status === 'aktiv')
-      return `Aktiv: je +${n} Priorität und −${n} ${ergebnis.spenderName || ergebnis.spender} in HEAVYS und PUMPS.`;
+      return `Aktiv: je +${n} Priorität und −${n} ${ergebnis.spenderName || ergebnis.spender} in HEAVYS sowie MIDDLES & PUMPS.`;
     if (ergebnis.status === 'spender-fehlt' && !cfg?.spender)
       return 'Wähle noch einen Spender aus derselben Körperhälfte.';
     if (ergebnis.status === 'spender-fehlt')
@@ -139,7 +139,7 @@ export async function mountMeter(container, { userId }) {
         ${quellen.map((q) => `<small><b>${q.saetze}×</b> ${html(q.name)}</small>`).join('')}
       </div></div>` : ''}
       ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
-      ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt in HEAVYS und PUMPS ab für: <b>${spenderFuer.map((ziel) =>
+      ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt in HEAVYS sowie MIDDLES & PUMPS ab für: <b>${spenderFuer.map((ziel) =>
         `${html(ziel)} (je ${prioSatzanzahl(prios[ziel])})`).join(', ')}</b></p>` : ''}
       <span class="som-ed-label">1 · Muskel priorisieren</span>
       <button type="button" class="som-prio-toggle${cfg ? ' on' : ''}" data-prio-toggle ${!hatPumpplatz ? ' disabled' : ''}>

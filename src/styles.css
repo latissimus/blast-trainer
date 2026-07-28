@@ -17,6 +17,7 @@
   --line:#0A0A0A;
 
   --load:#443199;   /* Heavy violet */
+  --middle:#225e61; /* progressive 10–15er-Arbeit */
   --pump:#FF69AE;   /* pink  */
   --mr:#FFDE59;     /* yellow*/
   /* Flieder: gehoert nur dem Set-O-Meter. Bewusst eine Farbe, die sonst nichts
@@ -84,6 +85,7 @@
      dasselbe Blau und traegt weiter Laufband, LOAD-Badge, aktiven Tab. */
   --navy:#4B6FD6;
   --load:#443199;
+  --middle:#225e61;
   --navy-panel:#1B2C5C;
   --link:#91A9FF;
 
@@ -332,6 +334,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .block{position:relative;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte);margin-bottom:14px;overflow:hidden}
 .block::before{content:"";position:absolute;z-index:1;inset:0 0 auto;height:5px;pointer-events:none}
 .block-load::before{background:var(--load)}
+.block-middle::before{background:var(--middle)}
 .block-pump::before{background:var(--pink)}
 .block-mr::before{background:var(--cluster)}
 .block.opt{border-style:dashed}
@@ -339,6 +342,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .bhead .mus{font-family:var(--display);font-style:italic;font-weight:700;font-size:16px;text-transform:uppercase}
 .badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:999px;text-transform:uppercase;border:var(--bw) solid var(--ink);font-family:var(--display);font-style:italic}
 .b-load{background:var(--load);color:#fff}
+.b-middle{background:var(--middle);color:#fff}
 .b-pump{background:var(--pump);color:var(--accent-ink)}
 .b-mr{background:var(--cluster);color:var(--cluster-ink)}
 .target{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;white-space:nowrap;font-weight:700}

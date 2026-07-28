@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { e1rm, bestE1, heavyReihen, verlauf } from './progression.js';
+import { e1rm, bestE1, heavyReihen, progressionsReihen, verlauf } from './progression.js';
 
 // Eine falsche Progressionskurve sieht aus wie eine richtige – und sie ist der
 // Wert, an dem man das ganze Training misst. Deshalb festgezurrt.
@@ -65,8 +65,19 @@ describe('heavyReihen', () => {
 
   it('ignoriert PUMPS-Blöcke', () => {
     // Der Pool ist dort das Werkzeug, nicht die Progression.
-    const p = payload('OK-P', 'back_thick', 'PL Rudern', { 1: [{ w: 40, r: 12 }], 2: [{ w: 45, r: 12 }] });
+    const p = payload('OK-P', 'chest_iso', 'Kabel Fliegende', { 1: [{ w: 20, r: 20 }], 2: [{ w: 22, r: 20 }] });
     expect(heavyReihen(p)).toHaveLength(0);
+    expect(progressionsReihen(p)).toHaveLength(0);
+  });
+
+  it('führt feste MIDDLES auf der Progressionsseite', () => {
+    const p = payload('OK-P', 'back_thick', 'PL Rudern', {
+      1: [{ w: 40, r: 12 }],
+      2: [{ w: 45, r: 12 }],
+    });
+    const r = progressionsReihen(p);
+    expect(r).toHaveLength(1);
+    expect(r[0]).toMatchObject({ name: 'PL Rudern', type: 'middle', typ: 'MIDDLES' });
   });
 
   it('führt gleiche Übung trotz anderer Schreibweise zusammen', () => {

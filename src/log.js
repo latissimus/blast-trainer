@@ -19,13 +19,16 @@ function pausenLabel(sekunden) {
   return minuten + ' min';
 }
 
-// Anzeige-Labels der Set-Typen. Die internen Keys (load/pump/mr) bleiben, damit
-// gespeicherte Logs gueltig bleiben – nur die Beschriftung wechselt.
-const TYPE_LABEL = { load: 'HEAVYS', pump: 'PUMPS', mr: 'CLUSTERS' };
+// HEAVYS und MIDDLES sind die beiden fest gewählten, progressiv verglichenen
+// Satzarten. PUMPS und CLUSTERS dürfen dagegen im Training frei rotieren.
+const istGetrackt = (type) => type === 'load' || type === 'middle';
+const TYPE_LABEL = { load: 'HEAVYS', middle: 'MIDDLES', pump: 'PUMPS', mr: 'CLUSTERS' };
 const LEVEL_LABEL = ['Kompakt', 'Standard', 'Selektiv'];
 const TUTORIAL_SETUP = [
-  { week: 1, day: 'OK-H', titel: 'OK HEAVYS', folgt: 'UK HEAVYS' },
-  { week: 1, day: 'UK-H', titel: 'UK HEAVYS', folgt: 'Satzeingabe' },
+  { week: 1, day: 'OK-H', titel: 'OK HEAVYS', typ: 'load', label: 'HEAVYS', folgt: 'UK HEAVYS' },
+  { week: 1, day: 'UK-H', titel: 'UK HEAVYS', typ: 'load', label: 'HEAVYS', folgt: 'OK MIDDLES' },
+  { week: 1, day: 'OK-P', titel: 'OK MIDDLES', typ: 'middle', label: 'MIDDLES', folgt: 'UK MIDDLES' },
+  { week: 1, day: 'UK-P', titel: 'UK MIDDLES', typ: 'middle', label: 'MIDDLES', folgt: 'Satzeingabe' },
 ];
 
 /* ------------------------------------------------------------------
@@ -94,13 +97,38 @@ export async function mountLog(container, { userId, readOnly = false }) {
     day: TPL[p.day] ? p.day : 'OK-H',
     data: p.data || {},
     tier: p.tier || {},
-    ex: p.ex || {},      // feste HEAVYS-Namen pro Einheit über alle Cycles
+    ex: p.ex || {},      // feste HEAVYS- und MIDDLES-Namen über alle Cycles
     notes: p.notes || {}, // gemeinsame Notizen pro Tag/Übung
     mem: p.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
     datum: p.datum || {},  // Einheit|Cycle -> ISO-Datum
     volumen: { prioritaet: p.volumen?.prioritaet || {} }, // Muskel-Prioritaeten
     meta: p.meta || {},    // phasenuebergreifende Oberflaechen-Zustaende
   };
+
+  // Vor dieser Version waren die heutigen MIDDLES frei gespeicherte PUMPS.
+  // Falls bereits Trainingsdaten existieren, übernimmt die App die zuletzt
+  // gewählte Übung als feste Auswahl. Die alten Cycle-Namen bleiben in den
+  // Einträgen erhalten und können auf der Progressionsseite korrekt getrennt
+  // ausgewertet werden.
+  function migriereMiddleNamen() {
+    let geaendert = false;
+    ['OK-P', 'UK-P'].forEach((day) => {
+      state.ex[day] = state.ex[day] || {};
+      TPL[day].blocks.filter((blk) => blk.type === 'middle').forEach((blk) => {
+        const fest = state.ex[day][blk.id];
+        if (fest && fest.some((name) => String(name || '').trim())) return;
+        const cycles = Object.keys(state.data[day] || {}).map(Number).sort((a, b) => b - a);
+        const alt = cycles
+          .map((cycle) => ((state.data[day][cycle] || {})[blk.id] || {}).names)
+          .find((namen) => namen && namen.some((name) => String(name || '').trim()));
+        if (!alt) return;
+        state.ex[day][blk.id] = blk.ex.map((_, i) => alt[i] || '');
+        geaendert = true;
+      });
+    });
+    return geaendert;
+  }
+  if (migriereMiddleNamen()) mergedOffline = true;
 
   let saveTimer = null;
   let saveStateEl = null;
@@ -314,10 +342,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
   function cycleFertig(cycle) {
     return daysOfWeek(cycle).every((day) => dayProgress(day, cycle).met);
   }
-  function heavyAuswahlStatus(tpl, tier) {
+  function festeAuswahlStatus(tpl, tier, typ) {
     const felder = [];
     tpl.blocks.filter((blk) => !blk.prio).forEach((blk) => {
-      if (effTypeOf(blk, tier) !== 'load') return;
+      if (effTypeOf(blk, tier) !== typ) return;
       const namen = dayNames(state.day, blk);
       exOf(blk, tier).forEach((exDef, xi) => felder.push({
         name: namen[xi] || '',
@@ -739,7 +767,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const idx = days.indexOf(state.day);
     const [koerper, typ] = TPL[state.day].short.split(' · ');
     tagWert.textContent = koerper;
-    tagLbl.textContent = typ;
+    // Im nativen Menü steht der volle Name. In der deutlich schmaleren
+    // unteren Leiste verhindert diese lesbare Kurzform ein „MIDDLES …“.
+    tagLbl.textContent = typ === 'MIDDLES & PUMPS' ? 'MID.+PUMPS' : typ;
 
     const tier = tierOf(state.day, state.week);
     tierSeg.value = String(tier);
@@ -786,7 +816,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     rIn.placeholder = blk.type === 'mr' ? '4' : 'Wdh'; rIn.disabled = readOnly; rF.appendChild(rIn);
     row.appendChild(rF);
 
-    if (blk.type === 'load') {
+    if (istGetrackt(blk.type)) {
       const rirF = document.createElement('div'); rirF.className = 'fld rir';
       const rirIn = document.createElement('input'); rirIn.type = 'text'; rirIn.inputMode = 'numeric'; rirIn.value = s.rir || ''; rirIn.placeholder = 'RIR';
       rirIn.setAttribute('aria-label', 'RIR – mögliche Wiederholungen übrig');
@@ -806,8 +836,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
     return row;
   }
 
-  // ---- Gedächtnis für frei rotierende Übungen (Pump & Clusters) ----
-  // Bei Pump/Cluster ist der Log kein Progressions-Werkzeug, sondern soll
+  // ---- Gedächtnis für frei rotierende Übungen (PUMPS & CLUSTERS) ----
+  // Bei PUMPS/CLUSTERS ist der Log kein Progressions-Werkzeug, sondern soll
   // zeigen, welche Last/Wdh man zuletzt bei dieser Übung genommen hat.
   // ---- Übungs-Pool (Pump/Cluster) ---------------------------------------
   // Pump- und Cluster-Übungen rotieren frei und haengen am Namen. Damit man in der
@@ -962,21 +992,24 @@ export async function mountLog(container, { userId, readOnly = false }) {
           <div class="tutorial-planpunkte">
             <div>
               <b>4</b>
-              <span><strong>4 Einheiten</strong><small>OK HEAVYS · UK HEAVYS · OK PUMPS · UK PUMPS.</small></span>
+              <span><strong>4 Einheiten</strong><small>OK HEAVYS · UK HEAVYS · OK MIDDLES &amp; PUMPS · UK MIDDLES &amp; PUMPS.</small></span>
             </div>
             <div>
               <b>7</b>
               <span><strong>7 Cycles</strong><small>Jeder CYCLE besteht aus den 4 Einheiten. Nach maximal 7 CYCLES folgt ein DELOAD.</small></span>
             </div>
             <div>
-              <b>2</b>
-              <span><strong>2 Satzarten</strong><small>HEAVYS sind schwer · PUMPS leichter und versagensnah.</small></span>
+              <b>3</b>
+              <span><strong>3 Satzarten</strong><small>HEAVYS 5–10 · MIDDLES 10–15 · PUMPS 15–25 Wiederholungen.</small></span>
             </div>
           </div>
           <div class="tutorial-heavyinfo">
             <strong>Was du jetzt festlegst</strong>
-            <p>Für HEAVYS wählst du jetzt feste Übungen für Ober- und Unterkörper.
+            <p>Für HEAVYS und MIDDLES wählst du jetzt feste Übungen für Ober- und Unterkörper.
               LOGMAN übernimmt sie in alle sieben Cycles. PUMPS wählst du im Training frei.</p>
+            <p><b>A-Tage:</b> HEAVYS machen schwere Leistung vergleichbar.
+              <b>B-Tage:</b> MIDDLES bilden das getrackte Fundament; PUMPS ergänzen leichtere, versagensnahe Arbeit.
+              Die Mischung verteilt Volumen und schont Gelenke – sie nutzt keine getrennten Wachstumsmechanismen.</p>
             <p>Die Felder unterscheiden zwei Übungsarten:</p>
             <div class="tutorial-rollen">
               <span><b>Comp</b><small>mehrere Gelenke und Muskeln</small></span>
@@ -984,7 +1017,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             </div>
           </div>
           <button type="button" class="log-tutorial-weiter" data-tutorial-beginnen>
-            HEAVYS auswählen <span class="tutorial-pf">→</span>
+            HEAVYS &amp; MIDDLES auswählen <span class="tutorial-pf">→</span>
           </button>`;
         karte.querySelector('[data-tutorial-beginnen]').onclick = () => {
           tutorialZielSetzen(0);
@@ -992,7 +1025,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         };
       } else if (tutorialSchritt < TUTORIAL_SETUP.length) {
         const schritt = TUTORIAL_SETUP[tutorialSchritt];
-        tutorialStatus = heavyAuswahlStatus(tpl, tier);
+        tutorialStatus = festeAuswahlStatus(tpl, tier, schritt.typ);
         const fertig = tutorialStatus.offen.length === 0;
         const alsNaechstes = tutorialStatus.offen[0];
         const naechsteAuswahl = alsNaechstes
@@ -1011,10 +1044,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
           <div class="tutorial-fortschritt" aria-hidden="true">
             ${TUTORIAL_SETUP.map((_, i) => `<i class="${i <= tutorialSchritt ? 'an' : ''}"></i>`).join('')}
           </div>
-          <div class="tutorial-zielkopf"><h2>${schritt.titel}</h2><span>HEAVYS</span></div>
+          <div class="tutorial-zielkopf"><h2>${schritt.titel}</h2><span>${schritt.label}</span></div>
           <p class="tutorial-kurzziel"><b>Feste Auswahl</b> · wird automatisch in Cycle 1–7 übernommen.</p>
           ${rollenHilfe ? `<p class="log-tutorial-typen">${rollenHilfe}</p>` : ''}
-          <p class="log-tutorial-stand"><b>${tutorialStatus.gewaehlt} / ${tutorialStatus.gesamt}</b> HEAVYS gewählt</p>
+          <p class="log-tutorial-stand"><b>${tutorialStatus.gewaehlt} / ${tutorialStatus.gesamt}</b> ${schritt.label} gewählt</p>
           <button type="button" class="log-tutorial-weiter" data-tutorial-weiter ${fertig ? '' : 'data-offen'}>
             ${fertig
               ? `Weiter: ${schritt.folgt} <span class="tutorial-pf">→</span>`
@@ -1031,7 +1064,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <span>Satzeingabe</span>
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
           </div>
-          <h2>HEAVYS protokollieren</h2>
+          <h2>HEAVYS &amp; MIDDLES protokollieren</h2>
           <div class="tutorial-eingabe">
             <span><b>kg</b><small>Gewicht</small></span>
             <span><b>Wdh.</b><small>Wiederholungen</small></span>
@@ -1083,8 +1116,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
       }
       const entry = cell[blk.id];
       const baseMR = blk.type === 'mr';
-      const freeEx = blk.type !== 'load';                // Pump & Cluster rotieren frei
-      const effType = effTypeOf(blk, tier);              // Typ je Tier (Pump-Ausnahme bei MR)
+      const freeEx = !istGetrackt(blk.type);             // nur PUMPS & CLUSTERS rotieren frei
+      const effType = effTypeOf(blk, tier);              // Typ je Tier (PUMPS-Ausnahme bei MR)
       if (freeEx) entry.names = entry.names || (entry.name != null ? [entry.name] : []);  // frei pro Woche/Feld
       const names = freeEx ? null : dayNames(state.day, blk);
       const effRest = effektivePause(blk);
@@ -1098,6 +1131,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
         cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '1–3 RIR') + '</span>',
           `<span class="chip">${blk.deload ? 'Kein Versagen' : (hatComp ? 'Versagen nur letzter Comp' : 'Kein erzwungenes Versagen')}</span>`);
       }
+      if (effType === 'middle') cues.push(
+        '<span class="chip">' + effReps + ' · ' + (blk.rir || '1–2 RIR') + '</span>',
+        '<span class="chip">Double Progression · feste Übung</span>',
+      );
       if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '0–1 RIR') + '</span>', '<span class="chip">leicht · versagensnah · Partials optional</span>');
       if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
       cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + pausenLabel(effRest) + '</button>');
@@ -1141,8 +1178,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
         nameIn.className = 'exname';
         nameIn.disabled = readOnly;
 
-        // Zuletzt Benutztes nach oben – nur bei Pump und Cluster, denn nur die
-        // rotieren frei. Heavy behaelt seine Uebung ohnehin ueber die Rotation.
+        // Zuletzt Benutztes nach oben – nur bei PUMPS und CLUSTERS, denn nur
+        // diese rotieren frei. HEAVYS und MIDDLES bleiben über alle Cycles fest.
         const zuletzt = freeEx ? recentNames(baseMR ? 'mr' : 'pump', blk.id).map((r) => r.n) : [];
         // Feld schlaegt Block: Bei "Brust + Rücken" bietet das erste Feld nur
         // Brust an, das zweite nur Rücken – statt beide Male alles.
@@ -1161,8 +1198,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
           nameIn.textContent = nameIn.value || 'Übung wählen…';
         };
         tonAnpassen();
+        const tutorialTyp = TUTORIAL_SETUP[tutorialSchritt]?.typ;
         if (tutorialAktiv && tutorialSchritt >= 0 && tutorialSchritt < TUTORIAL_SETUP.length &&
-            effType === 'load' && !nameIn.value && !tutorialWahlMarkiert) {
+            effType === tutorialTyp && !nameIn.value && !tutorialWahlMarkiert) {
           tutorialScrollAufFeld = tutorialLetzterBlock === blk.id;
           tutorialLetzterBlock = blk.id;
           nameIn.classList.add('tutorial-ziel');

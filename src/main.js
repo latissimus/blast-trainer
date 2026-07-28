@@ -56,7 +56,7 @@ const WILLKOMMEN_EMAIL = 'blast:willkommen-email';
 // laeuft; jede muss breiter als der Bildschirm sein.
 const MQ_TEXT = [
   'SCHLAG DEIN LETZTES MAL',
-  'HEAVYS · PUMPS · CYCLES',
+  'HEAVYS · MIDDLES · PUMPS · CYCLES',
   '7 CYCLES · DANACH OPTIONAL 1 WOCHE DELOAD',
   'LEVEL NACH TAGESFORM, NICHT NACH EHRGEIZ',
 ].join(' ◆ ') + ' ◆ ';
