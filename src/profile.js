@@ -4,7 +4,6 @@ import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
 import { readLog, readNotizen, clearUserData } from './localstore.js';
 import { ladeFeedbackEingang } from './feedback.js';
-import { sondeLesen, sondeSetzen } from './sonde.js';   // VORUEBERGEHEND
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -377,71 +376,6 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   ver.className = 'buildinfo';
   ver.textContent = `Version ${__BUILD_COMMIT__} · ${__BUILD_TIME__}`;
   wrap.appendChild(ver);
-
-  // ===== VORUEBERGEHENDE SONDEN – samt CSS-Block wieder entfernen! =====
-  // Das Flackern tritt nur in der installierten Web-App auf, dort laesst sich
-  // aber keine URL mit ?sonde=… aufrufen. Deshalb dieser Schalter: Die Wahl
-  // liegt im localStorage, wirkt sofort und ueberlebt einen Neustart der App.
-  const sondenKarte = profilSektion('Sonden · Header-Flackern');
-  sondenKarte.innerHTML = `
-    <p class="profile-hinweis">Nur zur Fehlersuche. Sonde wählen, dann zwischen
-      Log und Unterseiten wechseln und schauen, ob es noch flackert. Unten links
-      steht, welche gerade läuft.</p>
-    <div class="sondenwahl" role="group" aria-label="Sonde wählen">
-      <button type="button" data-sonde="">Aus</button>
-      <button type="button" data-sonde="a">A</button>
-      <button type="button" data-sonde="b">B</button>
-      <button type="button" data-sonde="c">C</button>
-      <button type="button" data-sonde="d">D</button>
-      <button type="button" data-sonde="e">E</button>
-      <button type="button" data-sonde="f">F</button>
-      <button type="button" data-sonde="g">G</button>
-      <button type="button" data-sonde="h">H</button>
-      <button type="button" data-sonde="i">I</button>
-      <button type="button" data-sonde="j">J</button>
-      <button type="button" data-sonde="k">K</button>
-      <button type="button" data-sonde="l">L</button>
-      <button type="button" data-sonde="p">P</button>
-      <button type="button" data-sonde="q">Q</button>
-      <button type="button" data-sonde="r">R</button>
-      <button type="button" data-sonde="t">T</button>
-      <button type="button" data-sonde="m">Messen</button>
-      <button type="button" data-sonde="n">Nachweis</button>
-    </div>
-    <p class="profile-hinweis" id="sonden-info"></p>`;
-  const SONDEN_TEXT = {
-    '': 'Alles unverändert.',
-    a: 'A · Fläche über dem Header nur 120px statt volle Bildschirmhöhe.',
-    b: 'B · Deckfläche unter dem Logo transparent. Der Zurück-Chip wird dabei sichtbar – das ist normal.',
-    c: 'C · Kopfzeile ohne eigenen Stapelkontext (isolation).',
-    d: 'D · Silhouette hinter dem Schriftzug aus. Das Logo sieht dabei nackt aus – das ist beabsichtigt.',
-    e: 'E · Alle Milchglas-Effekte (backdrop-filter) aus: Zurück-Chip, untere Leiste, Übungskatalog. Flächen wirken flach – gewollt.',
-    f: 'F · Nur der Zurück-Chip ohne Milchglas. Er ist der einzige, der beim Seitenwechsel in die Kopfzeile eingehängt wird.',
-    g: 'G · Kein Scroll-Sprung mehr: Jeder Wechsel beginnt und endet ganz oben. Das Log merkt sich seine Position dabei NICHT – nur zum Test.',
-    h: 'H · Kopfzeile fest statt klebend. Der wahrscheinlichste Kandidat: Eine klebende Leiste haengt an der Dokumenthoehe, und die aendert sich beim Wechsel schlagartig.',
-    i: 'I · Seitenwechsel erst, wenn das native Auswahlrad zu ist (0,35 s spaeter). Der Wechsel wirkt dadurch traeger – nur zum Test.',
-    j: 'J · Eigene GPU-Ebene fuer die Kopfzeile – der Kandidat aus der Messung. Der Zurueck-Chip verliert dabei sein Milchglas und wird schlicht deckend.',
-    k: 'K · Kopfzeile komplett entschichtet: kein Stapelkontext, keine Pseudo-Elemente, kein z-index, kein Zurueck-Chip. Zum Wechseln bitte das Menue unten benutzen.',
-    l: 'L · Untere Bedienleiste wird beim Wechsel nicht mehr vernichtet, nur unsichtbar. Erster Verdaechtiger ausserhalb der Kopfzeile. Unten ist dabei etwas mehr Luft.',
-    p: 'P · Halbierung: Nur umschalten, KEIN Inhaltstausch. Der Bildschirm zeigt danach den alten Inhalt in den neuen Farben – das ist gewollt und sieht falsch aus.',
-    q: 'Q · Dokumenthoehe waehrend des Tauschs festhalten. Direkt auf den gefundenen Mechanismus gerichtet. Aussehen unveraendert.',
-    r: 'R · CSS-Containment auf dem Seiteninhalt. Erlaubt dem Browser, den Rest der Seite beim Neuaufbau in Ruhe zu lassen. Die Tutorialkarte kann sich dabei anders verhalten.',
-    t: 'T · Nicht mehr das Fenster scrollt, sondern der Seitenbereich. Die Kopfzeile ueberlappt den Inhalt dann nie – die Bedingung fuer das Flackern entfaellt. Die gemerkte Log-Position greift im Test nicht.',
-    m: 'Messen · Ändert nichts am Aussehen. Zeichnet bei jedem Seitenwechsel 1,5 s lang die Bildabstände auf und zeigt sie unten links.',
-    n: 'Nachweis · Ändert nichts. Beobachtet 30 Bilder nach dem Wechsel, was mit der Kopfzeile passiert: neu gebaut, aus dem Bild gerutscht oder nur nicht gezeichnet.',
-  };
-  const sondenInfo = sondenKarte.querySelector('#sonden-info');
-  const sondenZeigen = () => {
-    const aktiv = sondeLesen();
-    sondenKarte.querySelectorAll('[data-sonde]').forEach((b) => {
-      b.classList.toggle('on', b.dataset.sonde === aktiv);
-    });
-    sondenInfo.textContent = SONDEN_TEXT[aktiv] || SONDEN_TEXT[''];
-  };
-  sondenKarte.querySelectorAll('[data-sonde]').forEach((b) => {
-    b.onclick = () => { sondeSetzen(b.dataset.sonde); sondenZeigen(); };
-  });
-  sondenZeigen();
 
   container.appendChild(wrap);
 }

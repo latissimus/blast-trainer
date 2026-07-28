@@ -14,13 +14,9 @@ import { mountNotizbuch } from './notizbuch.js';
 import { mountAdmin } from './admin.js';
 import { mountFeedback } from './feedback.js';
 import { verbindePausenAnzeige, stoppePause } from './pause.js';
-import { sondeAnwenden, sondeLesen } from './sonde.js';   // VORUEBERGEHEND
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
 applyTheme(getTheme());
-
-// ===== VORUEBERGEHEND – zusammen mit src/sonde.js wieder entfernen! =====
-sondeAnwenden();
 
 // Service Worker gleich beim Start registrieren – er liefert die App im
 // Funkloch aus. Haengt bewusst an keiner Oberflaeche: Frueher hing er am
@@ -325,22 +321,6 @@ function renderChrome() {
     <option value="faq">FAQs</option>
     ${isAdmin ? '<option value="admin">ADMIN</option>' : ''}`;
   menue.onchange = () => {
-    // ===== VORUEBERGEHENDE SONDE I – mit src/sonde.js wieder entfernen! =====
-    // Die Bildschirmfotos zeigen den Fehler in einem Zustand, den keine der
-    // bisherigen Sonden abgedeckt hat: Das native iOS-Auswahlrad ist noch
-    // sichtbar, die neue Seite steht bereits, und die Kopfzeile fehlt. Der
-    // Platz ist da, nur die Pixel fehlen.
-    //
-    // onchange feuert auf iOS, WAEHREND das Rad noch zufaehrt. Der Seitenwechsel
-    // faellt damit mitten in die Schliessanimation eines System-Overlays – und
-    // waehrend Safari die animiert, verliert die klebende Kopfzeile ihre Ebene.
-    // Diese Sonde wartet, bis das Rad weg ist, und wechselt erst danach.
-    // Der Wechsel fuehlt sich dadurch traeger an; das ist der Preis der Probe.
-    if (sondeLesen() === 'i') {
-      const ziel = menue.value;
-      setTimeout(() => { location.hash = ziel; }, 350);
-      return;
-    }
     location.hash = menue.value;
   };
 
@@ -395,38 +375,7 @@ async function routeView() {
   if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'feedback', 'notizbuch'].includes(hash)) hash = 'log';
   setNavActive(hash);
 
-  // ===== VORUEBERGEHENDE SONDE P – mit src/sonde.js wieder entfernen! =====
-  // HALBIERUNG statt naechster Verdaechtiger. Zwoelf Einzelproben haben nichts
-  // gebracht, also wird der Seitenwechsel in seine zwei Haelften zerlegt:
-  //   1. Umschalten   – Farben, data-seite, Klassen der Bedienleiste, Chip weg
-  //   2. Inhaltstausch – alte Seite raus, neue rein
-  // Diese Sonde fuehrt NUR Teil 1 aus und bricht davor ab. Der Bildschirm zeigt
-  // danach den alten Inhalt in den neuen Farben – sichtbar falsch, aber genau
-  // das ist der Zweck.
-  //   Flackert es weiter -> die Ursache steckt im Umschalten
-  //   Flackert es nicht  -> die Ursache steckt im Inhaltstausch
-  // Beide Ausgaenge halbieren den Suchraum; bisher konnte keine Sonde das.
-  //
-  // NIEMALS auf dem Profil: Dort sitzt der Schalter, mit dem man die Sonde
-  // wieder ausmacht. Ohne diese Ausnahme sperrt sie sich selbst ein – genau
-  // das ist passiert, und es war ein vermeidbarer Fehler.
-  if (sondeLesen() === 'p' && hash !== 'profile') return;
-
   cleanupActive();
-
-  // ===== VORUEBERGEHENDE SONDE G – mit src/sonde.js wieder entfernen! =====
-  // Prueft die Vermutung, dass der SPRUNG der Scrollposition das Flackern
-  // ausloest, nicht dessen Zeitpunkt. Nachgemessen: Beim Wechsel von einer
-  // runtergescrollten FAQ (scrollY 1200) ins Log stand der Inhalt schon auf
-  // Log, waehrend scrollY noch 1200 war – danach sprang es auf 700.
-  //
-  // Diese Sonde beseitigt JEDEN Sprung: Erst wird die alte, noch sichtbare
-  // Seite nach oben gescrollt (ein gewoehnlicher Scrollvorgang, kein
-  // Zwischenbild), dann getauscht, und die Zielposition bleibt 0. Damit
-  // beginnt und endet jeder Wechsel bei 0. Der Preis: Das Log merkt sich
-  // seine Position nicht mehr – genau deshalb ist es eine Sonde und kein Fix.
-  const sondeOhneSprung = sondeLesen() === 'g';
-  if (sondeOhneSprung) window.scrollTo({ top: 0, behavior: 'instant' });
 
   // Der Zurueck-Chip haengt physisch am Sticky-Header. Vor dem
   // Ansichtswechsel alte angedockte Elemente entfernen.
@@ -436,23 +385,34 @@ async function routeView() {
   const token = ++routeToken;
   const guard = (v) => { if (token !== routeToken) { v?.destroy?.(); return; } active = v; };
 
+  // OFFEN: Beim Seitenwechsel flackert auf dem installierten iPhone kurz die
+  // Kopfzeile – Logo, Chip, Sync-Punkt und Avatar verschwinden fuer ein Bild,
+  // manchmal auch ihr Hintergrund. Ausschliesslich dann, wenn vorher gescrollt
+  // wurde, und ausschliesslich in der installierten App, nie im Safari-Tab.
+  //
+  // Eingegrenzt (jeweils per Sonde am Geraet geprueft, alle ergebnislos ausser
+  // der ersten): Der Inhaltstausch loest es aus – laesst man ihn weg und macht
+  // nur das Umschalten, flackert nichts. NICHT die Ursache sind: Dokumenthoehe
+  // einfrieren, Kopfzeile fest statt klebend, eigene GPU-Ebene, alle
+  // Milchglas-Effekte, Stapelkontext und Pseudo-Elemente der Kopfzeile, die
+  // untere Bedienleiste, das native Auswahlrad, CSS-Containment auf #view.
+  // Die Bildabstaende bleiben dabei sauber bei 60 fps – der Hauptthread ist
+  // frei, es ist reine Kompositor-Arbeit.
+  //
+  // Arbeitshypothese: Ganz oben ueberlappt die Kopfzeile den Inhalt nicht und
+  // kann mit ihm zusammen gezeichnet werden. Nach dem Scrollen liegt sie
+  // darueber und braucht eine eigene Ebene – die beim Tausch verworfen und zu
+  // langsam neu aufgebaut wird.
+  // Naechster sinnvoller Ansatz waere eine App-Huelle, bei der nicht das
+  // Fenster scrollt, sondern #view (Muster: html.overlay-scroll-gesperrt in
+  // styles.css). Dann entfaellt die Ueberlappung. Das muss AM GERAET
+  // entwickelt werden – im Vorschaubrowser ist die Fensterhoehe 0, dort laesst
+  // sich so ein Layout nicht pruefen.
+
   // Unterseiten zunächst außerhalb des sichtbaren Views aufbauen und erst
   // vollständig einsetzen. Das bisherige sofortige Leeren zeigte auf iOS für
   // einen Frame nur den Seitenhintergrund – sichtbar als kurzes Flackern.
   // Das Log bleibt wegen seiner festen Tutorial-/Picker-Ebenen am echten View.
-  // ===== VORUEBERGEHENDE SONDE Q – mit src/sonde.js wieder entfernen! =====
-  // Haelt die Dokumenthoehe waehrend des Tauschs fest.
-  // Sonde P hat das Umschalten entlastet, es liegt am Inhaltstausch. Und der
-  // Nebenbefund vom Geraet nennt den Mechanismus: Auch das Zuklappen eines
-  // <details> laesst die Kopfzeile flackern. Beides hat nur eines gemeinsam –
-  // die Dokumenthoehe aendert sich schlagartig (beim Wechsel gemessen:
-  // 7829 -> 5103 Pixel). Eine klebende Leiste haengt genau daran.
-  // Diese Sonde friert die bisherige Hoehe ein, bis der Tausch durch ist, und
-  // gibt sie erst im naechsten Bild wieder frei. Schrumpfen kann das Dokument
-  // dadurch waehrend des Tauschs nicht mehr.
-  const sondeHoeheHalten = sondeLesen() === 'q';
-  if (sondeHoeheHalten) view.style.minHeight = `${view.getBoundingClientRect().height}px`;
-
   const ziel = hash === 'log' ? view : document.createElement('div');
   if (ziel === view) view.innerHTML = '';
   try {
@@ -492,16 +452,14 @@ async function routeView() {
     if (zurueck) topbar.appendChild(zurueck);
   }
   aktiveAnsicht = hash;
-  const zielY = sondeOhneSprung ? 0 : (hash === 'log' ? logScrollY : 0);
+  const zielY = hash === 'log' ? logScrollY : 0;
 
-  // SYNCHRON, nicht im naechsten Bild. Genau hier sass das kurze Flackern der
-  // Kopfzeile: Der Inhalt war schon getauscht, die Scrollposition aber noch die
-  // der alten Seite – nachgemessen stand die Seite bereits auf "prog", waehrend
-  // scrollY noch bei 600 lag. Der Browser durfte diesen Zwischenstand zeichnen,
-  // erst ein Bild spaeter sprang er an die richtige Stelle.
-  //
-  // Deshalb trat es auch nur nach dem Scrollen auf: Ohne Scrollen sind alte und
-  // neue Position beide 0, und es gibt nichts zu springen.
+  // SYNCHRON, nicht erst im naechsten Bild: Sonst ist der Inhalt schon
+  // getauscht, waehrend die Scrollposition noch die der alten Seite ist –
+  // nachgemessen stand die Seite bereits auf "prog", waehrend scrollY noch bei
+  // 600 lag. Diesen Zwischenstand darf der Browser zeichnen.
+  // (Das kurze Flackern der Kopfzeile behebt das NICHT – siehe die Notiz beim
+  // Inhaltstausch weiter oben. Richtig ist es trotzdem.)
   //
   // Ein offenes Tutorial/Overlay haelt iOS-Fenster und Body bewusst bei 0 und
   // scrollt nur den Seiteninhalt #view. Sonst wuerde dieser Routen-Scroll die
@@ -519,11 +477,7 @@ async function routeView() {
   // Nachfassen im naechsten Bild: Wird die Seite durch spaet fertige Bilder
   // oder Schriften noch hoeher, war das Ziel eben noch nicht erreichbar. Steht
   // die Position schon richtig, ist der zweite Aufruf wirkungslos.
-  requestAnimationFrame(() => {
-    scrollSetzen();
-    // Sonde Q: Hoehensperre erst jetzt loesen – der Tausch ist durch.
-    if (sondeHoeheHalten) view.style.minHeight = '';
-  });
+  requestAnimationFrame(scrollSetzen);
 }
 
 // Begruessung nach dem Einloggen: nur das Logo, das aufzieht.
