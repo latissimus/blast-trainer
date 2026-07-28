@@ -4,6 +4,7 @@ import { toast } from './log.js';
 import { getTheme, setTheme } from './theme.js';
 import { readLog, readNotizen, clearUserData } from './localstore.js';
 import { ladeFeedbackEingang } from './feedback.js';
+import { sondeLesen, sondeSetzen } from './sonde.js';   // VORUEBERGEHEND
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -376,6 +377,41 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   ver.className = 'buildinfo';
   ver.textContent = `Version ${__BUILD_COMMIT__} · ${__BUILD_TIME__}`;
   wrap.appendChild(ver);
+
+  // ===== VORUEBERGEHENDE SONDEN – samt CSS-Block wieder entfernen! =====
+  // Das Flackern tritt nur in der installierten Web-App auf, dort laesst sich
+  // aber keine URL mit ?sonde=… aufrufen. Deshalb dieser Schalter: Die Wahl
+  // liegt im localStorage, wirkt sofort und ueberlebt einen Neustart der App.
+  const sondenKarte = profilSektion('Sonden · Header-Flackern');
+  sondenKarte.innerHTML = `
+    <p class="profile-hinweis">Nur zur Fehlersuche. Sonde wählen, dann zwischen
+      Log und Unterseiten wechseln und schauen, ob es noch flackert. Unten links
+      steht, welche gerade läuft.</p>
+    <div class="sondenwahl" role="group" aria-label="Sonde wählen">
+      <button type="button" data-sonde="">Aus</button>
+      <button type="button" data-sonde="a">A</button>
+      <button type="button" data-sonde="b">B</button>
+      <button type="button" data-sonde="c">C</button>
+    </div>
+    <p class="profile-hinweis" id="sonden-info"></p>`;
+  const SONDEN_TEXT = {
+    '': 'Alles unverändert.',
+    a: 'A · Fläche über dem Header nur 120px statt volle Bildschirmhöhe.',
+    b: 'B · Deckfläche unter dem Logo transparent. Der Zurück-Chip wird dabei sichtbar – das ist normal.',
+    c: 'C · Kopfzeile ohne eigenen Stapelkontext (isolation).',
+  };
+  const sondenInfo = sondenKarte.querySelector('#sonden-info');
+  const sondenZeigen = () => {
+    const aktiv = sondeLesen();
+    sondenKarte.querySelectorAll('[data-sonde]').forEach((b) => {
+      b.classList.toggle('on', b.dataset.sonde === aktiv);
+    });
+    sondenInfo.textContent = SONDEN_TEXT[aktiv] || SONDEN_TEXT[''];
+  };
+  sondenKarte.querySelectorAll('[data-sonde]').forEach((b) => {
+    b.onclick = () => { sondeSetzen(b.dataset.sonde); sondenZeigen(); };
+  });
+  sondenZeigen();
 
   container.appendChild(wrap);
 }

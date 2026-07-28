@@ -189,6 +189,11 @@ html[data-sonde="c"] .topbar{isolation:auto}
 .sondenmarke{position:fixed;left:0;bottom:0;z-index:9999;
   background:#FF0000;color:#fff;font:700 11px/1 ui-monospace,Menlo,monospace;
   padding:6px 9px;pointer-events:none;letter-spacing:.04em}
+.sondenwahl{display:flex;gap:6px;margin:8px 0}
+.sondenwahl button{flex:1;padding:10px 0;border:var(--bw) solid var(--ink);
+  border-radius:var(--r);background:var(--surface);color:var(--ink);
+  font-family:var(--mono);font-size:14px;font-weight:800}
+.sondenwahl button.on{background:#FF0000;color:#fff;border-color:#FF0000}
 /* Der Header liegt in der installierten iOS-App direkt unter Uhrzeit und Akku.
    Bei einem Overlay muss deshalb die komplette Kopfzeile denselben dunklen
    Grund tragen – sonst bleibt zwischen Statusleiste und Tutorialkarte ein
@@ -305,11 +310,15 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Zwei gleiche Haelften laufen um je 100% ihrer Breite nach links – dadurch
    rueckt die zweite exakt dorthin, wo die erste war, und die Schleife hat
    keinen Sprung. */
-/* box-sizing:border-box gilt global (*-Regel oben): Die Hoehe enthaelt das
-   Polster, der Inhaltsbereich bleibt also exakt --mq-h hoch und align-items
-   zentriert die Schrift darin – unterhalb der iOS-Zeile. */
-.marquee{display:flex;overflow:hidden;height:var(--mq-platz);
-  padding-top:env(safe-area-inset-top);align-items:center;
+/* ABSTAND statt Polster: Mit padding waere der geschuetzte Bereich vom Navy
+   des Bands ausgefuellt. Im Browser sieht man aber den richtigen Zustand –
+   dort ist der iOS-Bereich hellblau und das Band beginnt erst darunter. Ein
+   aeusserer Abstand laesst genau das durch: Ueber dem Band steht die
+   Seitenfarbe von html/body, das Navy beginnt unterhalb der iOS-Zeile.
+   Der Abstand darf mit dem Elternrand zusammenfallen – das Ergebnis ist
+   dasselbe, weil darunter dieselbe Seitenfarbe liegt. */
+.marquee{display:flex;overflow:hidden;height:var(--mq-h);
+  margin-top:env(safe-area-inset-top);align-items:center;
   background:var(--navy);color:#fff;border-bottom:var(--bw) solid var(--ink);
   font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.09em;white-space:nowrap}
 .marquee span{flex:0 0 auto;animation:mq 26s linear infinite}

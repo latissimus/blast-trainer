@@ -14,32 +14,13 @@ import { mountNotizbuch } from './notizbuch.js';
 import { mountAdmin } from './admin.js';
 import { mountFeedback } from './feedback.js';
 import { verbindePausenAnzeige, stoppePause } from './pause.js';
+import { sondeAnwenden } from './sonde.js';   // VORUEBERGEHEND
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
 applyTheme(getTheme());
 
-// ===== VORUEBERGEHENDE SONDEN – wieder entfernen! =====
-// Grenzen das kurze Flackern im Logobereich beim Seitenwechsel ein. Die Regeln
-// stehen in styles.css (Abschnitt "VORUEBERGEHENDE SONDEN"). Ueber die URL
-// schaltbar, damit alle drei Faelle mit EINEM Deploy durchprobiert werden
-// koennen: ?sonde=a, ?sonde=b, ?sonde=c. Ohne Parameter ist alles wie immer.
-// Die rote Marke unten links sagt, welche Sonde gerade laeuft – ohne sie waere
-// nach dem Umschalten nicht sicher, ob die neue Fassung wirklich geladen ist.
-(function sondeSetzen() {
-  const SONDEN = {
-    a: 'SONDE A · Flaeche ueber Header nur 120px',
-    b: 'SONDE B · Deckflaeche unter Logo transparent',
-    c: 'SONDE C · Kopfzeile ohne isolation',
-  };
-  let sonde = null;
-  try { sonde = new URLSearchParams(location.search).get('sonde'); } catch (e) { /* egal */ }
-  if (!SONDEN[sonde]) return;
-  document.documentElement.dataset.sonde = sonde;
-  const marke = document.createElement('div');
-  marke.className = 'sondenmarke';
-  marke.textContent = SONDEN[sonde];
-  document.body.appendChild(marke);
-})();
+// ===== VORUEBERGEHEND – zusammen mit src/sonde.js wieder entfernen! =====
+sondeAnwenden();
 
 // Service Worker gleich beim Start registrieren – er liefert die App im
 // Funkloch aus. Haengt bewusst an keiner Oberflaeche: Frueher hing er am
