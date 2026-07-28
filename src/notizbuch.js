@@ -199,7 +199,7 @@ export function mountNotizbuch(container, { userId }) {
   function zeigeBild(src) {
     const lupe = document.createElement('div');
     lupe.className = 'nb-lupe';
-    lupe.innerHTML = `<img src="${src}" alt=""><button class="nb-lupe-zu" aria-label="Schließen">×</button>`;
+    lupe.innerHTML = `<div class="nb-lupe-bild"><img src="${src}" alt=""><button class="nb-lupe-zu" aria-label="Schließen">×</button></div>`;
     const zu = () => {
       lupe.remove();
       window.removeEventListener('hashchange', zu);

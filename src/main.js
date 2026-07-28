@@ -383,37 +383,43 @@ async function routeView() {
   const token = ++routeToken;
   const guard = (v) => { if (token !== routeToken) { v?.destroy?.(); return; } active = v; };
 
-  view.innerHTML = '';
+  // Unterseiten zunächst außerhalb des sichtbaren Views aufbauen und erst
+  // vollständig einsetzen. Das bisherige sofortige Leeren zeigte auf iOS für
+  // einen Frame nur den Seitenhintergrund – sichtbar als kurzes Flackern.
+  // Das Log bleibt wegen seiner festen Tutorial-/Picker-Ebenen am echten View.
+  const ziel = hash === 'log' ? view : document.createElement('div');
+  if (ziel === view) view.innerHTML = '';
   try {
     if (hash === 'log') {
-      const v = await mountLog(view, {
+      const v = await mountLog(ziel, {
         userId: session.user.id,
         readOnly: false,
       });
       guard(v);
     } else if (hash === 'profile') {
-      mountProfile(view, { session, profile, onProfileUpdated: (p) => { profile = p; } });
+      mountProfile(ziel, { session, profile, onProfileUpdated: (p) => { profile = p; } });
     } else if (hash === 'faq') {
-      mountFaq(view);
+      mountFaq(ziel);
     } else if (hash === 'meter') {
-      const v = await mountMeter(view, { userId: session.user.id });
+      const v = await mountMeter(ziel, { userId: session.user.id });
       guard(v);
     } else if (hash === 'prog') {
-      await mountProg(view, { userId: session.user.id });
+      await mountProg(ziel, { userId: session.user.id });
     } else if (hash === 'feedback') {
-      await mountFeedback(view, { session, profile });
+      await mountFeedback(ziel, { session, profile });
     } else if (hash === 'notizbuch') {
       // Die Huelle und der lokale Spiegel erscheinen sofort; der Serverstand
       // wird innerhalb der Seite nachgeladen und blockiert den Wechsel nicht.
-      mountNotizbuch(view, { userId: session.user.id });
+      mountNotizbuch(ziel, { userId: session.user.id });
     } else if (hash === 'admin') {
-      const v = await mountAdmin(view, { session });
+      const v = await mountAdmin(ziel, { session });
       guard(v);
     }
   } catch (e) {
-    view.innerHTML = `<div class="wrap" style="padding-top:20px"><div class="msg err">Fehler: ${e.message}</div></div>`;
+    ziel.innerHTML = `<div class="wrap" style="padding-top:20px"><div class="msg err">Fehler: ${e.message}</div></div>`;
   }
   if (token !== routeToken) return;
+  if (ziel !== view) view.replaceChildren(...ziel.childNodes);
   const topbar = app.querySelector('.topbar');
   if (topbar) {
     const zurueck = view.querySelector('.zurueck');

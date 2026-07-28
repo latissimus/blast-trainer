@@ -495,6 +495,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
   picker.setAttribute('aria-modal', 'true');
   picker.setAttribute('aria-label', 'Übung auswählen');
   pickerLage.appendChild(picker);
+  // Nur die Trefferliste darf wischen. Gesten auf der transparenten Lage oder
+  // im Kopf dürfen nicht zur Trainingsseite darunter durchgereicht werden –
+  // dafür ist keine globale Body-Sperre nötig.
+  pickerLage.addEventListener('touchmove', (e) => {
+    if (!(e.target instanceof Element) || !e.target.closest('.ex-picker-liste')) e.preventDefault();
+  }, { passive: false });
   document.body.appendChild(pickerLage);
   const tutorialDunkel = document.createElement('div');
   tutorialDunkel.className = 'tutorial-dimmer';
@@ -570,7 +576,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
       pickerLage.style.removeProperty('--picker-top');
       pickerLage.style.removeProperty('--picker-hoehe');
       pickerLage.hidden = true;
-      setStatusleistenOverlay('uebungskatalog', false);
     };
     const anOberkante = () => {
       const ansicht = window.visualViewport;
@@ -624,10 +629,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     suche.oninput = zeichneListe;
     schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
     zeichneListe();
-    // Erst den dunklen iOS-/Overlayzustand setzen, dann das Feld sichtbar
-    // machen. Kein automatischer Fokus: Das sofortige Oeffnen der iOS-Tastatur
-    // baute den geschuetzten Bereich erneut in der hellen Seitenfarbe auf.
-    setStatusleistenOverlay('uebungskatalog', true);
+    // Kein Wechsel des globalen Scroll- oder Statusleistenmodus: Die feste
+    // Lage fängt Berührungen selbst ab. So muss iOS beim Öffnen weder Header
+    // noch Seitenhintergrund neu zusammensetzen.
     pickerLage.hidden = false;
   }
 
@@ -1528,7 +1532,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
       tutorialFxTimer = [];
       tutorialFx?.remove();
       tutorialFx = null;
-      setStatusleistenOverlay('uebungskatalog', false);
       setStatusleistenOverlay('tutorial', false);
     },
   };

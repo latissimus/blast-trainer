@@ -4,6 +4,7 @@
    ============================================================ */
 :root{
   --bg:#B1E7FF;      /* gemessen auf retromuscle.net */
+  --chrome-bg:#B1E7FF; /* ruhige, seitenübergreifende Kopf-/Statusleiste */
   --surface:#FFFFFF;
   --surface2:#EAF4FC;
   --navy:#001454;
@@ -72,6 +73,7 @@
    ============================================================ */
 :root[data-theme="dark"]{
   --bg:#101A2B;       /* einheitliches tiefes Navy aus dem Notizbuch */
+  --chrome-bg:#101A2B;
   --surface:#191C24;
   --surface2:#232733;
   --ink:#697486;
@@ -149,27 +151,26 @@ a{color:var(--link)}
    – Logo und Profilbild blitzten dadurch kurz auf. */
 
 /* ---------- Top bar / nav ---------- */
-.topbar{position:sticky;top:0;z-index:20;isolation:isolate;background:var(--bg);
-  border-bottom:var(--bw) solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px;
-  transform:translateZ(0);backface-visibility:hidden}
+.topbar{position:sticky;top:0;z-index:20;isolation:isolate;background:var(--chrome-bg);
+  border-bottom:var(--bw) solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
 /* Beim iOS-Gummiband wandert der Sticky-Header kurz nach unten, waehrend
    fixed Elemente am Viewport bleiben. Diese unsichtbare Fortsetzung deckt
    den Bereich oberhalb des Headers ab, damit Set-O-Meter und Zurueck-Chip
    dort auch bei starkem Herunterziehen nicht hervorscheinen. */
 .topbar::before{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:100%;
-  height:100vh;background:var(--bg);pointer-events:none}
+  height:100vh;background:var(--chrome-bg);pointer-events:none}
 /* Eigene Deckflaeche zwischen Lasche und Header-Inhalt: So kann die Lasche
    innerhalb der Kopfzeile hochfahren, ohne jemals vor Logo oder Avatar zu
    erscheinen. Sichtbar ist ausschliesslich der Teil unterhalb der Kontur. */
 .topbar::after{content:"";position:absolute;z-index:1;left:0;right:0;top:0;bottom:0;
-  background:var(--bg);pointer-events:none}
+  background:var(--chrome-bg);pointer-events:none}
 /* Der Header liegt in der installierten iOS-App direkt unter Uhrzeit und Akku.
    Bei einem Overlay muss deshalb die komplette Kopfzeile denselben dunklen
    Grund tragen – sonst bleibt zwischen Statusleiste und Tutorialkarte ein
    heller Streifen stehen. */
 html.statusleiste-overlay .topbar,
 html.statusleiste-overlay .topbar::after,
-html.statusleiste-overlay .topbar::before{background:var(--statusbar-bg,var(--bg))}
+html.statusleiste-overlay .topbar::before{background:var(--statusbar-bg,var(--chrome-bg))}
 .topbar .wrap{position:relative;z-index:2;display:flex;align-items:center;gap:10px}
 /* LOGMAN-Wortmarke als Logo im RetroMuscle-Stil: pinke Füllung, Navy-Kontur, harter Schatten.
    Kein Layout-Effekt (Kontur/Schatten ändern die Header-Höhe nicht). */
@@ -401,19 +402,9 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    Dark-Mode auf manchen Geraeten schwarz auf schwarz. */
 .exname option,.exname optgroup{background:var(--surface2);color:var(--text)}
 
-/* Durchsuchbarer Uebungswaehler. Ein Dialog statt 199 Eintraegen im
-   System-Scrollrad; die Treffer bleiben nach "zuletzt" und Muskel gruppiert. */
-/* Die Deckflaeche dunkelt SELBST ab und traegt das Feld in sich. Kein <dialog>
-   und kein ::backdrop mehr: Ein modaler Dialog liegt in der Top-Layer, und
-   dort endete die Abdunkelung auf dem installierten iPhone oberhalb der
-   Safe-Area – der Streifen unter Uhrzeit und Akku blieb hellblau. Der
-   Tutorial-Dimmer daneben schafft es zuverlaessig, weil er ein gewoehnliches
-   festes Element mit inset:0 ist. Das hier ist dieselbe Bauweise.
-   z 80 muss ueber der Tutorialkarte (60) und dem Statusleisten-Riegel (70)
-   liegen: Der Waehler wird auch MITTEN im Tutorial geoeffnet, und als modaler
-   Dialog lag er frueher in der Top-Layer, also ueber allem. Bei z 45 war er
-   hinter der Tutorialkarte verschwunden. Unter der Startanimation (100)
-   bleibt er, die deckt bewusst alles zu. */
+/* Durchsuchbarer Uebungswaehler statt des System-Scrollrads. Die feste Lage
+   fängt Gesten selbst ab und liegt auch innerhalb des Tutorials über der
+   Erklärungskarte. Sie verändert weder Body-Scroll noch Statusleiste. */
 .ex-picker-lage{position:fixed;inset:0;z-index:80;
   display:flex;align-items:center;justify-content:center;padding:9px;
   background:transparent;
@@ -1402,10 +1393,14 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
 .nb-lupe{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.88);
   display:flex;align-items:center;justify-content:center;
   padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px)}
-.nb-lupe img{max-width:100%;max-height:100%;object-fit:contain;
+.nb-lupe-bild{position:relative;display:flex;align-items:center;justify-content:center;
+  max-width:100%;max-height:100%}
+.nb-lupe img{max-width:100%;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px);
+  width:auto;height:auto;object-fit:contain;
   border:var(--bw) solid #fff;border-radius:10px;display:block}
-.nb-lupe-zu{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:14px;
-  width:40px;height:40px;padding:0;border:var(--bw) solid #0A0A0A;border-radius:50%;
+.nb-lupe-zu{position:absolute;top:-10px;right:-10px;display:grid;place-items:center;
+  flex:0 0 40px;width:40px;height:40px;aspect-ratio:1;padding:0;
+  border:var(--bw) solid #0A0A0A;border-radius:50%;
   background:#fff;color:#0A0A0A;font-size:22px;font-weight:700;line-height:1}
 .nb-slot{position:relative;display:inline-block}
 .nb-bildweg{position:absolute;top:-7px;right:-7px;width:24px;height:24px;padding:0;
