@@ -1144,7 +1144,12 @@ body[data-seite="faq"],body[data-seite="profile"],body[data-seite="notizbuch"]{
    dem html-Canvas zu zeichnen reicht dort nicht zuverlässig: WebKit bemisst
    dessen Kachelfläche gelegentlich nach der Inhaltshöhe. Progression, Feedback
    und Notizbuch tragen ihr Muster deshalb zusätzlich selbst und sind immer
-   mindestens so hoch wie der sichtbare Bildschirm. */
+   mindestens so hoch wie der sichtbare Bildschirm. Auf diesen drei Seiten
+   wird es vom Root entfernt, damit zwei identische Ebenen die Deckkraft nicht
+   versehentlich fast verdoppeln. */
+:root[data-seite="prog"],:root[data-seite="feedback"],
+:root[data-seite="notizbuch"]{
+  background-image:none}
 body[data-seite="prog"],body[data-seite="notizbuch"]{
   min-height:100vh;min-height:100dvh;
   background-color:transparent;
