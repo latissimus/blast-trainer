@@ -1090,11 +1090,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (effType === 'load') {
         const hatComp = blk.prio || exOf(blk, tier).some((exDef) => exDef.r === 'Comp');
         cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '1–3 RIR') + '</span>',
-          `<span class="chip">${blk.deload ? 'Kein Versagen' : (hatComp ? 'Versagen nur letzter Comp' : 'Kein erzwungenes Versagen')}</span>`);
+          `<span class="chip">${blk.deload ? 'Kein Versagen' : (hatComp ? 'Versagen nur letzter Satz' : 'Kein erzwungenes Versagen')}</span>`);
       }
       if (effType === 'middle') cues.push(
         '<span class="chip">' + effReps + ' · ' + (blk.rir || '1–2 RIR') + '</span>',
-        '<span class="chip">Double Progression · feste Übung</span>',
+        '<span class="chip">Versagen nur letzter Satz</span>',
       );
       if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '0–1 RIR') + '</span>', '<span class="chip">leicht · versagensnah · Partials optional</span>');
       if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
