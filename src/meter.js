@@ -152,7 +152,7 @@ export async function mountMeter(container, { userId }) {
       ${zeigeModus && hatPumpplatz ? `<div class="som-inline-plan">
         <span class="som-ed-label">2 · Zusatz je Einheit</span>
         <div class="som-modusseg som-satzwahl drei" role="group" aria-label="Zusatzsätze je Einheit">
-          <button type="button" data-prio-saetze="0" class="${satzanzahl === 0 ? 'on' : ''}" ${!nurReihenfolgeMoeglich ? 'disabled' : ''}><b>Keine</b><small>nur zuerst</small></button>
+          <button type="button" data-prio-saetze="0" class="${satzanzahl === 0 ? 'on' : ''}" ${!nurReihenfolgeMoeglich ? 'disabled' : ''}><b>Keiner</b><small>nur Top-Übung</small></button>
           <button type="button" data-prio-saetze="1" class="${satzanzahl === 1 ? 'on' : ''}"><b>1 Satz</b><small>+2 pro Cycle</small></button>
           <button type="button" data-prio-saetze="2" class="${satzanzahl === 2 ? 'on' : ''}"><b>2 Sätze</b><small>+4 pro Cycle</small></button>
         </div>
