@@ -83,6 +83,7 @@ export function mountFaq(container) {
     <details class="faq"><summary>Wie trainiere ich HEAVYS?</summary>
       <div class="faq-a">
         <p><b>A-Tage · 6–10 Wiederholungen.</b> HEAVYS nutzen feste Übungen. Ziel sind technisch standardisierte Leistungsprogression, hohe mechanische Belastung und zuverlässige Logbuchvergleiche.</p>
+        <p><b>Zielnähe:</b> Comp-Übungen werden mit 0–3 RIR, Iso-Übungen mit 0–2 RIR ausgeführt. 0 RIR bedeutet, dass keine weitere saubere Wiederholung möglich gewesen wäre.</p>
         <p>Du nutzt <b>Double Progression</b>: Steigere zuerst die Wiederholungen innerhalb des Bereichs. Erreichst du das obere Ende mit passender Technik und Ziel-RIR, erhöhst du die Last und beginnst wieder weiter unten im Bereich.</p>
         <p>Die Übung bleibt, solange sie <b>schmerzfrei, technisch reproduzierbar und progressierbar</b> ist. Nicht jede Übung muss in jedem Cycle besser werden.</p>
         <p><b>Evidenz:</b> Muskelaufbau ist über verschiedene Lastbereiche möglich, wenn Sätze ausreichend anstrengend sind. Schwerere Lasten machen die Leistung zusätzlich gut vergleichbar und fördern besonders die Maximalkraft.</p>
@@ -92,6 +93,7 @@ export function mountFaq(container) {
     <details class="faq"><summary>Wie trainiere ich MIDDLES?</summary>
       <div class="faq-a">
         <p><b>B-Tage · 10–15 Wiederholungen.</b> MIDDLES sind feste, vollständig geloggte Übungen und bilden das progressiv getrackte Fundament dieser Einheiten.</p>
+        <p><b>Zielnähe:</b> 0–2 RIR.</p>
         <p>Sie nutzen dieselbe <b>Double Progression</b> wie HEAVYS: erst Wiederholungen innerhalb des Bereichs steigern, danach die Last erhöhen. Auch MIDDLES bleiben im Plan, solange sie schmerzfrei, technisch reproduzierbar und progressierbar sind.</p>
         <p><b>Evidenz:</b> Moderate Lasten verbinden wirksame Versagensnähe mit gut kontrollierbarer Technik und meist geringerer absoluter Belastung als HEAVYS. Der eigene Name beschreibt die Rolle im Plan, keinen eigenen Wachstumsmechanismus.</p>
       </div>
@@ -100,6 +102,7 @@ export function mountFaq(container) {
     <details class="faq"><summary>Wie trainiere ich PUMPS?</summary>
       <div class="faq-a">
         <p><b>B-Tage · 15–25 Wiederholungen mit leichterer Last, aber versagensnah.</b> PUMPS ergänzen die festen MIDDLES um produktive Arbeit mit geringeren absoluten Lasten. Die Übungen dürfen freier wechseln.</p>
+        <p><b>Zielnähe:</b> 0–1 RIR.</p>
         <p>Die Mischung aus MIDDLES und PUMPS dient <b>Volumenverteilung, Gelenkverträglichkeit, Übungsvielfalt und langfristiger Adhärenz</b> – nicht der Kombination zweier unabhängiger Wachstumsmechanismen.</p>
         <p><b>Lengthened Partials sind optional</b> und nur bei passenden, sicheren Übungen sinnvoll – nicht automatisch nach jedem Satz.</p>
         <p><b>Evidenz:</b> Leichtere Lasten können ähnlich Muskelmasse aufbauen wie schwere, wenn die Sätze nah genug ans Versagen geführt werden.</p>

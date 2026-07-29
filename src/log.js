@@ -3,7 +3,7 @@ import { readLog, writeLog, mergePayload } from './localstore.js';
 import { TPL, TIER_NAMES, CYCLE_TAGE, DELOAD_TAGE } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise, extraSets } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
-import { auswahlGruppen, sucheAuswahlGruppen, imKatalog } from './auswahl.js';
+import { auswahlGruppen, sucheAuswahlGruppen, imKatalog, eintragVon } from './auswahl.js';
 import { prioritaetsAnpassungen, sortiereBloeckeNachPrioritaet, slotKey } from './prioritaet.js';
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
@@ -1088,8 +1088,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const el = document.createElement('div'); el.className = `block block-${effType}`;
       const cues = [];
       if (effType === 'load') {
-        const hatComp = blk.prio || exOf(blk, tier).some((exDef) => exDef.r === 'Comp');
-        cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '0–3 RIR') + '</span>',
+        const prioRolle = blk.prio ? eintragVon(names?.[0])?.typ : null;
+        const hatComp = blk.prio
+          ? prioRolle !== 'Iso'
+          : exOf(blk, tier).some((exDef) => exDef.r === 'Comp');
+        const rirText = blk.prio
+          ? (prioRolle === 'Iso' ? '0–2 RIR' : (prioRolle === 'Comp' ? '0–3 RIR' : '0–3 Comp · 0–2 Iso'))
+          : (blk.rir || '0–3 RIR');
+        cues.push('<span class="chip">' + effReps + ' · ' + rirText + '</span>',
           `<span class="chip">${blk.deload ? 'Kein Versagen' : (hatComp ? 'Versagen nur letzter Satz' : 'Versagen erlaubt')}</span>`);
       }
       if (effType === 'middle') cues.push(
