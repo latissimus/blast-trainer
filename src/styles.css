@@ -929,7 +929,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .som-gruppe{display:flex;align-items:center;gap:8px;margin:11px 2px 2px;font-family:var(--display);font-style:italic;
   font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .som-gruppe:not(.prio)::after{content:"";flex:1;border-top:2px dashed var(--ink);opacity:.45}
-.som-gruppe.prio{width:max-content;padding:3px 8px;background:var(--prio);border:1.5px solid var(--ink);
+.som-gruppe.prio{width:max-content;padding:3px 8px;background:var(--prio);border:0;
   border-radius:999px;color:#fff}
 .som-muskel{overflow:hidden;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
 .som-muskel.priorisiert{border-color:var(--prio-text)}
@@ -1008,10 +1008,10 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .som-speicher{min-height:18px;margin:8px 2px 0;text-align:center;font-size:11px;color:var(--muted)}
 
 /* Direkt am Uebungsfeld sichtbar: Der Satz stammt aus der Prioritaetsplanung. */
-.volrolle{display:inline-flex;align-items:center;flex:0 0 auto;border:1px solid var(--ink);border-radius:999px;
+.volrolle{display:inline-flex;align-items:center;flex:0 0 auto;border:0;border-radius:999px;
   padding:2px 6px;font-size:9px;font-weight:800;text-transform:uppercase;white-space:nowrap}
 .volrolle.prio{background:var(--prio);color:#fff}
-.volrolle.minus{background:var(--prio-soft);border-color:var(--prio);color:var(--text)}
+.volrolle.minus{background:var(--prio-soft);color:var(--text)}
 
 /* Prioritaetskarten ergaenzen nur den gewaehlten Slot. Der Status-Chip sitzt
    bei der Uebungswahl, wo auch Umverteilungs-Chips erscheinen. */
