@@ -282,6 +282,7 @@ function renderChrome() {
               <path d="M31 11h4" fill="none" stroke="#8968FF" stroke-width="1.8" stroke-linecap="round"/>
               <rect x="38" y="7.5" width="5" height="5" fill="none" stroke="#8968FF" stroke-width="1.5"/>
               <path d="m46 7.5 5 5m0-5-5 5" fill="none" stroke="#8968FF" stroke-width="1.5" stroke-linecap="round"/>
+              <rect class="menue-computer-innen" x="7" y="21" width="43" height="23" rx="5"/>
               <rect x="7" y="21" width="43" height="23" rx="5" fill="none" stroke="#8968FF" stroke-width="1.8"/>
               <text class="menue-computer-text" x="28.5" y="32.5" fill="#111111" font-family="'Helvetica Neue',Arial,system-ui,sans-serif" font-size="9.6" font-style="italic" font-weight="900" text-anchor="middle" dominant-baseline="middle">MENÜ</text>
             </svg>
