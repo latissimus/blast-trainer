@@ -1096,7 +1096,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         '<span class="chip">' + effReps + ' · ' + (blk.rir || '0–2 RIR') + '</span>',
         '<span class="chip">Versagen nur letzter Satz</span>',
       );
-      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '0–1 RIR') + '</span>', '<span class="chip">leicht · Versagen erlaubt · Partials optional</span>');
+      if (effType === 'pump') cues.push('<span class="chip">' + effReps + ' · ' + (blk.rir || '0–1 RIR') + '</span>', '<span class="chip">Versagen erlaubt · Partials optional</span>');
       if (effType === 'mr') cues.push('<span class="chip">6×4 · ~15RM</span>', '<span class="chip">Versagen nur letzter Minisatz</span>');
       cues.push('<button class="chip rest"' + (readOnly ? ' disabled' : '') + ' data-rest="' + effRest + '">⏱ ' + pausenLabel(effRest) + '</button>');
 
