@@ -359,7 +359,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .block.opt{border-style:dashed}
 .bhead{display:flex;align-items:center;gap:8px;padding:15px 13px 9px;border-bottom:var(--bw) solid var(--ink)}
 .bhead .mus{font-family:var(--display);font-style:italic;font-weight:700;font-size:16px;text-transform:uppercase}
-.badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:999px;text-transform:uppercase;border:var(--bw) solid var(--ink);font-family:var(--display);font-style:italic}
+.badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:4px 8px;border-radius:999px;text-transform:uppercase;border:0;font-family:var(--display);font-style:italic}
 .b-load{background:var(--load);color:#fff}
 .b-middle{background:var(--middle);color:#fff}
 .b-pump{background:var(--pump);color:var(--accent-ink)}
@@ -388,7 +388,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 
 .ex{border-top:2px dashed var(--ink);padding:12px 13px}
 .exhead{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
-.role{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);border:var(--bw) solid var(--ink);
+.role{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);border:0;
   padding:2px 7px;border-radius:999px;flex:0 0 auto;font-family:var(--display);font-style:italic;background:var(--surface2)}
 .role.comp{color:#fff;background:var(--navy)}
 /* Uebungsauswahl. Ein <select>, kein Eingabefeld – eintragbar ist nur, was im
@@ -862,7 +862,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
 .seitenkopf{display:flex;align-items:flex-end;gap:10px;padding:28px 90px 13px 0}
 .seitenkopf-text{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
-.seitenkopf-kicker{width:max-content;padding:3px 7px;border:1.5px solid var(--ink);border-radius:999px;
+.seitenkopf-kicker{visibility:hidden;width:max-content;padding:3px 7px;border:1.5px solid transparent;border-radius:999px;
   background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:10px;
   font-weight:800;text-transform:uppercase;letter-spacing:.08em}
 .seitenkopf .section-title{margin:0;min-width:0;font-size:27px}
@@ -913,14 +913,14 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .som-ablauf{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 .som-ablauf span{display:flex;align-items:center;gap:5px;min-width:0;font-size:10.5px;
   font-weight:700;line-height:1.2;color:var(--text)}
-.som-ablauf i{display:grid;place-items:center;flex:0 0 21px;height:21px;border:1.5px solid var(--ink);
+.som-ablauf i{display:grid;place-items:center;flex:0 0 21px;height:21px;border:0;
   border-radius:50%;background:var(--prio);color:#fff;font-family:var(--mono);font-style:normal;font-size:10px}
 .prog-statuskopf{align-items:center}
 .prog-info-titel{flex:1;margin:0;padding:2px 4px;font-family:var(--display);font-style:italic;
   font-size:13px;font-weight:700;text-transform:uppercase;color:var(--text)}
 .som-legende{display:flex;gap:13px;margin:0 3px 9px;font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase}
 .som-legende span{display:flex;align-items:center;gap:5px}
-.som-legende i{display:inline-block;width:17px;height:7px;border-radius:999px;border:1px solid var(--ink)}
+.som-legende i{display:inline-block;width:17px;height:7px;border-radius:999px;border:0}
 .som-legende i.direkt{background:var(--navy)}
 .som-legende i.indirekt{background:#AEDCF6}
 :root[data-theme="dark"] .som-legende i.indirekt,
