@@ -17,6 +17,30 @@ export function zurueckChip() {
   return `<a class="zurueck" href="#log"><span class="pf">←</span> Log</a>`;
 }
 
+export function prioritaetsZusammenfassung(konto, ergebnis, cfg) {
+  if (!ergebnis) return '';
+  const n = prioSatzanzahl(cfg);
+  const satz = n === 1 ? 'Satz' : 'Sätze';
+  const slots = ergebnis.slots || [];
+  const gesamt = n * slots.length;
+  const gesamtSatz = gesamt === 1 ? 'Satz' : 'Sätze';
+  const koerperhaelfte = slots[0]?.tag?.startsWith('UK') ? 'UK' : 'OK';
+  const einheiten = slots.length === 2
+    ? `beiden ${koerperhaelfte}-Einheiten`
+    : `${koerperhaelfte}-Einheit`;
+  if (ergebnis.status === 'aktiv' && ergebnis.modus === 'reihenfolge')
+    return `${konto} zuerst · keine Zusatzsätze.`;
+  if (ergebnis.status === 'aktiv' && ergebnis.modus === 'plus')
+    return `${konto} zuerst · +${n} ${satz} in ${einheiten} · ${gesamt} zusätzliche ${gesamtSatz} pro Cycle.`;
+  if (ergebnis.status === 'aktiv')
+    return `${konto} zuerst · +${n} ${satz} in ${einheiten} · ${gesamt} ${gesamtSatz} von ${ergebnis.spenderName || ergebnis.spender} umverteilt.`;
+  if (ergebnis.status === 'spender-fehlt' && !cfg?.spender)
+    return 'Wähle noch einen Spender aus derselben Körperhälfte.';
+  if (ergebnis.status === 'spender-fehlt')
+    return 'Pausiert: Der gewählte Spender ist derzeit nicht verfügbar.';
+  return 'Vorgemerkt: Wähle noch die Art der Priorisierung.';
+}
+
 export async function mountMeter(container, { userId }) {
   container.innerHTML = '';
   const wrap = document.createElement('div');
@@ -88,23 +112,6 @@ export async function mountMeter(container, { userId }) {
     infoKnopf.setAttribute('aria-expanded', info.hidden ? 'false' : 'true');
   };
 
-  function statusText(ergebnis, cfg) {
-    if (!ergebnis) return '';
-    const n = prioSatzanzahl(cfg);
-    const satz = n === 1 ? 'Satz' : 'Sätze';
-    if (ergebnis.status === 'aktiv' && ergebnis.modus === 'reihenfolge')
-      return 'Aktiv: zuerst in der Einheit · keine Zusatzsätze.';
-    if (ergebnis.status === 'aktiv' && ergebnis.modus === 'plus')
-      return `Aktiv: je +${n} ${satz} in HEAVYS sowie MIDDLES & PUMPS.`;
-    if (ergebnis.status === 'aktiv')
-      return `Aktiv: je +${n} Priorität und −${n} ${ergebnis.spenderName || ergebnis.spender} in HEAVYS sowie MIDDLES & PUMPS.`;
-    if (ergebnis.status === 'spender-fehlt' && !cfg?.spender)
-      return 'Wähle noch einen Spender aus derselben Körperhälfte.';
-    if (ergebnis.status === 'spender-fehlt')
-      return 'Pausiert: Der gewählte Spender ist derzeit nicht verfügbar.';
-    return 'Vorgemerkt: Wähle noch die Art der Priorisierung.';
-  }
-
   function donorVon(konto, prioErgebnisse) {
     return KONTEN.filter((ziel) => {
       const ergebnis = prioErgebnisse[ziel];
@@ -141,7 +148,7 @@ export async function mountMeter(container, { userId }) {
       ${quellen.length ? `<div class="som-indirekt-quellen"><span>Indirekt durch</span><div>
         ${quellen.map((q) => `<small><b>${q.saetze}×</b> ${html(q.name)}</small>`).join('')}
       </div></div>` : ''}
-      ${cfg ? `<p class="som-prio-status">${html(statusText(ergebnis, cfg))}</p>` : ''}
+      ${cfg ? `<p class="som-prio-status" role="status" aria-live="polite">${html(prioritaetsZusammenfassung(konto, ergebnis, cfg))}</p>` : ''}
       ${spenderFuer.length ? `<p class="som-prio-status neutral">Gibt in HEAVYS sowie MIDDLES & PUMPS ab für: <b>${spenderFuer.map((ziel) =>
         `${html(ziel)} (je ${prioSatzanzahl(prios[ziel])})`).join(', ')}</b></p>` : ''}
       <span class="som-ed-label">1 · Muskel priorisieren</span>
