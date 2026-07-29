@@ -964,6 +964,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .som-inline-plan{margin-top:11px}
 .som-ed-label{display:block;margin-bottom:6px;font-size:11px;color:var(--muted);font-weight:800;
   text-transform:uppercase;letter-spacing:.06em}
+.som-inline-plan>.som-ed-label:not(:first-child){margin-top:16px}
 .som-modusseg{display:grid;grid-template-columns:1fr 1fr;overflow:hidden;border:var(--bw) solid var(--ink);border-radius:var(--r)}
 .som-modusseg.drei{grid-template-columns:repeat(3,1fr)}
 .som-modusseg button{min-width:0;padding:8px 6px;border:0;border-right:var(--bw) solid var(--ink);
