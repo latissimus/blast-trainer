@@ -59,7 +59,9 @@
      das Vorbild (retromuscle.net) haelt sie durchgehend gleich und duenner.
      Die frueheren --shadow-Variablen sind ersatzlos entfallen: Die Flaechen
      tragen jetzt nur noch ihre Kontur. */
-  --bw:2px;
+  --bw:1.5px;
+  --hairline:1px;
+  --dash:1.25px;
   /* ZWEI Radien, nicht einer. Das Vorbild rundet Karten grosszuegig (1rem =
      18px), Bedienelemente aber fast eckig (0.375rem = 6.75px). Pauschal alles
      gleich zu runden war mein Fehler – Knoepfe wurden runder als dort, Karten
@@ -159,7 +161,7 @@ a{color:var(--link)}
 
 /* ---------- Top bar / nav ---------- */
 .topbar{position:sticky;top:0;z-index:20;isolation:isolate;background:var(--bg);
-  border-bottom:var(--bw) solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
+  border-bottom:2px solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
 /* Beim iOS-Gummiband wandert der Sticky-Header kurz nach unten, waehrend
    fixed Elemente am Viewport bleiben. Diese unsichtbare Fortsetzung deckt
    den Bereich oberhalb des Headers ab, damit Set-O-Meter und Zurueck-Chip
@@ -338,7 +340,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .phasechip[hidden]{display:none}
 .phasechip{flex:0 0 auto;font-family:var(--display);font-style:italic;font-weight:700;
   font-size:10px;letter-spacing:.06em;text-transform:uppercase;
-  padding:5px 10px;border-radius:20px;border:2px solid var(--faint);
+  padding:5px 10px;border-radius:20px;border:var(--bw) solid var(--faint);
   color:var(--muted);background:transparent}
 .phasechip.laut{background:var(--mr);border-color:var(--ink);color:var(--accent-ink)}
 /* Gelb wirkt auf dunklem Grund grell und liegt nah an den Warnfarben. Hellblau
@@ -386,7 +388,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   font-family:var(--mono);font-weight:700}
 .chip.rest:disabled{opacity:.55}
 
-.ex{border-top:2px dashed var(--ink);padding:12px 13px}
+.ex{border-top:var(--dash) dashed var(--ink);padding:12px 13px}
 .exhead{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
 .role{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);border:0;
   padding:2px 7px;border-radius:999px;flex:0 0 auto;font-family:var(--display);font-style:italic;background:var(--surface2)}
@@ -466,7 +468,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker-liste{overflow:auto;overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;margin-top:8px;padding-right:2px}
 .ex-picker-gruppe{position:sticky;top:-1px;z-index:1;margin:0 0 4px;padding:13px 7px 5px;
-  background:var(--surface);border-bottom:2px dashed var(--ink);
+  background:var(--surface);border-bottom:var(--dash) dashed var(--ink);
   font-family:var(--display);font-style:italic;font-size:10px;font-weight:700;
   text-transform:uppercase;color:var(--muted)}
 .ex-picker-option{display:block;width:100%;padding:11px 10px;border:0;border-bottom:1px solid var(--faint);
@@ -474,7 +476,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker-option.gewaehlt{background:var(--prio-soft);color:var(--prio-text)}
 .ex-picker-option.gewaehlt::before{content:"✓ ";font-weight:900}
 .ex-picker-kein{padding:28px 12px;text-align:center;color:var(--muted);font-size:14px}
-.ex-picker-leeren{margin-top:10px;padding:9px;border:2px dashed var(--ink);border-radius:var(--r);
+.ex-picker-leeren{margin-top:10px;padding:9px;border:var(--dash) dashed var(--ink);border-radius:var(--r);
   background:transparent;color:var(--muted);font-family:var(--display);font-style:italic;
   font-weight:700;text-transform:uppercase}
 /* "zuletzt: 60 kg × 8" – die wichtigste Lesezeile im Log, direkt vor dem
@@ -507,14 +509,14 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .fld.mrlast .u{right:6px;font-size:8.5px}
 .delrow{background:none;border:0;color:var(--text);font-size:20px;width:26px;padding:0;flex:0 0 auto;font-weight:700}
 .delrow:active{color:var(--down)}
-.addset{margin-top:10px;background:var(--surface2);border:2px dashed var(--ink);color:var(--text);
+.addset{margin-top:10px;background:var(--surface2);border:var(--dash) dashed var(--ink);color:var(--text);
   width:100%;padding:9px;border-radius:var(--r);font-size:13.5px;font-weight:800;font-family:var(--display);font-style:italic;text-transform:uppercase}
 .addset:active{background:var(--pink);color:var(--accent-ink)}
 .notewrap{margin-top:8px}
-.addnote{background:var(--surface2);border:2px dashed var(--ink);color:var(--muted);
+.addnote{background:var(--surface2);border:var(--dash) dashed var(--ink);color:var(--muted);
   width:100%;padding:9px;border-radius:var(--r);font-size:13px;font-weight:800;font-family:var(--display);
   font-style:italic;text-transform:uppercase}
-.exnote{width:100%;background:var(--surface2);border:2px dashed var(--ink);border-radius:var(--r);color:var(--text);
+.exnote{width:100%;background:var(--surface2);border:var(--dash) dashed var(--ink);border-radius:var(--r);color:var(--text);
   font-family:var(--mono);font-size:14.5px;padding:9px 10px;resize:vertical;min-height:46px;line-height:1.4}
 .exnote:focus{outline:none}
 
@@ -561,7 +563,7 @@ html.statusleiste-overlay .ctrlbar{z-index:50;background:var(--bg)}
   -webkit-backdrop-filter:blur(6.65px) saturate(1.25);backdrop-filter:blur(6.65px) saturate(1.25);
   /* Ohne Schlagschatten (testweise). Er war der Grund fuer die 7px Polster an
      .ctrlbar – ohne ihn koennte die Leiste wieder breiter werden. */
-  border:var(--bw) solid var(--ink);border-radius:16px}
+  border:2px solid var(--ink);border-radius:16px}
 .ctrlbar .inner::after{content:'';position:absolute;inset:0;z-index:-2;pointer-events:none;
   border-radius:16px;box-shadow:0 0 0 100vmax var(--bg);
   clip-path:inset(8px -100vmax -100vmax -100vmax)}
@@ -752,7 +754,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .tutorial-planpunkte{display:grid;margin:12px 0 11px;border:var(--bw) solid var(--ink);
   border-radius:var(--r);overflow:hidden}
 .tutorial-planpunkte>div{display:grid;grid-template-columns:38px 1fr;align-items:center;gap:10px;
-  min-height:53px;padding:7px 10px;border-bottom:1.5px solid var(--ink);background:var(--surface)}
+  min-height:53px;padding:7px 10px;border-bottom:var(--hairline) solid var(--ink);background:var(--surface)}
 .tutorial-planpunkte>div:last-child{border-bottom:0}
 .tutorial-planpunkte>div>b{display:grid;place-items:center;width:36px;height:36px;border-radius:5px;
   background:var(--prio);color:#fff;font-family:var(--display);font-style:italic;font-size:16px}
@@ -768,7 +770,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .tutorial-heavyinfo p:last-of-type{margin-bottom:8px}
 .tutorial-rollen{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .tutorial-rollen span{display:flex;align-items:center;gap:6px;padding:6px 7px;
-  border:1.5px solid var(--ink);border-radius:5px;background:var(--surface)}
+  border:var(--hairline) solid var(--ink);border-radius:5px;background:var(--surface)}
 .tutorial-rollen b{font-family:var(--display);font-style:italic;font-size:12px;text-transform:uppercase}
 .tutorial-rollen small{color:var(--muted);font-size:10.5px;line-height:1.3}
 .tutorial-zielkopf{display:flex;align-items:center;gap:8px;margin-bottom:7px}
@@ -778,13 +780,13 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   font-size:10px;font-weight:700;text-transform:uppercase}
 .tutorial-kurzziel{margin-bottom:10px!important;font-size:12.5px!important}
 .log-tutorial-typen{padding:10px 11px!important;margin-bottom:12px!important;
-  border:1.5px dashed var(--ink);background:var(--surface2)}
+  border:var(--dash) dashed var(--ink);background:var(--surface2)}
 .log-tutorial-stand{padding:8px 10px!important;margin-bottom:11px!important;
   background:var(--prio-wash);border-left:4px solid var(--prio)}
 .tutorial-eingabe{display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden;margin:11px 0 12px;
   border:var(--bw) solid var(--ink);border-radius:var(--r)}
 .tutorial-eingabe span{display:flex;flex-direction:column;gap:2px;padding:9px 7px;
-  border-right:1.5px solid var(--ink);background:var(--surface2);text-align:center}
+  border-right:var(--hairline) solid var(--ink);background:var(--surface2);text-align:center}
 .tutorial-eingabe span:last-child{border-right:0}
 .tutorial-eingabe b{font-family:var(--mono);font-size:13px;color:var(--text)}
 .tutorial-eingabe small{font-size:10.5px;line-height:1.25;color:var(--muted)}
@@ -819,7 +821,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .tutorial-startfx small{font-size:10.5px;line-height:1.4}
 .action-title-svg{display:block;width:min(274px,80vw);height:auto;overflow:visible}
 .willkommen-fx .action-title-svg{width:min(248px,74vw)}
-.tutorial-startfx span{max-width:290px;padding:6px 9px;border:2px solid var(--navy);
+.tutorial-startfx span{max-width:290px;padding:6px 9px;border:var(--bw) solid var(--navy);
   font-size:11px;line-height:1.35}
 .willkommen-fx span{max-width:266px;padding:5px 8px;font-size:10px}
 .willkommen-fx.an{animation-duration:7.8s}
@@ -862,7 +864,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
    kuerzeste Weg zurueck ins Log – ueber das Menue waeren es zwei Tipps. */
 .seitenkopf{display:flex;align-items:flex-end;gap:10px;padding:28px 90px 13px 0}
 .seitenkopf-text{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0}
-.seitenkopf-kicker{visibility:hidden;width:max-content;padding:3px 7px;border:1.5px solid transparent;border-radius:999px;
+.seitenkopf-kicker{visibility:hidden;width:max-content;padding:3px 7px;border:var(--bw) solid transparent;border-radius:999px;
   background:var(--surface);color:var(--muted);font-family:var(--mono);font-size:10px;
   font-weight:800;text-transform:uppercase;letter-spacing:.08em}
 .seitenkopf .section-title{margin:0;min-width:0;font-size:27px}
@@ -887,16 +889,16 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .som-einstieg{margin:0 0 8px;padding:7px 8px;background:var(--surface);
   border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
 .som-einstieg .som-statuskopf{margin:0 0 6px;padding:0 0 6px;border:0;
-  border-bottom:1.5px solid var(--ink);border-radius:0;background:transparent}
+  border-bottom:var(--hairline) solid var(--ink);border-radius:0;background:transparent}
 .som-einstieg .som-einfach{margin:0;padding:0;border:0;border-radius:0;background:transparent}
 .som-einstieg .som-einfach p{margin:0 0 5px}
 .som-einstieg .som-legende{margin:6px 0 0;padding:6px 2px 0;
-  border-top:1.5px dashed var(--ink)}
+  border-top:var(--dash) dashed var(--ink)}
 .som-statuskopf{display:flex;align-items:stretch;gap:8px;margin-bottom:8px;padding:8px;
   background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
 .som-lage{display:grid;grid-template-columns:repeat(2,1fr);gap:0;flex:1;margin:0;font-family:var(--mono)}
 .som-stat{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:1px 8px;
-  border-right:1.5px solid var(--ink)}
+  border-right:var(--hairline) solid var(--ink)}
 .som-stat:last-child{border-right:0}
 .som-stat small{font-size:10px;line-height:1.1;font-weight:800;color:var(--muted);text-transform:uppercase}
 .som-stat b{margin-top:3px;font-size:16px;line-height:1;color:var(--text)}
@@ -906,7 +908,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   border-radius:var(--r);font-size:11.5px;line-height:1.45;color:var(--text)}
 .som-kurzhilfe p{margin:0 0 7px}
 .som-kurzhilfe p:last-child{margin-bottom:0}
-.som-einfach{margin:0 0 7px;padding:8px 10px;border:2px dashed var(--ink);border-radius:var(--r);
+.som-einfach{margin:0 0 7px;padding:8px 10px;border:var(--dash) dashed var(--ink);border-radius:var(--r);
   background:var(--surface);color:var(--muted);font-size:12px;line-height:1.45}
 .som-einfach p{margin:0 0 7px}
 .som-einfach b{color:var(--text)}
@@ -928,7 +930,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .som-liste{display:grid;gap:6px}
 .som-gruppe{display:flex;align-items:center;gap:8px;margin:11px 2px 2px;font-family:var(--display);font-style:italic;
   font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
-.som-gruppe:not(.prio)::after{content:"";flex:1;border-top:2px dashed var(--ink);opacity:.45}
+.som-gruppe:not(.prio)::after{content:"";flex:1;border-top:var(--dash) dashed var(--ink);opacity:.45}
 .som-gruppe.prio{width:max-content;padding:3px 8px;background:var(--prio);border:0;
   border-radius:999px;color:#fff}
 .som-muskel{overflow:hidden;background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
@@ -945,7 +947,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .som-prio-marke{flex:0 0 auto;padding:3px 6px;border-radius:999px;background:var(--prio);color:#fff;
   font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
 .som-track{grid-column:1/-1;grid-row:2;display:flex;width:100%;height:9px;background:var(--surface2);
-  border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
+  border:var(--hairline) solid var(--ink);border-radius:999px;overflow:hidden}
 .som-fill-direkt,.som-fill-indirekt{display:block;height:100%;transition:width .18s ease}
 .som-fill-direkt{background:var(--navy)}
 .som-fill-indirekt{background:#AEDCF6;border-left:1px solid rgba(10,10,10,.4)}
@@ -955,7 +957,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .som-pfeil{flex:0 0 auto;font-family:var(--mono);font-size:17px;font-weight:800;color:var(--muted);line-height:1;
   transition:transform .16s ease}
 .som-muskel.offen .som-pfeil{transform:rotate(180deg)}
-.som-inline-editor{padding:0 12px 12px;border-top:2px dashed var(--ink)}
+.som-inline-editor{padding:0 12px 12px;border-top:var(--dash) dashed var(--ink)}
 .som-inline-editor>.som-ed-label{margin-top:16px}
 .som-indirekt-quellen{margin:9px 0 0;color:var(--muted)}
 .som-indirekt-quellen>span{display:block;margin-bottom:5px;font-size:10.5px;font-weight:800;
@@ -988,7 +990,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .som-modusseg small{margin-top:2px;font-size:10.5px;opacity:.8}
 .som-spender{margin-top:12px}
 .som-spender-wahl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;margin-top:6px;padding:8px 9px;
-  text-align:left;background:var(--surface);color:var(--text);border:1.5px solid var(--ink);border-radius:var(--r)}
+  text-align:left;background:var(--surface);color:var(--text);border:var(--hairline) solid var(--ink);border-radius:var(--r)}
 .som-spender-wahl.on{border-color:var(--prio-text);background:var(--prio);color:#fff}
 .som-spender-wahl.on small,.som-spender-wahl.on .som-spender-zahlen{color:rgba(255,255,255,.78)}
 .som-spender-wahl.on em{color:#fff}
@@ -1193,7 +1195,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .faq-credit{margin-top:8px;text-align:left}
 .faq-spruenge{display:grid;grid-template-columns:repeat(4,1fr);overflow:hidden;margin:0 0 12px;
   border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface)}
-.faq-spruenge a{padding:9px 4px;border-right:1.5px solid var(--ink);color:var(--text);
+.faq-spruenge a{padding:9px 4px;border-right:var(--hairline) solid var(--ink);color:var(--text);
   font-family:var(--display);font-style:italic;font-size:11px;font-weight:700;
   text-align:center;text-decoration:none;text-transform:uppercase}
 .faq-spruenge a:last-child{border-right:0}
@@ -1220,13 +1222,13 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .faq-startkarte li{position:relative;min-height:28px;padding:4px 0 4px 37px;color:var(--muted);
   font-size:12.5px;line-height:1.45;counter-increment:faqstart}
 .faq-startkarte li::before{content:counter(faqstart);position:absolute;left:0;top:0;display:grid;
-  place-items:center;width:27px;height:27px;border:1.5px solid var(--ink);border-radius:5px;
+  place-items:center;width:27px;height:27px;border:var(--hairline) solid var(--ink);border-radius:5px;
   background:var(--prio);color:#fff;font-family:var(--mono);font-weight:800}
 .faq-startkarte li b{color:var(--text)}
 /* FAQ-Accordion */
 /* Abschnittsueberschrift im FAQ. Die Liste ist lang genug, dass man sonst nicht
    mehr weiss, auf welcher Ebene man liest – vom Prinzip bis zur Bedienung. */
-.faq-sektion{scroll-margin-top:calc(var(--topbar-h) + 10px);border-top:2px dashed var(--ink);margin:22px 0 12px;padding-top:12px;
+.faq-sektion{scroll-margin-top:calc(var(--topbar-h) + 10px);border-top:var(--dash) dashed var(--ink);margin:22px 0 12px;padding-top:12px;
   font-family:var(--display);font-style:italic;font-weight:700;font-size:14.5px;
   text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .faq-sektion:first-of-type{border-top:0;margin-top:4px;padding-top:0}
@@ -1292,7 +1294,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .profile-datei{display:flex;align-items:center;gap:9px;min-width:0;margin-bottom:14px;padding:8px;
   border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface2);cursor:pointer}
 .profile-datei input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.profile-datei-knopf{flex:0 0 auto;padding:7px 9px;border:1.5px solid var(--ink);border-radius:5px;
+.profile-datei-knopf{flex:0 0 auto;padding:7px 9px;border:var(--hairline) solid var(--ink);border-radius:5px;
   background:var(--pink);color:var(--accent-ink);font-family:var(--display);font-style:italic;
   font-size:12px;font-weight:700;text-transform:uppercase}
 .profile-dateiname{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
@@ -1335,7 +1337,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
   padding:6px 10px;opacity:.6}
 
 /* Setzt die Verlaufs-Box von den Profileinstellungen darueber ab. */
-.abschnitt-trenner{border-top:2px dashed var(--ink);opacity:.45;margin:26px 2px 20px}
+.abschnitt-trenner{border-top:var(--dash) dashed var(--ink);opacity:.45;margin:26px 2px 20px}
 
 /* ---------- Wert-Box mit Verlaufskurve (Heavy-Progression) ---------- */
 .mess-kopf{margin-bottom:14px;padding:14px;border:var(--bw) solid var(--ink);border-radius:var(--r);
