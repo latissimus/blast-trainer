@@ -219,9 +219,11 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie funktioniert ein Prioritätsmuskel?</summary>
       <div class="faq-a">
-        <p>Öffne im Set-O-Meter einen Muskel, wähle <b>1 oder 2 Sätze je passender Einheit</b> und setze ihn auf Priorität. LOGMAN fügt dafür eine kompakte eigene Muskelbox ein. Comp- und Iso-Übungen sind möglich.</p>
+        <p>Öffne im Set-O-Meter einen Muskel und setze ihn auf Priorität. Der Muskel steht dann <b>am Anfang jeder passenden Einheit</b>, solange du noch frisch bist. Du kannst ihn dort ohne Zusatzvolumen trainieren oder <b>1–2 Sätze je Einheit</b> ergänzen.</p>
+        <p><b>Keine Extras:</b> LOGMAN verschiebt den bereits vorhandenen Muskelblock nur nach oben. Ist der Muskel noch nicht regulär eingeplant – etwa Unterarme –, braucht er mindestens einen Zusatzsatz, damit überhaupt eine Übungskarte entsteht.</p>
         <p>Beispiel Unterarme mit zwei Sätzen: +2 in OK HEAVYS und +2 in OK MIDDLES &amp; PUMPS. Du kannst das Volumen <b>aufschlagen</b> oder dieselbe Satzanzahl von einem geeigneten Muskel derselben Körperhälfte <b>umverteilen</b>.</p>
-        <p><b>Evidenz:</b> Kleine Erhöhungen um ein bis zwei Sätze sind besser kontrollierbar als große Sprünge. Beurteile Wirkung und Erholung über mehrere Cycles.</p>
+        <p>Bei mehreren Prioritäten stehen alle oben – in der Reihenfolge, in der du sie priorisiert hast. Danach folgt der übrige Plan unverändert.</p>
+        <p><b>Evidenz:</b> Früher ausgeführte Übungen erlauben meist mehr Wiederholungen und zeigen tendenziell größere Kraftzuwächse. Für zusätzlichen Muskelaufbau allein durch die Reihenfolge ist dagegen kein klarer Vorteil belegt. Kleine Volumenerhöhungen um ein bis zwei Sätze bleiben besser kontrollierbar als große Sprünge.</p>
       </div>
     </details>
 

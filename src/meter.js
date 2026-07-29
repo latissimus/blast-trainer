@@ -5,6 +5,7 @@ import { KONTEN } from './katalog.js';
 import {
   prioritaetenVon,
   prioSatzanzahl,
+  prioReihenfolgeMoeglich,
   pumpMoeglichkeiten,
   spenderKandidaten,
 } from './prioritaet.js';
@@ -91,6 +92,8 @@ export async function mountMeter(container, { userId }) {
     if (!ergebnis) return '';
     const n = prioSatzanzahl(cfg);
     const satz = n === 1 ? 'Satz' : 'Sätze';
+    if (ergebnis.status === 'aktiv' && ergebnis.modus === 'reihenfolge')
+      return 'Aktiv: zuerst in der Einheit · keine Zusatzsätze.';
     if (ergebnis.status === 'aktiv' && ergebnis.modus === 'plus')
       return `Aktiv: je +${n} ${satz} in HEAVYS sowie MIDDLES & PUMPS.`;
     if (ergebnis.status === 'aktiv')
@@ -121,10 +124,11 @@ export async function mountMeter(container, { userId }) {
   function inlineEditor(konto, werte, prioErgebnisse) {
     const prios = prioritaetenVon(payload);
     const cfg = prios[konto];
-    const satzanzahl = cfg ? prioSatzanzahl(cfg) : entwurfSaetze;
+    const satzanzahl = modusOffen ? entwurfSaetze : (cfg ? prioSatzanzahl(cfg) : entwurfSaetze);
     const ergebnis = prioErgebnisse[konto];
     const spenderFuer = donorVon(konto, prioErgebnisse);
     const hatPumpplatz = pumpMoeglichkeiten(payload, cycle, konto).length > 0;
+    const nurReihenfolgeMoeglich = prioReihenfolgeMoeglich(payload, cycle, konto);
     const alleKandidaten = cfg?.modus === 'tausch'
       ? spenderKandidaten(payload, cycle, konto, basisWerte())
       : [];
@@ -147,11 +151,13 @@ export async function mountMeter(container, { userId }) {
       ${!hatPumpplatz ? '<p class="som-hinweis">Im Deload sind keine Prio-Slots vorgesehen.</p>' : ''}
       ${zeigeModus && hatPumpplatz ? `<div class="som-inline-plan">
         <span class="som-ed-label">2 · Zusatz je Einheit</span>
-        <div class="som-modusseg som-satzwahl" role="group" aria-label="Zusatzsätze je Einheit">
+        <div class="som-modusseg som-satzwahl drei" role="group" aria-label="Zusatzsätze je Einheit">
+          <button type="button" data-prio-saetze="0" class="${satzanzahl === 0 ? 'on' : ''}" ${!nurReihenfolgeMoeglich ? 'disabled' : ''}><b>Keine</b><small>nur zuerst</small></button>
           <button type="button" data-prio-saetze="1" class="${satzanzahl === 1 ? 'on' : ''}"><b>1 Satz</b><small>+2 pro Cycle</small></button>
           <button type="button" data-prio-saetze="2" class="${satzanzahl === 2 ? 'on' : ''}"><b>2 Sätze</b><small>+4 pro Cycle</small></button>
         </div>
-        <span class="som-ed-label">3 · Art wählen</span>
+        ${!nurReihenfolgeMoeglich ? '<p class="som-hinweis">„Nur zuerst“ ist möglich, wenn der Muskel bereits regulär in beiden passenden Einheiten vorkommt.</p>' : ''}
+        ${satzanzahl > 0 ? `<span class="som-ed-label">3 · Art wählen</span>
         <div class="som-modusseg" role="group" aria-label="Art der Priorisierung">
           <button type="button" data-modus="tausch" class="${cfg?.modus === 'tausch' ? 'on' : ''}"><b>Umverteilen</b><small>je −${satzanzahl} anderswo</small></button>
           <button type="button" data-modus="plus" class="${cfg?.modus === 'plus' ? 'on' : ''}"><b>Aufschlagen</b><small>+${satzanzahl * 2} pro Cycle</small></button>
@@ -170,7 +176,7 @@ export async function mountMeter(container, { userId }) {
               ${alleKandidaten.map((k) => `<option value="${html(k.key)}" data-konto="${html(k.konto)}" data-name="${html(k.label)}"${istGewaehlt(k) ? ' selected' : ''}>${html(k.label)} · ${html(k.name)}</option>`).join('')}
             </select>
           </label>` : ''}
-        </div>` : ''}
+        </div>` : ''}` : ''}
       </div>` : ''}
     </div>`;
   }
@@ -206,7 +212,9 @@ export async function mountMeter(container, { userId }) {
       <span class="som-stat"><small>Prioritäten</small><b>${aktiv}</b></span>`;
 
     const sortiertNachVolumen = sortiert(konten);
-    const priorisiert = sortiertNachVolumen.filter((r) => prios[r.konto]);
+    const priorisiert = Object.keys(prios)
+      .map((konto) => sortiertNachVolumen.find((r) => r.konto === konto))
+      .filter(Boolean);
     const uebrig = sortiertNachVolumen.filter((r) => !prios[r.konto]);
     const max = Math.max(1, ...sortiertNachVolumen.map((r) =>
       (werte.direkt[r.konto] || 0) + (werte.indirekt[r.konto] || 0) * .5));
@@ -241,10 +249,23 @@ export async function mountMeter(container, { userId }) {
     });
     body.querySelectorAll('[data-prio-saetze]').forEach((b) => {
       b.onclick = () => {
-        const saetze = Number(b.dataset.prioSaetze) === 1 ? 1 : 2;
+        const wert = Number(b.dataset.prioSaetze);
+        const saetze = wert === 0 ? 0 : (wert === 1 ? 1 : 2);
         const cfg = prios[ausgewaehlt];
+        if (saetze === 0) {
+          payload.volumen.prioritaet[ausgewaehlt] = { modus: 'reihenfolge', saetze: 0 };
+          modusOffen = false;
+          speichern(!cfg);
+          return;
+        }
         if (!cfg) {
           entwurfSaetze = saetze;
+          render();
+          return;
+        }
+        if (cfg.modus === 'reihenfolge') {
+          entwurfSaetze = saetze;
+          modusOffen = true;
           render();
           return;
         }

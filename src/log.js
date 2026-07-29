@@ -4,7 +4,7 @@ import { TPL, TIER_NAMES, CYCLE_TAGE, DELOAD_TAGE } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise, extraSets } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
 import { auswahlGruppen, sucheAuswahlGruppen, imKatalog } from './auswahl.js';
-import { prioritaetsAnpassungen, prioBloecke, slotKey } from './prioritaet.js';
+import { prioritaetsAnpassungen, sortiereBloeckeNachPrioritaet, slotKey } from './prioritaet.js';
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
@@ -256,31 +256,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
     }
   } catch (e) { /* sessionStorage darf den Log nicht aufhalten */ }
 
-  // Existiert der Prioritätsmuskel bereits regulär in der Einheit, steht seine
-  // kompakte Zusatzkarte direkt hinter dem letzten passenden Muskelblock.
-  // Neue Muskeln wie Unterarme bleiben als eigener Slot am Ende.
+  // Prioritätsmuskeln stehen frisch am Anfang der Einheit. Ein Zusatzslot sitzt
+  // direkt hinter dem passenden regulären Block; neue Muskeln wie Unterarme
+  // bilden oben eine eigene Karte.
   function sortierteBloecke(tpl, week, day) {
-    const basis = [...tpl.blocks];
-    const extras = prioBloecke(payloadOut(), week, day);
-    const verwendet = new Set();
-    const result = [];
-    basis.forEach((blk, index) => {
-      result.push(blk);
-      extras.forEach((extra, extraIndex) => {
-        const konto = extra.konten[0];
-        const passt = (blk.konten || []).includes(konto);
-        const spaeter = basis.slice(index + 1).some((b) => (b.konten || []).includes(konto));
-        if (passt && !spaeter) {
-          extra.angedockt = 1;
-          result.push(extra);
-          verwendet.add(extraIndex);
-        }
-      });
-    });
-    extras.forEach((extra, index) => {
-      if (!verwendet.has(index)) result.push(extra);
-    });
-    return result;
+    return sortiereBloeckeNachPrioritaet(payloadOut(), week, day, tpl.blocks);
   }
 
   // Fortschritt einer Einheit fuer den Punkt auf dem Tab. Zaehlt wie die Volumen-Leiste,

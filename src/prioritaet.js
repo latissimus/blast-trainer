@@ -21,8 +21,12 @@ const UK_KONTEN = new Set(['Quads', 'Hams', 'Glutes', 'Waden', 'Abduktoren', 'Ab
 export const koerperhaelfte = (konto) => UK_KONTEN.has(konto) ? 'UK' : 'OK';
 const volumenVon = (payload) => (payload && payload.volumen) || {};
 export const prioritaetenVon = (payload) => volumenVon(payload).prioritaet || {};
-const gueltigePrio = (cfg) => cfg && (cfg.modus === 'plus' || cfg.modus === 'tausch');
-export const prioSatzanzahl = (cfg) => Number(cfg?.saetze) === 1 ? 1 : 2;
+const gueltigePrio = (cfg) => cfg &&
+  (cfg.modus === 'reihenfolge' || cfg.modus === 'plus' || cfg.modus === 'tausch');
+export const prioSatzanzahl = (cfg) => {
+  if (cfg?.modus === 'reihenfolge' || Number(cfg?.saetze) === 0) return 0;
+  return Number(cfg?.saetze) === 1 ? 1 : 2;
+};
 
 const prioWdhBereich = (konto, heavy) => {
   if (!heavy) return '15–25';
@@ -38,7 +42,7 @@ function passendeTage(cycle, konto) {
 export function prioBlock(konto, tag, anzahl = 2) {
   const heavy = tag.endsWith('-H');
   const ok = tag.startsWith('OK-');
-  const saetze = anzahl === 1 ? 1 : 2;
+  const saetze = anzahl === 0 ? 0 : (anzahl === 1 ? 1 : 2);
   return {
     id: prioBlockId(konto),
     mus: konto,
@@ -103,6 +107,12 @@ function regulaereFelder(payload, cycle, konto, tag = null) {
   return result;
 }
 
+export function prioReihenfolgeMoeglich(payload, cycle, konto) {
+  const tage = passendeTage(cycle, konto);
+  return tage.length > 0 &&
+    tage.every((tag) => regulaereFelder(payload, cycle, konto, tag).length > 0);
+}
+
 function bestesFeld(felder) {
   return [...felder].sort((a, b) => b.anzahl - a.anzahl || a.key.localeCompare(b.key))[0] || null;
 }
@@ -117,6 +127,10 @@ export function prioritaetsAnpassungen(payload, cycle) {
   KONTEN.forEach((ziel) => {
     const cfg = prioritaet[ziel];
     if (!gueltigePrio(cfg)) return;
+    if (cfg.modus === 'reihenfolge') {
+      ergebnisse[ziel] = { status: 'aktiv', modus: 'reihenfolge', slots: [] };
+      return;
+    }
     const zielSlots = prioMoeglichkeiten(payload, cycle, ziel);
     if (!zielSlots.length) {
       ergebnisse[ziel] = { status: 'ziel-fehlt', modus: cfg.modus };
@@ -172,6 +186,47 @@ export function prioBloecke(payload, cycle, tag) {
   return anpassung.slots
     .filter((slot) => slot.tag === tag)
     .map((slot) => slot.block);
+}
+
+// Prioritäten stehen innerhalb ihrer Körperhälfte zuerst. Bei mehreren Zielen
+// gilt die Reihenfolge, in der sie im Set-O-Meter aktiviert wurden. Reguläre
+// Blöcke bleiben vollständig erhalten; ein Zusatzslot steht direkt hinter dem
+// passenden regulären Block. Ein neuer Muskel ohne regulären Block (z. B.
+// Unterarme) erscheint als eigener Prioritätsblock in derselben oberen Gruppe.
+export function sortiereBloeckeNachPrioritaet(payload, cycle, tag, basisBloecke) {
+  const basis = [...basisBloecke];
+  if (istDeload(cycle)) return basis;
+  const prioritaet = prioritaetenVon(payload);
+  const reihenfolge = Object.keys(prioritaet).filter((konto) => gueltigePrio(prioritaet[konto]));
+  if (!reihenfolge.length) return basis;
+
+  const extras = prioBloecke(payload, cycle, tag);
+  const verwendetBasis = new Set();
+  const verwendetExtras = new Set();
+  const oben = [];
+
+  reihenfolge.forEach((konto) => {
+    let hatRegulaerenBlock = false;
+    basis.forEach((blk, index) => {
+      if (verwendetBasis.has(index) || !(blk.konten || []).includes(konto)) return;
+      oben.push(blk);
+      verwendetBasis.add(index);
+      hatRegulaerenBlock = true;
+    });
+    extras.forEach((extra, index) => {
+      if (verwendetExtras.has(index) || extra.konten?.[0] !== konto) return;
+      oben.push({ ...extra, angedockt: hatRegulaerenBlock ? 1 : 0 });
+      verwendetExtras.add(index);
+    });
+  });
+
+  extras.forEach((extra, index) => {
+    if (!verwendetExtras.has(index)) oben.push(extra);
+  });
+  basis.forEach((blk, index) => {
+    if (!verwendetBasis.has(index)) oben.push(blk);
+  });
+  return oben;
 }
 
 // Ein Spender muss in beiden passenden Einheiten die gewählte Satzanzahl

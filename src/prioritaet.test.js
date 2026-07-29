@@ -5,8 +5,10 @@ import {
   tierVon,
   koerperhaelfte,
   prioMoeglichkeiten,
+  prioReihenfolgeMoeglich,
   prioritaetsAnpassungen,
   prioBloecke,
+  sortiereBloeckeNachPrioritaet,
   spenderKandidaten,
 } from './prioritaet.js';
 
@@ -68,6 +70,40 @@ describe('Prio-Slots', () => {
 
   it('deaktiviert Prioritäten im Deload', () => {
     expect(prioMoeglichkeiten({}, 8, 'Unterarme')).toEqual([]);
+  });
+
+  it('kann vorhandene Muskeln ohne Zusatzsätze zuerst trainieren', () => {
+    const p = payload();
+    p.volumen.prioritaet.Brust = { modus: 'reihenfolge', saetze: 0 };
+    const r = prioritaetsAnpassungen(p, 1);
+    expect(r.slots).toEqual([]);
+    expect(r.delta).toEqual({});
+    expect(r.ergebnisse.Brust).toMatchObject({
+      status: 'aktiv',
+      modus: 'reihenfolge',
+    });
+    expect(prioReihenfolgeMoeglich(p, 1, 'Brust')).toBe(true);
+    expect(prioReihenfolgeMoeglich(p, 1, 'Unterarme')).toBe(false);
+  });
+
+  it('setzt mehrere Prioritäten in Auswahlreihenfolge gemeinsam nach oben', () => {
+    const p = payload();
+    p.volumen.prioritaet['Seitliche Schulter'] = { modus: 'reihenfolge', saetze: 0 };
+    p.volumen.prioritaet.Unterarme = { modus: 'plus', saetze: 1 };
+    const sortiert = sortiereBloeckeNachPrioritaet(
+      p, 1, 'OK-H',
+      [
+        { id: 'brust', konten: ['Brust'] },
+        { id: 'schulter', konten: ['Seitliche Schulter', 'Hintere Schulter'] },
+        { id: 'trizeps', konten: ['Trizeps'] },
+      ],
+    );
+    expect(sortiert.map((b) => b.id)).toEqual([
+      'schulter',
+      'prio:Unterarme',
+      'brust',
+      'trizeps',
+    ]);
   });
 
   it('schlägt vier Sätze pro Cycle auf – unabhängig vom Level', () => {
