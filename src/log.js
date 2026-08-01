@@ -1355,12 +1355,17 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   async function resetAllData() {
-    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein PUMPS-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
+    if (!confirm('ALLE eingetragenen Daten löschen (Übungen, Gewichte, Wdh, RIR, Notizen und Gym/Info)?\n\nDanach startest du mit komplett leeren Feldern in eine neue Phase.\n\nDein PUMPS-Übungspool bleibt erhalten: Trägst du eine Übung wieder ein, siehst du weiterhin, was du zuletzt geschafft hast.')) return;
     // Pool retten, bevor die Wochendaten fallen. Neuere Werte gewinnen.
     state.mem = Object.assign({}, state.mem, harvestMem(state.data));
     state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.datum = {};
     state.volumen = { prioritaet: {} };
     state.week = 1; state.day = 'OK-H';
+    ['OK-H', 'UK-H', 'OK-P', 'UK-P'].forEach((day) =>
+      localStorage.removeItem(`blast:log-kontext:${userId}:${day}`));
+    // Entfernt auch einen Eintrag aus der kurzen Übergangsphase, in der das
+    // Feld noch nicht nach Einheiten getrennt gespeichert wurde.
+    localStorage.removeItem(`blast:log-kontext:${userId}`);
     lokaleAenderungenSeitMount = true;
     clearTimeout(saveTimer);
     // Leeren ist eine Absicht: Dieser Stand ersetzt den Server, auch wenn der
