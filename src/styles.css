@@ -1520,7 +1520,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 #view,.ex-picker-liste{scrollbar-width:none;-ms-overflow-style:none}
 #view::-webkit-scrollbar,.ex-picker-liste::-webkit-scrollbar{display:none;width:0;height:0}
 
-.log-kontext{display:grid;gap:5px;margin:10px 14px 12px;padding:10px 12px;
+.log-kontext{display:grid;gap:5px;margin:10px 0 12px;padding:10px 12px;
   background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r)}
 .log-kontext span{font-family:var(--display);font-style:italic;font-weight:700;
   font-size:11px;text-transform:uppercase;color:var(--muted)}
@@ -1530,6 +1530,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .profile-schalter input{width:22px;height:22px;accent-color:var(--prio)}
 .profile-schalter span{display:flex;flex-direction:column;gap:2px}
 .profile-schalter small{color:var(--muted);font-size:11px}
+.pump-erinnerung{margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:700;line-height:1.4}
 
 /* Kleine runde Symbole bleiben optisch kompakt, erhalten aber eine echte
    44×44-px-Trefferflaeche. Das Pseudoelement gehoert zum jeweiligen Button

@@ -916,12 +916,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
     if (!readOnly && localStorage.getItem(`blast:log-kontext-sichtbar:${userId}`) !== '0') {
       const kontext = document.createElement('label');
-      const wert = localStorage.getItem(`blast:log-kontext:${userId}`) || '';
+      const kontextKey = `blast:log-kontext:${userId}:${state.day}`;
+      const wert = localStorage.getItem(kontextKey) || localStorage.getItem(`blast:log-kontext:${userId}`) || '';
       kontext.className = 'log-kontext';
       kontext.innerHTML = `<span>Gym / Info</span><input type="text" maxlength="120" placeholder="z. B. Gym, Maschine oder Hinweis">`;
       const eingabe = kontext.querySelector('input');
       eingabe.value = wert;
-      eingabe.oninput = () => localStorage.setItem(`blast:log-kontext:${userId}`, eingabe.value);
+      eingabe.oninput = () => localStorage.setItem(kontextKey, eingabe.value);
       contentEl.appendChild(kontext);
     }
 
@@ -1133,6 +1134,22 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
       exOf(blk, tier).forEach((exDef, xi) => {
         const exDiv = document.createElement('div'); exDiv.className = 'ex';
+
+        if (freeEx && state.week > 1) {
+          const vorher = state.data[state.day]?.[String(state.week - 1)]?.[blk.id];
+          const vorherName = vorher?.names?.[xi];
+          const vorherSaetze = vorher?.sets?.[xi] || [];
+          const letzterSatz = [...vorherSaetze].reverse().find((satz) => satz?.w || satz?.r);
+          if (vorherName) {
+            const erinnerung = document.createElement('p');
+            erinnerung.className = 'pump-erinnerung';
+            const leistung = letzterSatz
+              ? ` · ${letzterSatz.w || '–'} kg × ${letzterSatz.r || '–'} Wdh`
+              : '';
+            erinnerung.textContent = `Zuletzt verwendet: ${vorherName}${leistung}`;
+            exDiv.appendChild(erinnerung);
+          }
+        }
 
         const hd = document.createElement('div'); hd.className = 'exhead';
         if (exDef.r || blk.prio) {
