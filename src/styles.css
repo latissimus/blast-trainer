@@ -538,10 +538,16 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   position:absolute;left:0;right:0;bottom:0;z-index:30;
   padding:8px 7px var(--ctrlbar-bottom);overflow:hidden;
   background:transparent}
+/* An der oberen Kante blendet die Seitenfarbe weich aus. Das verdeckt Inhalt
+   in den oberen Rundungsecken, ohne die Milchglasflaeche deckend zu machen. */
+.ctrlbar::before{content:"";position:absolute;z-index:0;top:0;right:0;left:0;height:18px;
+  background:linear-gradient(180deg,var(--bg) 0,
+    color-mix(in srgb,var(--bg) 70%,transparent) 45%,transparent 100%);
+  pointer-events:none}
 /* Nur der Spalt UNTER der gerundeten Milchglasleiste ist deckend. Hinter der
    Leiste selbst bleibt der Trainingsinhalt sichtbar und wird weiter geblurt. */
 .ctrlbar::after{content:"";position:absolute;z-index:0;right:0;bottom:0;left:0;
-  height:calc(var(--ctrlbar-bottom) + 1px);background:var(--bg);pointer-events:none}
+  height:calc(var(--ctrlbar-bottom) + 9px);background:var(--bg);pointer-events:none}
 /* Auch ausserhalb der Milchglasleiste darf beim Tutorial kein heller
    Seitenstreifen sichtbar bleiben – besonders nicht an den unteren Ecken. */
 html.statusleiste-overlay .ctrlbar{z-index:50;background:var(--bg)}
