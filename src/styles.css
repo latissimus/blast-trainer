@@ -534,10 +534,10 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    max-width, die greift dort nie.
    UNTERGRENZE sind 7px: Der Schlagschatten steht 4px nach rechts, darunter
    beruehrt die rechte untere Ecke den Bildschirmrand. */
-.ctrlbar{--ctrlbar-bottom:6px;
-  position:fixed;left:0;right:0;bottom:0;z-index:30;
-  padding:0 7px var(--ctrlbar-bottom);overflow:hidden;
-  background:linear-gradient(180deg,transparent 0,var(--bg) 8px,transparent 8px)}
+.ctrlbar{--ctrlbar-bottom:max(6px,calc(env(safe-area-inset-bottom) - 6px));
+  position:relative;left:auto;right:auto;bottom:auto;z-index:30;
+  padding:8px 7px var(--ctrlbar-bottom);overflow:hidden;
+  background:var(--bg)}
 /* Auch ausserhalb der Milchglasleiste darf beim Tutorial kein heller
    Seitenstreifen sichtbar bleiben – besonders nicht an den unteren Ecken. */
 html.statusleiste-overlay .ctrlbar{z-index:50;background:var(--bg)}
@@ -1061,7 +1061,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 /* Platz fuer die feste Bedienleiste unten. Zwei Zeilen je Feld machen sie
    hoeher als die fruehere Speicherleiste – ohne das verdeckt sie den
    letzten Block. */
-.pad-bottom{padding-bottom:118px}
+.pad-bottom{padding-bottom:20px}
 
 .toast{position:fixed;left:50%;bottom:112px;transform:translateX(-50%) translateY(18px);opacity:0;
   background:var(--navy);color:#fff;font-size:13.5px;font-weight:800;padding:11px 18px;border-radius:var(--r);
@@ -1531,7 +1531,7 @@ html.app-shell-an #app{
   overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch
 }
 #app.app-shell{
-  display:grid;grid-template-rows:auto minmax(0,1fr);
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto;
   width:100%;height:100dvh;min-height:0;overflow:hidden
 }
 #app.app-shell>.topbar{
@@ -1544,3 +1544,4 @@ html.app-shell-an #app{
   -webkit-overflow-scrolling:touch;scroll-behavior:auto;
   background-attachment:scroll!important
 }
+#app.app-shell>.ctrlbar{grid-row:3;align-self:stretch}
