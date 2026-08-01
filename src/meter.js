@@ -338,7 +338,7 @@ export async function mountMeter(container, { userId }) {
       const nachher = body.querySelector('.som-muskel.offen');
       if (!nachher) return;
       const delta = nachher.getBoundingClientRect().top - vorherTop;
-      if (Math.abs(delta) > 1) window.scrollBy({ top: delta, behavior: 'smooth' });
+      if (Math.abs(delta) > 1) document.getElementById('view')?.scrollBy({ top: delta, behavior: 'smooth' });
     });
     await synchronisiereTraining(userId, payload, (status) => {
       if (rev !== revision) return;

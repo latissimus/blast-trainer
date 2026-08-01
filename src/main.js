@@ -70,6 +70,8 @@ function cleanupActive() {
 /* ------------------------------------------------------------ auth UI */
 function renderAuth() {
   cleanupActive();
+  document.documentElement.classList.remove('app-shell-an');
+  app.classList.remove('app-shell');
   stoppePause(false);
   const isLogin = authMode === 'login';
   app.innerHTML = `
@@ -160,6 +162,8 @@ function renderAuth() {
 // landete man direkt im Log – mit dem alten, unbekannten Passwort.
 function renderRecovery() {
   cleanupActive();
+  document.documentElement.classList.remove('app-shell-an');
+  app.classList.remove('app-shell');
   app.innerHTML = `
     ${MARQUEE}
     <div class="auth-shell">
@@ -222,6 +226,8 @@ function navAvatar() {
 function renderChrome() {
   aktiveAnsicht = null;
   logScrollY = 0;
+  document.documentElement.classList.add('app-shell-an');
+  app.classList.add('app-shell');
   const isAdmin = profile?.role === 'admin';
   app.innerHTML = `
     <header class="topbar">
@@ -368,9 +374,9 @@ function setNavActive(view) {
 }
 
 async function routeView() {
-  if (aktiveAnsicht === 'log') logScrollY = window.scrollY;
   const view = document.getElementById('view');
   if (!view) return;
+  if (aktiveAnsicht === 'log') logScrollY = view.scrollTop;
   let hash = (location.hash.replace('#', '') || 'log');
   if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
   if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'feedback', 'notizbuch'].includes(hash)) hash = 'log';
@@ -386,29 +392,9 @@ async function routeView() {
   const token = ++routeToken;
   const guard = (v) => { if (token !== routeToken) { v?.destroy?.(); return; } active = v; };
 
-  // OFFEN: Beim Seitenwechsel flackert auf dem installierten iPhone kurz die
-  // Kopfzeile – Logo, Chip, Sync-Punkt und Avatar verschwinden fuer ein Bild,
-  // manchmal auch ihr Hintergrund. Ausschliesslich dann, wenn vorher gescrollt
-  // wurde, und ausschliesslich in der installierten App, nie im Safari-Tab.
-  //
-  // Eingegrenzt (jeweils per Sonde am Geraet geprueft, alle ergebnislos ausser
-  // der ersten): Der Inhaltstausch loest es aus – laesst man ihn weg und macht
-  // nur das Umschalten, flackert nichts. NICHT die Ursache sind: Dokumenthoehe
-  // einfrieren, Kopfzeile fest statt klebend, eigene GPU-Ebene, alle
-  // Milchglas-Effekte, Stapelkontext und Pseudo-Elemente der Kopfzeile, die
-  // untere Bedienleiste, das native Auswahlrad, CSS-Containment auf #view.
-  // Die Bildabstaende bleiben dabei sauber bei 60 fps – der Hauptthread ist
-  // frei, es ist reine Kompositor-Arbeit.
-  //
-  // Arbeitshypothese: Ganz oben ueberlappt die Kopfzeile den Inhalt nicht und
-  // kann mit ihm zusammen gezeichnet werden. Nach dem Scrollen liegt sie
-  // darueber und braucht eine eigene Ebene – die beim Tausch verworfen und zu
-  // langsam neu aufgebaut wird.
-  // Naechster sinnvoller Ansatz waere eine App-Huelle, bei der nicht das
-  // Fenster scrollt, sondern #view (Muster: html.overlay-scroll-gesperrt in
-  // styles.css). Dann entfaellt die Ueberlappung. Das muss AM GERAET
-  // entwickelt werden – im Vorschaubrowser ist die Fensterhoehe 0, dort laesst
-  // sich so ein Layout nicht pruefen.
+  // Der Header liegt ausserhalb des einzigen Scrollcontainers #view. Beim
+  // Inhaltstausch gibt es daher keine ueberlappende Sticky-Ebene mehr, die
+  // WebKit nach vorherigem Scrollen verwerfen und neu zeichnen muesste.
 
   // Unterseiten zunächst außerhalb des sichtbaren Views aufbauen und erst
   // vollständig einsetzen. Das bisherige sofortige Leeren zeigte auf iOS für
@@ -455,24 +441,11 @@ async function routeView() {
   aktiveAnsicht = hash;
   const zielY = hash === 'log' ? logScrollY : 0;
 
-  // SYNCHRON, nicht erst im naechsten Bild: Sonst ist der Inhalt schon
-  // getauscht, waehrend die Scrollposition noch die der alten Seite ist –
-  // nachgemessen stand die Seite bereits auf "prog", waehrend scrollY noch bei
-  // 600 lag. Diesen Zwischenstand darf der Browser zeichnen.
-  // (Das kurze Flackern der Kopfzeile behebt das NICHT – siehe die Notiz beim
-  // Inhaltstausch weiter oben. Richtig ist es trotzdem.)
-  //
-  // Ein offenes Tutorial/Overlay haelt iOS-Fenster und Body bewusst bei 0 und
-  // scrollt nur den Seiteninhalt #view. Sonst wuerde dieser Routen-Scroll die
-  // Sperre direkt nach dem Mounten wieder aushebeln.
+  // Synchron setzen: Der neue Inhalt darf nie fuer ein Bild mit der Position
+  // der vorherigen Seite erscheinen.
   const scrollSetzen = () => {
     if (token !== routeToken) return;
-    if (document.documentElement.classList.contains('overlay-scroll-gesperrt')) {
-      view.scrollTo({ top: zielY, behavior: 'instant' });
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    } else {
-      window.scrollTo({ top: zielY, behavior: 'instant' });
-    }
+    view.scrollTo({ top: zielY, behavior: 'instant' });
   };
   scrollSetzen();
   // Nachfassen im naechsten Bild: Wird die Seite durch spaet fertige Bilder
@@ -487,6 +460,8 @@ async function routeView() {
 // anderen.
 function showSplash() {
   cleanupActive();
+  document.documentElement.classList.remove('app-shell-an');
+  app.classList.remove('app-shell');
   app.innerHTML = `<div class="splash"><span class="brand">${brandSvg()}</span></div>`;
   return new Promise((r) => setTimeout(r, 2000));
 }

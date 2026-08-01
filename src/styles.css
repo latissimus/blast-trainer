@@ -121,6 +121,15 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 html{background:var(--bg)}
+/* Installierte App: Kopf und Bedienleiste gehoeren zur festen Huelle. Nur der
+   mittlere View scrollt. Damit ueberlappt der Header den Seiteninhalt nie und
+   WebKit muss seine Ebene beim Routenwechsel nicht neu zusammensetzen. */
+html.app-shell-an,html.app-shell-an body{height:100%;overflow:hidden}
+#app.app-shell{display:flex;flex-direction:column;width:100%;height:100%;height:100dvh;
+  min-height:0;overflow:hidden;background:var(--bg)}
+#app.app-shell #view{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;
+  padding-top:var(--tutorial-kartenraum,0px);background:var(--bg);
+  overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
 /* Safari zeigt beim Scroll-Gummiband die Leinwand von <html>. Waere sie trotz
    offenem Overlay noch weiss oder seitenfarben, blitzt genau der geschuetzte
    Bereich um Uhrzeit und Akku beim Scrollen um. */
@@ -130,18 +139,8 @@ html.statusleiste-overlay{background:var(--statusbar-bg,var(--bg))}
    Der eigentliche App-Inhalt behaelt separat seine Seitenfarbe und wird wie
    bisher vom Overlay abgedunkelt. */
 html.statusleiste-overlay body{background:var(--statusbar-bg,var(--bg))}
-html.statusleiste-overlay #app{min-height:100dvh;background:var(--statusbar-bg,var(--bg))}
-html.statusleiste-overlay #view{min-height:100dvh;background:var(--bg)}
-/* Nicht das iOS-Fenster und auch nicht der Body, sondern nur der eigentliche
-   Seiteninhalt #view scrollt waehrend eines Overlays.
-   Dadurch bleibt der transparente Statusbereich auf derselben dunklen Flaeche,
-   auch wenn das Tutorial automatisch zur naechsten Uebung faehrt. */
-html.overlay-scroll-gesperrt{height:100%;overflow:hidden}
-html.overlay-scroll-gesperrt body{position:fixed;inset:0;width:100%;height:100%;overflow:hidden}
-html.overlay-scroll-gesperrt #app{display:flex;flex-direction:column;height:100%;overflow:hidden}
-html.overlay-scroll-gesperrt #view{flex:1 1 auto;min-height:0;overflow-y:auto;
-  padding-top:var(--tutorial-kartenraum,0px);
-  overscroll-behavior:none;-webkit-overflow-scrolling:touch}
+html.statusleiste-overlay #app{background:var(--statusbar-bg,var(--bg))}
+html.statusleiste-overlay #view{background:var(--bg)}
 body{
   background:var(--bg);color:var(--text);font-family:var(--mono);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
@@ -160,7 +159,7 @@ a{color:var(--link)}
    – Logo und Profilbild blitzten dadurch kurz auf. */
 
 /* ---------- Top bar / nav ---------- */
-.topbar{position:sticky;top:0;z-index:20;isolation:isolate;background:var(--bg);
+.topbar{position:relative;flex:0 0 auto;z-index:20;isolation:isolate;background:var(--bg);
   border-bottom:2px solid var(--ink);padding:calc(env(safe-area-inset-top) + 10px) 0 10px}
 /* Beim iOS-Gummiband wandert der Sticky-Header kurz nach unten, waehrend
    fixed Elemente am Viewport bleiben. Diese unsichtbare Fortsetzung deckt
@@ -168,6 +167,7 @@ a{color:var(--link)}
    dort auch bei starkem Herunterziehen nicht hervorscheinen. */
 .topbar::before{content:"";position:absolute;z-index:-1;left:0;right:0;bottom:100%;
   height:100vh;background:var(--bg);pointer-events:none}
+#app.app-shell .topbar::before{display:none}
 /* Eigene Deckflaeche zwischen Lasche und Header-Inhalt: So kann die Lasche
    innerhalb der Kopfzeile hochfahren, ohne jemals vor Logo oder Avatar zu
    erscheinen. Sichtbar ist ausschliesslich der Teil unterhalb der Kontur. */
@@ -1228,7 +1228,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 /* FAQ-Accordion */
 /* Abschnittsueberschrift im FAQ. Die Liste ist lang genug, dass man sonst nicht
    mehr weiss, auf welcher Ebene man liest – vom Prinzip bis zur Bedienung. */
-.faq-sektion{scroll-margin-top:calc(var(--topbar-h) + 10px);border-top:var(--dash) dashed var(--ink);margin:22px 0 12px;padding-top:12px;
+.faq-sektion{scroll-margin-top:10px;border-top:var(--dash) dashed var(--ink);margin:22px 0 12px;padding-top:12px;
   font-family:var(--display);font-style:italic;font-weight:700;font-size:14.5px;
   text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .faq-sektion:first-of-type{border-top:0;margin-top:4px;padding-top:0}
@@ -1237,7 +1237,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
    Gewicht 400, nicht in der kursiven Display-Schrift. Die Versalien stehen
    dort im Text, nicht im CSS; wir behalten text-transform, weil unsere Fragen
    gemischt geschrieben sind. */
-.faq{scroll-margin-top:calc(var(--topbar-h) + 10px);border:var(--bw) solid var(--ink);
+.faq{scroll-margin-top:10px;border:var(--bw) solid var(--ink);
   border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;overflow:hidden}
 .faq>summary{list-style:none;cursor:pointer;padding:18px 46px 18px 18px;position:relative;
   font-family:var(--mono);font-weight:400;text-transform:uppercase;font-size:16px;
