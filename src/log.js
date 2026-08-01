@@ -919,7 +919,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const kontextKey = `blast:log-kontext:${userId}:${state.day}`;
       const wert = localStorage.getItem(kontextKey) || localStorage.getItem(`blast:log-kontext:${userId}`) || '';
       kontext.className = 'log-kontext';
-      kontext.innerHTML = `<span>Gym / Info</span><input type="text" maxlength="120" placeholder="z. B. Gym, Maschine oder Hinweis">`;
+      kontext.innerHTML = `<span>Gym / Info</span><input type="text" maxlength="120" placeholder="z. B. verwendetes Gym oder Hinweise">`;
       const eingabe = kontext.querySelector('input');
       eingabe.value = wert;
       eingabe.oninput = () => localStorage.setItem(kontextKey, eingabe.value);
