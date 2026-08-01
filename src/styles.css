@@ -540,7 +540,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   background:transparent}
 /* An der oberen Kante blendet die Seitenfarbe weich aus. Das verdeckt Inhalt
    in den oberen Rundungsecken, ohne die Milchglasflaeche deckend zu machen. */
-.ctrlbar::before{content:"";position:absolute;z-index:0;top:0;right:0;left:0;height:18px;
+.ctrlbar::before{content:"";position:absolute;z-index:0;top:8px;right:0;left:0;height:10px;
   background:linear-gradient(180deg,var(--bg) 0,
     color-mix(in srgb,var(--bg) 70%,transparent) 45%,transparent 100%);
   pointer-events:none}
