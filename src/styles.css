@@ -128,7 +128,7 @@ html.app-shell-an,html.app-shell-an body{height:100%;overflow:hidden}
 #app.app-shell{display:flex;flex-direction:column;width:100%;height:100%;height:100dvh;
   min-height:0;overflow:hidden;background:var(--bg)}
 #app.app-shell #view{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;
-  padding-top:var(--tutorial-kartenraum,0px);background:var(--bg);
+  padding-top:var(--tutorial-kartenraum,0px);background-color:var(--bg);
   overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
 /* Safari zeigt beim Scroll-Gummiband die Leinwand von <html>. Waere sie trotz
    offenem Overlay noch weiss oder seitenfarben, blitzt genau der geschuetzte
@@ -140,7 +140,7 @@ html.statusleiste-overlay{background:var(--statusbar-bg,var(--bg))}
    bisher vom Overlay abgedunkelt. */
 html.statusleiste-overlay body{background:var(--statusbar-bg,var(--bg))}
 html.statusleiste-overlay #app{background:var(--statusbar-bg,var(--bg))}
-html.statusleiste-overlay #view{background:var(--bg)}
+html.statusleiste-overlay #view{background-color:var(--bg)}
 body{
   background:var(--bg);color:var(--text);font-family:var(--mono);
   font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
@@ -534,7 +534,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    max-width, die greift dort nie.
    UNTERGRENZE sind 7px: Der Schlagschatten steht 4px nach rechts, darunter
    beruehrt die rechte untere Ecke den Bildschirmrand. */
-.ctrlbar{--ctrlbar-bottom:max(6px, calc(env(safe-area-inset-bottom) - 6px));
+.ctrlbar{--ctrlbar-bottom:max(6px, calc(env(safe-area-inset-bottom) - 18px));
   position:fixed;left:0;right:0;bottom:0;z-index:30;
   padding:0 7px var(--ctrlbar-bottom);overflow:hidden;
   background:linear-gradient(180deg,transparent 0,var(--bg) 8px,transparent 8px)}
@@ -1133,9 +1133,9 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 
 /* Eine Ebene und eine Höhe für alle Unterseiten. Das verhindert sowohl
    abgeschnittene Muster auf kurzen Seiten als auch doppelte Deckkraft. */
-body[data-seite="meter"],body[data-seite="feedback"],body[data-seite="faq"],
-body[data-seite="profile"],body[data-seite="prog"],body[data-seite="notizbuch"]{
-  min-height:100vh;min-height:100dvh;
+:root[data-seite="meter"] #view,:root[data-seite="feedback"] #view,
+:root[data-seite="faq"] #view,:root[data-seite="profile"] #view,
+:root[data-seite="prog"] #view,:root[data-seite="notizbuch"] #view{
   background-color:transparent;
   background-image:var(--muster-dreieck);
   background-size:auto;
@@ -1145,18 +1145,18 @@ body[data-seite="profile"],body[data-seite="prog"],body[data-seite="notizbuch"]{
    bei identischen 7 % deshalb kräftiger. Eine transparente Schicht in exakt
    der Seitenfarbe senkt ihren sichtbaren Kontrast auf rund 4,5 %, ohne den
    Grundton zu verändern. */
-body[data-seite="prog"],body[data-seite="notizbuch"]{
+:root[data-seite="prog"] #view,:root[data-seite="notizbuch"] #view{
   background-image:
     linear-gradient(color-mix(in srgb,var(--bg) 35%,transparent),color-mix(in srgb,var(--bg) 35%,transparent)),
     var(--muster-tropfen);
   background-size:auto,112px}
-:root[data-theme="dark"] body[data-seite="meter"],
-:root[data-theme="dark"] body[data-seite="feedback"],
-:root[data-theme="dark"] body[data-seite="faq"],
-:root[data-theme="dark"] body[data-seite="profile"]{
+:root[data-theme="dark"][data-seite="meter"] #view,
+:root[data-theme="dark"][data-seite="feedback"] #view,
+:root[data-theme="dark"][data-seite="faq"] #view,
+:root[data-theme="dark"][data-seite="profile"] #view{
   background-image:var(--muster-dreieck-dunkel)}
-:root[data-theme="dark"] body[data-seite="prog"],
-:root[data-theme="dark"] body[data-seite="notizbuch"]{
+:root[data-theme="dark"][data-seite="prog"] #view,
+:root[data-theme="dark"][data-seite="notizbuch"] #view{
   background-image:
     linear-gradient(color-mix(in srgb,var(--bg) 35%,transparent),color-mix(in srgb,var(--bg) 35%,transparent)),
     var(--muster-tropfen-dunkel)}
