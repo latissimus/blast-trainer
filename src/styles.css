@@ -1545,3 +1545,16 @@ html.app-shell-an #app{
   background-attachment:scroll!important
 }
 #app.app-shell>.ctrlbar{grid-row:3;align-self:stretch}
+
+/* Unterseiten besitzen keine dritte Bedienzeile. In iOS-Standalone endet
+   100dvh auf manchen Geraeten bereits oberhalb der unteren Safe-Area. Eine
+   fest positionierte Huelle darf diese Grenze ueberschreiten und reicht bis
+   an den physischen Displayrand; das Innenpolster haelt den letzten Inhalt
+   trotzdem oberhalb des Home-Indikators. Log und Admin bleiben unveraendert. */
+body[data-seite]:not([data-seite="log"]):not([data-seite="admin"]) #app.app-shell{
+  position:fixed;top:0;right:0;bottom:calc(0px - env(safe-area-inset-bottom));left:0;
+  width:100%;height:auto
+}
+body[data-seite]:not([data-seite="log"]):not([data-seite="admin"]) #app.app-shell>#view{
+  padding-bottom:env(safe-area-inset-bottom)
+}
