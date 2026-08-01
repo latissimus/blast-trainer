@@ -139,7 +139,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saving:  ['↻', 'saving', 'speichert…'],
     pending: ['↻', 'saving', 'ungespeicherte Änderungen'],
     // Nicht hochgeladen heisst nicht mehr "verloren": lokal liegt es sicher.
-    offline: ['↑', 'wait',   'auf diesem Gerät gesichert · wartet auf Verbindung'],
+    offline: ['▲', 'wait',   'auf diesem Gerät gesichert · wartet auf Verbindung'],
     error:   ['⚠', 'err',    'auf diesem Gerät gesichert · Upload fehlgeschlagen'],
   };
   function setStatus(kind) {
@@ -913,6 +913,17 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tutorialEbene.innerHTML = '';
     tutorialEbene.hidden = !tutorialAktiv;
     tutorialDunkel.hidden = !tutorialAktiv;
+
+    if (!readOnly && localStorage.getItem(`blast:log-kontext-sichtbar:${userId}`) !== '0') {
+      const kontext = document.createElement('label');
+      const wert = localStorage.getItem(`blast:log-kontext:${userId}`) || '';
+      kontext.className = 'log-kontext';
+      kontext.innerHTML = `<span>Gym / Info</span><input type="text" maxlength="120" placeholder="z. B. Gym, Maschine oder Hinweis">`;
+      const eingabe = kontext.querySelector('input');
+      eingabe.value = wert;
+      eingabe.oninput = () => localStorage.setItem(`blast:log-kontext:${userId}`, eingabe.value);
+      contentEl.appendChild(kontext);
+    }
 
     if (einstiegSichtbar) {
       const einstieg = document.createElement('section');

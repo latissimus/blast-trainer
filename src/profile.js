@@ -193,6 +193,18 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   };
   card.appendChild(saveBtn);
 
+  const logCard = profilSektion('Log-Einstellungen');
+  const logKontext = document.createElement('label');
+  logKontext.className = 'profile-schalter';
+  logKontext.innerHTML = `<input type="checkbox"><span><b>Gym-/Infofeld anzeigen</b><small>Oben im Log · bleibt für alle Cycles erhalten</small></span>`;
+  const logKontextSchalter = logKontext.querySelector('input');
+  logKontextSchalter.checked = localStorage.getItem(`blast:log-kontext-sichtbar:${session.user.id}`) !== '0';
+  logKontextSchalter.onchange = () => {
+    localStorage.setItem(`blast:log-kontext-sichtbar:${session.user.id}`, logKontextSchalter.checked ? '1' : '0');
+    toast(logKontextSchalter.checked ? 'Gym-/Infofeld eingeblendet' : 'Gym-/Infofeld ausgeblendet');
+  };
+  logCard.appendChild(logKontext);
+
   // --- Passwort aendern -------------------------------------------------
   const pwCard = profilSektion('Passwort ändern');
   const pwMsg = document.createElement('div');

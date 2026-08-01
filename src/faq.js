@@ -133,7 +133,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Welche Pausenzeiten gelten?</summary>
       <div class="faq-a">
-        <p>Die Pause steht direkt im jeweiligen Muskelblock und passt zur Übung: große HEAVYS-Comps meist <b>3 Minuten</b>, HEAVYS-Isos meist <b>2–2.5 Minuten</b>, MIDDLES meist <b>2 Minuten</b> und PUMPS meist <b>1–2 Minuten</b>.</p>
+        <p>Die Pause steht direkt im jeweiligen Muskelblock und passt zur Übung: HEAVYS-Comps meist <b>3 Minuten</b>, HEAVYS-Isos einschließlich Quads/Hams <b>2.5 Minuten</b>, MIDDLES-Comps <b>2.5 Minuten</b>, MIDDLES-Isos <b>2 Minuten</b>, PUMPS am Oberkörper sowie Waden/Abs <b>1.5 Minuten</b> und PUMPS für Quads/Hams <b>2 Minuten</b>.</p>
         <p>Ein Tipp auf den Uhr-Chip startet den Timer. Wenn deine Leistung trotz passender Anstrengung deutlich einbricht, darfst du etwas länger pausieren.</p>
         <p><b>Evidenz:</b> Sehr kurze Pausen sind für Muskelaufbau nicht überlegen. Ausreichende Pausen helfen, Wiederholungen und Satzqualität zu erhalten.</p>
       </div>

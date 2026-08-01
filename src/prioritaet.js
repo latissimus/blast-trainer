@@ -49,7 +49,7 @@ export function prioBlock(konto, tag, anzahl = 2) {
     konten: [konto],
     type: heavy ? 'load' : 'pump',
     sets: [saetze, saetze, saetze],
-    rest: heavy ? (ok ? 150 : 180) : (ok ? 60 : 120),
+    rest: heavy ? 150 : (ok ? 90 : 120),
     reps: prioWdhBereich(konto, heavy),
     rir: heavy ? '0–3 RIR' : '0–1 RIR',
     free: heavy ? 0 : 1,

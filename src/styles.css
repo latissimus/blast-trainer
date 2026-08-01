@@ -331,6 +331,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .save-dot.saving{color:var(--faint)}
 /* wartet auf Verbindung – kein Fehler, die Daten liegen lokal sicher */
 .save-dot.wait{color:var(--link)}
+.save-dot.wait{font-size:22px;font-weight:900}
 .save-dot.err{color:var(--down)}
 
 /* ---------- Log: week / rotation ---------- */
@@ -1513,6 +1514,22 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .mess-label,.prog-kurvenkopf span,.k-achse{
   font-size:11px!important}
 .som-hinweis.som-hinweis-oben{font-size:12px;text-align:left}
+
+/* Ruhiger App-Look: Scrollen bleibt vollständig erhalten, nur die native
+   Balkendarstellung verschwindet. */
+#view,.ex-picker-liste{scrollbar-width:none;-ms-overflow-style:none}
+#view::-webkit-scrollbar,.ex-picker-liste::-webkit-scrollbar{display:none;width:0;height:0}
+
+.log-kontext{display:grid;gap:5px;margin:10px 14px 12px;padding:10px 12px;
+  background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r)}
+.log-kontext span{font-family:var(--display);font-style:italic;font-weight:700;
+  font-size:11px;text-transform:uppercase;color:var(--muted)}
+.log-kontext input{width:100%;padding:7px 0;border:0;background:transparent;color:var(--text);
+  font:700 14px var(--mono);outline:0}
+.profile-schalter{display:flex;align-items:center;gap:11px;cursor:pointer}
+.profile-schalter input{width:22px;height:22px;accent-color:var(--prio)}
+.profile-schalter span{display:flex;flex-direction:column;gap:2px}
+.profile-schalter small{color:var(--muted);font-size:11px}
 
 /* Kleine runde Symbole bleiben optisch kompakt, erhalten aber eine echte
    44×44-px-Trefferflaeche. Das Pseudoelement gehoert zum jeweiligen Button
