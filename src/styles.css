@@ -1124,12 +1124,9 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
    Beide liegen ton-in-ton in der Tintenfarbe statt in einem festen Lila –
    so tragen sie jeden Seitengrund und kippen im Dark-Mode von selbst mit.
    Welches Muster eine Seite bekommt, ist unten eine Zeile. */
-/* Der Root hält nur die jeweilige Grundfarbe. Das Muster liegt weiter unten
-   einheitlich auf einem mindestens displayhohen Body. So rendert WebKit FAQ,
-   Feedback und die übrigen Unterseiten aus exakt derselben Ebene. */
-:root[data-seite="meter"],:root[data-seite="prog"],:root[data-seite="feedback"],
-:root[data-seite="faq"],:root[data-seite="profile"],:root[data-seite="notizbuch"]{
-  background-image:none}
+/* Auf iOS kann die untere Safe-Area je nach Scrollzustand aus dem Canvas von
+   html, body oder der App-Huelle gezeichnet werden. Deshalb tragen alle drei
+   Ebenen dasselbe Muster. Header und Karten bleiben deckend und unveraendert. */
 :root[data-theme="dark"][data-seite="log"]{background-image:none}
 
 /* Eine Ebene und eine Höhe für alle Unterseiten. Das verhindert sowohl
@@ -1137,9 +1134,15 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 :root[data-seite="meter"] #view,:root[data-seite="feedback"] #view,
 :root[data-seite="faq"] #view,:root[data-seite="profile"] #view,
 :root[data-seite="prog"] #view,:root[data-seite="notizbuch"] #view,
+:root[data-seite="meter"],:root[data-seite="feedback"],
+:root[data-seite="faq"],:root[data-seite="profile"],
+:root[data-seite="prog"],:root[data-seite="notizbuch"],
+:root[data-seite="meter"] #app,:root[data-seite="feedback"] #app,
+:root[data-seite="faq"] #app,:root[data-seite="profile"] #app,
+:root[data-seite="prog"] #app,:root[data-seite="notizbuch"] #app,
 body[data-seite="meter"],body[data-seite="feedback"],body[data-seite="faq"],
 body[data-seite="profile"],body[data-seite="prog"],body[data-seite="notizbuch"]{
-  background-color:transparent;
+  background-color:var(--bg);
   background-image:var(--muster-dreieck);
   background-size:auto;
   background-repeat:repeat}
@@ -1149,6 +1152,8 @@ body[data-seite="profile"],body[data-seite="prog"],body[data-seite="notizbuch"]{
    der Seitenfarbe senkt ihren sichtbaren Kontrast auf rund 4,5 %, ohne den
    Grundton zu verändern. */
 :root[data-seite="prog"] #view,:root[data-seite="notizbuch"] #view,
+:root[data-seite="prog"],:root[data-seite="notizbuch"],
+:root[data-seite="prog"] #app,:root[data-seite="notizbuch"] #app,
 body[data-seite="prog"],body[data-seite="notizbuch"]{
   background-image:
     linear-gradient(color-mix(in srgb,var(--bg) 35%,transparent),color-mix(in srgb,var(--bg) 35%,transparent)),
@@ -1158,6 +1163,14 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 :root[data-theme="dark"][data-seite="feedback"] #view,
 :root[data-theme="dark"][data-seite="faq"] #view,
 :root[data-theme="dark"][data-seite="profile"] #view,
+:root[data-theme="dark"][data-seite="meter"],
+:root[data-theme="dark"][data-seite="feedback"],
+:root[data-theme="dark"][data-seite="faq"],
+:root[data-theme="dark"][data-seite="profile"],
+:root[data-theme="dark"][data-seite="meter"] #app,
+:root[data-theme="dark"][data-seite="feedback"] #app,
+:root[data-theme="dark"][data-seite="faq"] #app,
+:root[data-theme="dark"][data-seite="profile"] #app,
 :root[data-theme="dark"] body[data-seite="meter"],
 :root[data-theme="dark"] body[data-seite="feedback"],
 :root[data-theme="dark"] body[data-seite="faq"],
@@ -1165,6 +1178,10 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
   background-image:var(--muster-dreieck-dunkel)}
 :root[data-theme="dark"][data-seite="prog"] #view,
 :root[data-theme="dark"][data-seite="notizbuch"] #view,
+:root[data-theme="dark"][data-seite="prog"],
+:root[data-theme="dark"][data-seite="notizbuch"],
+:root[data-theme="dark"][data-seite="prog"] #app,
+:root[data-theme="dark"][data-seite="notizbuch"] #app,
 :root[data-theme="dark"] body[data-seite="prog"],
 :root[data-theme="dark"] body[data-seite="notizbuch"]{
   background-image:
