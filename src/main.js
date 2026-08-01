@@ -34,6 +34,29 @@ if ('serviceWorker' in navigator) {
 }
 
 const app = document.getElementById('app');
+
+// iOS kann in einer installierten PWA 100dvh an der Oberkante der unteren
+// Safe-Area beenden. screen.height liefert dagegen die physische CSS-Hoehe des
+// Displays. Nur im Standalone-Modus geben wir diese verlässliche Höhe an die
+// Unterseiten-Shell weiter; ein normaler Browser behaelt sein dynamisches dvh.
+const istStandalone = window.matchMedia('(display-mode: standalone)').matches
+  || window.navigator.standalone === true;
+function displayhoeheAktualisieren() {
+  if (!istStandalone) {
+    document.documentElement.style.removeProperty('--app-display-height');
+    return;
+  }
+  const quer = window.innerWidth > window.innerHeight;
+  const kanten = [window.screen?.width, window.screen?.height]
+    .map(Number).filter((wert) => Number.isFinite(wert) && wert > 0);
+  if (kanten.length !== 2) return;
+  const hoehe = quer ? Math.min(...kanten) : Math.max(...kanten);
+  document.documentElement.style.setProperty('--app-display-height', `${hoehe}px`);
+}
+displayhoeheAktualisieren();
+window.addEventListener('orientationchange', displayhoeheAktualisieren);
+window.addEventListener('resize', displayhoeheAktualisieren);
+
 let session = null;
 let profile = null;
 let active = null;          // current view's { destroy } handle
