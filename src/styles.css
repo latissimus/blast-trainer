@@ -1520,12 +1520,14 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 #view,.ex-picker-liste{scrollbar-width:none;-ms-overflow-style:none}
 #view::-webkit-scrollbar,.ex-picker-liste::-webkit-scrollbar{display:none;width:0;height:0}
 
-.log-kontext{display:grid;gap:5px;margin:10px 0 12px;padding:10px 12px;
-  background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r)}
+.log-kontext{display:grid;gap:3px;margin:8px 0 12px;padding:8px 10px;
+  background:color-mix(in srgb,var(--surface) 58%,transparent);
+  border:var(--hairline) solid color-mix(in srgb,var(--ink) 38%,transparent);
+  border-radius:var(--r)}
 .log-kontext span{font-family:var(--display);font-style:italic;font-weight:700;
-  font-size:11px;text-transform:uppercase;color:var(--muted)}
+  font-size:10px;text-transform:uppercase;color:var(--muted);opacity:.78}
 .log-kontext input{width:100%;padding:7px 0;border:0;background:transparent;color:var(--text);
-  font:700 14px var(--mono);outline:0}
+  font:600 13px var(--mono);outline:0}
 .profile-schalter{display:flex;align-items:center;gap:11px;cursor:pointer}
 .profile-schalter input{width:22px;height:22px;accent-color:var(--prio)}
 .profile-schalter span{display:flex;flex-direction:column;gap:2px}
