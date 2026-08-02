@@ -83,7 +83,7 @@ export function mountFaq(container) {
     <details class="faq"><summary>Wie trainiere ich HEAVYS?</summary>
       <div class="faq-a">
         <p><b>A-Tage · 6–10 Wiederholungen.</b> HEAVYS nutzen feste Übungen. Ziel sind technisch standardisierte Leistungsprogression, hohe mechanische Belastung und zuverlässige Logbuchvergleiche.</p>
-        <p><b>Zielnähe:</b> Comp-Übungen werden mit 0–3 RIR, Iso-Übungen mit 0–2 RIR ausgeführt. 0 RIR bedeutet, dass keine weitere saubere Wiederholung möglich gewesen wäre.</p>
+        <p><b>Zielnähe:</b> 0–1 RIR. 0 RIR bedeutet, dass keine weitere saubere Wiederholung möglich gewesen wäre.</p>
         <p>Du nutzt <b>Double Progression</b>: Steigere zuerst die Wiederholungen innerhalb des Bereichs. Erreichst du das obere Ende mit passender Technik und Ziel-RIR, erhöhst du die Last und beginnst wieder weiter unten im Bereich.</p>
         <p>Die Übung bleibt, solange sie <b>schmerzfrei, technisch reproduzierbar und progressierbar</b> ist. Nicht jede Übung muss in jedem Cycle besser werden.</p>
         <p><b>Evidenz:</b> Muskelaufbau ist über verschiedene Lastbereiche möglich, wenn Sätze ausreichend anstrengend sind. Schwerere Lasten machen die Leistung zusätzlich gut vergleichbar und fördern besonders die Maximalkraft.</p>

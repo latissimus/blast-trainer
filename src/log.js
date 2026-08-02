@@ -1104,9 +1104,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const hatComp = blk.prio
           ? prioRolle !== 'Iso'
           : exOf(blk, tier).some((exDef) => exDef.r === 'Comp');
-        const rirText = blk.prio
-          ? (prioRolle === 'Iso' ? '0–2 RIR' : (prioRolle === 'Comp' ? '0–3 RIR' : '0–3 Comp · 0–2 Iso'))
-          : (blk.rir || '0–3 RIR');
+        const rirText = blk.rir || '0–1 RIR';
         cues.push('<span class="chip">' + effReps + ' · ' + rirText + '</span>',
           `<span class="chip">${blk.deload ? 'Kein Versagen' : (hatComp ? 'Versagen nur letzter Satz' : 'Versagen erlaubt')}</span>`);
       }
