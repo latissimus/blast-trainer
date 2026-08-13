@@ -318,6 +318,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .msg{border:var(--bw) solid var(--ink);border-radius:var(--r-karte);padding:11px 13px;font-size:14.5px;margin-bottom:14px;font-weight:600}
 .msg.err{background:#FFE0D8;color:#8A2A12}
 .msg.ok{background:#D8F5E6;color:#0B5C33}
+.msg.wait{background:var(--surface2);color:var(--link)}
 
 /* ---------- Log: Info-Button + dezenter Sync-Status ---------- */
 .ibtn{background:var(--surface);border:var(--bw) solid var(--ink);color:var(--text);

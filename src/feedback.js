@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { feedbackSynchronisieren, feedbackVormerken, feedbackWartend } from './feedbacksync.js';
 
 const KATEGORIEN = {
   idee: 'Verbesserung',
@@ -108,6 +109,16 @@ export async function mountFeedback(container, { session, profile }) {
 
   const feedbackLaden = () => ladeFeedbackEingang(wrap.querySelector('[data-feedback-liste]'));
 
+  if (feedbackWartend(session.user.id)) {
+    status.innerHTML = '<div class="msg wait">Feedback wartet auf Verbindung.</div>';
+    feedbackSynchronisieren(session.user.id).then((result) => {
+      if (result.status === 'gesendet') {
+        status.innerHTML = '<div class="msg ok">Vorgemerktes Feedback wurde gesendet.</div>';
+        if (profile?.role === 'admin') feedbackLaden();
+      }
+    });
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const nachricht = text.value.trim();
@@ -116,27 +127,19 @@ export async function mountFeedback(container, { session, profile }) {
       text.focus();
       return;
     }
-    senden.disabled = true;
-    status.textContent = 'Wird gesendet…';
-    const { error } = await supabase.from('feedback').insert({
-      user_id: session.user.id,
-      kategorie: kategorie.value,
-      nachricht,
-    });
-    senden.disabled = false;
-    if (error) {
-      const fehlt = error.code === 'PGRST205' || /feedback|schema cache/i.test(error.message || '');
-      status.innerHTML = `<div class="msg err">${
-        fehlt
-          ? 'Die Feedback-Funktion ist auf dem Server noch nicht aktiviert.'
-          : 'Feedback konnte nicht gesendet werden. Bitte Verbindung prüfen.'
-      }</div>`;
-      return;
-    }
+    feedbackVormerken(session.user.id, { kategorie: kategorie.value, nachricht });
     text.value = '';
     zaehler.textContent = '0 / 2000';
-    status.innerHTML = '<div class="msg ok">Danke – dein Vorschlag ist angekommen.</div>';
-    feedbackLaden();
+    senden.disabled = true;
+    status.textContent = 'Wird gesendet…';
+    const result = await feedbackSynchronisieren(session.user.id);
+    senden.disabled = false;
+    if (result.status === 'gesendet') {
+      status.innerHTML = '<div class="msg ok">Danke – dein Vorschlag ist angekommen.</div>';
+      if (profile?.role === 'admin') feedbackLaden();
+    } else {
+      status.innerHTML = '<div class="msg wait">Auf diesem Gerät gespeichert · wird bei Verbindung gesendet.</div>';
+    }
   });
 
   if (profile?.role === 'admin') feedbackLaden();

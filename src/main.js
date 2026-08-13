@@ -16,6 +16,7 @@ import { mountAdmin } from './admin.js';
 import { mountFeedback } from './feedback.js';
 import { verbindePausenAnzeige, stoppePause } from './pause.js';
 import { escapeHtml, sichereBildUrl } from './html.js';
+import { feedbackSynchronisieren } from './feedbacksync.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
 applyTheme(getTheme());
@@ -662,10 +663,14 @@ async function render() {
   // Homescreen geloescht wird – ohne das hier bliebe die Datenbank auf toten
   // Endpunkten sitzen, die Apple sogar noch mit 201 annimmt.
   if (navigator.onLine) abonniereStill(session.user.id);
+  if (navigator.onLine) feedbackSynchronisieren(session.user.id).catch(() => {});
 }
 
 /* ------------------------------------------------------------ boot */
 window.addEventListener('hashchange', () => { if (session && profile) routeView(); });
+window.addEventListener('online', () => {
+  if (session?.user?.id) feedbackSynchronisieren(session.user.id).catch(() => {});
+});
 
 // Das Zugangstoken laeuft nach einer Stunde ab. Ist man dann ohne Netz, kann
 // Supabase es nicht erneuern und gibt gar keine Sitzung zurueck – die App
