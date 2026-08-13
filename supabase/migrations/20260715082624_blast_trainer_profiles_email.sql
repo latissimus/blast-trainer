@@ -10,7 +10,7 @@ begin
   insert into public.profiles (id, role, full_name, email)
   values (
     new.id,
-    case when new.email = 'flrn.rau@gmail.com' then 'admin' else 'customer' end,
+    'customer',
     nullif(new.raw_user_meta_data->>'full_name', ''),
     new.email
   )

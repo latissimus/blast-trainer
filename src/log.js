@@ -9,6 +9,7 @@ import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
 import { synchronisiereTraining } from './trainingssync.js';
+import { escapeHtml } from './html.js';
 import { strukturellGleich } from './datenvergleich.js';
 import { vergleichE1 } from './progression.js';
 
@@ -754,7 +755,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       else if (vergleich < 0) chip = `<span class="delta d-down">▼ gesunken</span>`;
       else chip = `<span class="delta d-hold">= gehalten</span>`;
     }
-    node.innerHTML = `<b>Cycle ${pWeek}: ${txt}</b>${chip}`;
+    node.innerHTML = `<b>Cycle ${escapeHtml(pWeek)}: ${escapeHtml(txt)}</b>${chip}`;
   }
 
   function setRow(entry, xi, si, blk, prevLine, prevSets, prev, count) {
@@ -845,7 +846,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       : `zuletzt: ${m.w} kg${hasR ? ` × ${m.r} Wdh` : ''}`;
     // Wochennummern starten pro Phase neu – Pool-Treffer stammen aus einer
     // frueheren Phase und werden deshalb nicht als "Wo N" ausgewiesen.
-    node.innerHTML = `<b>${txt}</b><span class="delta d-hold">${m.pool ? 'Pool' : 'C ' + m.week}</span>`;
+    node.innerHTML = `<b>${escapeHtml(txt)}</b><span class="delta d-hold">${m.pool ? 'Pool' : 'C ' + escapeHtml(m.week)}</span>`;
   }
   // Clusters = 6×4 Minisätze. Kompakt: Gewicht + Wdh im letzten (6.) Satz.
   function mrRow(entry, xi, si, blk, memNode) {

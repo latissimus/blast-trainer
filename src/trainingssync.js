@@ -17,6 +17,7 @@ export function createLatestTrainingQueue({
   upload,
   markClean,
   isOnline = () => true,
+  timeoutMs = 8_000,
 }) {
   let sequence = 0;
   let pending = null;
@@ -41,12 +42,28 @@ export function createLatestTrainingQueue({
         }
 
         status(job, 'saving');
-        let error = null;
+        const controller = new AbortController();
+        let timer = null;
+        let uploadVersuch;
         try {
-          error = await upload(job.payload);
-        } catch (e) {
-          error = e;
+          uploadVersuch = upload(job.payload, controller.signal);
+        } catch (error) {
+          uploadVersuch = Promise.reject(error);
         }
+        const uploadResultat = Promise.resolve(uploadVersuch)
+          .then((error) => ({ error }), (error) => ({ error }));
+        const zeitlimit = new Promise((resolve) => {
+          timer = setTimeout(() => {
+            const error = Object.assign(
+              new Error('Training konnte wegen eines langsamen Netzwerks nicht synchronisiert werden.'),
+              { name: 'TimeoutError' },
+            );
+            controller.abort(error);
+            resolve({ error });
+          }, timeoutMs);
+        });
+        const { error } = await Promise.race([uploadResultat, zeitlimit]);
+        clearTimeout(timer);
 
         if (error) {
           status(job, isOnline() ? 'error' : 'offline');
@@ -104,11 +121,11 @@ function queueFor(userId) {
   if (queues.has(userId)) return queues.get(userId);
   const queue = createLatestTrainingQueue({
     isOnline: () => navigator.onLine,
-    upload: async (payload) => {
+    upload: async (payload, signal) => {
       const { error } = await supabase.from('training_logs').upsert(
         { user_id: userId, payload, updated_at: new Date().toISOString() },
         { onConflict: 'user_id' },
-      );
+      ).abortSignal(signal);
       return error;
     },
     markClean: (payload) => writeLog(userId, payload, false, false),

@@ -59,10 +59,7 @@ describe('Trainings-Synchronisation', () => {
     expect(upload.mock.calls[0][0].week).toBe(1);
 
     erster.resolve(null);
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(upload).toHaveBeenCalledTimes(2);
+    await vi.waitFor(() => expect(upload).toHaveBeenCalledTimes(2));
     expect(upload.mock.calls[1][0].week).toBe(2);
     expect(markClean).not.toHaveBeenCalled();
 
@@ -109,6 +106,27 @@ describe('Trainings-Synchronisation', () => {
     expect(result.status).toBe('error');
     expect(markClean).not.toHaveBeenCalled();
     expect(statuses).toEqual(['saving', 'error']);
+  });
+
+  it('gibt bei einer haengenden Verbindung nach dem Zeitlimit frei und bricht den Request ab', async () => {
+    vi.useFakeTimers();
+    const upload = vi.fn((_payload, signal) => new Promise((_resolve, reject) => {
+      signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+    }));
+    const markClean = vi.fn();
+    const statuses = [];
+    const queue = createLatestTrainingQueue({ upload, markClean, timeoutMs: 100 });
+
+    const gespeichert = queue.enqueue({ v: 4, cycle: 2 }, (status) => statuses.push(status));
+    await vi.advanceTimersByTimeAsync(101);
+    const result = await gespeichert;
+
+    expect(result.status).toBe('error');
+    expect(result.error.name).toBe('TimeoutError');
+    expect(upload.mock.calls[0][1].aborted).toBe(true);
+    expect(markClean).not.toHaveBeenCalled();
+    expect(statuses).toEqual(['saving', 'error']);
+    vi.useRealTimers();
   });
 
   it('friert den Stand beim Einreihen ein', async () => {

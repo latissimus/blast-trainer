@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js';
 import { signOut } from './auth.js';
 import { toast } from './log.js';
+import { escapeHtml } from './html.js';
 import { getTheme, setTheme } from './theme.js';
 import { readLog, readNotizen, clearUserData } from './localstore.js';
 import { ladeFeedbackEingang } from './feedback.js';
@@ -102,8 +103,8 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   const meta = document.createElement('div');
   meta.className = 'profile-meta';
   meta.innerHTML = `
-    <div class="profile-name">${profile.full_name || '—'}</div>
-    <div class="profile-email">${email}</div>
+    <div class="profile-name">${escapeHtml(profile.full_name || '—')}</div>
+    <div class="profile-email">${escapeHtml(email)}</div>
     <span class="role-tag ${profile.role === 'admin' ? 'admin' : ''}">${profile.role === 'admin' ? 'Admin' : 'Trainee'}</span>`;
   top.appendChild(avSlot); top.appendChild(meta);
   card.appendChild(top);
@@ -234,7 +235,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     pwBtn.disabled = true;
     const { error } = await supabase.auth.updateUser({ password: pw1.value });
     pwBtn.disabled = false;
-    if (error) { pwMsg.innerHTML = `<div class="msg err">${error.message}</div>`; return; }
+    if (error) { pwMsg.innerHTML = `<div class="msg err">${escapeHtml(error.message)}</div>`; return; }
     pw1.value = ''; pw2.value = '';
     pwMsg.innerHTML = `<div class="msg ok">Passwort geändert.</div>`;
     toast('Passwort geändert');

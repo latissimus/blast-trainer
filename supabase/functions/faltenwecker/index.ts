@@ -38,7 +38,11 @@ Deno.serve(async (req) => {
   const { data: echt } = await supabase.rpc('wecker_token_gueltig', { t: token });
   if (echt !== true) return json({ fehler: 'nur der Wecker selbst' }, 403);
 
-  webpush.setVapidDetails('mailto:flrn.rau@gmail.com', VAPID_PUBLIC, privat);
+  webpush.setVapidDetails(
+    Deno.env.get('VAPID_CONTACT') || 'mailto:admin@example.invalid',
+    VAPID_PUBLIC,
+    privat,
+  );
 
   const { data: abos, error } = await supabase.rpc('falten_faellige_abos');
   if (error) return json({ fehler: error.message }, 500);

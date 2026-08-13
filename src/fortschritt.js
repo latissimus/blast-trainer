@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js';
 import { kurveSvg } from './kurve.js';
 import { progressionsReihen, verlauf } from './progression.js';
+import { escapeHtml } from './html.js';
 
 // Progression der festen HEAVYS- und MIDDLES-Übungen.
 //
@@ -13,7 +14,7 @@ const fmt = (n) => (Math.round(n * 10) / 10).toString().replace('.', ',');
 export function mountFortschritt(wrap, { session, payload: fertig = null, titel = 'Leistungsprogression' }) {
   const karte = document.createElement('div');
   karte.className = 'card';
-  karte.innerHTML = `${titel ? `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">${titel}</h2>` : ''}
+  karte.innerHTML = `${titel ? `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">${escapeHtml(titel)}</h2>` : ''}
     <div id="fs-inhalt"><div class="mess-leer">lädt…</div></div>`;
   wrap.appendChild(karte);
 
@@ -31,7 +32,7 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
       if (error) throw error;
       payload = data?.payload || {};
     } catch (e) {
-      inhalt.innerHTML = `<div class="msg err">${e.message}</div>`;
+      inhalt.innerHTML = `<div class="msg err">${escapeHtml(e.message)}</div>`;
       return;
     }
 
@@ -51,7 +52,7 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
 
     inhalt.innerHTML = `
       ${reihen.length > 1 ? `<select class="input" id="fs-wahl" style="margin:0 0 12px">
-        ${reihen.map((r, i) => `<option value="${i}">${r.typ} · ${r.name}</option>`).join('')}
+        ${reihen.map((r, i) => `<option value="${i}">${escapeHtml(r.typ)} · ${escapeHtml(r.name)}</option>`).join('')}
       </select>` : ''}
       <div class="mess-kopf" id="fs-kopf"></div>
       <div id="fs-kurve"></div>`;
@@ -60,7 +61,7 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
       const r = reihen[i];
       const v = verlauf(r.punkte);
       // Bei nur einer Uebung ersetzt der Name die fehlende Auswahl.
-      const titel = reihen.length > 1 ? '' : `<div class="mess-datum" style="margin:0 0 4px">${r.typ} · ${r.name}</div>`;
+      const titel = reihen.length > 1 ? '' : `<div class="mess-datum" style="margin:0 0 4px">${escapeHtml(r.typ)} · ${escapeHtml(r.name)}</div>`;
       const delta = v.kg === 0
         ? `<span class="delta d-hold">= gehalten</span>`
         : `<span class="delta ${v.kg > 0 ? 'd-up' : 'd-down'}">${v.kg > 0 ? '▲' : '▼'} ${fmt(Math.abs(v.kg))} kg · ${fmt(Math.abs(v.prozent))} %</span>`;
@@ -69,7 +70,7 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
         <div class="mess-wert">${fmt(v.letzt)} <span>kg 1RM</span> ${delta}</div>
         <div class="mess-datum">Cycle ${r.punkte[0].week} → ${r.punkte[r.punkte.length - 1].week} · bester Satz je Cycle</div>`;
       karte.querySelector('#fs-kurve').innerHTML = `
-        <div class="prog-kurvenkopf"><b>Leistungstrend</b><span>${r.typ} · 1RM</span></div>
+        <div class="prog-kurvenkopf"><b>Leistungstrend</b><span>${escapeHtml(r.typ)} · 1RM</span></div>
         ${kurveSvg(
           [{ werte: r.punkte.map((p) => ({ x: p.week, wert: p.e1 })), klasse: 'trend', punkte: true }],
           { einheit: 'kg', xText: (w) => 'C ' + w },

@@ -1,5 +1,5 @@
 -- ============================================================
--- BLAST Trainer: profiles, training_logs, roles, RLS, storage
+-- LOGMAN: profiles, training_logs, roles, RLS, storage
 -- ============================================================
 
 -- ---- Tables ------------------------------------------------
@@ -44,7 +44,7 @@ begin
   insert into public.profiles (id, role, full_name)
   values (
     new.id,
-    case when new.email = 'flrn.rau@gmail.com' then 'admin' else 'customer' end,
+    'customer',
     nullif(new.raw_user_meta_data->>'full_name', '')
   )
   on conflict (id) do nothing;

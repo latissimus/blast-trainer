@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js';
 import { mountLog } from './log.js';
 import { ladeFeedbackEingang } from './feedback.js';
+import { escapeHtml, sichereBildUrl } from './html.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -32,23 +33,24 @@ export async function mountAdmin(container, { session }) {
       .order('role', { ascending: true })
       .order('email', { ascending: true });
 
-    if (error) { wrap.insertAdjacentHTML('beforeend', `<div class="msg err">Konnte Nutzer nicht laden: ${error.message}</div>`); return; }
+    if (error) { wrap.insertAdjacentHTML('beforeend', `<div class="msg err">Konnte Nutzer nicht laden: ${escapeHtml(error.message)}</div>`); return; }
     if (!profiles || profiles.length === 0) wrap.insertAdjacentHTML('beforeend', `<div class="empty">Noch keine Nutzer.</div>`);
 
     (profiles || []).forEach((p) => {
       const row = document.createElement('button');
       row.className = 'cust-row';
       const isSelf = p.id === session.user.id;
-      const av = p.avatar_url
-        ? `<img class="av" src="${p.avatar_url}" alt="">`
-        : `<div class="av avatar-fallback" style="display:flex;align-items:center;justify-content:center;font-size:16px">${initials(p.full_name, p.email)}</div>`;
+      const avatarUrl = sichereBildUrl(p.avatar_url);
+      const av = avatarUrl
+        ? `<img class="av" src="${escapeHtml(avatarUrl)}" alt="">`
+        : `<div class="av avatar-fallback" style="display:flex;align-items:center;justify-content:center;font-size:16px">${escapeHtml(initials(p.full_name, p.email))}</div>`;
       row.innerHTML = `
         ${av}
         <div>
-          <div class="nm">${p.full_name || '(kein Name)'}${isSelf ? ' · du' : ''}
+          <div class="nm">${escapeHtml(p.full_name || '(kein Name)')}${isSelf ? ' · du' : ''}
             <span class="role-tag ${p.role === 'admin' ? 'admin' : ''}" style="margin-left:6px">${p.role === 'admin' ? 'Admin' : 'Trainee'}</span>
           </div>
-          <div class="em">${p.email || p.id}</div>
+          <div class="em">${escapeHtml(p.email || p.id)}</div>
         </div>
         <span class="chev">›</span>`;
       row.onclick = () => showCustomer(p);
@@ -76,11 +78,11 @@ export async function mountAdmin(container, { session }) {
       <div class="seitenkopf">
         <div class="seitenkopf-text">
           <span class="seitenkopf-kicker">Kundenlog</span>
-          <h1 class="section-title">${p.full_name || p.email || 'Nutzer'}</h1>
+          <h1 class="section-title">${escapeHtml(p.full_name || p.email || 'Nutzer')}</h1>
         </div>
       </div>
       <button class="back-link" id="ad-back">← Zurück zur Liste</button>
-      <div class="readonly-note">Nur-Lese-Ansicht · Log von ${p.email || p.id}</div>`;
+      <div class="readonly-note">Nur-Lese-Ansicht · Log von ${escapeHtml(p.email || p.id)}</div>`;
     container.appendChild(wrap);
     wrap.querySelector('#ad-back').onclick = showList;
 
@@ -89,7 +91,7 @@ export async function mountAdmin(container, { session }) {
     try {
       currentLog = await mountLog(logMount, { userId: p.id, readOnly: true });
     } catch (e) {
-      logMount.innerHTML = `<div class="wrap"><div class="msg err">Log konnte nicht geladen werden: ${e.message}</div></div>`;
+      logMount.innerHTML = `<div class="wrap"><div class="msg err">Log konnte nicht geladen werden: ${escapeHtml(e.message)}</div></div>`;
     }
   }
 

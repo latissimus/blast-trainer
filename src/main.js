@@ -15,6 +15,7 @@ import { mountNotizbuch } from './notizbuch.js';
 import { mountAdmin } from './admin.js';
 import { mountFeedback } from './feedback.js';
 import { verbindePausenAnzeige, stoppePause } from './pause.js';
+import { escapeHtml, sichereBildUrl } from './html.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
 applyTheme(getTheme());
@@ -122,7 +123,7 @@ function renderAuth() {
     </div>`;
 
   const msg = app.querySelector('#auth-msg');
-  const showMsg = (text, kind) => { msg.innerHTML = `<div class="msg ${kind}">${text}</div>`; };
+  const showMsg = (text, kind) => { msg.innerHTML = `<div class="msg ${kind === 'ok' ? 'ok' : 'err'}">${escapeHtml(text)}</div>`; };
 
   app.querySelector('#auth-toggle').onclick = () => { authMode = isLogin ? 'signup' : 'login'; renderAuth(); };
 
@@ -205,7 +206,7 @@ function renderRecovery() {
     </div>`;
 
   const msg = app.querySelector('#rc-msg');
-  const showMsg = (t, k) => { msg.innerHTML = `<div class="msg ${k}">${t}</div>`; };
+  const showMsg = (t, k) => { msg.innerHTML = `<div class="msg ${k === 'ok' ? 'ok' : 'err'}">${escapeHtml(t)}</div>`; };
 
   app.querySelector('#rc-form').onsubmit = async (e) => {
     e.preventDefault();
@@ -237,13 +238,14 @@ function translateErr(err) {
 /* Profilbild oben (statt "Profil"-Button); Klick öffnet die Profil-Seite. */
 function navAvatar() {
   const email = session.user.email;
-  if (profile.avatar_url) {
-    return `<button class="nav-av" data-view="profile" aria-label="Profil"><img src="${profile.avatar_url}" alt=""></button>`;
+  const avatarUrl = sichereBildUrl(profile.avatar_url);
+  if (avatarUrl) {
+    return `<button class="nav-av" data-view="profile" aria-label="Profil"><img src="${escapeHtml(avatarUrl)}" alt=""></button>`;
   }
   const src = (profile.full_name || email || '?').trim();
   const parts = src.split(/\s+/).filter(Boolean);
   const ini = (parts.length >= 2 ? parts[0][0] + parts[1][0] : src.slice(0, 2)).toUpperCase();
-  return `<button class="nav-av nav-av-fb" data-view="profile" aria-label="Profil">${ini}</button>`;
+  return `<button class="nav-av nav-av-fb" data-view="profile" aria-label="Profil">${escapeHtml(ini)}</button>`;
 }
 
 /* ------------------------------------------------------------ app chrome */
@@ -478,7 +480,7 @@ async function routeView() {
       guard(v);
     }
   } catch (e) {
-    ziel.innerHTML = `<div class="wrap" style="padding-top:20px"><div class="msg err">Fehler: ${e.message}</div></div>`;
+    ziel.innerHTML = `<div class="wrap" style="padding-top:20px"><div class="msg err">Fehler: ${escapeHtml(e.message)}</div></div>`;
   }
   if (token !== routeToken) return;
   if (ziel !== view) view.replaceChildren(...ziel.childNodes);
@@ -601,10 +603,19 @@ async function render() {
     // ein eingefrorenes Logo sieht aus wie eine haengende App.
     if (!splashFertig) app.innerHTML = `${MARQUEE}<div class="ladebild"><span class="brand">${brandSvg()}</span><p class="auth-sub">lädt…</p></div>`;
     const zwischengespeichert = readProfile(session.user.id);
-    if (!navigator.onLine && zwischengespeichert) {
-      // Nachweislich offline: gar nicht erst fragen. Der Versuch laeuft nur in
-      // einen Timeout, und solange haengt man auf dem Ladebildschirm.
+    if (zwischengespeichert) {
+      // Das Profil gehoert zur lokalen App-Huelle: Es wird auch bei scheinbar
+      // vorhandenem, aber schlechtem Netz sofort benutzt. Eine frische Fassung
+      // holen wir still nach und verwenden sie beim naechsten Seitenaufbau.
       profile = zwischengespeichert;
+      if (navigator.onLine) {
+        const userId = session.user.id;
+        loadProfile(userId).then((frisch) => {
+          if (!frisch || session?.user?.id !== userId) return;
+          writeProfile(userId, frisch);
+          profile = frisch;
+        }).catch(() => {});
+      }
     } else try {
       profile = await loadProfile(session.user.id);
       if (profile) writeProfile(session.user.id, profile);
@@ -613,7 +624,7 @@ async function render() {
       // im Studio nie bis zum Log – obwohl die Trainingsdaten dort lokal liegen.
       profile = zwischengespeichert;
       if (!profile) {
-        app.innerHTML = `${MARQUEE}<div class="auth-shell"><div class="msg err">Profil konnte nicht geladen werden: ${e.message}</div><button class="btn btn-block" id="lo">Abmelden</button></div>`;
+        app.innerHTML = `${MARQUEE}<div class="auth-shell"><div class="msg err">Profil konnte nicht geladen werden: ${escapeHtml(e.message)}</div><button class="btn btn-block" id="lo">Abmelden</button></div>`;
         app.querySelector('#lo').onclick = () => signOut();
         return;
       }
@@ -688,21 +699,43 @@ supabase.auth.onAuthStateChange((event, newSession) => {
 });
 
 (async function boot() {
-  // Offline gar nicht erst fragen: getSession() versucht ein abgelaufenes Token
-  // zu erneuern und laeuft dabei in einen Timeout. Die gespeicherte Sitzung
-  // reicht hier – offline brauchen wir daraus nur die Nutzer-ID.
+  // Die lokal gespeicherte Sitzung reicht, um LOGMAN sofort aus seinem lokalen
+  // Spiegel zu starten. Das gilt nicht nur im Flugmodus: Gerade schlechtes Netz
+  // darf den Start nicht blockieren. Supabase prueft/erneuert danach im
+  // Hintergrund; ein ausdruecklicher Logout bleibt davon unberuehrt.
+  const lokal = gespeicherteSitzung();
+  if (lokal) {
+    session = lokal;
+    await render();
+
+    if (navigator.onLine) {
+      supabase.auth.getSession().then(async ({ data, error }) => {
+        if (data.session) {
+          session = data.session;
+          return;
+        }
+        if (!error || error.name !== 'AuthRetryableFetchError') {
+          session = null;
+          profile = null;
+          await render();
+        }
+      }).catch(() => {});
+    }
+    return;
+  }
+
   if (!navigator.onLine) {
-    session = gespeicherteSitzung();
     await render();
     return;
   }
+
   const { data, error } = await supabase.auth.getSession();
   session = data.session;
   // Nur bei einem Netzfehler zurueckfallen. Supabase unterscheidet das selbst:
   // AuthRetryableFetchError heisst "Netz weg", ein AuthApiError hiesse "Token
   // ungueltig" – dann gehoert man tatsaechlich abgemeldet.
   if (!session && error && error.name === 'AuthRetryableFetchError') {
-    session = gespeicherteSitzung();
+    session = lokal;
   }
   await render();
 })();
