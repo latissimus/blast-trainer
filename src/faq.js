@@ -141,7 +141,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wofür sind die Übungsnotizen?</summary>
       <div class="faq-a">
-        <p>Die Notiz unter einer Übung ist für dauerhafte Einstellungen und Cues wie Sitzhöhe, Griff oder Fußposition. Bei HEAVYS und MIDDLES wird sie zusammen mit der festen Übung in allen Cycles angezeigt.</p>
+        <p>Bei <b>HEAVYS und MIDDLES</b> ist die Übungsnotiz für dauerhafte Einstellungen und Cues wie Sitzhöhe, Griff oder Fußposition. Sie wird zusammen mit der festen Übung in allen Cycles angezeigt. Bei <b>PUMPS</b> gilt die Notiz nur für den aktuellen Cycle, weil die Übung frei wechseln kann.</p>
         <p>Das getrennte <b>Notizbuch</b> sammelt allgemeine Gedanken, Links und Bilder und bleibt bei einer neuen Phase erhalten.</p>
       </div>
     </details>

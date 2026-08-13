@@ -90,7 +90,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     data: payload.data || {},
     tier: payload.tier || {},
     ex: payload.ex || {},      // feste HEAVYS- und MIDDLES-Namen über alle Cycles
-    notes: payload.notes || {}, // gemeinsame Notizen pro Tag/Übung
+    notes: payload.notes || {}, // dauerhafte HEAVYS-/MIDDLES-Notizen pro Einheit/Übung
     mem: payload.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
     datum: payload.datum || {},  // Einheit|Cycle -> ISO-Datum
     volumen: { prioritaet: payload.volumen?.prioritaet || {} }, // Muskel-Prioritaeten
@@ -1294,12 +1294,18 @@ export async function mountLog(container, { userId, readOnly = false }) {
           for (let si = 0; si < count; si++) exDiv.appendChild(setRow(entry, xi, si, blk, prevLine, prevSets, prev, count));
         }
 
-        // Notizen-Feld (gestrichelt) – pro Tag/Übung geteilt
-        const notes = dayNotes(state.day, blk);
+        // Feste HEAVYS/MIDDLES behalten technische Übungsnotizen über alle
+        // Cycles. Frei rotierende PUMPS/CLUSTERS gehören nur zu dieser einen
+        // Einheit im aktuellen Cycle und liegen deshalb direkt im Log-Eintrag.
+        const notes = freeEx
+          ? (entry.notes = Array.isArray(entry.notes) ? entry.notes : [])
+          : dayNotes(state.day, blk);
+        while (notes.length <= xi) notes.push('');
+        const noteTitel = freeEx ? 'Notiz · nur dieser Cycle' : 'Übungsnotiz · alle Cycles';
         const noteWrap = document.createElement('div'); noteWrap.className = 'notewrap';
         const showNote = () => {
           const ta = document.createElement('textarea');
-          ta.className = 'exnote'; ta.value = notes[xi] || ''; ta.placeholder = 'Notiz zur Übung…'; ta.rows = 2;
+          ta.className = 'exnote'; ta.value = notes[xi] || ''; ta.placeholder = noteTitel; ta.rows = 2;
           ta.disabled = readOnly;
           if (!readOnly) ta.oninput = () => { notes[xi] = ta.value; queuePersist(); };
           noteWrap.innerHTML = ''; noteWrap.appendChild(ta);
@@ -1307,7 +1313,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         if (notes[xi]) {
           showNote();
         } else if (!readOnly) {
-          const nb = document.createElement('button'); nb.className = 'addnote'; nb.textContent = '+ Notizen';
+          const nb = document.createElement('button'); nb.className = 'addnote'; nb.textContent = '+ ' + noteTitel;
           nb.onclick = () => { showNote(); noteWrap.querySelector('textarea').focus(); };
           noteWrap.appendChild(nb);
         }
