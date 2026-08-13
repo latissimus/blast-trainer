@@ -29,7 +29,7 @@ export const TPL = {
     short: 'UK · HEAVYS',
     sub: 'Unterkörper · HEAVYS',
     blocks: [
-      { id: 'legs_comp', mus: 'Beine', konten: ['Quads', 'Glutes'], type: 'load', sets: [2, 3, 3], rest: 180, reps: '6–10', rir: '0–1 RIR', ex: [feld('Comp', ['Quads', 'Glutes'])] },
+      { id: 'legs_comp', mus: 'Beine', konten: ['Quads', 'Glutes'], type: 'load', sets: [2, 2, 2], rest: 180, reps: '6–10', rir: '0–1 RIR', ex: [feld('Comp', ['Quads', 'Glutes'])] },
       { id: 'quads_iso', mus: 'Quads', konten: ['Quads'], type: 'load', sets: [1, 2, 2], rest: 150, reps: '6–10', rir: '0–1 RIR', ex: [feld('Iso', ['Quads'])] },
       { id: 'hams_glutes_iso', mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'load', sets: [1, 2, 2], rest: 150, reps: '6–10', rir: '0–1 RIR', ex: [feld('Iso', ['Hams', 'Glutes'])] },
       { id: 'calves_iso', mus: 'Waden', konten: ['Waden'], type: 'load', sets: [3, 3, 3], rest: 120, reps: '6–10', rir: '0–1 RIR', ex: [feld('Iso', ['Waden'])] },
@@ -53,7 +53,7 @@ export const TPL = {
     short: 'UK · MIDDLES & PUMPS',
     sub: 'Unterkörper · MIDDLES & PUMPS',
     blocks: [
-      { id: 'legs_comp', mus: 'Beine', konten: ['Quads', 'Glutes'], type: 'middle', sets: [2, 3, 3], rest: 150, reps: '10–15', rir: '0–2 RIR', ex: [feld('Comp', ['Quads', 'Glutes'])] },
+      { id: 'legs_comp', mus: 'Beine', konten: ['Quads', 'Glutes'], type: 'middle', sets: [2, 2, 2], rest: 150, reps: '10–15', rir: '0–2 RIR', ex: [feld('Comp', ['Quads', 'Glutes'])] },
       { id: 'quads_iso', mus: 'Quads', konten: ['Quads'], type: 'pump', sets: [1, 2, 2], rest: 120, reps: '15–25', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Quads'])] },
       { id: 'hams_glutes_iso', mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'pump', sets: [1, 2, 2], rest: 120, reps: '15–25', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Hams', 'Glutes'])] },
       { id: 'calves_iso', mus: 'Waden', konten: ['Waden'], type: 'pump', sets: [3, 3, 3], rest: 90, reps: '15–25', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Waden'])] },

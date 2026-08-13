@@ -216,6 +216,7 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p>Level II entspricht dem voreingestellten Standardplan. Große Muskelgruppen erhalten ihre Arbeit über HEAVYS, MIDDLES und PUMPS; kleinere Muskeln sammeln zusätzlich indirekte Belastung.</p>
         <p><b>Evidenz:</b> Mehr harte Sätze führen im Durchschnitt zu mehr Muskelaufbau, der Zusatznutzen wird aber kleiner und unterscheidet sich stark zwischen Muskeln und Personen. Außerdem zählen Versagensnähe und indirekte Arbeit mit – deshalb liegt der Standard bewusst unter pauschalen „10–20 direkte Sätze“-Vorgaben.</p>
+        <p>Bei den Unterkörpertagen bleiben die Beine-Comps deshalb bei <b>zwei Sätzen je Einheit</b>: Quads und Glutes erhalten zusätzlich gezielte Isolationsarbeit. Die Waden behalten <b>drei Sätze je Einheit</b>, weil sie im übrigen Plan kaum relevante indirekte Arbeit sammeln.</p>
         <p>Level I reduziert die Dosis. Level III startet mit denselben Satzzahlen wie Level II und zeigt an jeder Übung einen <b>+ Satz</b>-Chip. So erhöhst du nur dort, wo Entwicklung und Erholung tatsächlich mehr Volumen erlauben.</p>
       </div>
     </details>

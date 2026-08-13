@@ -48,6 +48,13 @@ describe('Satzarten der Cycle-Vorlage', () => {
     expect(TPL['OK-P'].blocks.find((b) => b.id === 'delt_iso').sets).toEqual([2, 2, 2]);
   });
 
+  it('hält Beine-Comps bei Standard auf zwei und Waden auf drei Sätzen', () => {
+    expect(TPL['UK-H'].blocks.find((b) => b.id === 'legs_comp').sets).toEqual([2, 2, 2]);
+    expect(TPL['UK-P'].blocks.find((b) => b.id === 'legs_comp').sets).toEqual([2, 2, 2]);
+    expect(TPL['UK-H'].blocks.find((b) => b.id === 'calves_iso').sets).toEqual([3, 3, 3]);
+    expect(TPL['UK-P'].blocks.find((b) => b.id === 'calves_iso').sets).toEqual([3, 3, 3]);
+  });
+
   it('benennt die B-Tage als MIDDLES & PUMPS', () => {
     expect(TPL['OK-P'].short).toBe('OK · MIDDLES & PUMPS');
     expect(TPL['UK-P'].short).toBe('UK · MIDDLES & PUMPS');

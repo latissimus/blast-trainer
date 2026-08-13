@@ -112,7 +112,7 @@ Ein Satz bleibt hypertrophieorientiert, wenn:
 
 | Übung                | Sätze | Wiederholungen | RIR     | Pause |
 | -------------------- | ----- | -------------- | ------- | ----- |
-| Beine-Comp           | 3     | 5–8            | 1-3 RIR | 3 min |
+| Beine-Comp           | 2     | 5–8            | 1-3 RIR | 3 min |
 | Quads-Iso            | 2     | 5–8            | 1-2 RIR | 3 min |
 | Hams/Glutes-Iso      | 2     | 5–8            | 1-2 RIR | 3 min |
 | Waden-Iso            | 3     | 5–8            | 1-2 RIR | 2 min |
@@ -138,7 +138,7 @@ Ein Satz bleibt hypertrophieorientiert, wenn:
 
 | Übung                | Sätze | Wiederholungen | RIR     | Pause |
 | -------------------- | ----- | -------------- | ------- | ----- |
-| Beine-Comp           | 3     | 10–15          | 1-2 RIR | 2 min |
+| Beine-Comp           | 2     | 10–15          | 1-2 RIR | 2 min |
 | Quads-Iso            | 2     | 15-20          | 0-1 RIR | 2 min |
 | Hams/Glutes-Iso      | 2     | 10-20          | 1-2 RIR | 2 min |
 | Waden-Iso            | 3     | 15-20          | 0-1 RIR | 1 min |
