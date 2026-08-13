@@ -141,7 +141,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saving:  ['↻', 'saving', 'speichert…'],
     pending: ['↻', 'saving', 'ungespeicherte Änderungen'],
     // Nicht hochgeladen heisst nicht mehr "verloren": lokal liegt es sicher.
-    offline: ['▲', 'wait',   'auf diesem Gerät gesichert · wartet auf Verbindung'],
+    offline: ['↑', 'wait',   'auf diesem Gerät gesichert · wartet auf Verbindung'],
     error:   ['⚠', 'err',    'auf diesem Gerät gesichert · Upload fehlgeschlagen'],
   };
   function setStatus(kind) {
