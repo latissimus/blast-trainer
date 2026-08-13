@@ -10,6 +10,7 @@ import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
 import { synchronisiereTraining } from './trainingssync.js';
 import { strukturellGleich } from './datenvergleich.js';
+import { vergleichE1 } from './progression.js';
 
 function effektivePause(blk) {
   return blk.rest || 120;
@@ -427,8 +428,6 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const ws = Object.keys(d).map(Number).filter((w) => w < week && cellHasData(d[w])).sort((a, b) => b - a);
     return ws.length ? { week: ws[0], data: d[ws[0]] } : null;
   }
-  const e1rm = (w, r) => { w = parseFloat(String(w).replace(',', '.')); r = parseFloat(r); if (!w || !r) return 0; return w * (1 + r / 30); };
-  const bestE1 = (arr) => { let m = 0; (arr || []).forEach((s) => { if (s) { const e = e1rm(s.w, s.r); if (e > m) m = e; } }); return m; };
   const fmt = (n) => (Math.round(n * 10) / 10).toString().replace('.', ',');
 
   // ---- DOM scaffold ------------------------------------------------
@@ -749,11 +748,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
     if (!prevSets || !prevSets.some((s) => s && (s.w || s.r))) { node.innerHTML = '<b>letztes Mal: —</b>'; return; }
     const txt = prevSets.filter((s) => s && (s.w || s.r)).map((s) => `${s.w || '–'}×${s.r || '–'}`).join(', ');
     let chip = '';
-    const pe = bestE1(prevSets), te = bestE1(todaySets);
-    if (te > 0 && pe > 0) {
-      const diff = te - pe;
-      if (diff > 0.4) chip = `<span class="delta d-up">▲ gesteigert</span>`;
-      else if (diff < -0.4) chip = `<span class="delta d-down">▼ gesunken</span>`;
+    const vergleich = vergleichE1(prevSets, todaySets);
+    if (vergleich !== null) {
+      if (vergleich > 0) chip = `<span class="delta d-up">▲ gesteigert</span>`;
+      else if (vergleich < 0) chip = `<span class="delta d-down">▼ gesunken</span>`;
       else chip = `<span class="delta d-hold">= gehalten</span>`;
     }
     node.innerHTML = `<b>Cycle ${pWeek}: ${txt}</b>${chip}`;

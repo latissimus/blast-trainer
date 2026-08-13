@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { e1rm, bestE1, heavyReihen, progressionsReihen, verlauf } from './progression.js';
+import { e1rm, bestE1, vergleichE1, heavyReihen, progressionsReihen, verlauf } from './progression.js';
 
 // Eine falsche Progressionskurve sieht aus wie eine richtige – und sie ist der
 // Wert, an dem man das ganze Training misst. Deshalb festgezurrt.
@@ -41,6 +41,21 @@ describe('bestE1', () => {
   });
   it('kommt mit Lücken klar', () => {
     expect(bestE1([null, { w: 60, r: 10 }, {}])).toBeCloseTo(e1rm(60, 10), 5);
+  });
+});
+
+describe('vergleichE1', () => {
+  it('zeigt bei kleinen Lasten bereits eine Wiederholung mehr als Steigerung', () => {
+    expect(vergleichE1([{ w: 7, r: 8 }], [{ w: 7, r: 9 }])).toBe(1);
+  });
+
+  it('zeigt bei kleinen Lasten bereits eine Wiederholung weniger als Abfall', () => {
+    expect(vergleichE1([{ w: 7, r: 8 }], [{ w: 7, r: 7 }])).toBe(-1);
+  });
+
+  it('meldet identische Bestsaetze als gehalten und leere Eingaben noch nicht', () => {
+    expect(vergleichE1([{ w: 7, r: 8 }], [{ w: 7, r: 8 }])).toBe(0);
+    expect(vergleichE1([{ w: 7, r: 8 }], [])).toBeNull();
   });
 });
 

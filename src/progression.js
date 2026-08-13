@@ -20,6 +20,20 @@ export const e1rm = (w, r) => {
 export const bestE1 = (saetze) =>
   (saetze || []).reduce((m, s) => (s ? Math.max(m, e1rm(s.w, s.r)) : m), 0);
 
+// Vergleich zweier Trainingseintraege. Jede echte Aenderung zaehlt: Ein
+// absoluter e1RM-Puffer wuerde kleine Lasten benachteiligen (bei 7 kg veraendert
+// eine Wiederholung den Epley-Wert nur um rund 0,23 kg).
+export const vergleichE1 = (vorher, heute) => {
+  const alt = bestE1(vorher);
+  const neu = bestE1(heute);
+  if (!alt || !neu) return null;
+  const differenz = neu - alt;
+  const rundungstoleranz = Math.max(alt, neu, 1) * 1e-10;
+  if (differenz > rundungstoleranz) return 1;
+  if (differenz < -rundungstoleranz) return -1;
+  return 0;
+};
+
 /**
  * Reihen je getrackter Übung aus dem gespeicherten Payload.
  * @returns [{ name, punkte: [{ week, e1 }] }] – `week` bleibt als interner
