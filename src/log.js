@@ -3,7 +3,14 @@ import { readLog, writeLog, mergePayload } from './localstore.js';
 import { TPL, TIER_NAMES, CYCLE_TAGE, DELOAD_TAGE } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise, extraSets } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
-import { auswahlGruppen, sucheAuswahlGruppen, imKatalog, eintragVon } from './auswahl.js';
+import { auswahlGruppen, sucheAuswahlGruppen, eintragVon } from './auswahl.js';
+import {
+  erstelleEigeneUebung,
+  erstelleVariante,
+  katalogMitEigenen,
+  normalisiereEigeneUebungen,
+} from './eigene-uebungen.js';
+import { KONTEN } from './katalog.js';
 import { prioritaetsAnpassungen, sortiereBloeckeNachPrioritaet, slotKey } from './prioritaet.js';
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
@@ -94,6 +101,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     ex: payload.ex || {},      // feste HEAVYS- und MIDDLES-Namen über alle Cycles
     notes: payload.notes || {}, // dauerhafte HEAVYS-/MIDDLES-Notizen pro Einheit/Übung
     mem: payload.mem || {},    // Übungs-Pool: Name -> zuletzt geschaffte Last, ueberlebt den Phasen-Reset
+    eigeneUebungen: normalisiereEigeneUebungen(payload.eigeneUebungen), // persönliche Varianten und freie Übungen
     datum: payload.datum || {},  // Einheit|Cycle -> ISO-Datum
     volumen: { prioritaet: payload.volumen?.prioritaet || {} }, // Muskel-Prioritaeten
     meta: payload.meta || {},    // phasenuebergreifende Oberflaechen-Zustaende
@@ -152,7 +160,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     saveStateEl.title = title;
   }
   function payloadOut() {
-    return { data: state.data, week: state.week, day: state.day, tier: state.tier, ex: state.ex, notes: state.notes, mem: state.mem, datum: state.datum, volumen: state.volumen, meta: state.meta, v: 4 };
+    return { data: state.data, week: state.week, day: state.day, tier: state.tier, ex: state.ex, notes: state.notes, mem: state.mem, eigeneUebungen: state.eigeneUebungen, datum: state.datum, volumen: state.volumen, meta: state.meta, v: 4 };
   }
   // Lokal vormerken, ohne ein gesetztes replace-Kennzeichen zu verlieren:
   // Es darf erst fallen, wenn der Server den Stand wirklich hat.
@@ -481,7 +489,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // im Kopf dürfen nicht zur Trainingsseite darunter durchgereicht werden –
   // dafür ist keine globale Body-Sperre nötig.
   pickerLage.addEventListener('touchmove', (e) => {
-    if (!(e.target instanceof Element) || !e.target.closest('.ex-picker-liste')) e.preventDefault();
+    if (!(e.target instanceof Element) || !e.target.closest('.ex-picker-scroll')) e.preventDefault();
   }, { passive: false });
   document.body.appendChild(pickerLage);
   const tutorialDunkel = document.createElement('div');
@@ -531,25 +539,18 @@ export async function mountLog(container, { userId, readOnly = false }) {
   window.addEventListener('resize', tutorialClipPlanen);
   appScroller().addEventListener('scroll', tutorialClipPlanen, { passive: true });
 
-  function oeffneUebungswahl({ titel, gruppen, aktuell, onSelect }) {
-    picker.innerHTML = '';
-    const schale = document.createElement('div');
-    schale.className = 'ex-picker-schale';
-    schale.innerHTML = `
-      <div class="ex-picker-kopf">
-        <div><small>Übung auswählen</small><b></b></div>
-        <button type="button" class="ex-picker-zu" aria-label="Schließen">×</button>
-      </div>
-      <input class="ex-picker-suche" type="search" placeholder="Übung suchen…" autocomplete="off">
-      <div class="ex-picker-liste"></div>
-      ${aktuell ? '<button type="button" class="ex-picker-leeren">Auswahl löschen</button>' : ''}`;
-    schale.querySelector('.ex-picker-kopf b').textContent = titel;
-    picker.appendChild(schale);
-    const suche = schale.querySelector('.ex-picker-suche');
-    const liste = schale.querySelector('.ex-picker-liste');
-
-    // Ohne <dialog> gibt es kein eingebautes Escape mehr – selbst nachruesten.
+  function oeffneUebungswahl({ titel, gruppen, aktuell, konten, rolle, onSelect }) {
+    let aktuelleListe = null;
     const beiTaste = (e) => { if (e.key === 'Escape') schliessen(); };
+    const anOberkante = () => {
+      const ansicht = window.visualViewport;
+      const oben = Math.max(6, Number(ansicht?.offsetTop) || 0) + 6;
+      const hoehe = Math.max(240, (Number(ansicht?.height) || window.innerHeight) - oben - 6);
+      pickerLage.classList.add('tastatur');
+      pickerLage.style.setProperty('--picker-top', `${oben}px`);
+      pickerLage.style.setProperty('--picker-hoehe', `${hoehe}px`);
+      if (aktuelleListe) aktuelleListe.scrollTop = 0;
+    };
     const schliessen = () => {
       window.visualViewport?.removeEventListener('resize', anOberkante);
       document.removeEventListener('keydown', beiTaste);
@@ -558,58 +559,169 @@ export async function mountLog(container, { userId, readOnly = false }) {
       pickerLage.style.removeProperty('--picker-hoehe');
       pickerLage.hidden = true;
     };
-    const anOberkante = () => {
-      const ansicht = window.visualViewport;
-      const oben = Math.max(6, Number(ansicht?.offsetTop) || 0) + 6;
-      const hoehe = Math.max(240, (Number(ansicht?.height) || window.innerHeight) - oben - 6);
-      pickerLage.classList.add('tastatur');
-      pickerLage.style.setProperty('--picker-top', `${oben}px`);
-      pickerLage.style.setProperty('--picker-hoehe', `${hoehe}px`);
-      liste.scrollTop = 0;
-    };
-    schale.querySelector('.ex-picker-zu').onclick = schliessen;
-    // Tippen neben das Feld schliesst – die Deckflaeche ist jetzt ein echtes
-    // Element, der Treffer liegt also auf ihr statt auf einem ::backdrop.
-    pickerLage.onclick = (e) => { if (e.target === pickerLage) schliessen(); };
-    document.addEventListener('keydown', beiTaste);
-    suche.addEventListener('focus', () => {
+    const beiEingabeFokus = (eingabe) => eingabe.addEventListener('focus', () => {
       anOberkante();
       window.visualViewport?.addEventListener('resize', anOberkante);
     });
-
     const waehlen = (name) => {
       schliessen();
       onSelect(name);
     };
-    const zeichneListe = () => {
-      liste.innerHTML = '';
-      const treffer = sucheAuswahlGruppen(gruppen, suche.value);
-      if (!treffer.length) {
-        const leer = document.createElement('p');
-        leer.className = 'ex-picker-kein';
-        leer.textContent = 'Keine passende Übung gefunden.';
-        liste.appendChild(leer);
-        return;
-      }
-      treffer.forEach((gruppe) => {
-        const ueberschrift = document.createElement('p');
-        ueberschrift.className = 'ex-picker-gruppe';
-        ueberschrift.textContent = gruppe.label;
-        liste.appendChild(ueberschrift);
-        gruppe.eintraege.forEach((eintrag) => {
-          const b = document.createElement('button');
-          b.type = 'button';
-          b.className = 'ex-picker-option' + (eintrag.n === aktuell ? ' gewaehlt' : '');
-          b.textContent = eintrag.n;
-          b.onclick = () => waehlen(eintrag.n);
-          liste.appendChild(b);
-        });
-      });
-      liste.scrollTop = 0;
+    const eigenerKopf = (kicker, ueberschrift, zurueck = null) => `
+      <div class="ex-picker-kopf">
+        ${zurueck ? '<button type="button" class="ex-picker-zurueck" aria-label="Zurück">←</button>' : ''}
+        <div><small>${kicker}</small><b>${escapeHtml(ueberschrift)}</b></div>
+        <button type="button" class="ex-picker-zu" aria-label="Schließen">×</button>
+      </div>`;
+
+    const eigeneSpeichern = (result) => {
+      if (result.fehler) return result.fehler;
+      state.eigeneUebungen = result.liste;
+      queuePersist();
+      waehlen(result.eintrag.n);
+      return '';
     };
-    suche.oninput = zeichneListe;
-    schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
-    zeichneListe();
+
+    const zeigeFormular = (basis = null) => {
+      picker.innerHTML = '';
+      const schale = document.createElement('div');
+      schale.className = 'ex-picker-schale';
+      const muskelOptionen = [...new Set((konten || []).filter((konto) => KONTEN.includes(konto)))];
+      const erlaubteMuskel = muskelOptionen.length ? muskelOptionen : [...KONTEN];
+      const startHaupt = basis?.haupt || erlaubteMuskel[0] || '';
+      const startTyp = basis?.typ || rolle || '';
+      schale.innerHTML = `
+        ${eigenerKopf(basis ? 'Eigene Variante' : 'Eigene Übung', basis?.n || titel, true)}
+        <div class="ex-picker-form ex-picker-scroll">
+          ${basis ? `<p class="ex-picker-form-hinweis"><b>Zuordnung wird übernommen:</b> ${escapeHtml(basis.haupt)} · ${escapeHtml(basis.typ)}</p>` : ''}
+          <label class="ex-picker-form-feld"><span>${basis ? 'Eigener Variantenname' : 'Name der Übung'} *</span>
+            <input type="text" maxlength="80" autocomplete="off" placeholder="${basis ? 'z. B. Gym80 Brustpresse' : `z. B. eigene ${escapeHtml(startHaupt)}-Maschine`}">
+          </label>
+          ${basis ? '' : `<label class="ex-picker-form-feld"><span>Hauptmuskel *</span>
+            <select data-eigen-haupt>${erlaubteMuskel.map((konto) => `<option value="${escapeHtml(konto)}">${escapeHtml(konto)}</option>`).join('')}</select>
+          </label>
+          <label class="ex-picker-form-feld"><span>Art *</span>
+            <select data-eigen-typ ${rolle ? 'disabled' : ''}>
+              <option value="" ${startTyp ? '' : 'selected'}>Comp oder Iso wählen…</option>
+              <option value="Comp" ${startTyp === 'Comp' ? 'selected' : ''}>Comp · mehrere Gelenke und Muskeln</option>
+              <option value="Iso" ${startTyp === 'Iso' ? 'selected' : ''}>Iso · ein Muskel möglichst gezielt</option>
+            </select>
+          </label>
+          <details class="ex-picker-neben"><summary>Indirekte Belastung ergänzen · optional</summary><div data-eigen-neben></div></details>`}
+          <p class="ex-picker-form-fehler" role="alert" aria-live="polite"></p>
+          <button type="button" class="btn btn-primary btn-block" data-eigen-speichern>${basis ? 'Variante speichern' : 'Übung speichern'}</button>
+        </div>`;
+      picker.appendChild(schale);
+      aktuelleListe = schale.querySelector('.ex-picker-form');
+      const nameIn = schale.querySelector('input');
+      const fehlerEl = schale.querySelector('.ex-picker-form-fehler');
+      const hauptIn = schale.querySelector('[data-eigen-haupt]');
+      const typIn = schale.querySelector('[data-eigen-typ]');
+      const nebenEl = schale.querySelector('[data-eigen-neben]');
+      const gewaehlteNeben = new Set();
+      const zeichneNeben = () => {
+        if (!nebenEl) return;
+        const haupt = hauptIn?.value || startHaupt;
+        gewaehlteNeben.delete(haupt);
+        nebenEl.innerHTML = KONTEN.filter((konto) => konto !== haupt).map((konto) => `
+          <label><input type="checkbox" value="${escapeHtml(konto)}" ${gewaehlteNeben.has(konto) ? 'checked' : ''}><span>${escapeHtml(konto)}</span></label>`).join('');
+        nebenEl.querySelectorAll('input').forEach((box) => {
+          box.onchange = () => box.checked ? gewaehlteNeben.add(box.value) : gewaehlteNeben.delete(box.value);
+        });
+      };
+      zeichneNeben();
+      if (hauptIn) hauptIn.onchange = zeichneNeben;
+      schale.querySelector('.ex-picker-zurueck').onclick = zeigeListe;
+      schale.querySelector('.ex-picker-zu').onclick = schliessen;
+      beiEingabeFokus(nameIn);
+      schale.querySelector('[data-eigen-speichern]').onclick = () => {
+        const result = basis
+          ? erstelleVariante(state.eigeneUebungen, basis, nameIn.value)
+          : erstelleEigeneUebung(state.eigeneUebungen, {
+            n: nameIn.value,
+            haupt: hauptIn?.value || startHaupt,
+            typ: typIn?.value || startTyp,
+            neben: [...gewaehlteNeben],
+          });
+        fehlerEl.textContent = eigeneSpeichern(result);
+      };
+      requestAnimationFrame(() => nameIn.focus());
+    };
+
+    const zeigeListe = () => {
+      window.visualViewport?.removeEventListener('resize', anOberkante);
+      pickerLage.classList.remove('tastatur');
+      pickerLage.style.removeProperty('--picker-top');
+      pickerLage.style.removeProperty('--picker-hoehe');
+      picker.innerHTML = '';
+      const schale = document.createElement('div');
+      schale.className = 'ex-picker-schale';
+      schale.innerHTML = `
+        ${eigenerKopf('Übung auswählen', titel)}
+        <input class="ex-picker-suche" type="search" placeholder="Übung suchen…" autocomplete="off">
+        <p class="ex-picker-varianten-hinweis"><b>⋯</b> Eigene Maschinenvariante speichern</p>
+        <div class="ex-picker-liste ex-picker-scroll"></div>
+        <button type="button" class="ex-picker-eigen-neu">+ Eigene Übung anlegen</button>
+        ${aktuell ? '<button type="button" class="ex-picker-leeren">Auswahl löschen</button>' : ''}`;
+      picker.appendChild(schale);
+      const suche = schale.querySelector('.ex-picker-suche');
+      const liste = schale.querySelector('.ex-picker-liste');
+      aktuelleListe = liste;
+      schale.querySelector('.ex-picker-zu').onclick = schliessen;
+      beiEingabeFokus(suche);
+      schale.querySelector('.ex-picker-eigen-neu').onclick = () => zeigeFormular();
+      schale.querySelector('.ex-picker-leeren')?.addEventListener('click', () => waehlen(''));
+
+      const zeichneListe = () => {
+        liste.innerHTML = '';
+        const treffer = sucheAuswahlGruppen(gruppen, suche.value);
+        if (!treffer.length) {
+          const leer = document.createElement('p');
+          leer.className = 'ex-picker-kein';
+          leer.textContent = 'Keine passende Übung gefunden.';
+          liste.appendChild(leer);
+          return;
+        }
+        treffer.forEach((gruppe) => {
+          const ueberschrift = document.createElement('p');
+          ueberschrift.className = 'ex-picker-gruppe';
+          ueberschrift.textContent = gruppe.label;
+          liste.appendChild(ueberschrift);
+          gruppe.eintraege.forEach((eintrag) => {
+            const zeile = document.createElement('div');
+            zeile.className = 'ex-picker-zeile';
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'ex-picker-option' + (eintrag.n === aktuell ? ' gewaehlt' : '');
+            b.textContent = eintrag.n;
+            b.onclick = () => waehlen(eintrag.n);
+            zeile.appendChild(b);
+            if (!eintrag.eigen) {
+              const variante = document.createElement('button');
+              variante.type = 'button';
+              variante.className = 'ex-picker-variante';
+              variante.textContent = '⋯';
+              variante.setAttribute('aria-label', `Eigene Variante von ${eintrag.n} speichern`);
+              variante.onclick = () => zeigeFormular(eintrag);
+              zeile.appendChild(variante);
+            } else {
+              const eigen = document.createElement('span');
+              eigen.className = 'ex-picker-eigen-marke';
+              eigen.textContent = 'Eigen';
+              zeile.appendChild(eigen);
+            }
+            liste.appendChild(zeile);
+          });
+        });
+        liste.scrollTop = 0;
+      };
+      suche.oninput = zeichneListe;
+      zeichneListe();
+    };
+
+    pickerLage.onclick = (e) => { if (e.target === pickerLage) schliessen(); };
+    document.addEventListener('keydown', beiTaste);
+    zeigeListe();
     // Kein Wechsel des globalen Scroll- oder Statusleistenmodus: Die feste
     // Lage fängt Berührungen selbst ab. So muss iOS beim Öffnen weder Header
     // noch Seitenhintergrund neu zusammensetzen.
@@ -1095,11 +1207,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const effRest = effektivePause(blk);
       const effReps = effType === 'mr' ? '6×4' : (baseMR ? '15–25' : blk.reps);
       const blockMus = blk.mus;
+      const katalog = katalogMitEigenen(state.eigeneUebungen);
 
       const el = document.createElement('div'); el.className = `block block-${effType}`;
       const cues = [];
       if (effType === 'load') {
-        const prioRolle = blk.prio ? eintragVon(names?.[0])?.typ : null;
+        const prioRolle = blk.prio ? eintragVon(names?.[0], katalog)?.typ : null;
         const hatComp = blk.prio
           ? prioRolle !== 'Iso'
           : exOf(blk, tier).some((exDef) => exDef.r === 'Comp');
@@ -1175,14 +1288,21 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const zuletzt = freeEx ? recentNames(baseMR ? 'mr' : 'pump', blk.id).map((r) => r.n) : [];
         // Feld schlaegt Block: Bei "Brust + Rücken" bietet das erste Feld nur
         // Brust an, das zweite nur Rücken – statt beide Male alles.
-        const gruppen = auswahlGruppen(exDef.konten || blk.konten, exDef.r || null, zuletzt);
+        const erlaubteKonten = exDef.konten || blk.konten;
+        const erlaubteRolle = exDef.r || null;
+        const gruppen = auswahlGruppen(erlaubteKonten, erlaubteRolle, zuletzt, katalog);
 
-        // Ein Name aus einem alten Log, den der Katalog nicht (mehr) kennt:
-        // sichtbar lassen und als solchen kennzeichnen, statt ihn stumm zu
-        // verschlucken. Streicht jemand eine Zeile aus der Excel, wuerde sonst
-        // rueckwirkend die Beschriftung schon geloggter Saetze verschwinden.
-        if (aktuell && !imKatalog(aktuell)) {
-          gruppen.push({ label: 'Nicht im Katalog', eintraege: [{ n: aktuell }] });
+        // Die aktuelle Auswahl bleibt erreichbar, selbst wenn eine persönliche
+        // Übung später anders zugeordnet oder ausgeblendet wurde. Alte Logs
+        // verlieren dadurch weder Namen noch die Möglichkeit zum Wechseln.
+        const aktuellInListe = gruppen.some((gruppe) =>
+          gruppe.eintraege.some((eintrag) => eintrag.n === aktuell));
+        if (aktuell && !aktuellInListe) {
+          const bekannt = eintragVon(aktuell, katalogMitEigenen(state.eigeneUebungen, { nurAktive: false }));
+          gruppen.push({
+            label: bekannt ? 'Aktuelle Auswahl' : 'Nicht im Katalog',
+            eintraege: [bekannt || { n: aktuell }],
+          });
         }
         nameIn.value = aktuell;
         const tonAnpassen = () => {
@@ -1263,6 +1383,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
           titel: blockMus,
           gruppen,
           aktuell: nameIn.value,
+          konten: erlaubteKonten,
+          rolle: erlaubteRolle,
           onSelect: (wert) => {
             nameIn.value = wert;
             if (freeEx) { entry.names[xi] = wert; renderMem(prevLine, entry.names[xi], memKind); }

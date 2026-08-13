@@ -146,11 +146,11 @@ export function mountFaq(container) {
       </div>
     </details>
 
-    <details class="faq"><summary>Wo notiere ich Griffvarianten oder studiospezifische Maschinen?</summary>
+    <details class="faq"><summary>Wie speichere ich Griffvarianten oder studiospezifische Maschinen?</summary>
       <div class="faq-a">
-        <p>Wähle im Übungskatalog den <b>allgemeinen Übungsnamen</b>. Die konkrete Griffbreite, Handstellung oder Griffart trägst du direkt darunter in die <b>Übungsnotiz</b> ein.</p>
-        <p>Dasselbe gilt für Maschinen, die nur in deinem Studio stehen: Notiere zum Beispiel Hersteller, Modell, Sitzhöhe, Hebelstellung oder Studio. So bleibt der Katalog übersichtlich, während deine Ausführung eindeutig reproduzierbar ist.</p>
-        <p>Bei festen HEAVYS und MIDDLES werden diese Angaben automatisch in allen Cycles übernommen.</p>
+        <p>Für eine andere Ausführung derselben Übung genügt weiterhin die <b>Übungsnotiz</b>, zum Beispiel für Griffbreite, Sitzhöhe oder Hebelstellung.</p>
+        <p>Soll eine Maschine eine <b>eigene Historie</b> erhalten, tippe im Übungskatalog neben der passenden Ausgangsübung auf das <b>Drei-Punkte-Feld</b>. Vergib etwa den Namen „Gym80 Brustpresse“. Muskelzuordnung und Comp/Iso übernimmt LOGMAN automatisch; die ursprüngliche Übung bleibt erhalten.</p>
+        <p>Fehlt eine Bewegung vollständig, wähle <b>+ Eigene Übung anlegen</b>. Name, Hauptmuskel und Comp/Iso sind Pflicht; indirekt belastete Muskeln kannst du ergänzen. Verwalten kannst du alle persönlichen Einträge anschließend im Profil unter <b>Eigene Übungen</b>. Dein persönlicher Katalog bleibt auch beim Start einer neuen Phase erhalten.</p>
       </div>
     </details>
 

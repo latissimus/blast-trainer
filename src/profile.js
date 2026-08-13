@@ -3,8 +3,16 @@ import { signOut } from './auth.js';
 import { toast } from './log.js';
 import { escapeHtml } from './html.js';
 import { getTheme, setTheme } from './theme.js';
-import { readLog, readNotizen, clearUserData } from './localstore.js';
+import { readLog, writeLog, readNotizen, clearUserData } from './localstore.js';
 import { ladeFeedbackEingang } from './feedback.js';
+import { synchronisiereTraining } from './trainingssync.js';
+import {
+  aktualisiereEigeneZuordnung,
+  benenneEigeneUebungUm,
+  normalisiereEigeneUebungen,
+  setzeEigeneUebungAktiv,
+} from './eigene-uebungen.js';
+import { KONTEN } from './katalog.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -205,6 +213,128 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     toast(logKontextSchalter.checked ? 'Gym-/Infofeld eingeblendet' : 'Gym-/Infofeld ausgeblendet');
   };
   logCard.appendChild(logKontext);
+
+  // Persönliche Übungen liegen absichtlich im Trainings-Payload: So sind sie
+  // zusammen mit dem Log offline verfügbar und auf jedem Gerät identisch. Im
+  // Profil werden sie nur verwaltet; neu angelegt werden sie direkt dort, wo
+  // man sie braucht – im Übungskatalog eines Muskelblocks.
+  const eigeneCard = profilSektion('Eigene Übungen');
+  const eigeneHinweis = document.createElement('p');
+  eigeneHinweis.className = 'profile-hinweis';
+  eigeneHinweis.textContent = 'Varianten und eigene Übungen legst du im Übungskatalog an.';
+  const eigeneListe = document.createElement('div');
+  eigeneListe.className = 'profile-eigene-liste';
+  const eigeneStatus = document.createElement('div');
+  eigeneStatus.className = 'profile-daten-status';
+  eigeneStatus.setAttribute('aria-live', 'polite');
+  eigeneCard.append(eigeneHinweis, eigeneListe, eigeneStatus);
+
+  let eigenerStand = readLog(session.user.id);
+  let eigenesPayload = eigenerStand?.payload || { v: 4, week: 1, day: 'OK-H' };
+  eigenesPayload.eigeneUebungen = normalisiereEigeneUebungen(eigenesPayload.eigeneUebungen);
+
+  const eigeneSpeichern = async () => {
+    eigenerStand = readLog(session.user.id);
+    writeLog(session.user.id, eigenesPayload, true, !!eigenerStand?.replace);
+    eigeneStatus.textContent = 'Auf diesem Gerät gespeichert · synchronisiert…';
+    const result = await synchronisiereTraining(session.user.id, eigenesPayload);
+    if (result.status === 'saved') eigeneStatus.textContent = 'Gespeichert';
+    else if (result.status === 'offline') eigeneStatus.textContent = 'Auf diesem Gerät gespeichert · wartet auf Verbindung';
+    else if (result.status === 'error') eigeneStatus.textContent = 'Auf diesem Gerät gespeichert · Upload fehlgeschlagen';
+  };
+
+  const eigeneZeichnen = () => {
+    eigeneListe.innerHTML = '';
+    const alle = normalisiereEigeneUebungen(eigenesPayload.eigeneUebungen);
+    if (!alle.length) {
+      eigeneListe.innerHTML = '<p class="profile-eigene-leer">Noch keine eigenen Übungen angelegt.</p>';
+      return;
+    }
+    alle.forEach((eintrag) => {
+      const zeile = document.createElement('div');
+      zeile.className = `profile-eigene${eintrag.aktiv ? '' : ' inaktiv'}`;
+      zeile.innerHTML = `<div><b>${escapeHtml(eintrag.n)}</b><small>${eintrag.art === 'variante' ? `Variante von ${escapeHtml(eintrag.basis)}` : 'Eigene Übung'} · ${escapeHtml(eintrag.haupt)} · ${escapeHtml(eintrag.typ)}</small></div>`;
+      const aktionen = document.createElement('span');
+      if (eintrag.aktiv) {
+        const umbenennen = document.createElement('button');
+        umbenennen.type = 'button';
+        umbenennen.textContent = 'Umbenennen';
+        umbenennen.onclick = async () => {
+          const name = prompt('Neuer Name der Übung:', eintrag.n);
+          if (name == null || name.trim() === eintrag.n) return;
+          const result = benenneEigeneUebungUm(eigenesPayload, eintrag.id, name);
+          if (result.fehler) { toast(result.fehler); return; }
+          eigeneZeichnen();
+          await eigeneSpeichern();
+        };
+        if (eintrag.art === 'eigen') {
+          const zuordnung = document.createElement('button');
+          zuordnung.type = 'button';
+          zuordnung.textContent = 'Zuordnung';
+          zuordnung.onclick = () => {
+            const vorhanden = zeile.querySelector('.profile-eigene-editor');
+            if (vorhanden) { vorhanden.remove(); return; }
+            const editor = document.createElement('div');
+            editor.className = 'profile-eigene-editor';
+            editor.innerHTML = `
+              <label><span>Hauptmuskel</span><select data-haupt>${KONTEN.map((konto) => `<option value="${escapeHtml(konto)}"${konto === eintrag.haupt ? ' selected' : ''}>${escapeHtml(konto)}</option>`).join('')}</select></label>
+              <label><span>Art</span><select data-typ><option value="Comp"${eintrag.typ === 'Comp' ? ' selected' : ''}>Comp</option><option value="Iso"${eintrag.typ === 'Iso' ? ' selected' : ''}>Iso</option></select></label>
+              <details><summary>Indirekte Belastung · optional</summary><div data-neben></div></details>
+              <button type="button" data-zuordnung-speichern>Zuordnung speichern</button>`;
+            const haupt = editor.querySelector('[data-haupt]');
+            const neben = editor.querySelector('[data-neben]');
+            const gewaehlteNeben = new Set(eintrag.neben || []);
+            const nebenZeichnen = () => {
+              gewaehlteNeben.delete(haupt.value);
+              neben.innerHTML = KONTEN.filter((konto) => konto !== haupt.value).map((konto) => `
+                <label><input type="checkbox" value="${escapeHtml(konto)}"${gewaehlteNeben.has(konto) ? ' checked' : ''}><span>${escapeHtml(konto)}</span></label>`).join('');
+              neben.querySelectorAll('input').forEach((box) => {
+                box.onchange = () => box.checked ? gewaehlteNeben.add(box.value) : gewaehlteNeben.delete(box.value);
+              });
+            };
+            nebenZeichnen();
+            haupt.onchange = nebenZeichnen;
+            editor.querySelector('[data-zuordnung-speichern]').onclick = async () => {
+              const result = aktualisiereEigeneZuordnung(eigenesPayload.eigeneUebungen, eintrag.id, {
+                haupt: haupt.value,
+                typ: editor.querySelector('[data-typ]').value,
+                neben: [...gewaehlteNeben],
+              });
+              if (result.fehler) { toast(result.fehler); return; }
+              eigenesPayload.eigeneUebungen = result.liste;
+              eigeneZeichnen();
+              await eigeneSpeichern();
+            };
+            zeile.appendChild(editor);
+          };
+          aktionen.appendChild(zuordnung);
+        }
+        const entfernen = document.createElement('button');
+        entfernen.type = 'button';
+        entfernen.textContent = 'Ausblenden';
+        entfernen.onclick = async () => {
+          if (!confirm(`„${eintrag.n}“ aus der zukünftigen Auswahl entfernen? Alte Logs bleiben erhalten.`)) return;
+          eigenesPayload.eigeneUebungen = setzeEigeneUebungAktiv(eigenesPayload.eigeneUebungen, eintrag.id, false);
+          eigeneZeichnen();
+          await eigeneSpeichern();
+        };
+        aktionen.append(umbenennen, entfernen);
+      } else {
+        const wieder = document.createElement('button');
+        wieder.type = 'button';
+        wieder.textContent = 'Wieder einblenden';
+        wieder.onclick = async () => {
+          eigenesPayload.eigeneUebungen = setzeEigeneUebungAktiv(eigenesPayload.eigeneUebungen, eintrag.id, true);
+          eigeneZeichnen();
+          await eigeneSpeichern();
+        };
+        aktionen.appendChild(wieder);
+      }
+      zeile.appendChild(aktionen);
+      eigeneListe.appendChild(zeile);
+    });
+  };
+  eigeneZeichnen();
 
   // --- Passwort aendern -------------------------------------------------
   const pwCard = profilSektion('Passwort ändern');

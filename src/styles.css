@@ -467,20 +467,58 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker-suche:focus{outline:none;border-color:var(--pink)}
 /* overscroll-behavior: Ohne <dialog> gibt es keine eingebaute Sperre mehr –
    sonst scrollt am Ende der Liste die Seite dahinter weiter. */
-.ex-picker-liste{overflow:auto;overscroll-behavior:contain;
+.ex-picker-liste{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;margin-top:8px;padding-right:2px}
 .ex-picker-gruppe{position:sticky;top:-1px;z-index:1;margin:0 0 4px;padding:13px 7px 5px;
   background:var(--surface);border-bottom:var(--dash) dashed var(--ink);
   font-family:var(--display);font-style:italic;font-size:10px;font-weight:700;
   text-transform:uppercase;color:var(--muted)}
-.ex-picker-option{display:block;width:100%;padding:11px 10px;border:0;border-bottom:1px solid var(--faint);
+.ex-picker-zeile{display:flex;align-items:stretch;border-bottom:1px solid var(--faint)}
+.ex-picker-option{display:block;min-width:0;flex:1;padding:11px 10px;border:0;
   background:transparent;color:var(--text);text-align:left;font:700 14px/1.3 var(--ui)}
 .ex-picker-option.gewaehlt{background:var(--prio-soft);color:var(--prio-text)}
 .ex-picker-option.gewaehlt::before{content:"✓ ";font-weight:900}
+.ex-picker-variante{flex:0 0 auto;margin:6px 2px 6px 6px;padding:5px 7px;border:0;border-radius:7px;
+  background:var(--prio-soft);color:var(--prio-text);font:700 italic 10px var(--display);
+  text-transform:uppercase}
+.ex-picker-varianten-hinweis{margin:5px 2px 0;color:var(--muted);font:600 10px/1.3 var(--mono)}
+.ex-picker-varianten-hinweis b{display:inline-grid;place-items:center;width:22px;height:16px;
+  border-radius:6px;background:var(--prio-soft);color:var(--prio-text);font-size:13px;line-height:1}
+.ex-picker-eigen-marke{align-self:center;margin-right:8px;color:var(--prio-text);
+  font:700 italic 9px var(--display);text-transform:uppercase}
 .ex-picker-kein{padding:28px 12px;text-align:center;color:var(--muted);font-size:14px}
+.ex-picker-eigen-neu{margin-top:10px;padding:10px;border:0;border-radius:var(--r);
+  background:var(--prio);color:#fff;font:700 italic 13px var(--display);text-transform:uppercase}
 .ex-picker-leeren{margin-top:10px;padding:9px;border:var(--dash) dashed var(--ink);border-radius:var(--r);
   background:transparent;color:var(--muted);font-family:var(--display);font-style:italic;
   font-weight:700;text-transform:uppercase}
+.ex-picker-zurueck{flex:0 0 36px;width:36px;height:36px;padding:0;border:0;
+  background:transparent;color:var(--text);font:900 22px var(--display)}
+.ex-picker-form{display:grid;flex:1;min-height:0;gap:12px;overflow:auto;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;padding:2px 2px 4px}
+.ex-picker-form-hinweis{margin:0;padding:9px 10px;border-left:4px solid var(--prio);
+  background:var(--prio-soft);color:var(--muted);font:600 12px/1.45 var(--mono)}
+.ex-picker-form-feld{display:grid;gap:5px}
+.ex-picker-form-feld>span,.ex-picker-neben summary{color:var(--muted);
+  font:700 italic 11px var(--display);text-transform:uppercase}
+.ex-picker-form-feld input,.ex-picker-form-feld select{width:100%;padding:11px 10px;
+  border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface2);
+  color:var(--text);font:700 14px var(--ui)}
+.ex-picker-form-feld select:disabled{opacity:.78}
+.ex-picker-neben{margin:0;padding:10px;border:var(--hairline) solid var(--faint);border-radius:var(--r)}
+.ex-picker-neben summary{cursor:pointer;list-style:none}
+.ex-picker-neben summary::-webkit-details-marker{display:none}
+.ex-picker-neben summary::after{content:"+";float:right;color:var(--prio-text);font-style:normal}
+.ex-picker-neben[open] summary::after{content:"−"}
+.ex-picker-neben>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.ex-picker-neben label{position:relative}
+.ex-picker-neben input{position:absolute;opacity:0;pointer-events:none}
+.ex-picker-neben span{display:block;padding:6px 8px;border-radius:999px;background:var(--surface2);
+  color:var(--muted);font:700 10px var(--ui)}
+.ex-picker-neben input:checked+span{background:var(--prio);color:#fff}
+.ex-picker-form-fehler{min-height:17px;margin:0;color:var(--danger);font:700 11px/1.4 var(--mono)}
+:root[data-theme="dark"] .ex-picker-eigen-neu,:root[data-theme="dark"] .ex-picker-neben input:checked+span{
+  color:#fff}
 /* "zuletzt: 60 kg × 8" – die wichtigste Lesezeile im Log, direkt vor dem
    naechsten Satz. Stand auf 12px und war damit kleiner als alles andere,
    was man waehrend der Einheit liest. */
@@ -1538,6 +1576,33 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .profile-schalter input{width:22px;height:22px;accent-color:var(--prio)}
 .profile-schalter span{display:flex;flex-direction:column;gap:2px}
 .profile-schalter small{color:var(--muted);font-size:11px}
+.profile-eigene-liste{display:grid;gap:7px}
+.profile-eigene{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;
+  padding:9px 10px;border:var(--hairline) solid var(--faint);border-radius:var(--r);background:var(--surface2)}
+.profile-eigene>div{display:grid;gap:2px;min-width:0}
+.profile-eigene b{overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.profile-eigene small{color:var(--muted);font-size:10px;line-height:1.35}
+.profile-eigene>span{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px}
+.profile-eigene button{padding:6px 7px;border:0;border-radius:7px;background:var(--prio-soft);
+  color:var(--prio-text);font:700 italic 9px var(--display);text-transform:uppercase}
+.profile-eigene-editor{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  padding-top:8px;border-top:1px solid var(--faint)}
+.profile-eigene-editor>label{display:grid;gap:3px}
+.profile-eigene-editor>label>span,.profile-eigene-editor summary{color:var(--muted);
+  font:700 italic 9px var(--display);text-transform:uppercase}
+.profile-eigene-editor select{width:100%;min-width:0;padding:7px;border:var(--hairline) solid var(--ink);
+  border-radius:7px;background:var(--surface);color:var(--text);font:700 11px var(--ui)}
+.profile-eigene-editor details{grid-column:1/-1}
+.profile-eigene-editor summary{cursor:pointer}
+.profile-eigene-editor details>div{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.profile-eigene-editor details label{position:relative}
+.profile-eigene-editor details input{position:absolute;opacity:0;pointer-events:none}
+.profile-eigene-editor details label span{display:block;padding:5px 7px;border-radius:999px;
+  background:var(--surface);color:var(--muted);font:700 9px var(--ui)}
+.profile-eigene-editor details input:checked+span{background:var(--prio);color:#fff}
+.profile-eigene-editor>[data-zuordnung-speichern]{grid-column:1/-1;background:var(--prio);color:#fff}
+.profile-eigene.inaktiv{opacity:.62}
+.profile-eigene-leer{margin:0;padding:10px;color:var(--muted);text-align:center;font-size:12px}
 .pump-erinnerung{margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:700;line-height:1.4}
 
 /* Fertig geladenes PWA-Update. Liegt oberhalb der Bedienleiste, damit weder

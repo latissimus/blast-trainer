@@ -140,6 +140,10 @@ describe('mergePayload – Vollstaendigkeit', () => {
       notes: { 'UK-A': { legs: ['Sitz 4'] } },
       tier: { 'UK-A|3': 1 },
       mem: { 'pump|x': { w: '20' } },
+      eigeneUebungen: [{
+        id: 'e1', n: 'Meine Presse', haupt: 'Brust', neben: ['Trizeps'],
+        typ: 'Comp', art: 'eigen', aktiv: true, updatedAt: 10,
+      }],
       datum: { 'UK-A|3': '2026-07-19' },
       volumen: { prioritaet: { Unterarme: { modus: 'plus' } } },
       meta: { einstiegErledigt: true },
@@ -147,6 +151,15 @@ describe('mergePayload – Vollstaendigkeit', () => {
     };
     const m = mergePayload(p, {});
     Object.keys(p).forEach((k) => expect(m, `Feld "${k}" fehlt nach dem Merge`).toHaveProperty(k));
+  });
+
+  it('vereinigt persönliche Übungen aus Server und Offline-Gerät', () => {
+    const basis = { haupt: 'Brust', neben: [], typ: 'Comp', art: 'eigen', aktiv: true };
+    const m = mergePayload(
+      { eigeneUebungen: [{ ...basis, id: 'server', n: 'Server-Presse', updatedAt: 10 }] },
+      { eigeneUebungen: [{ ...basis, id: 'lokal', n: 'Offline-Presse', updatedAt: 20 }] },
+    );
+    expect(m.eigeneUebungen.map((e) => e.n).sort()).toEqual(['Offline-Presse', 'Server-Presse']);
   });
 
   it('laesst das Datum lokal gewinnen und mischt beide Seiten', () => {

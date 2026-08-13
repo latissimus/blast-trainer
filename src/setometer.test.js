@@ -175,6 +175,19 @@ describe('Cycle und Deload', () => {
 });
 
 describe('Robustheit und Sortierung', () => {
+  it('ordnet persönliche Übungen im Set-O-Meter korrekt zu', () => {
+    const p = basis();
+    p.eigeneUebungen = [{
+      id: 'e1', n: 'Meine Brustpresse', haupt: 'Brust', neben: ['Trizeps'],
+      typ: 'Comp', art: 'eigen', aktiv: true, updatedAt: 1,
+    }];
+    p.ex['OK-H'] = { chest_comp: ['Meine Brustpresse'] };
+    const r = zaehleCycle(p, 1);
+    expect(r.direkt.Brust).toBe(2);
+    expect(r.indirekt.Trizeps).toBe(2);
+    expect(r.unbekannte).toEqual([]);
+  });
+
   it('meldet unbekannte Übungen', () => {
     const p = basis();
     p.ex['OK-H'] = { chest_comp: ['Nicht im Katalog'] };

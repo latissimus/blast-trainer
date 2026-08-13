@@ -1,3 +1,5 @@
+import { mergeEigeneUebungen } from './eigene-uebungen.js';
+
 // Lokaler Spiegel (Stufe 1 "offline").
 //
 // Grundgedanke wie bei Apple Notes: Was du eintippst, liegt sofort auf dem Geraet.
@@ -144,6 +146,10 @@ export function mergePayload(srv, loc) {
     volumen: loc.volumen !== undefined ? loc.volumen : (srv.volumen || {}),
     // Uebungs-Pool: Vereinigung, nichts wird verworfen.
     mem: Object.assign({}, srv.mem, loc.mem),
+    // Persönliche Übungen haben stabile IDs und einen Änderungszeitpunkt.
+    // Dadurch bleiben auf verschiedenen Geräten angelegte Varianten erhalten;
+    // auch ein bewusstes Ausblenden wird als neuere Fassung synchronisiert.
+    eigeneUebungen: mergeEigeneUebungen(srv.eigeneUebungen, loc.eigeneUebungen),
     // Phasenuebergreifende Oberflaechen-Zustaende, z.B. ob der einmalige
     // Schnellstart bereits abgeschlossen wurde.
     meta: Object.assign({}, srv.meta, loc.meta),

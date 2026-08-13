@@ -1,5 +1,6 @@
 import { TPL } from './template.js';
-import { KATALOG, KONTEN } from './katalog.js';
+import { KONTEN } from './katalog.js';
+import { katalogMitEigenen } from './eigene-uebungen.js';
 import { targetSets, setsForExercise, exOf, extraSets } from './saetze.js';
 import {
   istDeload,
@@ -25,7 +26,8 @@ const klein = (s) => String(s || '').trim().toLowerCase();
 
 export { istDeload, tageDerWoche };
 
-export function zaehleCycle(payload, cycle, katalog = KATALOG) {
+export function zaehleCycle(payload, cycle, katalog = null) {
+  katalog = katalog || katalogMitEigenen(payload?.eigeneUebungen, { nurAktive: false });
   const idx = new Map(katalog.map((e) => [klein(e.n), e]));
   const konten = {};
   const direkt = {};
