@@ -407,11 +407,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
     tutorialFx.setAttribute('role', 'status');
     tutorialFx.setAttribute('aria-live', 'polite');
     tutorialFx.innerHTML = `
-      <div class="tutorial-startfx-strahlen" aria-hidden="true"></div>
       <div class="tutorial-startfx-inhalt">
-        <small>Einrichtung abgeschlossen</small>
-        ${actionTitleSvg("LOS GEHT'S!")}
-        <span>Du beginnst jetzt mit Cycle 1 · OK HEAVYS. Mehr Hilfe findest du im FAQ.</span>
+        <div class="tutorial-fx-leiste" aria-hidden="true"><b>LOGMAN.SETUP</b><span>— □ ×</span></div>
+        <div class="tutorial-fx-koerper">
+          <small>Einrichtung abgeschlossen</small>
+          ${actionTitleSvg("LOS GEHT'S!")}
+          <strong>Cycle 1 · OK HEAVYS</strong>
+          <p><b>Noch Fragen?</b> Unten rechts <b>MENÜ</b> öffnen und <b>FAQs</b> wählen.</p>
+        </div>
       </div>`;
     document.body.appendChild(tutorialFx);
     requestAnimationFrame(() => tutorialFx?.classList.add('an'));
@@ -1091,7 +1094,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
           </div>
           <h2>Vier Einheiten. Ein klarer Ablauf.</h2>
-          <p class="tutorial-intro">Du richtest jetzt nur die Übungen ein, die sich in deinem Trainingsblock wiederholen.</p>
+          <p class="tutorial-intro">Du trainierst vier Einheiten der Reihe nach – unabhängig von Kalenderwochen. Jetzt richtest du nur die Übungen ein, die sich wiederholen.</p>
           <div class="tutorial-plan-kurz">
             <span><b>4</b><small>Einheiten<br>pro Cycle</small></span>
             <span><b>7</b><small>Cycles<br>bis Deload</small></span>
@@ -1173,6 +1176,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             <span><b>RIR</b><small>Wiederholungen übrig</small></span>
           </div>
           <p class="tutorial-abschluss-hinweis"><b>RIR 1</b> heißt: Eine saubere Wiederholung wäre noch möglich gewesen. LOGMAN zeigt dir beim nächsten vergleichbaren Training deine letzten Werte.</p>
+          <div class="tutorial-faqweg"><b>Noch Fragen?</b><span>Unten rechts <strong>MENÜ</strong> öffnen und <strong>FAQs</strong> wählen.</span></div>
           <div class="log-tutorial-ende">
             <button type="button" class="log-tutorial-weiter" data-tutorial-fertig>Training starten <span class="tutorial-pf">→</span></button>
           </div>`;

@@ -530,11 +530,14 @@ function showWillkommen() {
   fx.setAttribute('role', 'status');
   fx.setAttribute('aria-live', 'polite');
   fx.innerHTML = `
-      <div class="tutorial-startfx-strahlen" aria-hidden="true"></div>
       <div class="tutorial-startfx-inhalt">
-        <small>Dein LOGMAN ist bereit</small>
-        ${actionTitleSvg('PLAN EINRICHTEN')}
-        <span>Als Nächstes erklärt das Tutorial deinen Plan und führt dich durch die Übungsauswahl.</span>
+        <div class="tutorial-fx-leiste" aria-hidden="true"><b>LOGMAN.SETUP</b><span>— □ ×</span></div>
+        <div class="tutorial-fx-koerper">
+          <small>Dein LOGMAN ist bereit</small>
+          ${actionTitleSvg('PLAN EINRICHTEN')}
+          <strong>Vier Einheiten · feste Übungen · klar geführt</strong>
+          <p>Als Nächstes führt dich das Tutorial direkt durch deine erste Einrichtung.</p>
+        </div>
       </div>`;
   // GEFUNDENES WETTRENNEN: Diese Funktion faerbte die Statusleiste frueher
   // selbst wieder zurueck, auf einem eigenen, von aussen unabhaengigen Timer

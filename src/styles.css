@@ -861,6 +861,12 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .log-tutorial-abschluss{max-width:430px}
 .tutorial-abschluss-hinweis{padding:9px 10px;border-left:4px solid var(--prio);
   background:var(--prio-wash);font-size:12px!important}
+.tutorial-faqweg{display:flex;align-items:center;gap:9px;padding:9px 10px;border:var(--hairline) solid var(--ink);
+  border-radius:7px;background:var(--surface2)}
+.tutorial-faqweg>b{flex:0 0 auto;font-family:var(--display);font-style:italic;font-size:12px;
+  color:var(--prio-text);text-transform:uppercase}
+.tutorial-faqweg span{color:var(--muted);font:700 10.5px/1.35 var(--mono)}
+.tutorial-faqweg strong{color:var(--text)}
 .block.tutorial-aktiv{position:relative;z-index:41;outline:4px solid var(--pink);outline-offset:3px;
   transition:outline-color .3s ease,transform .3s ease}
 .tutorial-ziel{position:relative;z-index:2;outline:4px solid var(--pink)!important;outline-offset:3px;
@@ -875,49 +881,55 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   .tutorial-auswahlprinzip>div{padding:7px 8px}
 }
 
-/* Hellblauer Retro-Auftakt und -Abschluss. Der Grund entspricht dem Log bis in
-   die iOS-Statusleiste; ohne Scanlines bleibt das Logo-Muster der einzige
-   Hintergrundreiz. */
+/* Hellblauer Retro-Auftakt und -Abschluss. Statt eines bewegten Musters steht
+   jetzt ein einziges ruhiges Programmfenster im Mittelpunkt. Das greift den
+   Computer-Menuebutton auf, bleibt aber gross genug fuer einen klaren Satz. */
 .tutorial-startfx{position:fixed;inset:0;z-index:100;display:grid;place-items:center;
-  --navy:#001454;--pink:#FF69AE;
+  --navy:#001454;--pink:#FF69AE;--fx-violett:#7658E8;
   overflow:hidden;background:#B1E7FF;color:var(--navy);opacity:0;
   pointer-events:auto}
-.tutorial-startfx-strahlen{position:absolute;inset:-8%;opacity:.11;
-  background:url(./assets/silhouette-navy.png) 0 0/68px 68px repeat}
 .tutorial-startfx.an{animation:tutorialStartFlaeche 6.6s cubic-bezier(.58,.05,.25,1) both}
-.tutorial-startfx-inhalt{position:relative;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;top:-5vh;width:min(100%,420px);gap:15px;padding:30px 22px;
-  text-align:center;opacity:0}
-.tutorial-startfx.an .tutorial-startfx-inhalt{animation:tutorialStartText 5.7s .35s cubic-bezier(.16,.84,.32,1) both}
-.tutorial-startfx small,.tutorial-startfx span{font-family:var(--mono);font-weight:800;
-  color:var(--navy);text-transform:uppercase;letter-spacing:.08em}
-.tutorial-startfx small{font-size:10.5px;line-height:1.4}
-.action-title-svg{display:block;width:min(274px,80vw);height:auto;overflow:visible}
-.willkommen-fx .action-title-svg{width:min(248px,74vw)}
-.tutorial-startfx span{max-width:290px;padding:6px 9px;border:var(--bw) solid var(--navy);
-  font-size:11px;line-height:1.35}
-.willkommen-fx span{max-width:266px;padding:5px 8px;font-size:10px}
+.tutorial-startfx-inhalt{position:relative;top:-4vh;width:min(350px,calc(100vw - 34px));
+  overflow:hidden;border:2px solid var(--navy);border-radius:14px;background:rgba(255,255,255,.68);
+  box-shadow:8px 8px 0 var(--fx-violett);text-align:center;opacity:0}
+.tutorial-fx-leiste{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  min-height:34px;padding:6px 11px;border-bottom:2px solid var(--navy);background:#A8EBF7;
+  color:var(--navy);font:800 9px var(--mono);letter-spacing:.08em}
+.tutorial-fx-leiste span{font-size:15px;letter-spacing:.12em}
+.tutorial-fx-koerper{display:flex;flex-direction:column;align-items:center;gap:9px;padding:21px 18px 20px}
+.tutorial-startfx small{font:800 10px/1.4 var(--mono);color:var(--navy);
+  text-transform:uppercase;letter-spacing:.08em}
+.action-title-svg{display:block;width:min(260px,74vw);height:auto;margin:-5px 0 -3px;overflow:visible}
+.willkommen-fx .action-title-svg{width:min(242px,70vw)}
+.tutorial-fx-koerper>strong{display:block;padding:6px 9px;border:1.5px solid var(--navy);
+  border-radius:6px;background:#fff;color:var(--navy);font:800 10.5px/1.35 var(--mono);
+  text-transform:uppercase;letter-spacing:.04em}
+.tutorial-fx-koerper>p{max-width:286px;margin:0;color:var(--navy);font:700 11px/1.45 var(--mono)}
+.tutorial-fx-koerper>p b{font-weight:900}
+.tutorial-startfx.an .tutorial-startfx-inhalt{
+  animation:tutorialStartText 5.7s .35s cubic-bezier(.16,.84,.32,1) both}
 .willkommen-fx.an{animation-duration:7.8s}
 .willkommen-fx.an .tutorial-startfx-inhalt{
-  animation:willkommenStartText 6s .45s cubic-bezier(.2,.72,.28,1) both}
+  animation:willkommenStartText 6.2s .45s cubic-bezier(.2,.72,.28,1) both}
 @keyframes tutorialStartFlaeche{
   0%{opacity:0;transform:translateY(0)}
   11%,84%{opacity:1;transform:translateY(0)}
   100%{opacity:1;transform:translateY(102%)}
 }
 @keyframes tutorialStartText{
-  0%{opacity:0;transform:scale(.86)}
-  14%{opacity:1;transform:scale(1)}
-  58%{opacity:1;transform:scale(1.075)}
-  76%,88%{opacity:1;transform:scale(1)}
-  100%{opacity:0;transform:scale(.96)}
+  0%{opacity:0;transform:translateY(18px)}
+  15%,78%{opacity:1;transform:translateY(0)}
+  100%{opacity:0;transform:translateY(10px)}
 }
 @keyframes willkommenStartText{
-  0%{opacity:0;transform:scale(.9)}
-  15%{opacity:1;transform:scale(1)}
-  68%{opacity:1;transform:scale(1.075)}
-  84%{opacity:1;transform:scale(.99)}
-  100%{opacity:0;transform:scale(.96)}
+  0%{opacity:0;transform:translateY(18px)}
+  15%,82%{opacity:1;transform:translateY(0)}
+  100%{opacity:0;transform:translateY(10px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .tutorial-startfx.an,.willkommen-fx.an{animation-duration:3.1s}
+  .tutorial-startfx.an .tutorial-startfx-inhalt,
+  .willkommen-fx.an .tutorial-startfx-inhalt{animation:tutorialStartText 2.7s .15s ease both}
 }
 .willkommen-nachzug{animation:willkommenNachzug 1.6s cubic-bezier(.22,.8,.3,1) both}
 @keyframes willkommenNachzug{

@@ -36,13 +36,14 @@ export function mountFaq(container) {
         <li><b>Tutorial starten</b> und deine festen HEAVYS- und MIDDLES-Übungen auswählen.</li>
         <li><b>Cycle, Einheit und Level</b> unten im Log prüfen.</li>
         <li><b>Gewicht, Wiederholungen und bei HEAVYS/MIDDLES RIR</b> eintragen – gespeichert wird automatisch.</li>
+        <li><b>Noch Fragen?</b> Unten rechts MENÜ öffnen und FAQs wählen.</li>
       </ol>
     </section>
 
     <details class="faq" open><summary>Wie starte ich mein erstes Training?</summary>
       <div class="faq-a">
         <p><b>Starte im Log das kurze Tutorial.</b> Es erklärt den rollierenden Split und führt dich durch die feste Übungsauswahl für OK/UK HEAVYS sowie OK/UK MIDDLES. PUMPS wählst du später direkt im Training frei.</p>
-        <p>Danach beginnst du mit <b>Cycle 1 · OK HEAVYS</b>. Einen Speichern-Knopf brauchst du nicht: Jede Eingabe wird sofort auf dem Gerät gesichert und bei Verbindung hochgeladen.</p>
+        <p>Danach beginnst du mit <b>Cycle 1 · OK HEAVYS</b>. Level II · Standard ist vorausgewählt. Einen Speichern-Knopf brauchst du nicht: Jede Eingabe wird sofort auf dem Gerät gesichert und bei Verbindung hochgeladen.</p>
         <a class="faq-tutorial-start" href="#log" data-tutorial-start>Tutorial starten</a>
       </div>
     </details>
@@ -66,7 +67,9 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie finde ich mich in der App zurecht?</summary>
       <div class="faq-a">
-        <p><b>Im Log</b> stellst du unten Cycle, Einheit, Level und Datum ein. Das violette Menü führt zu Notizbuch, Set-O-Meter, Progression und FAQs. Auf Unterseiten bringt dich „← Log“ zurück.</p>
+        <p><b>Im Log</b> stellst du unten Cycle, Einheit, Level und das tatsächliche Trainingsdatum ein. Das violette Menü führt zu Notizbuch, Set-O-Meter, Progression, Feedback und FAQs. Auf Unterseiten bringt dich „← Log“ zurück.</p>
+        <p>Im Einheiten-Menü bedeutet <b>◦ angefangen</b> und <b>✓ vollständig</b>. Ist eine Einheit komplett eingetragen, bietet LOGMAN oberhalb des ersten Muskelblocks direkt die nächste offene Einheit an.</p>
+        <p><b>Gym / Info</b> ist ein optionales Feld für das verwendete Studio oder Hinweise. Der Text gilt für diese Einheit in allen Cycles. Im Profil unter Darstellung kannst du das Feld ausblenden.</p>
         <p>Der Speicherstatus neben dem Profilbild bedeutet: <b>✓</b> gespeichert · <b>↻</b> speichert · <b>↑</b> wartet auf Verbindung · <b>⚠</b> Upload fehlgeschlagen. Deine Eingabe liegt auch in den letzten beiden Fällen bereits auf dem Gerät.</p>
       </div>
     </details>
@@ -212,6 +215,13 @@ export function mountFaq(container) {
       </div>
     </details>
 
+    <details class="faq"><summary>Was passiert beim Start einer neuen Phase?</summary>
+      <div class="faq-a">
+        <p>Eine neue Phase beginnt wieder bei <b>Cycle 1 · OK HEAVYS · Level II</b>. Übungen, Satzdaten, Übungsnotizen, Prioritäten, Datum und Gym/Info des abgeschlossenen Blocks werden bewusst gelöscht. Die neue Phase baut nicht auf dessen Planfeldern auf.</p>
+        <p>Erhalten bleiben dein <b>PUMPS-Übungspool</b>, deine selbst angelegten Übungen und das getrennte <b>Notizbuch</b>. Vor dem Löschen zeigt LOGMAN eine genaue Bestätigung an.</p>
+      </div>
+    </details>
+
     <details class="faq"><summary>Wie kommen die Satzzahlen zustande?</summary>
       <div class="faq-a">
         <p>Level II entspricht dem voreingestellten Standardplan. Große Muskelgruppen erhalten ihre Arbeit über HEAVYS, MIDDLES und PUMPS; kleinere Muskeln sammeln zusätzlich indirekte Belastung.</p>
@@ -248,6 +258,7 @@ export function mountFaq(container) {
     <details class="faq"><summary>Was ist der PUMPS-Übungspool?</summary>
       <div class="faq-a">
         <p>PUMPS dürfen frei rotieren. Deshalb merkt sich der Pool zu jedem Übungsnamen das zuletzt verwendete Gewicht und die Wiederholungen – unabhängig davon, in welchem Cycle du die Übung wieder auswählst.</p>
+        <p>Im nächsten Cycle zeigt „<b>Zuletzt verwendet</b>“ zusätzlich die Übung und den letzten ausgefüllten Satz aus derselben PUMPS-Einheit. So kannst du sie schnell wiederverwenden, musst es aber nicht.</p>
         <p>Der Pool bleibt beim Start einer neuen Phase erhalten und dient nur als Orientierung. PUMPS werden nicht als eigene Progressionskurve bewertet.</p>
       </div>
     </details>
