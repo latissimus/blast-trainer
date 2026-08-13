@@ -14,7 +14,7 @@ const payload = (tag, block, name, proWoche) => ({
   },
 });
 
-describe('e1RM (Epley)', () => {
+describe('1RM-Schaetzung (Epley)', () => {
   it('gibt bei einer Wiederholung die Last selbst', () => {
     expect(e1rm(100, 1)).toBeCloseTo(103.3, 1);
   });

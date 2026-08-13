@@ -2,7 +2,8 @@ import { TPL } from './template.js';
 
 // Auswertung der progressiv getrackten HEAVYS und MIDDLES.
 //
-// Warum e1RM und nicht einfach das Gewicht: 80 kg × 8 und 85 kg × 6 sind beide
+// Warum ein geschaetztes 1RM und nicht einfach das Gewicht: 80 kg × 8 und
+// 85 kg × 6 sind beide
 // ein Fortschritt, aber ueber die reine Last nicht vergleichbar. Das geschaetzte
 // Einer-Maximum (Epley) bringt Last und Wiederholungen auf eine Zahl – so bleibt
 // eine Steigerung sichtbar, egal ob sie ueber Gewicht oder Wdh. kam.
@@ -21,7 +22,7 @@ export const bestE1 = (saetze) =>
   (saetze || []).reduce((m, s) => (s ? Math.max(m, e1rm(s.w, s.r)) : m), 0);
 
 // Vergleich zweier Trainingseintraege. Jede echte Aenderung zaehlt: Ein
-// absoluter e1RM-Puffer wuerde kleine Lasten benachteiligen (bei 7 kg veraendert
+// absoluter 1RM-Puffer wuerde kleine Lasten benachteiligen (bei 7 kg veraendert
 // eine Wiederholung den Epley-Wert nur um rund 0,23 kg).
 export const vergleichE1 = (vorher, heute) => {
   const alt = bestE1(vorher);
