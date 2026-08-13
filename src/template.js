@@ -18,7 +18,7 @@ export const TPL = {
     blocks: [
       { id: 'chest_comp', mus: 'Brust', konten: ['Brust'], type: 'load', sets: [2, 2, 2], rest: 180, reps: '6–10', rir: '0–1 RIR', ex: [feld('Comp', ['Brust'])] },
       { id: 'chest_iso', mus: 'Brust', konten: ['Brust'], type: 'load', sets: [1, 2, 2], rest: 150, reps: '6–10', rir: '0–1 RIR', ex: [feld('Iso', ['Brust'])] },
-      { id: 'back_thick', mus: 'Rücken · Dicke', konten: ['Oberer Rücken'], type: 'load', sets: [2, 3, 3], rest: 180, reps: '6–10', rir: '0–1 RIR', ex: [feld('Comp', ['Oberer Rücken'])] },
+      { id: 'back_thick', mus: 'Rücken · Dicke', konten: ['Oberer Rücken'], type: 'load', sets: [2, 2, 2], rest: 180, reps: '6–10', rir: '0–1 RIR', ex: [feld('Comp', ['Oberer Rücken'])] },
       { id: 'back_wide', mus: 'Rücken · Weite', konten: ['Lat'], type: 'load', sets: [1, 2, 2], rest: 180, reps: '6–10', rir: '0–1 RIR', ex: [feld('Comp', ['Lat'])] },
       { id: 'delt_iso', mus: 'Seitl./Hint. Schulter', konten: ['Seitliche Schulter', 'Hintere Schulter'], type: 'load', sets: [2, 3, 3], rest: 150, reps: '6–10', rir: '0–1 RIR', ex: [feld('Iso', ['Seitliche Schulter', 'Hintere Schulter'])] },
       { id: 'biceps_iso', mus: 'Bizeps', konten: ['Bizeps'], type: 'load', sets: [1, 2, 2], rest: 150, reps: '6–10', rir: '0–1 RIR', ex: [feld('Iso', ['Bizeps'])] },

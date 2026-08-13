@@ -39,6 +39,10 @@ describe('Satzarten der Cycle-Vorlage', () => {
     expect(TPL['OK-P'].blocks.find((b) => b.id === 'back_thick').sets).toEqual([2, 2, 2]);
   });
 
+  it('hält Rücken-Dicke bei HEAVYS ab Standard auf zwei Sätzen', () => {
+    expect(TPL['OK-H'].blocks.find((b) => b.id === 'back_thick').sets).toEqual([2, 2, 2]);
+  });
+
   it('benennt die B-Tage als MIDDLES & PUMPS', () => {
     expect(TPL['OK-P'].short).toBe('OK · MIDDLES & PUMPS');
     expect(TPL['UK-P'].short).toBe('UK · MIDDLES & PUMPS');

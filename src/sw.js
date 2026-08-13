@@ -23,9 +23,11 @@ cleanupOutdatedCaches();
 // Die App ist eine einzige index.html mit Hash-Routing – jeder Aufruf bekommt sie.
 registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')));
 
-// skipWaiting + clientsClaim: Eine neue Version uebernimmt beim naechsten Start,
-// statt zu warten, bis alle Fenster geschlossen sind.
-self.addEventListener('install', () => self.skipWaiting());
+// Eine neue Version wartet, bis der Update-Hinweis ausdrücklich bestätigt
+// wird. Dadurch lädt die App nie mitten in einem Training ungefragt neu.
+self.addEventListener('message', (event) => {
+  if (event.data?.typ === 'skip-waiting') self.skipWaiting();
+});
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
 self.addEventListener('push', (event) => {

@@ -1534,6 +1534,19 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .profile-schalter small{color:var(--muted);font-size:11px}
 .pump-erinnerung{margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:700;line-height:1.4}
 
+/* Fertig geladenes PWA-Update. Liegt oberhalb der Bedienleiste, damit weder
+   Satzeingabe noch Menü verdeckt werden. */
+.pwa-update-button{position:fixed;z-index:1200;right:14px;
+  bottom:calc(max(14px,env(safe-area-inset-bottom)) + 82px);
+  display:grid;gap:2px;min-width:176px;padding:11px 15px;
+  border:var(--bw) solid var(--ink);border-radius:13px;
+  background:var(--prio);color:#fff;text-align:left;
+  font-family:var(--ui);box-shadow:3px 3px 0 color-mix(in srgb,var(--ink) 55%,transparent)}
+.pwa-update-button[hidden]{display:none}
+.pwa-update-button b{font-size:13px}.pwa-update-button small{font-size:10px;opacity:.84}
+.pwa-update-button:disabled{opacity:.72}
+:root[data-theme="dark"] .pwa-update-button{background:var(--pink);color:var(--accent-ink)}
+
 /* Kleine runde Symbole bleiben optisch kompakt, erhalten aber eine echte
    44×44-px-Trefferflaeche. Das Pseudoelement gehoert zum jeweiligen Button
    und ist damit ebenfalls anklickbar. */

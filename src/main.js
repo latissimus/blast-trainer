@@ -4,7 +4,8 @@ import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } f
 import { readProfile, writeProfile } from './localstore.js';
 import { brandSvg, actionTitleSvg } from './brand.js';
 import { getTheme, applyTheme, statusleisteAnSeite, setStatusleistenOverlay } from './theme.js';
-import { registriereSW, abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
+import { abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
+import { registriereServiceWorker } from './pwa.js';
 import { mountLog, toast } from './log.js';
 import { mountProfile } from './profile.js';
 import { mountFaq } from './faq.js';
@@ -22,7 +23,7 @@ applyTheme(getTheme());
 // Funkloch aus. Haengt bewusst an keiner Oberflaeche: Frueher hing er am
 // Test-Knopf im Profil, und mit dessen Wegfall waere die Offline-Faehigkeit
 // still gestorben. Fehler hier duerfen die App nicht aufhalten.
-registriereSW().catch(() => {});
+registriereServiceWorker().catch(() => {});
 
 // Tipp auf eine Mitteilung mit Ziel: Der Worker kann das laufende Fenster nicht
 // selbst umlenken, also sagt er uns nur, wohin. Der Falten-Wecker schickt so ins
