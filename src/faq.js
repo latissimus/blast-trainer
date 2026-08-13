@@ -54,7 +54,7 @@ export function mountFaq(container) {
       </div>
     </details>
 
-    <details class="faq"><summary>Welches Level soll ich wählen?</summary>
+    <details class="faq"><summary>Welches Volumen soll ich wählen?</summary>
       <div class="faq-a">
         <p>Das Level regelt die <b>Satzanzahl der aktuellen Einheit</b>. Die ausgeführten Sätze bleiben auf jedem Level produktiv und ausreichend nah am Versagen.</p>
         <p><b>Level I – Kompakt · weniger Volumen:</b> für den Einstieg, schwächere Tage, geringe Erholung oder Erhalt.<br>
