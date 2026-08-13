@@ -253,6 +253,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
   let tutorialFxTimer = [];
   let tutorialLetzterBlock = null;
   let tutorialScrollAufFeld = false;
+  let tutorialRollenGesehen = new Set(
+    Array.isArray(state.meta.tutorialRollenGesehen) ? state.meta.tutorialRollenGesehen : [],
+  );
+  const tutorialModusSetzen = (aktiv) => document.body.classList.toggle('tutorial-modus', aktiv);
 
   // Aus dem FAQ kann das Tutorial auch spaeter erneut gestartet werden.
   try {
@@ -263,11 +267,14 @@ export async function mountLog(container, { userId, readOnly = false }) {
       einstiegSichtbar = false;
       state.meta.tutorialAktiv = true;
       state.meta.tutorialSchritt = -1;
+      state.meta.tutorialRollenGesehen = [];
+      tutorialRollenGesehen = new Set();
       state.meta.einstiegErledigt = true;
       state.week = TUTORIAL_SETUP[0].week;
       state.day = TUTORIAL_SETUP[0].day;
     }
   } catch (e) { /* sessionStorage darf den Log nicht aufhalten */ }
+  tutorialModusSetzen(tutorialAktiv);
 
   // Prioritätsmuskeln stehen frisch am Anfang der Einheit. Ein Zusatzslot sitzt
   // direkt hinter dem passenden regulären Block; neue Muskeln wie Unterarme
@@ -343,6 +350,10 @@ export async function mountLog(container, { userId, readOnly = false }) {
     };
   }
   function tutorialZielSetzen(schritt) {
+    if (schritt < 0) {
+      tutorialRollenGesehen = new Set();
+      state.meta.tutorialRollenGesehen = [];
+    }
     tutorialSchritt = schritt;
     state.meta.tutorialAktiv = true;
     state.meta.tutorialSchritt = schritt;
@@ -350,6 +361,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     einstiegSichtbar = false;
     tutorialLetzterBlock = null;
     tutorialScrollAufFeld = false;
+    tutorialModusSetzen(true);
     setStatusleistenOverlay('tutorial', true);
     if (schritt < TUTORIAL_SETUP.length) {
       const ziel = TUTORIAL_SETUP[Math.max(0, schritt)];
@@ -372,10 +384,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
     state.meta.tutorialSchritt = 0;
     state.meta.tutorialErledigt = true;
     state.meta.tutorialAbgebrochen = abgebrochen;
+    state.meta.tutorialRollenGesehen = [];
     state.meta.einstiegErledigt = true;
     state.week = 1;
     state.day = 'OK-H';
     einstiegSichtbar = false;
+    tutorialModusSetzen(false);
     setStatusleistenOverlay('tutorial', false);
     if (tutorialDunkel) tutorialDunkel.hidden = true;
     queuePersist();
@@ -1073,39 +1087,22 @@ export async function mountLog(container, { userId, readOnly = false }) {
         karte.classList.add('log-tutorial-basics');
         karte.innerHTML = `
           <div class="log-tutorial-kopf">
-            <span>Kurz erklärt</span>
+            <span>LOGMAN einrichten</span>
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
           </div>
-          <h2>Dein Plan auf einen Blick</h2>
-          <div class="tutorial-planpunkte">
-            <div>
-              <b>4</b>
-              <span><strong>4 Einheiten</strong><small>OK HEAVYS · UK HEAVYS · OK MIDDLES &amp; PUMPS · UK MIDDLES &amp; PUMPS.</small></span>
-            </div>
-            <div>
-              <b>7</b>
-              <span><strong>7 Cycles</strong><small>Jeder CYCLE besteht aus den 4 Einheiten. Nach maximal 7 CYCLES folgt ein DELOAD.</small></span>
-            </div>
-            <div>
-              <b>3</b>
-              <span><strong>3 Satzarten</strong><small>HEAVYS 6–10 · MIDDLES 10–15 · PUMPS 15–25 Wiederholungen.</small></span>
-            </div>
+          <h2>Vier Einheiten. Ein klarer Ablauf.</h2>
+          <p class="tutorial-intro">Du richtest jetzt nur die Übungen ein, die sich in deinem Trainingsblock wiederholen.</p>
+          <div class="tutorial-plan-kurz">
+            <span><b>4</b><small>Einheiten<br>pro Cycle</small></span>
+            <span><b>7</b><small>Cycles<br>bis Deload</small></span>
           </div>
-          <div class="tutorial-heavyinfo">
-            <strong>Was du jetzt festlegst</strong>
-            <p>Für HEAVYS und MIDDLES wählst du jetzt feste Übungen für Ober- und Unterkörper.
-              LOGMAN übernimmt sie in alle sieben Cycles. PUMPS wählst du im Training frei.</p>
-            <p><b>A-Tage:</b> HEAVYS machen schwere Leistung vergleichbar.
-              <b>B-Tage:</b> MIDDLES bilden das getrackte Fundament; PUMPS ergänzen leichtere, versagensnahe Arbeit.
-              Die Mischung verteilt Volumen und schont Gelenke – sie nutzt keine getrennten Wachstumsmechanismen.</p>
-            <p>Die Felder unterscheiden zwei Übungsarten:</p>
-            <div class="tutorial-rollen">
-              <span><b>Comp</b><small>mehrere Gelenke und Muskeln</small></span>
-              <span><b>Iso</b><small>ein Muskel möglichst gezielt</small></span>
-            </div>
+          <div class="tutorial-auswahlprinzip">
+            <div><b>FEST</b><span><strong>HEAVYS &amp; MIDDLES</strong><small>Einmal auswählen · in Cycle 1–7 übernommen</small></span></div>
+            <div><b>FREI</b><span><strong>PUMPS</strong><small>Direkt im Training flexibel auswählen</small></span></div>
           </div>
+          <p class="tutorial-intro-hinweis">Comp und Iso erklärt LOGMAN erst dann, wenn du das jeweilige Feld vor dir hast.</p>
           <button type="button" class="log-tutorial-weiter" data-tutorial-beginnen>
-            HEAVYS &amp; MIDDLES auswählen <span class="tutorial-pf">→</span>
+            Einrichtung starten <span class="tutorial-pf">→</span>
           </button>`;
         karte.querySelector('[data-tutorial-beginnen]').onclick = () => {
           tutorialZielSetzen(0);
@@ -1119,10 +1116,13 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const naechsteAuswahl = alsNaechstes
           ? `${alsNaechstes.muskel} ${alsNaechstes.rolle}-Übung wählen`
           : '';
-        const rollenHilfe = alsNaechstes?.rolle === 'Comp'
-          ? '<b>Comp-Feld:</b> Wähle eine große Grundübung. Sie bewegt mehrere Gelenke und trainiert mehrere Muskeln.'
-          : alsNaechstes?.rolle === 'Iso'
-            ? '<b>Iso-Feld:</b> Wähle eine Übung, die den angezeigten Muskel möglichst gezielt belastet.'
+        const rolleZumErklaeren = alsNaechstes?.rolle && !tutorialRollenGesehen.has(alsNaechstes.rolle)
+          ? alsNaechstes.rolle
+          : '';
+        const rollenHilfe = rolleZumErklaeren === 'Comp'
+          ? '<b>Comp</b><span>Mehrere Gelenke und Muskeln arbeiten zusammen.</span>'
+          : rolleZumErklaeren === 'Iso'
+            ? '<b>Iso</b><span>Der angezeigte Muskel wird möglichst gezielt belastet.</span>'
             : '';
         karte.innerHTML = `
           <div class="log-tutorial-kopf">
@@ -1133,35 +1133,48 @@ export async function mountLog(container, { userId, readOnly = false }) {
             ${TUTORIAL_SETUP.map((_, i) => `<i class="${i <= tutorialSchritt ? 'an' : ''}"></i>`).join('')}
           </div>
           <div class="tutorial-zielkopf"><h2>${schritt.titel}</h2><span>${schritt.label}</span></div>
-          <p class="tutorial-kurzziel"><b>Feste Auswahl</b> · wird automatisch in Cycle 1–7 übernommen.</p>
-          ${rollenHilfe ? `<p class="log-tutorial-typen">${rollenHilfe}</p>` : ''}
-          <p class="log-tutorial-stand"><b>${tutorialStatus.gewaehlt} / ${tutorialStatus.gesamt}</b> ${schritt.label} gewählt</p>
+          ${alsNaechstes ? `<div class="tutorial-auftrag">
+            <small>Als Nächstes</small>
+            <strong>${alsNaechstes.muskel} · ${alsNaechstes.rolle}</strong>
+            ${rollenHilfe ? `<p>${rollenHilfe}</p>` : ''}
+          </div>` : '<div class="tutorial-auftrag fertig"><strong>Auswahl vollständig</strong></div>'}
+          <div class="log-tutorial-stand"><b>${tutorialStatus.gewaehlt} / ${tutorialStatus.gesamt}</b><span>feste ${schritt.label} gewählt</span></div>
           <button type="button" class="log-tutorial-weiter" data-tutorial-weiter ${fertig ? '' : 'data-offen'}>
             ${fertig
               ? `Weiter: ${schritt.folgt} <span class="tutorial-pf">→</span>`
               : `${naechsteAuswahl} <span class="tutorial-pf">↓</span>`}
           </button>`;
         karte.querySelector('[data-tutorial-weiter]').onclick = () => {
-          if (!fertig) { tutorialScrollen(); return; }
+          if (!fertig) {
+            tutorialScrollen();
+            const schrittBeimOeffnen = tutorialSchritt;
+            const verzoegerung = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 320;
+            tutorialFxTimer.push(setTimeout(() => {
+              if (!tutorialAktiv || tutorialSchritt !== schrittBeimOeffnen) return;
+              contentEl.querySelector('.tutorial-ziel')?.click();
+            }, verzoegerung));
+            return;
+          }
           tutorialZielSetzen(tutorialSchritt + 1);
           tutorialSpeichernUndZeichnen();
         };
       } else {
+        karte.classList.add('log-tutorial-abschluss');
         karte.innerHTML = `
           <div class="log-tutorial-kopf">
-            <span>Satzeingabe</span>
+            <span>Setup abgeschlossen</span>
             <button type="button" data-tutorial-zu aria-label="Tutorial beenden">×</button>
           </div>
-          <h2>HEAVYS &amp; MIDDLES protokollieren</h2>
+          <h2>Bereit für Cycle 1</h2>
+          <p>Deine HEAVYS und MIDDLES sind festgelegt. Du startest mit <b>Cycle 1 · OK HEAVYS</b>.</p>
           <div class="tutorial-eingabe">
             <span><b>kg</b><small>Gewicht</small></span>
             <span><b>Wdh.</b><small>Wiederholungen</small></span>
             <span><b>RIR</b><small>Wiederholungen übrig</small></span>
           </div>
-          <p><b>RIR 1</b> bedeutet: Eine saubere Wiederholung wäre noch möglich gewesen.</p>
-          <p class="tutorial-kurzziel">Beim nächsten vergleichbaren Training stehen die letzten Werte direkt über der Eingabe.</p>
+          <p class="tutorial-abschluss-hinweis"><b>RIR 1</b> heißt: Eine saubere Wiederholung wäre noch möglich gewesen. LOGMAN zeigt dir beim nächsten vergleichbaren Training deine letzten Werte.</p>
           <div class="log-tutorial-ende">
-            <button type="button" class="log-tutorial-weiter" data-tutorial-fertig>Tutorial abschließen</button>
+            <button type="button" class="log-tutorial-weiter" data-tutorial-fertig>Training starten <span class="tutorial-pf">→</span></button>
           </div>`;
         karte.querySelector('[data-tutorial-fertig]').onclick = tutorialStartAnimation;
       }
@@ -1393,6 +1406,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
             nameIn.value = wert;
             if (freeEx) { entry.names[xi] = wert; renderMem(prevLine, entry.names[xi], memKind); }
             else { names[xi] = wert; }
+            const tutorialTreffer = tutorialAktiv && tutorialSchritt >= 0 &&
+              tutorialSchritt < TUTORIAL_SETUP.length && effType === tutorialTyp;
+            if (tutorialTreffer && wert && exDef.r) {
+              tutorialRollenGesehen.add(exDef.r);
+              state.meta.tutorialRollenGesehen = [...tutorialRollenGesehen];
+            }
             tonAnpassen();
             if (!tutorialAktiv) {
               state.meta.einstiegErledigt = true;
@@ -1404,6 +1423,18 @@ export async function mountLog(container, { userId, readOnly = false }) {
             // aktivieren/deaktivieren. Die Satzzahl muss deshalb sofort neu
             // berechnet werden, nicht erst beim naechsten Seitenwechsel.
             if (freeEx || tutorialAktiv || optionen.katalogGeaendert) renderDay();
+            // Nach der letzten festen Auswahl einer Einheit geht der Assistent
+            // selbststaendig und ruhig zum naechsten Setup-Schritt. Bei bereits
+            // vorbefuellten Einheiten bleibt der sichtbare Weiter-Button als
+            // eindeutiger manueller Weg bestehen.
+            if (tutorialTreffer && wert && festeAuswahlStatus(tpl, tier, tutorialTyp).offen.length === 0) {
+              const schrittBeimSpeichern = tutorialSchritt;
+              tutorialFxTimer.push(setTimeout(() => {
+                if (!tutorialAktiv || tutorialSchritt !== schrittBeimSpeichern) return;
+                tutorialZielSetzen(schrittBeimSpeichern + 1);
+                tutorialSpeichernUndZeichnen();
+              }, 520));
+            }
           },
         });
 
@@ -1679,6 +1710,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       tutorialFxTimer = [];
       tutorialFx?.remove();
       tutorialFx = null;
+      tutorialModusSetzen(false);
       setStatusleistenOverlay('tutorial', false);
     },
   };

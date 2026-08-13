@@ -751,9 +751,12 @@ body.einstieg-fokus #app::after{content:"";position:fixed;top:0;left:0;width:100
   50%{transform:scale(1.025)}
 }
 
-/* Gefuehrtes Heavy-Setup. Die Karte ist genauso breit wie die untere
-   Bedienleiste. Der feste Dimmer liegt ueber der restlichen App; nur Karte und
-   der gerade erklaerte Muskelblock werden darueber angehoben. */
+/* Im Einrichtungsmodus gehoert der knappe Bildschirm ganz der Aufgabe. Die
+   untere Bedienleiste bleibt funktional unveraendert, wird aber bis zum Ende
+   des Tutorials ausgeblendet. */
+body.tutorial-modus .ctrlbar{display:none!important}
+/* Gefuehrtes Setup. Die transparente Sperrflaeche verhindert Fehleingaben in
+   anderen Muskelkarten; nur der gerade erklaerte Block liegt darueber. */
 .tutorial-dimmer{position:fixed;top:var(--topbar-h,0px);right:0;bottom:0;left:0;z-index:35;
   background:transparent;
   touch-action:pan-y}
@@ -775,7 +778,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
   width:min(580px,calc(100vw - 14px));
   max-height:calc(100dvh - env(safe-area-inset-top) - 6px);
   margin:0;
-  padding:17px;
+  padding:14px;
   transform:translateX(-50%);background-color:#fff;pointer-events:auto;
   overflow-x:hidden;overflow-y:auto;
   border:var(--bw) solid var(--ink);border-radius:16px;
@@ -791,50 +794,57 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 }
 :root[data-theme="dark"] .log-tutorial{background-color:#1E212A}
 .log-tutorial-basics{border-color:var(--prio)}
-.log-tutorial-kopf{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
+.log-tutorial-kopf{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}
 .log-tutorial-kopf span{padding:5px 8px;border-radius:999px;background:var(--prio);
   color:#fff;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
 .log-tutorial-kopf button{width:36px;height:36px;padding:0;border:var(--bw) solid var(--ink);
   border-radius:50%;background:var(--surface2);color:var(--text);font-size:20px;line-height:1}
-.log-tutorial h2{margin:0 0 9px;font-family:var(--display);font-style:italic;
-  font-size:20px;text-transform:uppercase;line-height:1.05}
-.log-tutorial p{margin:0 0 14px;color:var(--muted);font-size:13.5px;line-height:1.55}
+.log-tutorial h2{margin:0 0 8px;font-family:var(--display);font-style:italic;
+  font-size:21px;text-transform:uppercase;line-height:1.08}
+.log-tutorial p{margin:0 0 11px;color:var(--muted);font-size:13px;line-height:1.48}
 .log-tutorial p b{color:var(--text)}
-.tutorial-fortschritt{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:1px 0 11px}
+.tutorial-fortschritt{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:0 0 9px}
 .tutorial-fortschritt i{height:4px;border:1px solid var(--prio);background:transparent}
 .tutorial-fortschritt i.an{background:var(--prio)}
-.tutorial-planpunkte{display:grid;margin:12px 0 11px;border:var(--bw) solid var(--ink);
-  border-radius:var(--r);overflow:hidden}
-.tutorial-planpunkte>div{display:grid;grid-template-columns:38px 1fr;align-items:center;gap:10px;
-  min-height:53px;padding:7px 10px;border-bottom:var(--hairline) solid var(--ink);background:var(--surface)}
-.tutorial-planpunkte>div:last-child{border-bottom:0}
-.tutorial-planpunkte>div>b{display:grid;place-items:center;width:36px;height:36px;border-radius:5px;
-  background:var(--prio);color:#fff;font-family:var(--display);font-style:italic;font-size:16px}
-.tutorial-planpunkte span{display:flex;flex-direction:column;gap:1px}
-.tutorial-planpunkte strong{font-family:var(--display);font-style:italic;font-size:12.5px;
+.tutorial-intro{max-width:35em;margin-bottom:10px!important}
+.tutorial-plan-kurz{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:9px 0}
+.tutorial-plan-kurz>span{display:grid;grid-template-columns:38px 1fr;align-items:center;gap:8px;
+  min-height:50px;padding:7px 9px;border:var(--hairline) solid var(--ink);border-radius:7px;
+  background:var(--surface2)}
+.tutorial-plan-kurz b{display:grid;place-items:center;width:36px;height:36px;border-radius:6px;
+  background:var(--prio);color:#fff;font-family:var(--display);font-style:italic;font-size:18px}
+.tutorial-plan-kurz small{color:var(--muted);font:700 10.5px/1.28 var(--mono);
   text-transform:uppercase}
-.tutorial-planpunkte small{color:var(--muted);font-size:11.5px;line-height:1.4}
-.tutorial-heavyinfo{margin-bottom:12px;padding:11px;border-left:5px solid var(--prio);
-  background:var(--prio-wash)}
-.tutorial-heavyinfo>strong{display:block;margin-bottom:5px;font-family:var(--display);
-  font-style:italic;font-size:13px;text-transform:uppercase}
-.tutorial-heavyinfo p{margin:0 0 7px;font-size:12px;line-height:1.48}
-.tutorial-heavyinfo p:last-of-type{margin-bottom:8px}
-.tutorial-rollen{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.tutorial-rollen span{display:flex;align-items:center;gap:6px;padding:6px 7px;
-  border:var(--hairline) solid var(--ink);border-radius:5px;background:var(--surface)}
-.tutorial-rollen b{font-family:var(--display);font-style:italic;font-size:12px;text-transform:uppercase}
-.tutorial-rollen small{color:var(--muted);font-size:10.5px;line-height:1.3}
+.tutorial-auswahlprinzip{display:grid;overflow:hidden;margin:9px 0;border:var(--hairline) solid var(--ink);
+  border-radius:8px;background:var(--surface)}
+.tutorial-auswahlprinzip>div{display:grid;grid-template-columns:46px 1fr;align-items:center;gap:9px;
+  padding:8px 10px;border-bottom:var(--hairline) solid var(--ink)}
+.tutorial-auswahlprinzip>div:last-child{border-bottom:0}
+.tutorial-auswahlprinzip>div>b{font-family:var(--display);font-style:italic;font-size:11px;
+  color:var(--prio-text);text-align:center}
+.tutorial-auswahlprinzip span{display:flex;flex-direction:column;gap:1px}
+.tutorial-auswahlprinzip strong{font-family:var(--display);font-style:italic;font-size:12px}
+.tutorial-auswahlprinzip small{color:var(--muted);font-size:10.5px;line-height:1.3}
+.tutorial-intro-hinweis{margin-bottom:10px!important;font-size:11.5px!important}
 .tutorial-zielkopf{display:flex;align-items:center;gap:8px;margin-bottom:7px}
 .tutorial-zielkopf h2{flex:1;margin:0}
-.tutorial-zielkopf>span{padding:4px 8px;border:var(--bw) solid var(--ink);border-radius:999px;
+.tutorial-zielkopf>span{padding:4px 8px;border:0;border-radius:999px;
   background:var(--navy);color:#fff;font-family:var(--display);font-style:italic;
   font-size:10px;font-weight:700;text-transform:uppercase}
-.tutorial-kurzziel{margin-bottom:10px!important;font-size:12.5px!important}
-.log-tutorial-typen{padding:10px 11px!important;margin-bottom:12px!important;
-  border:var(--dash) dashed var(--ink);background:var(--surface2)}
-.log-tutorial-stand{padding:8px 10px!important;margin-bottom:11px!important;
-  background:var(--prio-wash);border-left:4px solid var(--prio)}
+.tutorial-auftrag{display:grid;gap:2px;margin:8px 0;padding:9px 10px;border-left:4px solid var(--prio);
+  background:var(--prio-wash)}
+.tutorial-auftrag>small{color:var(--muted);font:800 9px var(--mono);text-transform:uppercase;
+  letter-spacing:.06em}
+.tutorial-auftrag>strong{font-family:var(--display);font-style:italic;font-size:15px;
+  text-transform:uppercase}
+.tutorial-auftrag p{display:flex;align-items:baseline;gap:7px;margin:4px 0 0;font-size:11.5px;
+  line-height:1.35}
+.tutorial-auftrag p b{flex:0 0 auto;color:var(--prio-text);font-family:var(--display);
+  font-style:italic;text-transform:uppercase}
+.tutorial-auftrag.fertig{border-left-color:var(--green);background:rgba(40,181,106,.11)}
+.log-tutorial-stand{display:flex;align-items:baseline;gap:7px;margin:0 0 9px;padding:6px 9px;
+  background:var(--surface2);color:var(--muted);font:700 11px var(--mono)}
+.log-tutorial-stand b{color:var(--text);font-size:14px}
 .tutorial-eingabe{display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden;margin:11px 0 12px;
   border:var(--bw) solid var(--ink);border-radius:var(--r)}
 .tutorial-eingabe span{display:flex;flex-direction:column;gap:2px;padding:9px 7px;
@@ -842,17 +852,28 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .tutorial-eingabe span:last-child{border-right:0}
 .tutorial-eingabe b{font-family:var(--mono);font-size:13px;color:var(--text)}
 .tutorial-eingabe small{font-size:10.5px;line-height:1.25;color:var(--muted)}
-.log-tutorial-weiter{width:100%;padding:13px;border:var(--bw) solid var(--ink);border-radius:var(--r);
+.log-tutorial-weiter{width:100%;min-height:45px;padding:11px 12px;border:var(--bw) solid var(--ink);border-radius:var(--r);
   background:var(--pink);color:var(--accent-ink);font-family:var(--display);font-style:italic;
-  font-size:15px;font-weight:700;text-transform:uppercase}
+  font-size:14px;font-weight:700;text-transform:uppercase}
 .tutorial-pf{font-family:var(--mono);font-style:normal;font-size:19px;margin-left:3px;line-height:1}
 .log-tutorial-weiter[data-offen]{background:var(--prio);color:#fff}
-.log-tutorial-ende{display:grid;gap:12px;margin-top:17px}
+.log-tutorial-ende{display:grid;gap:12px;margin-top:12px}
+.log-tutorial-abschluss{max-width:430px}
+.tutorial-abschluss-hinweis{padding:9px 10px;border-left:4px solid var(--prio);
+  background:var(--prio-wash);font-size:12px!important}
 .block.tutorial-aktiv{position:relative;z-index:41;outline:4px solid var(--pink);outline-offset:3px;
   transition:outline-color .3s ease,transform .3s ease}
 .tutorial-ziel{position:relative;z-index:2;outline:4px solid var(--pink)!important;outline-offset:3px;
-  animation:tutorialPuls 1.3s ease-in-out infinite}
-@keyframes tutorialPuls{0%,100%{outline-color:var(--pink)}50%{outline-color:var(--prio)}}
+  transition:outline-color .25s ease}
+
+@media(max-width:410px){
+  .log-tutorial{width:calc(100vw - 12px);padding:13px}
+  .log-tutorial h2{font-size:19px}
+  .tutorial-plan-kurz>span{grid-template-columns:34px 1fr;padding:6px 7px}
+  .tutorial-plan-kurz b{width:32px;height:32px;font-size:16px}
+  .tutorial-plan-kurz small{font-size:9.5px}
+  .tutorial-auswahlprinzip>div{padding:7px 8px}
+}
 
 /* Hellblauer Retro-Auftakt und -Abschluss. Der Grund entspricht dem Log bis in
    die iOS-Statusleiste; ohne Scanlines bleibt das Logo-Muster der einzige
