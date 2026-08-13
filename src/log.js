@@ -563,9 +563,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
       anOberkante();
       window.visualViewport?.addEventListener('resize', anOberkante);
     });
-    const waehlen = (name) => {
+    const waehlen = (name, optionen = {}) => {
       schliessen();
-      onSelect(name);
+      onSelect(name, optionen);
     };
     const eigenerKopf = (kicker, ueberschrift, zurueck = null) => `
       <div class="ex-picker-kopf">
@@ -578,7 +578,11 @@ export async function mountLog(container, { userId, readOnly = false }) {
       if (result.fehler) return result.fehler;
       state.eigeneUebungen = result.liste;
       queuePersist();
-      waehlen(result.eintrag.n);
+      // Alle bereits aufgebauten Auswahlknöpfe halten ihre gefilterten
+      // Kataloggruppen in einer Closure. Ohne dieses Signal kannten die
+      // anderen Felder eine gerade angelegte Übung erst nach einem
+      // Seitenwechsel, obwohl sie schon gespeichert war.
+      waehlen(result.eintrag.n, { katalogGeaendert: true });
       return '';
     };
 
@@ -1385,7 +1389,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
           aktuell: nameIn.value,
           konten: erlaubteKonten,
           rolle: erlaubteRolle,
-          onSelect: (wert) => {
+          onSelect: (wert, optionen = {}) => {
             nameIn.value = wert;
             if (freeEx) { entry.names[xi] = wert; renderMem(prevLine, entry.names[xi], memKind); }
             else { names[xi] = wert; }
@@ -1399,7 +1403,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             // Eine Pump-Wahl kann eine gespeicherte Prioritaet oder deren Spender
             // aktivieren/deaktivieren. Die Satzzahl muss deshalb sofort neu
             // berechnet werden, nicht erst beim naechsten Seitenwechsel.
-            if (freeEx || tutorialAktiv) renderDay();
+            if (freeEx || tutorialAktiv || optionen.katalogGeaendert) renderDay();
           },
         });
 
