@@ -353,7 +353,30 @@ function renderChrome() {
     <option value="feedback">FEEDBACK</option>
     <option value="faq">FAQs</option>
     ${isAdmin ? '<option value="admin">ADMIN</option>' : ''}`;
+
+  // iOS zeichnet :active auf einem nativen Select bei einem kurzen Tipp oft
+  // gar nicht. Der sichtbare Computer bekommt deshalb einen eigenen, kurzen
+  // Druckzustand ab pointerdown; das Select selbst bleibt vollstaendig nativ.
+  const menueKnopf = menue.closest('.menue');
+  let menueDruckStart = 0;
+  let menueDruckTimer = 0;
+  const menueDruecken = () => {
+    clearTimeout(menueDruckTimer);
+    menueDruckStart = performance.now();
+    menueKnopf.classList.add('ist-gedrueckt');
+    // Rueckfall, falls iOS beim Oeffnen des Pickers kein pointerup liefert.
+    menueDruckTimer = window.setTimeout(() => menueKnopf.classList.remove('ist-gedrueckt'), 900);
+  };
+  const menueLoslassen = () => {
+    clearTimeout(menueDruckTimer);
+    const rest = Math.max(0, 150 - (performance.now() - menueDruckStart));
+    menueDruckTimer = window.setTimeout(() => menueKnopf.classList.remove('ist-gedrueckt'), rest);
+  };
+  menue.addEventListener('pointerdown', menueDruecken, { passive: true });
+  menue.addEventListener('pointerup', menueLoslassen, { passive: true });
+  menue.addEventListener('pointercancel', menueLoslassen, { passive: true });
   menue.onchange = () => {
+    menueLoslassen();
     location.hash = menue.value;
   };
 

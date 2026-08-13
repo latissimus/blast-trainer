@@ -610,8 +610,10 @@ html.statusleiste-overlay .ctrlbar{z-index:50;background:var(--bg)}
 .menue-computer{position:absolute;inset:2px 1px 1px;z-index:1;display:block;pointer-events:none}
 .menue-computer svg{display:block;width:100%;height:100%;overflow:visible}
 .menue-computer-front{transition:transform 70ms ease-out}
-.ci.menue:active .menue-computer-front{transform:translate(4px,3px)}
-.ci.menue:active .menue-computer-schatten{opacity:0}
+.ci.menue:active .menue-computer-front,
+.ci.menue.ist-gedrueckt .menue-computer-front{transform:translate(4px,3px)}
+.ci.menue:active .menue-computer-schatten,
+.ci.menue.ist-gedrueckt .menue-computer-schatten{opacity:0}
 .menue-computer-innen{fill:transparent}
 :root[data-theme="dark"] .menue-computer-text{fill:#FFFFFF}
 .ci.menue select{z-index:3}
