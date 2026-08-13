@@ -711,7 +711,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
             } else {
               const eigen = document.createElement('span');
               eigen.className = 'ex-picker-eigen-marke';
-              eigen.textContent = 'Eigen';
+              eigen.textContent = 'Eigene';
               zeile.appendChild(eigen);
             }
             liste.appendChild(zeile);

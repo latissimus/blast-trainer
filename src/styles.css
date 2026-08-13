@@ -484,7 +484,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker-varianten-hinweis{margin:5px 2px 0;color:var(--muted);font:600 10px/1.3 var(--mono)}
 .ex-picker-varianten-hinweis b{display:inline-grid;place-items:center;width:22px;height:16px;
   border-radius:6px;background:var(--prio-soft);color:var(--prio-text);font-size:13px;line-height:1}
-.ex-picker-eigen-marke{align-self:center;margin-right:8px;color:var(--prio-text);
+.ex-picker-eigen-marke{align-self:center;margin-left:6px;margin-right:8px;color:var(--prio-text);
   font:700 italic 9px var(--display);text-transform:uppercase}
 .ex-picker-kein{padding:28px 12px;text-align:center;color:var(--muted);font-size:14px}
 .ex-picker-eigen-neu{margin-top:10px;padding:10px;border:0;border-radius:var(--r);
@@ -495,7 +495,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker-zurueck{flex:0 0 36px;width:36px;height:36px;padding:0;border:0;
   background:transparent;color:var(--text);font:900 22px var(--display)}
 .ex-picker-form{display:grid;flex:1;min-height:0;gap:12px;overflow:auto;overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch;padding:2px 2px 4px}
+  -webkit-overflow-scrolling:touch;padding:3px 7px 5px}
 .ex-picker-form-hinweis{margin:0;padding:9px 10px;border-left:4px solid var(--prio);
   background:var(--prio-soft);color:var(--muted);font:600 12px/1.45 var(--mono)}
 .ex-picker-form-feld{display:grid;gap:5px}
