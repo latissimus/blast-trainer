@@ -392,8 +392,9 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   // direkt unter dem Formular.
   const rechtCard = profilSektion('Rechtliches');
   rechtCard.innerHTML = `
-    <p class="profile-hinweis">Datenschutz, Anbieterangaben und Hinweise zur sicheren Nutzung von LOGMAN.</p>
+    <p class="profile-hinweis">Nutzungsbedingungen, Datenschutz, Anbieterangaben und Hinweise zur sicheren Nutzung von LOGMAN.</p>
     <div class="profile-recht-links">
+      <a class="btn" href="#nutzung">Nutzung</a>
       <a class="btn" href="#datenschutz">Datenschutz</a>
       <a class="btn" href="#impressum">Impressum &amp; Hinweise</a>
     </div>`;

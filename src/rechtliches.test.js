@@ -2,8 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { rechtlicherInhalt, RECHTSSEITEN } from './rechtliches.js';
 
 describe('Rechtliche Seiten', () => {
-  it('stellt Datenschutz und Impressum als feste Routen bereit', () => {
-    expect(RECHTSSEITEN).toEqual(['datenschutz', 'impressum']);
+  it('stellt Nutzungsbedingungen, Datenschutz und Impressum als feste Routen bereit', () => {
+    expect(RECHTSSEITEN).toEqual(['nutzung', 'datenschutz', 'impressum']);
+  });
+
+  it('erklaert die kostenlose Nutzung ohne zwingende Verbraucherrechte auszuschliessen', () => {
+    const html = rechtlicherInhalt('nutzung');
+    expect(html).toContain('kostenlos');
+    expect(html).toContain('keine In-App-Käufe');
+    expect(html).toContain('Offlinebetrieb');
+    expect(html).toContain('Sicherheitsupdates');
+    expect(html).toMatch(/Zwingende\s+gesetzliche Ansprüche bleiben unberührt/);
+    expect(html).toContain('Account löschen');
   });
 
   it('erklaert die wesentlichen Verarbeitungen von LOGMAN', () => {

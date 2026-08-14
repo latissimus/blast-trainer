@@ -10,7 +10,7 @@ export const RECHTSDATEN = Object.freeze({
   smtp: '[SMTP-ANBIETER ERGÄNZEN]',
 });
 
-export const RECHTSSEITEN = Object.freeze(['datenschutz', 'impressum']);
+export const RECHTSSEITEN = Object.freeze(['nutzung', 'datenschutz', 'impressum']);
 
 const extern = (url, text) =>
   `<a href="${url}" target="_blank" rel="noreferrer">${text}</a>`;
@@ -199,16 +199,166 @@ function impressumInhalt() {
     </section>`;
 }
 
+function nutzungsbedingungenInhalt() {
+  return `
+    <section class="recht-karte recht-wichtig">
+      <h2>Kostenlos trainieren mit LOGMAN</h2>
+      <p>LOGMAN wird derzeit kostenlos bereitgestellt. Es gibt keine
+        kostenpflichtige Mitgliedschaft, keine In-App-Käufe und keine
+        automatische Vertragsverlängerung.</p>
+      <p>Diese Nutzungsbedingungen regeln die Verwendung der App und des
+        persönlichen LOGMAN-Kontos. Gesetzliche Rechte, insbesondere zwingende
+        Verbraucherrechte für digitale Produkte, bleiben unberührt.</p>
+    </section>
+
+    <section class="recht-karte">
+      <h2>1. Anbieter und Geltungsbereich</h2>
+      <p>Anbieter von LOGMAN ist:</p>
+      ${kontakt()}
+      <p>Die Bedingungen gelten für die Registrierung und Nutzung von LOGMAN.
+        Mit dem Erstellen eines Kontos kommt der Nutzungsvertrag zustande.</p>
+    </section>
+
+    <section class="recht-karte">
+      <h2>2. Konto und Zugang</h2>
+      <p>Für persönliche Funktionen wird ein Konto benötigt. Die bei der
+        Registrierung gemachten Angaben müssen zutreffen. Zugangsdaten dürfen
+        nicht an andere Personen weitergegeben werden. Wenn ein unbefugter
+        Zugriff vermutet wird, sollte das Passwort sofort geändert und der
+        Anbieter informiert werden.</p>
+      <p>Die Nutzung ist nur im Rahmen der eigenen rechtlichen
+        Handlungsfähigkeit zulässig. Wer dafür die Zustimmung einer
+        sorgeberechtigten Person benötigt, darf LOGMAN nur mit dieser
+        Zustimmung verwenden.</p>
+    </section>
+
+    <section class="recht-karte">
+      <h2>3. Leistung und Offlinebetrieb</h2>
+      <p>LOGMAN unterstützt die Planung, Dokumentation und Auswertung des
+        Trainings. Dazu gehören insbesondere Trainingslog, Cycles,
+        Progressionsanzeige, Set-O-Meter, Notizen, eigene Übungen und
+        Synchronisation.</p>
+      <p>Teile der App funktionieren offline. Änderungen werden zunächst auf
+        dem Gerät gespeichert und bei verfügbarer Verbindung synchronisiert.
+        Bei sehr schwacher oder unterbrochener Verbindung kann sich die
+        Synchronisation verzögern. Vor einem Gerätewechsel oder dem Löschen von
+        Website-Daten sollte geprüft werden, ob alle Änderungen übertragen
+        wurden.</p>
+    </section>
+
+    <section class="recht-karte">
+      <h2>4. Training und Gesundheit</h2>
+      <p>LOGMAN ist ein Trainingswerkzeug und keine medizinische Beratung,
+        Diagnose oder Behandlung. Die angezeigten Pläne, Satzzahlen,
+        Belastungsbereiche und Informationen sind allgemeine Trainingshilfen
+        und keine individuelle gesundheitliche Freigabe.</p>
+      <p>Übungen, Lasten, Wiederholungen und die Nähe zum Muskelversagen müssen
+        zur eigenen Erfahrung und gesundheitlichen Situation passen. Bei
+        Schmerzen, Verletzungen, Erkrankungen oder Unsicherheit sollte das
+        Training beendet und medizinischer beziehungsweise fachlicher Rat
+        eingeholt werden.</p>
+    </section>
+
+    <section class="recht-karte">
+      <h2>5. Zulässige Nutzung</h2>
+      <p>LOGMAN darf nur gesetzeskonform und für persönliche Trainingszwecke
+        verwendet werden. Nicht erlaubt sind insbesondere:</p>
+      <ul>
+        <li>Angriffe, Manipulationsversuche oder eine Umgehung von
+          Sicherheits- und Zugriffsbeschränkungen,</li>
+        <li>automatisierte Zugriffe, die den Betrieb unangemessen belasten,</li>
+        <li>das Hochladen rechtswidriger Inhalte oder von Inhalten, an denen
+          keine erforderlichen Rechte bestehen,</li>
+        <li>die Nutzung fremder Konten oder das Auslesen fremder Daten.</li>
+      </ul>
+      <p>Bei erheblichen oder wiederholten Verstößen kann der Zugang nach
+        vorherigem Hinweis vorübergehend gesperrt oder der Nutzungsvertrag aus
+        wichtigem Grund beendet werden. Bei akuter Gefahr für die Sicherheit
+        oder andere Personen kann eine sofortige Sperre erforderlich sein.</p>
+    </section>
+
+    <section class="recht-karte">
+      <h2>6. Eigene Inhalte</h2>
+      <p>Notizen, Bilder, Links, Übungsvarianten und sonstige eigene Inhalte
+        bleiben den Nutzenden zugeordnet. Sie räumen dem Anbieter nur die
+        technisch erforderlichen, nicht ausschließlichen Rechte ein, diese
+        Inhalte zu speichern, zu verarbeiten und auf ihren Geräten anzuzeigen,
+        soweit dies für LOGMAN erforderlich ist.</p>
+      <p>Nutzende sind dafür verantwortlich, dass eigene Inhalte keine Rechte
+        Dritter verletzen und keine rechtswidrigen Informationen enthalten.
+        Eigene Übungen werden ausschließlich im jeweiligen Kundenkonto
+        gespeichert und nicht automatisch für andere Personen veröffentlicht.</p>
+    </section>
+
+    <section class="recht-karte">
+      <h2>7. Verfügbarkeit, Updates und Änderungen</h2>
+      <p>LOGMAN wird mit angemessener Sorgfalt betrieben. Eine jederzeitige,
+        vollständig störungsfreie Verfügbarkeit kann insbesondere wegen
+        Wartung, Updates, Gerätebedingungen oder Störungen von Netz- und
+        Drittanbietern nicht versprochen werden.</p>
+      <p>Erforderliche Updates einschließlich Sicherheitsupdates werden im
+        gesetzlichen Umfang bereitgestellt. Sie sollten zeitnah installiert
+        werden. LOGMAN darf aus triftigem Grund weiterentwickelt werden, etwa
+        zur Sicherheit, Fehlerbehebung, Anpassung an technische oder rechtliche
+        Anforderungen oder zur Verbesserung von Funktionen. Änderungen
+        erfolgen ohne zusätzliche Kosten. Über Änderungen, die die Nutzung
+        mehr als nur unerheblich beeinträchtigen, wird im gesetzlich
+        erforderlichen Umfang vorab informiert; gesetzliche Kündigungsrechte
+        bleiben bestehen.</p>
+    </section>
+
+    <section class="recht-karte">
+      <h2>8. Haftung</h2>
+      <p>Der Anbieter haftet unbeschränkt bei Vorsatz und grober Fahrlässigkeit,
+        bei Verletzung von Leben, Körper oder Gesundheit, nach dem
+        Produkthaftungsgesetz sowie im Umfang ausdrücklich übernommener
+        Garantien.</p>
+      <p>Bei leicht fahrlässiger Verletzung einer wesentlichen Vertragspflicht
+        ist die Haftung auf den vorhersehbaren, vertragstypischen Schaden
+        begrenzt. Eine wesentliche Vertragspflicht ist eine Pflicht, deren
+        Erfüllung die ordnungsgemäße Nutzung von LOGMAN erst ermöglicht und auf
+        deren Einhaltung regelmäßig vertraut werden darf. Im Übrigen ist die
+        Haftung für leichte Fahrlässigkeit ausgeschlossen. Zwingende
+        gesetzliche Ansprüche bleiben unberührt.</p>
+    </section>
+
+    <section class="recht-karte">
+      <h2>9. Dauer und Beendigung</h2>
+      <p>Der Nutzungsvertrag läuft auf unbestimmte Zeit und kann jederzeit über
+        <b>Profil → Account löschen</b> beendet werden. Dabei werden das Konto
+        und die zugehörigen App-Daten gelöscht, soweit keine gesetzlichen
+        Gründe eine weitere Speicherung verlangen.</p>
+      <p>Das Recht beider Seiten zur außerordentlichen Kündigung aus wichtigem
+        Grund bleibt bestehen. Sollte LOGMAN dauerhaft eingestellt werden,
+        wird darüber nach Möglichkeit rechtzeitig informiert und eine
+        Gelegenheit zum Datenexport gegeben.</p>
+    </section>
+
+    <section class="recht-karte">
+      <h2>10. Schlussbestimmungen</h2>
+      <p>Es gilt deutsches Recht. Für Verbraucherinnen und Verbraucher gilt
+        diese Rechtswahl nur, soweit dadurch der Schutz zwingender Vorschriften
+        des Staates ihres gewöhnlichen Aufenthalts nicht entzogen wird.</p>
+      <p>Sollten einzelne Regelungen unwirksam sein, bleiben die übrigen
+        Regelungen davon unberührt. An die Stelle der unwirksamen Regelung
+        treten die gesetzlichen Vorschriften.</p>
+    </section>`;
+}
+
 export function rechtlicherInhalt(seite) {
+  if (seite === 'nutzung') return nutzungsbedingungenInhalt();
   if (seite === 'datenschutz') return datenschutzInhalt();
   if (seite === 'impressum') return impressumInhalt();
   throw new Error('Unbekannte Rechtsseite');
 }
 
 export function mountRechtliches(container, { seite, angemeldet = false } = {}) {
-  const datenschutz = seite === 'datenschutz';
-  const titel = datenschutz ? 'Datenschutz' : 'Impressum';
-  const kicker = datenschutz ? 'Deine Daten' : 'Anbieter';
+  const seitendaten = {
+    nutzung: ['Nutzung', 'Nutzungsbedingungen'],
+    datenschutz: ['Deine Daten', 'Datenschutz'],
+    impressum: ['Anbieter', 'Impressum'],
+  };
+  const [kicker, titel] = seitendaten[seite];
   const zurueckZiel = angemeldet ? '#log' : '#';
   const zurueckText = angemeldet ? 'Log' : 'Anmeldung';
 
@@ -224,8 +374,9 @@ export function mountRechtliches(container, { seite, angemeldet = false } = {}) 
       <p class="recht-stand">Stand: 14. August 2026</p>
       <div class="recht-inhalt">${rechtlicherInhalt(seite)}</div>
       <nav class="recht-nav" aria-label="Rechtliche Informationen">
-        <a href="#datenschutz"${datenschutz ? ' aria-current="page"' : ''}>Datenschutz</a>
-        <a href="#impressum"${!datenschutz ? ' aria-current="page"' : ''}>Impressum</a>
+        <a href="#nutzung"${seite === 'nutzung' ? ' aria-current="page"' : ''}>Nutzung</a>
+        <a href="#datenschutz"${seite === 'datenschutz' ? ' aria-current="page"' : ''}>Datenschutz</a>
+        <a href="#impressum"${seite === 'impressum' ? ' aria-current="page"' : ''}>Impressum</a>
       </nav>
     </div>`;
 }

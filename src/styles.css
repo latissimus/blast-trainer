@@ -1179,7 +1179,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 :root[data-seite="feedback"]{--bg:#D9BBF7}
 :root[data-seite="faq"]{--bg:#FBE7A4}
 :root[data-seite="profile"]{--bg:#BFE7D2}
-:root[data-seite="datenschutz"],:root[data-seite="impressum"]{--bg:#BFE7D2}
+:root[data-seite="nutzung"],:root[data-seite="datenschutz"],:root[data-seite="impressum"]{--bg:#BFE7D2}
 /* Hellblauer Grund, weisse Flaechen. Anders als die uebrigen Seiten setzt diese
    auch --surface und --surface2 um: Damit werden Karte, Notizfeld UND der
    "+ Bild"-Chip von selbst weiss, statt jede Flaeche einzeln einzufaerben.
@@ -1195,6 +1195,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 :root[data-theme="dark"][data-seite="feedback"]{--bg:#101A2B}
 :root[data-theme="dark"][data-seite="faq"]{--bg:#101A2B}
 :root[data-theme="dark"][data-seite="profile"]{--bg:#101A2B}
+:root[data-theme="dark"][data-seite="nutzung"],
 :root[data-theme="dark"][data-seite="datenschutz"],
 :root[data-theme="dark"][data-seite="impressum"]{--bg:#101A2B}
 
@@ -1205,6 +1206,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 :root[data-seite="feedback"] .seitenkopf-kicker{background:#FF69AE;color:#141414;border-color:#141414}
 :root[data-seite="faq"] .seitenkopf-kicker{background:#FBE7A4;color:#141414;border-color:#141414}
 :root[data-seite="profile"] .seitenkopf-kicker{background:#BFE7D2;color:#141414;border-color:#141414}
+:root[data-seite="nutzung"] .seitenkopf-kicker,
 :root[data-seite="datenschutz"] .seitenkopf-kicker,
 :root[data-seite="impressum"] .seitenkopf-kicker{background:#BFE7D2;color:#141414;border-color:#141414}
 :root[data-seite="notizbuch"] .seitenkopf-kicker{background:#AEDCF6;color:#141414;border-color:#141414}
@@ -1239,10 +1241,10 @@ body[data-seite="profile"],body[data-seite="prog"],body[data-seite="notizbuch"]{
   background-size:auto;
   background-repeat:repeat}
 
-:root[data-seite="datenschutz"] #view,:root[data-seite="impressum"] #view,
-:root[data-seite="datenschutz"],:root[data-seite="impressum"],
-:root[data-seite="datenschutz"] #app,:root[data-seite="impressum"] #app,
-body[data-seite="datenschutz"],body[data-seite="impressum"]{
+:root[data-seite="nutzung"] #view,:root[data-seite="datenschutz"] #view,:root[data-seite="impressum"] #view,
+:root[data-seite="nutzung"],:root[data-seite="datenschutz"],:root[data-seite="impressum"],
+:root[data-seite="nutzung"] #app,:root[data-seite="datenschutz"] #app,:root[data-seite="impressum"] #app,
+body[data-seite="nutzung"],body[data-seite="datenschutz"],body[data-seite="impressum"]{
   background-color:var(--bg);
   background-image:var(--muster-dreieck);
   background-size:auto;
@@ -1277,12 +1279,16 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 :root[data-theme="dark"] body[data-seite="faq"],
 :root[data-theme="dark"] body[data-seite="profile"]{
   background-image:var(--muster-dreieck-dunkel)}
+:root[data-theme="dark"][data-seite="nutzung"] #view,
 :root[data-theme="dark"][data-seite="datenschutz"] #view,
 :root[data-theme="dark"][data-seite="impressum"] #view,
+:root[data-theme="dark"][data-seite="nutzung"],
 :root[data-theme="dark"][data-seite="datenschutz"],
 :root[data-theme="dark"][data-seite="impressum"],
+:root[data-theme="dark"][data-seite="nutzung"] #app,
 :root[data-theme="dark"][data-seite="datenschutz"] #app,
 :root[data-theme="dark"][data-seite="impressum"] #app,
+:root[data-theme="dark"] body[data-seite="nutzung"],
 :root[data-theme="dark"] body[data-seite="datenschutz"],
 :root[data-theme="dark"] body[data-seite="impressum"]{
   background-image:var(--muster-dreieck-dunkel)}
@@ -1427,7 +1433,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 :root[data-theme="dark"] .btn-danger{background:#3B211D;color:#FF9A83}
 :root[data-theme="dark"] .profile-abschnitt.gefahr>summary{color:#FF9A83}
 .profile-daten-status{min-height:17px;margin-top:8px;color:var(--muted);font-size:11.5px;text-align:center}
-.profile-recht-links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.profile-recht-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .profile-recht-links .btn{display:flex;align-items:center;justify-content:center;
   min-height:42px;padding:8px;text-align:center;text-decoration:none;font-size:12px}
 
@@ -1457,7 +1463,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .recht-karte a{color:var(--link);font-weight:700;overflow-wrap:anywhere}
 .recht-fehlt{display:inline;padding:1px 4px;background:#FFE0D8;color:#8A2A12;
   font-weight:800;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-.recht-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.recht-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
 .recht-nav a{display:flex;align-items:center;justify-content:center;min-height:42px;
   padding:8px;border:var(--bw) solid var(--ink);border-radius:var(--r);
   background:var(--surface);color:var(--text);font-family:var(--display);

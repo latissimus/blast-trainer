@@ -132,9 +132,11 @@ function renderAuth() {
         <button id="auth-toggle">${isLogin ? 'Registrieren' : 'Zur Anmeldung'}</button>
       </div>
       ${isLogin ? '<div class="auth-switch"><button id="auth-forgot">Passwort vergessen?</button></div>' : ''}
-      ${isLogin ? '' : `<p class="auth-datenschutz">Mit dem Erstellen des Accounts bestätigst du,
-        dass du die <a href="#datenschutz">Datenschutzerklärung</a> zur Kenntnis genommen hast.</p>`}
+      ${isLogin ? '' : `<p class="auth-datenschutz">Mit dem Erstellen des Accounts akzeptierst du die
+        <a href="#nutzung">Nutzungsbedingungen</a> und bestätigst, dass du die
+        <a href="#datenschutz">Datenschutzerklärung</a> zur Kenntnis genommen hast.</p>`}
       <nav class="auth-recht" aria-label="Rechtliche Informationen">
+        <a href="#nutzung">Nutzung</a>
         <a href="#datenschutz">Datenschutz</a>
         <a href="#impressum">Impressum &amp; Hinweise</a>
       </nav>
