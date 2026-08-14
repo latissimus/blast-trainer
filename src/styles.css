@@ -315,6 +315,11 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .auth-sub{text-align:center;color:var(--muted);font-size:14.5px;margin:0 0 22px}
 .auth-switch{text-align:center;font-size:14.5px;margin-top:16px}
 .auth-switch button{background:none;border:0;color:var(--link);font-weight:800;text-decoration:underline;font-family:var(--mono)}
+.auth-datenschutz{max-width:360px;margin:18px auto 0;color:var(--muted);
+  font-size:11.5px;line-height:1.5;text-align:center}
+.auth-datenschutz a,.auth-recht a{color:var(--link);font-weight:700}
+.auth-recht{display:flex;justify-content:center;flex-wrap:wrap;gap:7px 16px;
+  margin-top:13px;font-family:var(--mono);font-size:11.5px}
 .msg{border:var(--bw) solid var(--ink);border-radius:var(--r-karte);padding:11px 13px;font-size:14.5px;margin-bottom:14px;font-weight:600}
 .msg.err{background:#FFE0D8;color:#8A2A12}
 .msg.ok{background:#D8F5E6;color:#0B5C33}
@@ -1176,6 +1181,7 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 :root[data-seite="feedback"]{--bg:#D9BBF7}
 :root[data-seite="faq"]{--bg:#FBE7A4}
 :root[data-seite="profile"]{--bg:#BFE7D2}
+:root[data-seite="datenschutz"],:root[data-seite="impressum"]{--bg:#BFE7D2}
 /* Hellblauer Grund, weisse Flaechen. Anders als die uebrigen Seiten setzt diese
    auch --surface und --surface2 um: Damit werden Karte, Notizfeld UND der
    "+ Bild"-Chip von selbst weiss, statt jede Flaeche einzeln einzufaerben.
@@ -1191,6 +1197,8 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 :root[data-theme="dark"][data-seite="feedback"]{--bg:#101A2B}
 :root[data-theme="dark"][data-seite="faq"]{--bg:#101A2B}
 :root[data-theme="dark"][data-seite="profile"]{--bg:#101A2B}
+:root[data-theme="dark"][data-seite="datenschutz"],
+:root[data-theme="dark"][data-seite="impressum"]{--bg:#101A2B}
 
 /* Im Dark-Mode bleibt die Seitenidentitaet am kleinen Farbstempel erhalten.
    Der grosse Hintergrund bleibt dadurch ruhig und konsistent. */
@@ -1199,6 +1207,8 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 :root[data-seite="feedback"] .seitenkopf-kicker{background:#FF69AE;color:#141414;border-color:#141414}
 :root[data-seite="faq"] .seitenkopf-kicker{background:#FBE7A4;color:#141414;border-color:#141414}
 :root[data-seite="profile"] .seitenkopf-kicker{background:#BFE7D2;color:#141414;border-color:#141414}
+:root[data-seite="datenschutz"] .seitenkopf-kicker,
+:root[data-seite="impressum"] .seitenkopf-kicker{background:#BFE7D2;color:#141414;border-color:#141414}
 :root[data-seite="notizbuch"] .seitenkopf-kicker{background:#AEDCF6;color:#141414;border-color:#141414}
 
 /* ---------- Seitenmuster ----------
@@ -1226,6 +1236,15 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 :root[data-seite="prog"] #app,:root[data-seite="notizbuch"] #app,
 body[data-seite="meter"],body[data-seite="feedback"],body[data-seite="faq"],
 body[data-seite="profile"],body[data-seite="prog"],body[data-seite="notizbuch"]{
+  background-color:var(--bg);
+  background-image:var(--muster-dreieck);
+  background-size:auto;
+  background-repeat:repeat}
+
+:root[data-seite="datenschutz"] #view,:root[data-seite="impressum"] #view,
+:root[data-seite="datenschutz"],:root[data-seite="impressum"],
+:root[data-seite="datenschutz"] #app,:root[data-seite="impressum"] #app,
+body[data-seite="datenschutz"],body[data-seite="impressum"]{
   background-color:var(--bg);
   background-image:var(--muster-dreieck);
   background-size:auto;
@@ -1259,6 +1278,15 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 :root[data-theme="dark"] body[data-seite="feedback"],
 :root[data-theme="dark"] body[data-seite="faq"],
 :root[data-theme="dark"] body[data-seite="profile"]{
+  background-image:var(--muster-dreieck-dunkel)}
+:root[data-theme="dark"][data-seite="datenschutz"] #view,
+:root[data-theme="dark"][data-seite="impressum"] #view,
+:root[data-theme="dark"][data-seite="datenschutz"],
+:root[data-theme="dark"][data-seite="impressum"],
+:root[data-theme="dark"][data-seite="datenschutz"] #app,
+:root[data-theme="dark"][data-seite="impressum"] #app,
+:root[data-theme="dark"] body[data-seite="datenschutz"],
+:root[data-theme="dark"] body[data-seite="impressum"]{
   background-image:var(--muster-dreieck-dunkel)}
 :root[data-theme="dark"][data-seite="prog"] #view,
 :root[data-theme="dark"][data-seite="notizbuch"] #view,
@@ -1415,6 +1443,49 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 :root[data-theme="dark"] .btn-danger{background:#3B211D;color:#FF9A83}
 :root[data-theme="dark"] .profile-abschnitt.gefahr>summary{color:#FF9A83}
 .profile-daten-status{min-height:17px;margin-top:8px;color:var(--muted);font-size:11.5px;text-align:center}
+.profile-recht-links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.profile-recht-links .btn{display:flex;align-items:center;justify-content:center;
+  min-height:42px;padding:8px;text-align:center;text-decoration:none;font-size:12px}
+
+/* ---------- Rechtliches ----------
+   Lange Texte bleiben bewusst ruhig und linksbuendig. Die pinke Oberkante der
+   ersten Karte bindet die sachlichen Seiten trotzdem an den LOGMAN-Look an. */
+.recht-public{min-height:calc(100vh - var(--mq-platz));min-height:calc(100dvh - var(--mq-platz))}
+.recht-public .seitenkopf{align-items:center;padding:26px 0 13px}
+.recht-public .zurueck{position:static;z-index:auto;flex:0 0 auto}
+.recht-seite{max-width:680px}
+.recht-stand{margin:0 0 10px;color:var(--muted);font-family:var(--mono);
+  font-size:11.5px;text-align:right}
+.recht-inhalt{display:grid;gap:10px}
+.recht-karte{position:relative;overflow:hidden;padding:17px;background:var(--surface);
+  border:var(--bw) solid var(--ink);border-radius:var(--r-karte)}
+.recht-karte.recht-wichtig{padding-top:22px}
+.recht-karte.recht-wichtig::before{content:"";position:absolute;inset:0 0 auto;height:6px;background:var(--pink)}
+.recht-karte h2{margin:0 0 10px;font-family:var(--display);font-style:italic;
+  font-size:18px;line-height:1.15;text-transform:uppercase}
+.recht-karte h3{margin:16px 0 5px;font-size:13px;line-height:1.3;text-transform:uppercase}
+.recht-karte p,.recht-karte li,.recht-karte address{font-family:var(--mono);
+  font-size:13px;line-height:1.6;color:var(--muted)}
+.recht-karte p{margin:0 0 10px}.recht-karte p:last-child{margin-bottom:0}
+.recht-karte ul{margin:0 0 10px;padding-left:20px}.recht-karte li+li{margin-top:6px}
+.recht-karte b,.recht-karte h3{color:var(--text)}
+.recht-karte address{font-style:normal}
+.recht-karte a{color:var(--link);font-weight:700;overflow-wrap:anywhere}
+.recht-fehlt{display:inline;padding:1px 4px;background:#FFE0D8;color:#8A2A12;
+  font-weight:800;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.recht-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.recht-nav a{display:flex;align-items:center;justify-content:center;min-height:42px;
+  padding:8px;border:var(--bw) solid var(--ink);border-radius:var(--r);
+  background:var(--surface);color:var(--text);font-family:var(--display);
+  font-style:italic;font-size:12px;font-weight:700;text-align:center;
+  text-decoration:none;text-transform:uppercase}
+.recht-nav a[aria-current="page"]{background:var(--pink);color:var(--accent-ink)}
+:root[data-theme="dark"] .recht-fehlt{background:#3B211D;color:#FF9A83}
+
+@media (max-width:360px){
+  .profile-recht-links,.recht-nav{grid-template-columns:1fr}
+  .recht-public .seitenkopf{align-items:flex-start;flex-direction:column}
+}
 
 /* ---------- Admin ---------- */
 .cust-row{display:flex;align-items:center;gap:12px;padding:12px;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;width:100%;text-align:left}

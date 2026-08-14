@@ -389,6 +389,17 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   });
   thCard.appendChild(seg);
 
+  // Rechtliche Informationen bleiben auch nach der Registrierung jederzeit
+  // mit wenigen Tipps erreichbar. Vor der Anmeldung stehen dieselben Links
+  // direkt unter dem Formular.
+  const rechtCard = profilSektion('Rechtliches');
+  rechtCard.innerHTML = `
+    <p class="profile-hinweis">Datenschutz, Anbieterangaben und Hinweise zur sicheren Nutzung von LOGMAN.</p>
+    <div class="profile-recht-links">
+      <a class="btn" href="#datenschutz">Datenschutz</a>
+      <a class="btn" href="#impressum">Impressum &amp; Hinweise</a>
+    </div>`;
+
   // --- Eigene Daten -------------------------------------------------------
   // Bewusst unten im Profil statt im Hauptmenue: wichtig fuer Kontrolle und
   // Datenschutz, aber keine Handlung waehrend des Trainings.

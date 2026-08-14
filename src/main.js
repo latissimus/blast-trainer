@@ -17,6 +17,7 @@ import { mountFeedback } from './feedback.js';
 import { verbindePausenAnzeige, stoppePause } from './pause.js';
 import { escapeHtml, sichereBildUrl } from './html.js';
 import { feedbackSynchronisieren } from './feedbacksync.js';
+import { mountRechtliches, RECHTSSEITEN } from './rechtliches.js';
 
 // Vor dem ersten Rendern setzen, sonst blitzt das helle Theme kurz auf.
 applyTheme(getTheme());
@@ -88,6 +89,17 @@ const MQ_TEXT = [
 ].join(' ◆ ') + ' ◆ ';
 const MARQUEE = `<div class="marquee" aria-hidden="true"><span>${MQ_TEXT.repeat(2)}</span><span>${MQ_TEXT.repeat(2)}</span></div>`;
 
+const rechtsseiteAusHash = () => {
+  const hash = location.hash.replace('#', '');
+  return RECHTSSEITEN.includes(hash) ? hash : null;
+};
+
+function seitenfarbeZuruecksetzen() {
+  delete document.documentElement.dataset.seite;
+  delete document.body.dataset.seite;
+  statusleisteAnSeite();
+}
+
 function cleanupActive() {
   if (active && active.destroy) active.destroy();
   active = null;
@@ -98,6 +110,7 @@ function renderAuth() {
   cleanupActive();
   document.documentElement.classList.remove('app-shell-an');
   app.classList.remove('app-shell');
+  seitenfarbeZuruecksetzen();
   stoppePause(false);
   const isLogin = authMode === 'login';
   app.innerHTML = `
@@ -121,6 +134,12 @@ function renderAuth() {
         <button id="auth-toggle">${isLogin ? 'Registrieren' : 'Zur Anmeldung'}</button>
       </div>
       ${isLogin ? '<div class="auth-switch"><button id="auth-forgot">Passwort vergessen?</button></div>' : ''}
+      ${isLogin ? '' : `<p class="auth-datenschutz">Mit dem Erstellen des Accounts bestätigst du,
+        dass du die <a href="#datenschutz">Datenschutzerklärung</a> zur Kenntnis genommen hast.</p>`}
+      <nav class="auth-recht" aria-label="Rechtliche Informationen">
+        <a href="#datenschutz">Datenschutz</a>
+        <a href="#impressum">Impressum &amp; Hinweise</a>
+      </nav>
     </div>`;
 
   const msg = app.querySelector('#auth-msg');
@@ -181,6 +200,18 @@ function renderAuth() {
       btn.disabled = false;
     }
   };
+}
+
+function renderPublicRechtliches(seite) {
+  cleanupActive();
+  document.documentElement.classList.remove('app-shell-an');
+  app.classList.remove('app-shell');
+  stoppePause(false);
+  document.documentElement.dataset.seite = seite;
+  document.body.dataset.seite = seite;
+  statusleisteAnSeite();
+  app.innerHTML = `${MARQUEE}<main id="recht-public" class="recht-public"></main>`;
+  mountRechtliches(app.querySelector('#recht-public'), { seite, angemeldet: false });
 }
 
 // Nach dem Klick auf den Link aus der Zuruecksetzen-Mail: Supabase hat bereits
@@ -431,7 +462,7 @@ async function routeView() {
   if (aktiveAnsicht === 'log') logScrollY = view.scrollTop;
   let hash = (location.hash.replace('#', '') || 'log');
   if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
-  if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'feedback', 'notizbuch'].includes(hash)) hash = 'log';
+  if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'feedback', 'notizbuch', ...RECHTSSEITEN].includes(hash)) hash = 'log';
   setNavActive(hash);
 
   cleanupActive();
@@ -479,6 +510,8 @@ async function routeView() {
     } else if (hash === 'admin') {
       const v = await mountAdmin(ziel, { session });
       guard(v);
+    } else if (RECHTSSEITEN.includes(hash)) {
+      mountRechtliches(ziel, { seite: hash, angemeldet: true });
     }
   } catch (e) {
     ziel.innerHTML = `<div class="wrap" style="padding-top:20px"><div class="msg err">Fehler: ${escapeHtml(e.message)}</div></div>`;
@@ -588,6 +621,12 @@ function einstiegHervorheben() {
 /* ------------------------------------------------------------ top-level render */
 async function render() {
   cleanupActive();
+  const rechtsseite = rechtsseiteAusHash();
+  if (!session && rechtsseite) {
+    profile = null; recovery = false; splash = false; willkommen = false;
+    renderPublicRechtliches(rechtsseite);
+    return;
+  }
   if (!session) { profile = null; recovery = false; splash = false; willkommen = false; renderAuth(); return; }
   if (recovery) { renderRecovery(); return; }
 
@@ -670,7 +709,10 @@ async function render() {
 }
 
 /* ------------------------------------------------------------ boot */
-window.addEventListener('hashchange', () => { if (session && profile) routeView(); });
+window.addEventListener('hashchange', () => {
+  if (session && profile) routeView();
+  else render();
+});
 window.addEventListener('online', () => {
   if (session?.user?.id) feedbackSynchronisieren(session.user.id).catch(() => {});
 });
