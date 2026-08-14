@@ -465,8 +465,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker-kopf small{font-size:9px;font-weight:800;text-transform:uppercase;color:var(--muted)}
 .ex-picker-kopf b{font-family:var(--display);font-style:italic;font-size:18px;text-transform:uppercase;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ex-picker-zu{flex:0 0 36px;width:36px;height:36px;padding:0;border:var(--bw) solid var(--ink);
-  border-radius:50%;background:var(--surface2);color:var(--text);font-size:20px;font-weight:800}
+.ex-picker-zu{flex:0 0 40px;width:40px;height:40px;padding:0;border:0;
+  background:transparent;color:var(--text);font:900 25px/1 var(--ui)}
 .ex-picker-suche{width:100%;padding:11px 12px;border:var(--bw) solid var(--ink);border-radius:var(--r);
   background:var(--surface2);color:var(--text);font:700 16px var(--ui)}
 .ex-picker-suche:focus{outline:none;border-color:var(--pink)}

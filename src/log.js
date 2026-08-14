@@ -682,7 +682,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       schale.innerHTML = `
         ${eigenerKopf('Übung auswählen', titel)}
         <input class="ex-picker-suche" type="search" placeholder="Übung suchen…" autocomplete="off">
-        <p class="ex-picker-varianten-hinweis"><b>•••</b> Eigene Maschinenvariante speichern</p>
+        <p class="ex-picker-varianten-hinweis"><b>•••</b> Eigene Übungsvariante erstellen</p>
         <div class="ex-picker-liste ex-picker-scroll"></div>
         <button type="button" class="ex-picker-eigen-neu">+ Eigene Übung anlegen</button>
         ${aktuell ? '<button type="button" class="ex-picker-leeren">Auswahl löschen</button>' : ''}`;
