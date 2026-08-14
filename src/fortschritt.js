@@ -5,9 +5,8 @@ import { escapeHtml } from './html.js';
 
 // Progression der festen HEAVYS- und MIDDLES-Übungen.
 //
-// Bewusst ein eigenes Modul und nicht Teil der Koerperwerte: Das hier ist der
-// Trainings-Marker und gehoert dauerhaft zu LOGMAN, waehrend Hautfalten und
-// Gewicht Koerperdaten sind und spaeter woanders leben koennen.
+// Das Modul gehoert dauerhaft zu LOGMAN: Es wertet die im Trainingslog
+// gespeicherte Leistungsentwicklung aus.
 
 const fmt = (n) => (Math.round(n * 10) / 10).toString().replace('.', ',');
 

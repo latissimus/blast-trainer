@@ -52,7 +52,7 @@ self.addEventListener('push', (event) => {
 
 // Tipp auf die Mitteilung: vorhandenes Fenster nach vorn holen, sonst oeffnen.
 //
-// Nennt die Mitteilung ein Ziel (der Falten-Wecker tut es), dann auch dorthin.
+// Nennt die Mitteilung ein Ziel, dann auch dorthin.
 // Beim schon offenen Fenster per Nachricht statt client.navigate(): Letzteres ist
 // in WebKit nicht verlaesslich – und genau dort laeuft die App.
 self.addEventListener('notificationclick', (event) => {

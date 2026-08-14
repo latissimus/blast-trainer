@@ -96,9 +96,8 @@ alte Zeilen weg.
 
 `supabase/` ist die versionierte **Kopie** des Cloud-Projekts (`bjtnpmselziqpwnthukj`),
 nicht die Quelle. Migrationen sind 1:1 aus `schema_migrations` gezogen: nur anhängen,
-nie bestehende editieren. Zwei Edge Functions (Deno): `pausentimer` (im Namen des
-Aufrufers, RLS greift) und `faltenwecker` (pg_cron, service_role, weist sich per
-Vault-Token aus).
+nie bestehende editieren. Die Edge Function `pausentimer` arbeitet im Namen des
+Aufrufers; RLS greift.
 
 Schutz ist ausschließlich RLS. `VITE_SUPABASE_URL`, der `sb_publishable_`-Key und
 `VAPID_PUBLIC` stehen absichtlich im Klartext im Code. Dieses Projekt nutzt das
@@ -117,9 +116,3 @@ Edge Functions nehmen den plattformseitig injizierten Key, nichts aus Vault.
   Designsystem (Themes `retro`/`dark` über `data-theme`), `kurve.js` das komplette
   Diagramm.
 - Der Nutzer will **vor jeder Änderung gefragt werden**.
-
-## Was hier nicht (mehr) liegt
-
-`templates/koerperwerte/` ist eine mitnehmbare Kopie der Hautfalten-/Gewichts-Boxen
-für eine spätere Ernährungs-App. Sie sind aus LOGMAN entfernt (Körperdaten, kein
-Trainings-Log), das Backend dazu läuft aber noch. Nicht wieder einbauen.

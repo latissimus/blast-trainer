@@ -28,8 +28,7 @@ applyTheme(getTheme());
 registriereServiceWorker().catch(() => {});
 
 // Tipp auf eine Mitteilung mit Ziel: Der Worker kann das laufende Fenster nicht
-// selbst umlenken, also sagt er uns nur, wohin. Der Falten-Wecker schickt so ins
-// Profil – direkt zur Eingabe, statt irgendwo zu landen.
+// selbst umlenken, also sagt er uns nur, wohin.
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('message', (e) => {
     if (e.data?.typ === 'gehe-zu' && e.data.url) location.hash = e.data.url.replace(/^#/, '');
