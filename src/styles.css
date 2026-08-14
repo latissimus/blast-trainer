@@ -483,12 +483,14 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
   background:transparent;color:var(--text);text-align:left;font:700 14px/1.3 var(--ui)}
 .ex-picker-option.gewaehlt{background:var(--prio-soft);color:var(--prio-text)}
 .ex-picker-option.gewaehlt::before{content:"✓ ";font-weight:900}
-.ex-picker-variante{flex:0 0 auto;margin:6px 2px 6px 6px;padding:5px 7px;border:0;border-radius:7px;
-  background:var(--prio-soft);color:var(--prio-text);font:700 italic 10px var(--display);
-  text-transform:uppercase}
-.ex-picker-varianten-hinweis{margin:5px 2px 0;color:var(--muted);font:600 10px/1.3 var(--mono)}
-.ex-picker-varianten-hinweis b{display:inline-grid;place-items:center;width:22px;height:16px;
-  border-radius:6px;background:var(--prio-soft);color:var(--prio-text);font-size:13px;line-height:1}
+.ex-picker-variante{display:grid;place-items:center;flex:0 0 42px;width:42px;margin:3px 0 3px 4px;
+  padding:0;border:0;background:transparent;color:var(--muted);
+  font:900 17px/1 var(--ui);letter-spacing:1px}
+.ex-picker-variante:active{color:var(--text)}
+.ex-picker-varianten-hinweis{display:flex;align-items:center;gap:7px;margin:8px 4px 1px;
+  color:var(--muted);font:600 10px/1.35 var(--mono)}
+.ex-picker-varianten-hinweis b{display:inline-block;color:var(--muted);font:900 15px/1 var(--ui);
+  letter-spacing:1px}
 .ex-picker-eigen-marke{align-self:center;margin-left:6px;margin-right:8px;color:var(--prio-text);
   font:700 italic 9px var(--display);text-transform:uppercase}
 .ex-picker-kein{padding:28px 12px;text-align:center;color:var(--muted);font-size:14px}
@@ -497,10 +499,15 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker-leeren{margin-top:10px;padding:9px;border:var(--dash) dashed var(--ink);border-radius:var(--r);
   background:transparent;color:var(--muted);font-family:var(--display);font-style:italic;
   font-weight:700;text-transform:uppercase}
-.ex-picker-zurueck{flex:0 0 36px;width:36px;height:36px;padding:0;border:0;
-  background:transparent;color:var(--text);font:900 22px var(--display)}
+.ex-picker-zurueck{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;padding:0;border:0;
+  background:transparent;color:var(--text)}
+.ex-picker-zurueck svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2.6;
+  stroke-linecap:round;stroke-linejoin:round}
 .ex-picker-form{display:grid;flex:1;min-height:0;gap:12px;overflow:auto;overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;padding:3px 7px 5px}
+.ex-picker-schale-formular{padding:16px}
+.ex-picker-schale-formular .ex-picker-kopf{margin-bottom:16px}
+.ex-picker-schale-formular .ex-picker-form{gap:18px;padding:4px 8px 10px}
 .ex-picker-form-hinweis{margin:0;padding:9px 10px;border-left:4px solid var(--prio);
   background:var(--prio-soft);color:var(--muted);font:600 12px/1.45 var(--mono)}
 .ex-picker-form-feld{display:grid;gap:5px}
@@ -509,6 +516,15 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .ex-picker-form-feld input,.ex-picker-form-feld select{width:100%;padding:11px 10px;
   border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface2);
   color:var(--text);font:700 14px var(--ui)}
+.ex-picker-schale-formular .ex-picker-form-hinweis{padding:12px 13px;line-height:1.55}
+.ex-picker-schale-formular .ex-picker-form-feld{gap:8px}
+.ex-picker-schale-formular .ex-picker-form-feld>span,
+.ex-picker-schale-formular .ex-picker-neben summary{font-size:12px}
+.ex-picker-schale-formular .ex-picker-form-feld input,
+.ex-picker-schale-formular .ex-picker-form-feld select{padding:13px 12px}
+.ex-picker-schale-formular .ex-picker-neben{padding:12px}
+.ex-picker-schale-formular .ex-picker-neben>div{margin-top:10px}
+.ex-picker-schale-formular [data-eigen-speichern]{min-height:46px;margin-top:2px}
 .ex-picker-form-feld select:disabled{opacity:.78}
 .ex-picker-neben{margin:0;padding:10px;border:var(--hairline) solid var(--faint);border-radius:var(--r)}
 .ex-picker-neben summary{cursor:pointer;list-style:none}

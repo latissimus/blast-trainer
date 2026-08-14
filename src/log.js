@@ -586,7 +586,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     };
     const eigenerKopf = (kicker, ueberschrift, zurueck = null) => `
       <div class="ex-picker-kopf">
-        ${zurueck ? '<button type="button" class="ex-picker-zurueck" aria-label="Zurück">←</button>' : ''}
+        ${zurueck ? `<button type="button" class="ex-picker-zurueck" aria-label="Zurück">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>` : ''}
         <div><small>${kicker}</small><b>${escapeHtml(ueberschrift)}</b></div>
         <button type="button" class="ex-picker-zu" aria-label="Schließen">×</button>
       </div>`;
@@ -606,7 +608,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
     const zeigeFormular = (basis = null) => {
       picker.innerHTML = '';
       const schale = document.createElement('div');
-      schale.className = 'ex-picker-schale';
+      schale.className = 'ex-picker-schale ex-picker-schale-formular';
       const muskelOptionen = [...new Set((konten || []).filter((konto) => KONTEN.includes(konto)))];
       const erlaubteMuskel = muskelOptionen.length ? muskelOptionen : [...KONTEN];
       const startHaupt = basis?.haupt || erlaubteMuskel[0] || '';
@@ -680,7 +682,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       schale.innerHTML = `
         ${eigenerKopf('Übung auswählen', titel)}
         <input class="ex-picker-suche" type="search" placeholder="Übung suchen…" autocomplete="off">
-        <p class="ex-picker-varianten-hinweis"><b>⋯</b> Eigene Maschinenvariante speichern</p>
+        <p class="ex-picker-varianten-hinweis"><b>•••</b> Eigene Maschinenvariante speichern</p>
         <div class="ex-picker-liste ex-picker-scroll"></div>
         <button type="button" class="ex-picker-eigen-neu">+ Eigene Übung anlegen</button>
         ${aktuell ? '<button type="button" class="ex-picker-leeren">Auswahl löschen</button>' : ''}`;
@@ -721,7 +723,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
               const variante = document.createElement('button');
               variante.type = 'button';
               variante.className = 'ex-picker-variante';
-              variante.textContent = '⋯';
+              variante.textContent = '•••';
               variante.setAttribute('aria-label', `Eigene Variante von ${eintrag.n} speichern`);
               variante.onclick = () => zeigeFormular(eintrag);
               zeile.appendChild(variante);
