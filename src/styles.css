@@ -692,9 +692,7 @@ html.statusleiste-overlay .ctrlbar{z-index:50;background:var(--bg)}
 /* Auf Unterseiten entfaellt die Leiste ganz. Zurueck ins Log fuehrt der
    "← Log"-Chip unter dem Kopf, und das Log ist die Seite, zu der man ohnehin
    staendig zurueckkehrt – das Menue unten war der zweite Weg zum selben Ziel.
-   Der Admin behaelt seine volle Leiste (er bekommt nie .nur-menue), weil die
-   vier Felder dort die einzige Moeglichkeit sind, durch fremde Wochen zu
-   blaettern. Eine laufende Pause holt die Leiste sofort zurueck – siehe unten. */
+   Eine laufende Pause holt die Leiste sofort zurueck – siehe unten. */
 .ctrlbar.nur-menue:not(.timer-an){display:none}
 /* Ohne Leiste braucht der Seitenfuss keinen Platz mehr freizuhalten. Laeuft
    gerade eine Pause, steht die Leiste wieder da und der Abstand ebenso. */
@@ -1306,8 +1304,6 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .feedback-intro p{margin:0 0 5px;font-family:var(--display);font-style:italic;
   font-size:17px;font-weight:700;text-transform:uppercase;line-height:1.15}
 .feedback-intro span{display:block;color:var(--muted);font-size:13px;line-height:1.45}
-.admin-feedback-eingang .feedback-intro{margin:0 0 10px;border-bottom:var(--bw) solid var(--ink);
-  border-radius:var(--r-karte)}
 .feedback-form{position:relative;overflow:hidden;padding:18px 14px 14px;background:var(--surface);
   border:var(--bw) solid var(--ink);border-radius:0 0 var(--r-karte) var(--r-karte)}
 .feedback-form::before{content:"";position:absolute;inset:0 0 auto;height:6px;background:var(--pink)}
@@ -1318,16 +1314,6 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .feedback-zaehler b{color:var(--text)}
 .feedback-status{margin-top:10px}
 .feedback-status:empty{display:none}
-.feedback-eingang{margin-top:24px}
-.feedback-eingang>.section-title{margin-bottom:10px}
-.feedback-laden{color:var(--muted);font-size:13px}
-.feedback-eintrag{margin-bottom:8px;padding:11px;background:var(--surface);
-  border:var(--bw) solid var(--ink);border-radius:var(--r)}
-.feedback-eintrag-kopf{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-.feedback-eintrag-kopf b{font-family:var(--display);font-style:italic;text-transform:uppercase}
-.feedback-eintrag-kopf time,.feedback-eintrag small{color:var(--muted);font-size:10px}
-.feedback-eintrag small{display:block;margin:2px 0 7px}
-.feedback-eintrag p{margin:0;white-space:pre-wrap;font-size:13px;line-height:1.5}
 
 /* ---------- FAQ- und Meter-Seite ---------- */
 .src{font-size:12px;color:var(--faint);margin-top:16px;line-height:1.5;border-top:var(--bw) solid var(--ink);padding-top:10px}
@@ -1428,8 +1414,6 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .profile-email{font-size:12px;color:var(--muted);overflow-wrap:anywhere;word-break:break-word}
 .avatar{width:88px;height:88px;border-radius:50%;border:var(--bw) solid var(--ink);object-fit:cover;background:var(--surface2);flex:0 0 auto}
 .avatar-fallback{display:flex;align-items:center;justify-content:center;font-family:var(--display);font-style:italic;font-weight:700;font-size:34px;color:var(--link)}
-.role-tag{display:inline-block;background:var(--pink);color:var(--accent-ink);border:var(--bw) solid var(--ink);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;text-transform:uppercase;font-family:var(--display);font-style:italic;margin-top:4px}
-.role-tag.admin{background:var(--mr);color:var(--accent-ink)}
 .profile-datei{display:flex;align-items:center;gap:9px;min-width:0;margin-bottom:14px;padding:8px;
   border:var(--bw) solid var(--ink);border-radius:var(--r);background:var(--surface2);cursor:pointer}
 .profile-datei input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -1487,16 +1471,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
   .recht-public .seitenkopf{align-items:flex-start;flex-direction:column}
 }
 
-/* ---------- Admin ---------- */
-.cust-row{display:flex;align-items:center;gap:12px;padding:12px;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;width:100%;text-align:left}
-.cust-row .av{width:44px;height:44px;border-radius:50%;border:var(--bw) solid var(--ink);object-fit:cover;background:var(--surface2);flex:0 0 auto}
-.cust-row .nm{font-weight:800}
-.cust-row .em{font-size:13px;color:var(--muted)}
-.cust-row .chev{margin-left:auto;font-size:20px;font-weight:700}
 .section-title{font-size:26px;margin:6px 0 16px}
-.back-link{background:none;border:0;color:var(--link);font-weight:800;font-family:var(--mono);padding:0;margin-bottom:12px;text-decoration:underline}
-.readonly-note{background:var(--mr);color:var(--accent-ink);border:var(--bw) solid var(--ink);border-radius:var(--r);padding:10px 13px;font-size:13px;font-weight:700;margin-bottom:14px}
-.empty{color:var(--muted);font-weight:600;padding:20px 0;text-align:center}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 :focus-visible{outline:3px solid var(--pink);outline-offset:2px}
@@ -1770,18 +1745,18 @@ html.app-shell-an #app{
    100dvh auf manchen Geraeten bereits oberhalb der unteren Safe-Area. Eine
    fest positionierte Huelle darf diese Grenze ueberschreiten und reicht bis
    an den physischen Displayrand; das Innenpolster haelt den letzten Inhalt
-   trotzdem oberhalb des Home-Indikators. Log und Admin bleiben unveraendert. */
-:root.app-shell-an[data-seite]:not([data-seite="log"]):not([data-seite="admin"]),
-:root.app-shell-an[data-seite]:not([data-seite="log"]):not([data-seite="admin"]) body{
+   trotzdem oberhalb des Home-Indikators. Das Log bleibt unveraendert. */
+:root.app-shell-an[data-seite]:not([data-seite="log"]),
+:root.app-shell-an[data-seite]:not([data-seite="log"]) body{
   height:var(--app-display-height,100dvh)
 }
-:root.app-shell-an[data-seite]:not([data-seite="log"]):not([data-seite="admin"]){
+:root.app-shell-an[data-seite]:not([data-seite="log"]){
   overflow:visible
 }
-body[data-seite]:not([data-seite="log"]):not([data-seite="admin"]) #app.app-shell{
+body[data-seite]:not([data-seite="log"]) #app.app-shell{
   position:fixed;top:0;right:0;bottom:auto;left:0;
   width:100%;height:var(--app-display-height,100dvh)
 }
-body[data-seite]:not([data-seite="log"]):not([data-seite="admin"]) #app.app-shell>#view{
+body[data-seite]:not([data-seite="log"]) #app.app-shell>#view{
   padding-bottom:env(safe-area-inset-bottom)
 }

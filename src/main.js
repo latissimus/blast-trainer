@@ -1,7 +1,7 @@
 import './styles.css';
 import { supabase } from './supabase.js';
 import { signIn, signUp, signOut, loadProfile, resetPassword, updatePassword } from './auth.js';
-import { readProfile, writeProfile } from './localstore.js';
+import { clearTrainingData, readProfile, writeProfile } from './localstore.js';
 import { brandSvg, actionTitleSvg } from './brand.js';
 import { getTheme, applyTheme, statusleisteAnSeite, setStatusleistenOverlay } from './theme.js';
 import { abonniereStill, pushHinweisZeigen, pushHinweisWegwischen, erlaubnisFragen } from './push.js';
@@ -12,7 +12,6 @@ import { mountFaq } from './faq.js';
 import { mountMeter } from './meter.js';
 import { mountProg } from './prog.js';
 import { mountNotizbuch } from './notizbuch.js';
-import { mountAdmin } from './admin.js';
 import { mountFeedback } from './feedback.js';
 import { verbindePausenAnzeige, stoppePause } from './pause.js';
 import { escapeHtml, sichereBildUrl } from './html.js';
@@ -286,7 +285,6 @@ function renderChrome() {
   logScrollY = 0;
   document.documentElement.classList.add('app-shell-an');
   app.classList.add('app-shell');
-  const isAdmin = profile?.role === 'admin';
   app.innerHTML = `
     <header class="topbar">
       <div class="wrap">
@@ -385,8 +383,7 @@ function renderChrome() {
     <option value="meter">SET-O-METER</option>
     <option value="prog">PROGRESSION</option>
     <option value="feedback">FEEDBACK</option>
-    <option value="faq">FAQs</option>
-    ${isAdmin ? '<option value="admin">ADMIN</option>' : ''}`;
+    <option value="faq">FAQs</option>`;
 
   // iOS zeichnet :active auf einem nativen Select bei einem kurzen Tipp oft
   // gar nicht. Der sichtbare Computer bekommt deshalb einen eigenen, kurzen
@@ -450,9 +447,9 @@ function setNavActive(view) {
   statusleisteAnSeite();
   // Die Log-Leiste gehoert dem Log. Auf Unterseiten verschwindet sie komplett,
   // weil der Zurueck-zum-Log-Button oben bereits den eindeutigen Rueckweg
-  // anbietet. Der Admin behaelt seine Trainingsfelder, aber nicht das Menue.
+  // anbietet.
   const leiste = document.querySelector('.ctrlbar');
-  leiste?.classList.toggle('nur-menue', view !== 'log' && view !== 'admin');
+  leiste?.classList.toggle('nur-menue', view !== 'log');
   leiste?.classList.toggle('ohne-menue', view !== 'log');
 }
 
@@ -461,8 +458,7 @@ async function routeView() {
   if (!view) return;
   if (aktiveAnsicht === 'log') logScrollY = view.scrollTop;
   let hash = (location.hash.replace('#', '') || 'log');
-  if (hash === 'admin' && profile?.role !== 'admin') hash = 'log';
-  if (!['log', 'profile', 'admin', 'faq', 'meter', 'prog', 'feedback', 'notizbuch', ...RECHTSSEITEN].includes(hash)) hash = 'log';
+  if (!['log', 'profile', 'faq', 'meter', 'prog', 'feedback', 'notizbuch', ...RECHTSSEITEN].includes(hash)) hash = 'log';
   setNavActive(hash);
 
   cleanupActive();
@@ -502,14 +498,11 @@ async function routeView() {
     } else if (hash === 'prog') {
       await mountProg(ziel, { userId: session.user.id });
     } else if (hash === 'feedback') {
-      await mountFeedback(ziel, { session, profile });
+      await mountFeedback(ziel, { session });
     } else if (hash === 'notizbuch') {
       // Die Huelle und der lokale Spiegel erscheinen sofort; der Serverstand
       // wird innerhalb der Seite nachgeladen und blockiert den Wechsel nicht.
       mountNotizbuch(ziel, { userId: session.user.id });
-    } else if (hash === 'admin') {
-      const v = await mountAdmin(ziel, { session });
-      guard(v);
     } else if (RECHTSSEITEN.includes(hash)) {
       mountRechtliches(ziel, { seite: hash, angemeldet: true });
     }
@@ -646,6 +639,14 @@ async function render() {
     // ein eingefrorenes Logo sieht aus wie eine haengende App.
     if (!splashFertig) app.innerHTML = `${MARQUEE}<div class="ladebild"><span class="brand">${brandSvg()}</span><p class="auth-sub">lädt…</p></div>`;
     const zwischengespeichert = readProfile(session.user.id);
+    // Letzte lokale Spur der frueheren Adminrolle: Der Server entfernt die
+    // zugehoerige Trainingszeile per Migration. Auch der Offline-Spiegel muss
+    // einmal weg, sonst koennte er die geloeschten Daten erneut hochladen.
+    if (zwischengespeichert?.role === 'admin') {
+      clearTrainingData(session.user.id);
+      delete zwischengespeichert.role;
+      writeProfile(session.user.id, zwischengespeichert);
+    }
     if (zwischengespeichert) {
       // Das Profil gehoert zur lokalen App-Huelle: Es wird auch bei scheinbar
       // vorhandenem, aber schlechtem Netz sofort benutzt. Eine frische Fassung

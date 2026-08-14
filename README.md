@@ -11,7 +11,8 @@ ueber Supabase. Veröffentlicht wird die PWA ueber GitHub Pages.
 - Die App-Huelle und statischen Dateien stehen ueber den Service Worker offline bereit.
 - Supabase synchronisiert im Hintergrund; langsame Requests haben ein Zeitlimit.
 - Row-Level Security trennt Kundendaten. Kunden koennen nur ihre eigenen Daten lesen und aendern.
-- Admins sehen Kundenlogs ausschliesslich lesend.
+- Es gibt keinen Adminzugang innerhalb der App. Feedback wird im geschuetzten
+  Supabase-Projekt bearbeitet.
 
 ## Lokal starten
 
@@ -37,18 +38,6 @@ Die SQL-Dateien unter `supabase/migrations/` in zeitlicher Reihenfolge anwenden
 und die Edge Functions deployen. Fuer Push-Benachrichtigungen werden mindestens
 `VAPID_PRIVATE_KEY` und `VAPID_CONTACT` als Function-Secrets benoetigt.
 
-Neue Registrierungen erhalten immer die Rolle `customer`. Eine oeffentlich
-bekannte E-Mail-Adresse verleiht absichtlich keine Adminrechte. Den ersten Admin
-nach dessen Registrierung bewusst im Supabase SQL Editor festlegen:
-
-```sql
-update public.profiles
-set role = 'admin'
-where id = (
-  select id from auth.users where email = 'DEINE-ADMIN-ADRESSE'
-);
-```
-
 E-Mail-Bestaetigung sollte in Produktion aktiviert bleiben. Fuer einen
 zuverlaessigen Versand ein eigenes SMTP-Konto konfigurieren und unter
 Authentication → URL Configuration die Live-Domain als Site URL und Redirect
@@ -69,10 +58,10 @@ Migrationen sind davon getrennt und muessen ueber Supabase ausgerollt werden.
 
 ## Datenmodell
 
-- `profiles`: Rolle, Name, E-Mail und komprimiertes Profilbild
+- `profiles`: Name, E-Mail und komprimiertes Profilbild
 - `training_logs`: ein JSON-Trainingsstand je Nutzer
 - `notizen` und privater Storage-Bucket `notizbuch`: persoenliche Notizen und Bilder
-- `feedback`: Kundenfeedback fuer die Adminansicht
+- `feedback`: Kundenfeedback fuer die Bearbeitung im geschuetzten Backend
 - `push_subscriptions`, `rest_timers`, `push_versuche`: Push- und Pausentimer-Infrastruktur
 
 Alle nutzerbezogenen Tabellen verwenden RLS. Das Profilbild wird vor dem

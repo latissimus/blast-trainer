@@ -46,7 +46,7 @@ const TUTORIAL_SETUP = [
    Mount the LOGMAN log (v4: Cycles, rollierender OK/UK-Split, Pausen-Timer)
    into `container`.
      userId    – whose training_logs row to load
-     readOnly  – true for the admin viewing a customer (no editing/saving)
+     readOnly  – optional read-only rendering without editing/saving
    Returns { destroy } to remove the sticky save bar on nav.
    ------------------------------------------------------------------ */
 export async function mountLog(container, { userId, readOnly = false }) {
@@ -755,9 +755,8 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // Dauerplatz oben, aber sie muessen ablesbar bleiben. Darum je Feld zwei
   // Zeilen: oben der Wert, unten wofuer er steht.
   //
-  // WIRD IMMER GEBAUT, auch in der Nur-Lese-Ansicht des Admins: Dort sind es
-  // die einzigen Bedienelemente, mit denen er durch fremde Wochen blaettert.
-  // Frueher hing das an der Speicherleiste, die es im readOnly nicht gab.
+  // WIRD IMMER GEBAUT, auch in einer Nur-Lese-Ansicht. Frueher hing das an der
+  // Speicherleiste, die es im readOnly nicht gab.
   //
   // Je Feld liegt ein durchsichtiges natives Element ueber der Beschriftung:
   // <select> und <input type="date"> oeffnen auf iOS die Systemauswahl, die

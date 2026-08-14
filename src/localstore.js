@@ -43,6 +43,15 @@ export const readLog = (uid) => safeGet(LOG_KEY(uid));
 export const writeLog = (uid, payload, dirty, replace = false) =>
   safeSet(LOG_KEY(uid), { payload, dirty, replace, at: Date.now() });
 
+export function clearTrainingData(uid) {
+  try {
+    localStorage.removeItem(LOG_KEY(uid));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 export const readProfile = (uid) => safeGet(PROFILE_KEY(uid));
 export const writeProfile = (uid, profile) => safeSet(PROFILE_KEY(uid), profile);
 
@@ -63,7 +72,7 @@ export const writeNotizen = (uid, notizen) => safeSet(NOTIZ_KEY(uid), notizen);
 // Trainingsdaten noch Profil/Notizen des geloeschten Kontos zurueckbleiben.
 export function clearUserData(uid) {
   try {
-    localStorage.removeItem(LOG_KEY(uid));
+    clearTrainingData(uid);
     localStorage.removeItem(PROFILE_KEY(uid));
     localStorage.removeItem(NOTIZ_KEY(uid));
     return true;

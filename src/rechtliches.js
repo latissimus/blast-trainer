@@ -44,7 +44,7 @@ function datenschutzInhalt() {
       <h2>2. Welche Daten verarbeitet werden</h2>
       <h3>Konto und Profil</h3>
       <p>E-Mail-Adresse, Name, der beim Authentifizierungsdienst gespeicherte
-        Passwort-Hash, Kontorolle und – falls freiwillig gewählt – ein
+        Passwort-Hash und – falls freiwillig gewählt – ein
         Profilbild. Das Klartext-Passwort ist für LOGMAN nicht einsehbar.</p>
 
       <h3>Training und Einstellungen</h3>
@@ -105,10 +105,10 @@ function datenschutzInhalt() {
         <li>Der zum Gerät gehörende Push-Dienst, beispielsweise von Apple,
           Google oder Mozilla – nur wenn Benachrichtigungen aktiviert werden.</li>
       </ul>
-      <p>Administratoren von LOGMAN können Kontaktdaten, Feedback und
-        Trainingslogs zur Verwaltung und Unterstützung einsehen. Die
-        Trainingsansicht ist für Administratoren ausschließlich lesend
-        vorgesehen.</p>
+      <p>Es gibt keinen Adminzugang zu Kundendaten innerhalb der App. Der
+        Betreiber kann über den geschützten Backendzugang auf gespeicherte
+        Daten zugreifen, soweit dies für technischen Betrieb, Support oder die
+        Bearbeitung von Feedback erforderlich ist.</p>
       <p>Soweit Dienstleister Daten außerhalb des Europäischen Wirtschaftsraums
         verarbeiten, erfolgt die Übermittlung nur auf Grundlage eines zulässigen
         Übermittlungsmechanismus, insbesondere eines Angemessenheitsbeschlusses
