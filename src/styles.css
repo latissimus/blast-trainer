@@ -1665,7 +1665,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 #view,.ex-picker-liste{scrollbar-width:none;-ms-overflow-style:none}
 #view::-webkit-scrollbar,.ex-picker-liste::-webkit-scrollbar{display:none;width:0;height:0}
 
-.log-kontext{display:grid;gap:3px;margin:8px 0 12px;padding:8px 10px;
+.log-kontext{display:grid;gap:3px;margin:3px 0 12px;padding:8px 10px;
   background:color-mix(in srgb,var(--surface) 58%,transparent);
   border:var(--hairline) solid color-mix(in srgb,var(--ink) 38%,transparent);
   border-radius:var(--r)}
@@ -1678,14 +1678,14 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .profile-schalter span{display:flex;flex-direction:column;gap:2px}
 .profile-schalter small{color:var(--muted);font-size:11px}
 .profile-eigene-liste{display:grid;gap:7px}
-.profile-eigene{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;
+.profile-eigene{display:grid;grid-template-columns:minmax(0,1fr) minmax(112px,132px);gap:10px;align-items:start;
   padding:9px 10px;border:var(--hairline) solid var(--faint);border-radius:var(--r);background:var(--surface2)}
 .profile-eigene>div{display:grid;gap:2px;min-width:0}
 .profile-eigene b{overflow:hidden;text-overflow:ellipsis;font-size:13px}
 .profile-eigene small{color:var(--muted);font-size:10px;line-height:1.35}
-.profile-eigene>span{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px}
+.profile-eigene>span{display:flex;flex-direction:column;align-items:stretch;gap:5px}
 .profile-eigene button{padding:6px 7px;border:0;border-radius:7px;background:var(--prio-soft);
-  color:var(--prio-text);font:700 italic 9px var(--display);text-transform:uppercase}
+  width:100%;color:var(--prio-text);font:700 italic 9px var(--display);text-transform:uppercase}
 .profile-eigene-editor{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px;
   padding-top:8px;border-top:1px solid var(--faint)}
 .profile-eigene-editor>label{display:grid;gap:3px}
