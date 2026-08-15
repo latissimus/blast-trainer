@@ -1320,7 +1320,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
         const aktuellInListe = gruppen.some((gruppe) =>
           gruppe.eintraege.some((eintrag) => eintrag.n === aktuell));
         if (aktuell && !aktuellInListe) {
-          const bekannt = eintragVon(aktuell, katalogMitEigenen(state.eigeneUebungen, { nurAktive: false }));
+          const bekannt = eintragVon(aktuell, katalogMitEigenen(state.eigeneUebungen, { nurAktive: false, mitGeloeschten: true }));
           gruppen.push({
             label: bekannt ? 'Aktuelle Auswahl' : 'Nicht im Katalog',
             eintraege: [bekannt || { n: aktuell }],

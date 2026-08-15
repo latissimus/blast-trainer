@@ -20,18 +20,18 @@ export async function mountProg(container, { userId }) {
     <div class="seitenkopf">
       <div class="seitenkopf-text">
         <span class="seitenkopf-kicker">Auswertung</span>
-        <h1 class="section-title">Progression</h1>
+        <h1 class="section-title">Fortschritt</h1>
       </div>
       <a class="zurueck" href="#log"><span class="pf">←</span> Log</a>
     </div>
     <div class="som-statuskopf prog-statuskopf">
-      <p class="prog-info-titel">HEAVYS- &amp; MIDDLES-Progression</p>
+      <p class="prog-info-titel">HEAVYS- &amp; MIDDLES-Fortschritt</p>
       <button class="som-info-knopf" id="prog-info-knopf" type="button" aria-expanded="false" aria-controls="prog-info">i</button>
     </div>
     <div class="som-kurzhilfe" id="prog-info" hidden>
       <p>Diese Kurve zeigt den <b>Trend deiner HEAVYS- und MIDDLES-Leistung</b>. Einzelne schwächere Einheiten sind normal; aussagekräftig wird erst die Entwicklung über mehrere vergleichbare Cycles.</p>
       <p>Gezeigt wird das <b>geschätzte 1RM nach Epley</b> aus deinem besten Satz je Cycle. Dadurch zählen sowohl mehr Gewicht als auch mehr Wiederholungen bei gleichem Gewicht. Es ist eine Rechengröße, kein Maximalkrafttest und kein direkter Beweis für Muskelwachstum.</p>
-      <p>Ausgewertet werden nur <b>HEAVYS- und MIDDLES-Sätze</b>. Beide nutzen feste Übungen und Double Progression. PUMPS sind nicht als vergleichbarer Leistungstest gedacht.</p>
+      <p>Ausgewertet werden nur <b>HEAVYS- und MIDDLES-Sätze</b>. Bei beiden steigerst du zuerst die Wiederholungen und danach das Gewicht. PUMPS sind nicht als vergleichbarer Leistungstest gedacht.</p>
     </div>
     <div id="prog-inhalt"></div>`;
   container.appendChild(wrap);

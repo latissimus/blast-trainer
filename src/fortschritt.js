@@ -10,7 +10,7 @@ import { escapeHtml } from './html.js';
 
 const fmt = (n) => (Math.round(n * 10) / 10).toString().replace('.', ',');
 
-export function mountFortschritt(wrap, { session, payload: fertig = null, titel = 'Leistungsprogression' }) {
+export function mountFortschritt(wrap, { session, payload: fertig = null, titel = 'Leistungsfortschritt' }) {
   const karte = document.createElement('div');
   karte.className = 'card';
   karte.innerHTML = `${titel ? `<h2 class="section-title" style="font-size:18px;margin:0 0 12px">${escapeHtml(titel)}</h2>` : ''}

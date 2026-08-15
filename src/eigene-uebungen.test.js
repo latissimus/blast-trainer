@@ -5,6 +5,7 @@ import {
   benenneEigeneUebungUm,
   aktualisiereEigeneZuordnung,
   katalogMitEigenen,
+  loescheEigeneUebung,
   mergeEigeneUebungen,
   setzeEigeneUebungAktiv,
 } from './eigene-uebungen.js';
@@ -50,6 +51,17 @@ describe('persönliche Übungen', () => {
     const entfernt = setzeEigeneUebungAktiv(result.liste, result.eintrag.id, false, 20);
     expect(katalogMitEigenen(entfernt).some((e) => e.n === 'Meine Presse')).toBe(false);
     expect(katalogMitEigenen(entfernt, { nurAktive: false }).some((e) => e.n === 'Meine Presse')).toBe(true);
+  });
+
+  it('löscht Übungen dauerhaft aus der Verwaltung, behält aber ihre Zuordnung für alte Logs', () => {
+    const result = erstelleEigeneUebung([], { n: 'Meine Presse', haupt: 'Brust', typ: 'Comp' }, 10);
+    const geloescht = loescheEigeneUebung(result.liste, result.eintrag.id, 20);
+    expect(katalogMitEigenen(geloescht, { nurAktive: false }).some((e) => e.n === 'Meine Presse')).toBe(false);
+    expect(katalogMitEigenen(geloescht, { nurAktive: false, mitGeloeschten: true })
+      .find((e) => e.n === 'Meine Presse')).toMatchObject({ haupt: 'Brust', geloescht: true });
+
+    const merged = mergeEigeneUebungen(result.liste, geloescht);
+    expect(merged.find((e) => e.id === result.eintrag.id).geloescht).toBe(true);
   });
 
   it('vereinigt persönliche Übungen pro ID und übernimmt die neuere Bearbeitung', () => {

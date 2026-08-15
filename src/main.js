@@ -382,7 +382,7 @@ function renderChrome() {
     <option value="log">LOG</option>
     <option value="notizbuch">NOTIZBUCH</option>
     <option value="meter">SET-O-METER</option>
-    <option value="prog">PROGRESSION</option>
+    <option value="prog">FORTSCHRITT</option>
     <option value="feedback">FEEDBACK</option>
     <option value="faq">FAQs</option>`;
 

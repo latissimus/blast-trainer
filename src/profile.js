@@ -8,6 +8,7 @@ import { synchronisiereTraining } from './trainingssync.js';
 import {
   aktualisiereEigeneZuordnung,
   benenneEigeneUebungUm,
+  loescheEigeneUebung,
   normalisiereEigeneUebungen,
   setzeEigeneUebungAktiv,
 } from './eigene-uebungen.js';
@@ -243,7 +244,8 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
 
   const eigeneZeichnen = () => {
     eigeneListe.innerHTML = '';
-    const alle = normalisiereEigeneUebungen(eigenesPayload.eigeneUebungen);
+    const alle = normalisiereEigeneUebungen(eigenesPayload.eigeneUebungen)
+      .filter((eintrag) => !eintrag.geloescht);
     if (!alle.length) {
       eigeneListe.innerHTML = '<p class="profile-eigene-leer">Noch keine eigenen Übungen angelegt.</p>';
       return;
@@ -328,6 +330,20 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
         };
         aktionen.appendChild(wieder);
       }
+      const loeschen = document.createElement('button');
+      loeschen.type = 'button';
+      loeschen.className = 'loeschen';
+      loeschen.textContent = 'Löschen';
+      loeschen.onclick = async () => {
+        if (!confirm(`„${eintrag.n}“ endgültig aus deinen eigenen Übungen löschen? Alte Trainingseinträge bleiben erhalten.`)) return;
+        eigenesPayload.eigeneUebungen = loescheEigeneUebung(
+          eigenesPayload.eigeneUebungen,
+          eintrag.id,
+        );
+        eigeneZeichnen();
+        await eigeneSpeichern();
+      };
+      aktionen.appendChild(loeschen);
       zeile.appendChild(aktionen);
       eigeneListe.appendChild(zeile);
     });

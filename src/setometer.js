@@ -27,7 +27,7 @@ const klein = (s) => String(s || '').trim().toLowerCase();
 export { istDeload, tageDerWoche };
 
 export function zaehleCycle(payload, cycle, katalog = null) {
-  katalog = katalog || katalogMitEigenen(payload?.eigeneUebungen, { nurAktive: false });
+  katalog = katalog || katalogMitEigenen(payload?.eigeneUebungen, { nurAktive: false, mitGeloeschten: true });
   const idx = new Map(katalog.map((e) => [klein(e.n), e]));
   const konten = {};
   const direkt = {};

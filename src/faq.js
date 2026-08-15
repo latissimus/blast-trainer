@@ -67,7 +67,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie finde ich mich in der App zurecht?</summary>
       <div class="faq-a">
-        <p><b>Im Log</b> stellst du unten Cycle, Einheit, Level und das tatsächliche Trainingsdatum ein. Das violette Menü führt zu Notizbuch, Set-O-Meter, Progression, Feedback und FAQs. Auf Unterseiten bringt dich „← Log“ zurück.</p>
+        <p><b>Im Log</b> stellst du unten Cycle, Einheit, Level und das tatsächliche Trainingsdatum ein. Das violette Menü führt zu Notizbuch, Set-O-Meter, Fortschritt, Feedback und FAQs. Auf Unterseiten bringt dich „← Log“ zurück.</p>
         <p>Im Einheiten-Menü bedeutet <b>◦ angefangen</b> und <b>✓ vollständig</b>. Ist eine Einheit komplett eingetragen, bietet LOGMAN oberhalb des ersten Muskelblocks direkt die nächste offene Einheit an.</p>
         <p><b>Gym / Info</b> ist ein optionales Feld für das verwendete Studio oder Hinweise. Der Text gilt für diese Einheit in allen Cycles. Im Profil unter Darstellung kannst du das Feld ausblenden.</p>
         <p>Der Speicherstatus neben dem Profilbild bedeutet: <b>✓</b> gespeichert · <b>↻</b> speichert · <b>↑</b> wartet auf Verbindung · <b>⚠</b> Upload fehlgeschlagen. Deine Eingabe liegt auch in den letzten beiden Fällen bereits auf dem Gerät.</p>
@@ -85,9 +85,9 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie trainiere ich HEAVYS?</summary>
       <div class="faq-a">
-        <p><b>A-Tage · 6–10 Wiederholungen.</b> HEAVYS nutzen feste Übungen. Ziel sind technisch standardisierte Leistungsprogression, hohe mechanische Belastung und zuverlässige Logbuchvergleiche.</p>
+        <p><b>A-Tage · 6–10 Wiederholungen.</b> HEAVYS nutzen feste Übungen. Ziel sind technisch standardisierter Leistungsfortschritt, hohe mechanische Belastung und zuverlässige Logbuchvergleiche.</p>
         <p><b>Zielnähe:</b> 0–1 RIR. 0 RIR bedeutet, dass keine weitere saubere Wiederholung möglich gewesen wäre.</p>
-        <p>Du nutzt <b>Double Progression</b>: Steigere zuerst die Wiederholungen innerhalb des Bereichs. Erreichst du das obere Ende mit passender Technik und Ziel-RIR, erhöhst du die Last und beginnst wieder weiter unten im Bereich.</p>
+        <p>Du nutzt die <b>doppelte Steigerung (Double Progression)</b>: Steigere zuerst die Wiederholungen innerhalb des Bereichs. Erreichst du das obere Ende mit passender Technik und Ziel-RIR, erhöhst du die Last und beginnst wieder weiter unten im Bereich.</p>
         <p>Die Übung bleibt, solange sie <b>schmerzfrei, technisch reproduzierbar und progressierbar</b> ist. Nicht jede Übung muss in jedem Cycle besser werden.</p>
         <p><b>Evidenz:</b> Muskelaufbau ist über verschiedene Lastbereiche möglich, wenn Sätze ausreichend anstrengend sind. Schwerere Lasten machen die Leistung zusätzlich gut vergleichbar und fördern besonders die Maximalkraft.</p>
       </div>
@@ -97,7 +97,7 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p><b>B-Tage · 10–15 Wiederholungen.</b> MIDDLES sind feste, vollständig geloggte Übungen und bilden das progressiv getrackte Fundament dieser Einheiten.</p>
         <p><b>Zielnähe:</b> 0–2 RIR.</p>
-        <p>Sie nutzen dieselbe <b>Double Progression</b> wie HEAVYS: erst Wiederholungen innerhalb des Bereichs steigern, danach die Last erhöhen. Auch MIDDLES bleiben im Plan, solange sie schmerzfrei, technisch reproduzierbar und progressierbar sind.</p>
+        <p>Sie nutzen dieselbe <b>doppelte Steigerung</b> wie HEAVYS: erst Wiederholungen innerhalb des Bereichs steigern, danach die Last erhöhen. Auch MIDDLES bleiben im Plan, solange sie schmerzfrei, technisch reproduzierbar und steigerbar sind.</p>
         <p><b>Evidenz:</b> Moderate Lasten verbinden wirksame Versagensnähe mit gut kontrollierbarer Technik und meist geringerer absoluter Belastung als HEAVYS. Der eigene Name beschreibt die Rolle im Plan, keinen eigenen Wachstumsmechanismus.</p>
       </div>
     </details>
@@ -248,7 +248,7 @@ export function mountFaq(container) {
       </div>
     </details>
 
-    <details class="faq"><summary>Was zeigt die Progression?</summary>
+    <details class="faq"><summary>Was zeigt der Fortschritt?</summary>
       <div class="faq-a">
         <p>Die Kurve zeigt getrennt den <b>Trend deiner HEAVYS- und MIDDLES-Leistung</b>. Dafür berechnet LOGMAN aus dem besten Satz jedes Cycles ein geschätztes <b>1RM</b>. Das steht für <i>One-Repetition Maximum</i>, also das geschätzte Gewicht für eine maximale Wiederholung.</p>
         <p>Es ist eine Rechengröße, kein echter Maximalkrafttest und kein direkter Beweis für Muskelwachstum. Einzelne schwächere Einheiten sind normal; entscheidend ist der Trend über mehrere Cycles.</p>
@@ -259,13 +259,13 @@ export function mountFaq(container) {
       <div class="faq-a">
         <p>PUMPS dürfen frei rotieren. Deshalb merkt sich der Pool zu jedem Übungsnamen das zuletzt verwendete Gewicht und die Wiederholungen – unabhängig davon, in welchem Cycle du die Übung wieder auswählst.</p>
         <p>Im nächsten Cycle zeigt „<b>Zuletzt verwendet</b>“ zusätzlich die Übung und den letzten ausgefüllten Satz aus derselben PUMPS-Einheit. So kannst du sie schnell wiederverwenden, musst es aber nicht.</p>
-        <p>Der Pool bleibt beim Start einer neuen Phase erhalten und dient nur als Orientierung. PUMPS werden nicht als eigene Progressionskurve bewertet.</p>
+        <p>Der Pool bleibt beim Start einer neuen Phase erhalten und dient nur als Orientierung. PUMPS werden nicht als eigene Fortschrittskurve bewertet.</p>
       </div>
     </details>
 
   <details class="faq"><summary>Wann sollte ich Volumen verändern?</summary>
       <div class="faq-a">
-        <p><b>Erhöhen:</b> Wenn Entwicklung über mehrere Cycles ausbleibt, Technik und Progression stabil sind und du vollständig erholt bist. Ergänze zunächst 1–2 Sätze und beobachte mindestens zwei bis drei Cycles.</p>
+        <p><b>Erhöhen:</b> Wenn Entwicklung über mehrere Cycles ausbleibt, Technik und Leistung stabil sind und du vollständig erholt bist. Ergänze zunächst 1–2 Sätze und beobachte mindestens zwei bis drei Cycles.</p>
         
 <p><b>Indikation für eine Drosselung:</b><br>
     • Hoher Alltagsstress oder schwierige Lebensphasen.<br>
@@ -275,7 +275,7 @@ export function mountFaq(container) {
     <p><b>Konkrete Maßnahmen:</b><br>
     • <b>Volumenstufe Level I wählen</b> (Erhaltung / Basis-Reiz).<br>
     • <b>Weniger systemisch ermüdende Übungen:</b> Freie Mehrgelenksübungen reduzieren, häufiger auf Maschinen ausweichen.<br>
-    • <b>Keine starre Progressionspflicht:</b> Das Training dient in diesen Phasen dem Krafterhalt und der Stressbewältigung, nicht dem Erzwingen neuer Rekorde.</p>
+    • <b>Keine erzwungene Steigerung:</b> Das Training dient in diesen Phasen dem Krafterhalt und der Stressbewältigung, nicht dem Erzwingen neuer Rekorde.</p>
       </div>
     </details>
 
@@ -294,7 +294,7 @@ export function mountFaq(container) {
 
     <p><b>Übung wird ersetzt, wenn:</b><br>
     • Wiederkehrende Schmerzen auftreten.<br>
-    • Über mehrere vergleichbare Einheiten keine Progression möglich ist (HEAVYS und MIDDLES).<br>
+    • Über mehrere vergleichbare Einheiten kein Fortschritt möglich ist (HEAVYS und MIDDLES).<br>
     • Der Zielmuskel trotz sauberer Technikarbeit nicht der limitierende Faktor ist.<br>
     • Die systemische Ermüdung unverhältnismäßig hoch ist.</p>
 
@@ -321,7 +321,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Was ist LOGMAN?</summary>
       <div class="faq-a">
-	<p>LOGMAN ist aus dem Anspruch heraus entstanden, ein evidenzbasiertes Werkzeug für intelligentes Krafttraining mit dem Ziel der Hypertrophie zu schaffen – mit maximalem Fokus auf Progression und Regeneration 👊🏼</p>
+	<p>LOGMAN ist aus dem Anspruch heraus entstanden, ein evidenzbasiertes Werkzeug für intelligentes Krafttraining mit dem Ziel der Hypertrophie zu schaffen – mit maximalem Fokus auf Fortschritt und Regeneration 👊🏼</p>
 
         <p>Im Ergebnis ist LOGMAN ein <b>Trainingstagebuch im Retro-Look für ein festes, aber anpassbares Muskelaufbau-System</b>. Es verbindet progressiv dokumentierte HEAVYS und MIDDLES, ergänzende versagensnahe PUMPS, individuell erholbares Volumen und einen rollierenden OK/UK-Split.</p>
         

@@ -573,7 +573,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .addset{margin-top:10px;background:var(--surface2);border:var(--dash) dashed var(--ink);color:var(--text);
   width:100%;padding:9px;border-radius:var(--r);font-size:13.5px;font-weight:800;font-family:var(--display);font-style:italic;text-transform:uppercase}
 .addset:active{background:var(--pink);color:var(--accent-ink)}
-.notewrap{margin-top:8px}
+.notewrap{margin-top:14px}
 .addnote{background:var(--surface2);border:var(--dash) dashed var(--ink);color:var(--muted);
   width:100%;padding:9px;border-radius:var(--r);font-size:13px;font-weight:800;font-family:var(--display);
   font-style:italic;text-transform:uppercase}
@@ -1703,6 +1703,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .profile-eigene-editor details input:checked+span{background:var(--prio);color:#fff}
 .profile-eigene-editor>[data-zuordnung-speichern]{grid-column:1/-1;background:var(--prio);color:#fff}
 .profile-eigene.inaktiv{opacity:.62}
+.profile-eigene button.loeschen{background:var(--danger-soft,#ffe0d8);color:var(--danger)}
 .profile-eigene-leer{margin:0;padding:10px;color:var(--muted);text-align:center;font-size:12px}
 .pump-erinnerung{margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:700;line-height:1.4}
 

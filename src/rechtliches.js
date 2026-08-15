@@ -236,7 +236,7 @@ function nutzungsbedingungenInhalt() {
       <h2>3. Leistung und Offlinebetrieb</h2>
       <p>LOGMAN unterstützt die Planung, Dokumentation und Auswertung des
         Trainings. Dazu gehören insbesondere Trainingslog, Cycles,
-        Progressionsanzeige, Set-O-Meter, Notizen, eigene Übungen und
+        Fortschrittsanzeige, Set-O-Meter, Notizen, eigene Übungen und
         Synchronisation.</p>
       <p>Teile der App funktionieren offline. Änderungen werden zunächst auf
         dem Gerät gespeichert und bei verfügbarer Verbindung synchronisiert.

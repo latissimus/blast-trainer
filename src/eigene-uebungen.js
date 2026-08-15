@@ -24,18 +24,19 @@ export function normalisiereEigeneUebungen(liste) {
       art: eintrag?.art === 'variante' ? 'variante' : 'eigen',
       basis: String(eintrag?.basis || '').trim(),
       aktiv: eintrag?.aktiv !== false,
+      geloescht: eintrag?.geloescht === true,
       updatedAt: Number(eintrag?.updatedAt) || 0,
       eigen: true,
     };
   }).filter((eintrag) => eintrag.n && eintrag.haupt && eintrag.typ);
 }
 
-// Inaktive Einträge bleiben als Zuordnung erhalten. Dadurch zählen alte Logs
-// auch nach dem Entfernen einer persönlichen Übung weiterhin korrekt; in der
-// Auswahl erscheinen dagegen ausschließlich aktive Einträge.
-export function katalogMitEigenen(liste, { nurAktive = true } = {}) {
+// Ausgeblendete und gelöschte Einträge bleiben intern als Zuordnung erhalten.
+// Dadurch zählen alte Logs weiterhin korrekt und eine Löschung wird beim
+// Offline-Merge nicht von einem älteren Serverstand rückgängig gemacht.
+export function katalogMitEigenen(liste, { nurAktive = true, mitGeloeschten = false } = {}) {
   const eigene = normalisiereEigeneUebungen(liste)
-    .filter((eintrag) => !nurAktive || eintrag.aktiv)
+    .filter((eintrag) => (mitGeloeschten || !eintrag.geloescht) && (!nurAktive || eintrag.aktiv))
     .map((eintrag) => ({ ...eintrag }));
   return [...KATALOG, ...eigene];
 }
@@ -94,6 +95,13 @@ export function erstelleEigeneUebung(liste, daten, jetzt = Date.now()) {
 export function setzeEigeneUebungAktiv(liste, id, aktiv, jetzt = Date.now()) {
   return normalisiereEigeneUebungen(liste).map((eintrag) =>
     eintrag.id === id ? { ...eintrag, aktiv: !!aktiv, updatedAt: jetzt } : eintrag);
+}
+
+export function loescheEigeneUebung(liste, id, jetzt = Date.now()) {
+  return normalisiereEigeneUebungen(liste).map((eintrag) =>
+    eintrag.id === id
+      ? { ...eintrag, aktiv: false, geloescht: true, updatedAt: jetzt }
+      : eintrag);
 }
 
 export function aktualisiereEigeneZuordnung(liste, id, daten, jetzt = Date.now()) {
