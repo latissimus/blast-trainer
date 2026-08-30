@@ -13,13 +13,20 @@ import { TPL } from './template.js';
 export const e1rm = (w, r) => {
   const last = parseFloat(String(w).replace(',', '.'));
   const wdh = parseFloat(r);
-  if (!last || !wdh) return 0;
+  if (!Number.isFinite(last) || last < 0 || !Number.isFinite(wdh) || wdh <= 0) return 0;
   return last * (1 + wdh / 30);
+};
+
+const satzGueltig = (s) => {
+  if (!s || String(s.w ?? '').trim() === '' || String(s.r ?? '').trim() === '') return false;
+  const gewicht = parseFloat(String(s.w).replace(',', '.'));
+  const wdh = parseFloat(s.r);
+  return Number.isFinite(gewicht) && gewicht >= 0 && Number.isFinite(wdh) && wdh > 0;
 };
 
 // Bester Satz einer Uebung an einem Tag.
 export const bestE1 = (saetze) =>
-  (saetze || []).reduce((m, s) => (s ? Math.max(m, e1rm(s.w, s.r)) : m), 0);
+  (saetze || []).reduce((m, s) => (satzGueltig(s) ? Math.max(m, e1rm(s.w, s.r)) : m), 0);
 
 // Vergleich zweier Trainingseintraege. Jede echte Aenderung zaehlt: Ein
 // absoluter 1RM-Puffer wuerde kleine Lasten benachteiligen (bei 7 kg veraendert
@@ -27,7 +34,7 @@ export const bestE1 = (saetze) =>
 export const vergleichE1 = (vorher, heute) => {
   const alt = bestE1(vorher);
   const neu = bestE1(heute);
-  if (!alt || !neu) return null;
+  if (!(vorher || []).some(satzGueltig) || !(heute || []).some(satzGueltig)) return null;
   const differenz = neu - alt;
   const rundungstoleranz = Math.max(alt, neu, 1) * 1e-10;
   if (differenz > rundungstoleranz) return 1;
@@ -66,7 +73,7 @@ function reihenFuerTypen(payload, typen) {
           const name = String(namen[xi] || '').trim();
           if (!name) return;
           const best = bestE1(saetze);
-          if (!best) return;
+          if (!(saetze || []).some(satzGueltig)) return;
           // Derselbe Name darf bei HEAVYS und MIDDLES zwei getrennte Reihen
           // bilden, weil Last und Wiederholungsbereich nicht vergleichbar sind.
           const key = `${type}|${name.toLowerCase()}`;
@@ -77,7 +84,8 @@ function reihenFuerTypen(payload, typen) {
             wochen: new Map(),
           });
           const reihe = proUebung.get(key);
-          if (best > (reihe.wochen.get(woche) || 0)) reihe.wochen.set(woche, best);
+          const bisher = reihe.wochen.get(woche);
+          if (bisher === undefined || best > bisher) reihe.wochen.set(woche, best);
         });
       });
     });
@@ -111,6 +119,6 @@ export function verlauf(punkte) {
     erst,
     letzt,
     kg: Math.round((letzt - erst) * 10) / 10,
-    prozent: Math.round(((letzt - erst) / erst) * 1000) / 10,
+    prozent: erst === 0 ? null : Math.round(((letzt - erst) / erst) * 1000) / 10,
   };
 }

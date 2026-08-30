@@ -29,7 +29,7 @@ export const prioSatzanzahl = (cfg) => {
 };
 
 const prioWdhBereich = (konto, heavy) => {
-  if (!heavy) return '15–25';
+  if (!heavy) return '15–20';
   return konto === 'Unterarme' ? '8–15' : '6–10';
 };
 

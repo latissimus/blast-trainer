@@ -104,7 +104,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie trainiere ich PUMPS?</summary>
       <div class="faq-a">
-        <p><b>B-Tage · 15–25 Wiederholungen mit leichterer Last, aber versagensnah.</b> PUMPS ergänzen die festen MIDDLES um produktive Arbeit mit geringeren absoluten Lasten. Die Übungen dürfen freier wechseln.</p>
+        <p><b>B-Tage · PUMPS mit 15–20 Wiederholungen und leichterer Last, aber versagensnah.</b> PUMPS ergänzen die festen MIDDLES um produktive Arbeit mit geringeren absoluten Lasten. Die Übungen dürfen freier wechseln.</p>
         <p><b>Zielnähe:</b> 0–1 RIR.</p>
         <p>Die Mischung aus MIDDLES und PUMPS dient <b>Volumenverteilung, Gelenkverträglichkeit, Übungsvielfalt und langfristiger Adhärenz</b> – nicht der Kombination zweier unabhängiger Wachstumsmechanismen.</p>
         <p><b>Lengthened Partials sind optional</b> und nur bei passenden, sicheren Übungen sinnvoll – nicht automatisch nach jedem Satz.</p>

@@ -61,9 +61,10 @@ export function mountFortschritt(wrap, { session, payload: fertig = null, titel 
       const v = verlauf(r.punkte);
       // Bei nur einer Uebung ersetzt der Name die fehlende Auswahl.
       const titel = reihen.length > 1 ? '' : `<div class="mess-datum" style="margin:0 0 4px">${escapeHtml(r.typ)} · ${escapeHtml(r.name)}</div>`;
+      const prozent = Number.isFinite(v.prozent) ? ` · ${fmt(Math.abs(v.prozent))} %` : '';
       const delta = v.kg === 0
         ? `<span class="delta d-hold">= gehalten</span>`
-        : `<span class="delta ${v.kg > 0 ? 'd-up' : 'd-down'}">${v.kg > 0 ? '▲' : '▼'} ${fmt(Math.abs(v.kg))} kg · ${fmt(Math.abs(v.prozent))} %</span>`;
+        : `<span class="delta ${v.kg > 0 ? 'd-up' : 'd-down'}">${v.kg > 0 ? '▲' : '▼'} ${fmt(Math.abs(v.kg))} kg${prozent}</span>`;
       karte.querySelector('#fs-kopf').innerHTML = `${titel}
         <small class="mess-label">Aktueller Leistungswert</small>
         <div class="mess-wert">${fmt(v.letzt)} <span>kg 1RM</span> ${delta}</div>

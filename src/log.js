@@ -880,8 +880,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
   }
 
   function renderPrev(node, prevSets, todaySets, pWeek) {
-    if (!prevSets || !prevSets.some((s) => s && (s.w || s.r))) { node.innerHTML = '<b>letztes Mal: —</b>'; return; }
-    const txt = prevSets.filter((s) => s && (s.w || s.r)).map((s) => `${s.w || '–'}×${s.r || '–'}`).join(', ');
+    const befuellt = (s) => s && ((s.w != null && String(s.w).trim() !== '') || (s.r != null && String(s.r).trim() !== ''));
+    if (!prevSets || !prevSets.some(befuellt)) { node.innerHTML = '<b>letztes Mal: —</b>'; return; }
+    const txt = prevSets.filter(befuellt).map((s) => `${s.w != null && String(s.w).trim() !== '' ? s.w : '–'}×${s.r != null && String(s.r).trim() !== '' ? s.r : '–'}`).join(', ');
     let chip = '';
     const vergleich = vergleichE1(prevSets, todaySets);
     if (vergleich !== null) {

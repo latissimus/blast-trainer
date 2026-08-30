@@ -150,6 +150,13 @@ describe('verlauf', () => {
   it('zeigt Rückgang negativ', () => {
     expect(verlauf([{ week: 1, e1: 100 }, { week: 5, e1: 95 }]).kg).toBe(-5);
   });
+
+  it('wertet Körpergewicht mit 0 kg als gültigen Ausgangswert', () => {
+    expect(e1rm(0, 8)).toBe(0);
+    expect(vergleichE1([{ w: 0, r: 8 }], [{ w: 5, r: 8 }])).toBe(1);
+    expect(vergleichE1([{ w: 5, r: 8 }], [{ w: 0, r: 8 }])).toBe(-1);
+    expect(verlauf([{ week: 1, e1: 0 }, { week: 2, e1: 5 }]).prozent).toBeNull();
+  });
   it('gibt null bei zu wenig Punkten', () => {
     expect(verlauf([{ week: 1, e1: 100 }])).toBeNull();
   });

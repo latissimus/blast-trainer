@@ -41,10 +41,10 @@ export const TPL = {
     sub: 'Oberkörper · MIDDLES & PUMPS',
     blocks: [
       { id: 'chest_comp', mus: 'Brust', konten: ['Brust'], type: 'middle', sets: [2, 2, 2], rest: 150, reps: '10–15', rir: '0–2 RIR', ex: [feld('Comp', ['Brust'])] },
-      { id: 'chest_iso', mus: 'Brust', konten: ['Brust'], type: 'pump', sets: [1, 2, 2], rest: 90, reps: '15–25', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Brust'])] },
+      { id: 'chest_iso', mus: 'Brust', konten: ['Brust'], type: 'pump', sets: [1, 2, 2], rest: 90, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Brust'])] },
       { id: 'back_thick', mus: 'Rücken · Dicke', konten: ['Oberer Rücken'], type: 'middle', sets: [2, 2, 2], rest: 150, reps: '10–15', rir: '0–2 RIR', ex: [feld('Comp', ['Oberer Rücken'])] },
       { id: 'back_wide', mus: 'Rücken · Weite', konten: ['Lat'], type: 'middle', sets: [1, 2, 2], rest: 150, reps: '10–15', rir: '0–2 RIR', ex: [feld('Comp', ['Lat'])] },
-      { id: 'delt_iso', mus: 'Seitl./Hint. Schulter', konten: ['Seitliche Schulter', 'Hintere Schulter'], type: 'pump', sets: [2, 2, 2], rest: 90, reps: '15–25', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Seitliche Schulter', 'Hintere Schulter'])] },
+      { id: 'delt_iso', mus: 'Seitl./Hint. Schulter', konten: ['Seitliche Schulter', 'Hintere Schulter'], type: 'pump', sets: [2, 2, 2], rest: 90, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Seitliche Schulter', 'Hintere Schulter'])] },
       { id: 'biceps_iso', mus: 'Bizeps', konten: ['Bizeps'], type: 'middle', sets: [1, 2, 2], rest: 120, reps: '10–15', rir: '0–2 RIR', ex: [feld('Iso', ['Bizeps'])] },
       { id: 'triceps_iso', mus: 'Trizeps', konten: ['Trizeps'], type: 'middle', sets: [1, 2, 2], rest: 120, reps: '10–15', rir: '0–2 RIR', ex: [feld('Iso', ['Trizeps'])] },
     ],
@@ -54,10 +54,10 @@ export const TPL = {
     sub: 'Unterkörper · MIDDLES & PUMPS',
     blocks: [
       { id: 'legs_comp', mus: 'Beine', konten: ['Quads', 'Glutes'], type: 'middle', sets: [2, 2, 2], rest: 150, reps: '10–15', rir: '0–2 RIR', ex: [feld('Comp', ['Quads', 'Glutes'])] },
-      { id: 'quads_iso', mus: 'Quads', konten: ['Quads'], type: 'pump', sets: [1, 2, 2], rest: 120, reps: '15–25', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Quads'])] },
-      { id: 'hams_glutes_iso', mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'pump', sets: [1, 2, 2], rest: 120, reps: '15–25', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Hams', 'Glutes'])] },
-      { id: 'calves_iso', mus: 'Waden', konten: ['Waden'], type: 'pump', sets: [3, 3, 3], rest: 90, reps: '15–25', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Waden'])] },
-      { id: 'abs_iso', mus: 'Abs', konten: ['Abs'], type: 'pump', sets: [2, 2, 2], rest: 90, reps: '15–25', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Abs'])] },
+      { id: 'quads_iso', mus: 'Quads', konten: ['Quads'], type: 'pump', sets: [1, 2, 2], rest: 120, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Quads'])] },
+      { id: 'hams_glutes_iso', mus: 'Hams/Glutes', konten: ['Hams', 'Glutes'], type: 'pump', sets: [1, 2, 2], rest: 120, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Hams', 'Glutes'])] },
+      { id: 'calves_iso', mus: 'Waden', konten: ['Waden'], type: 'pump', sets: [3, 3, 3], rest: 90, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Waden'])] },
+      { id: 'abs_iso', mus: 'Abs', konten: ['Abs'], type: 'pump', sets: [2, 2, 2], rest: 90, reps: '15–20', rir: '0–1 RIR', free: 1, ex: [feld('Iso', ['Abs'])] },
     ],
   },
 };

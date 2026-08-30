@@ -136,7 +136,7 @@ describe('Prio-Slots', () => {
     const p = payload();
     p.volumen.prioritaet.Unterarme = { modus: 'plus' };
     expect(prioBloecke(p, 1, 'OK-H')[0].reps).toBe('8–15');
-    expect(prioBloecke(p, 1, 'OK-P')[0].reps).toBe('15–25');
+    expect(prioBloecke(p, 1, 'OK-P')[0].reps).toBe('15–20');
   });
 
   it('trainiert andere neue HEAVY-Prioritäten mit 6–10 Wiederholungen', () => {
