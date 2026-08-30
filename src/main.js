@@ -11,7 +11,6 @@ import { mountProfile } from './profile.js';
 import { mountFaq } from './faq.js';
 import { mountMeter } from './meter.js';
 import { mountProg } from './prog.js';
-import { mountNotizbuch } from './notizbuch.js';
 import { mountFeedback } from './feedback.js';
 import { verbindePausenAnzeige, stoppePause } from './pause.js';
 import { escapeHtml, sichereBildUrl } from './html.js';
@@ -380,7 +379,6 @@ function renderChrome() {
   const menue = app.querySelector('#app-menue');
   menue.innerHTML = `
     <option value="log">LOG</option>
-    <option value="notizbuch">NOTIZBUCH</option>
     <option value="meter">SET-O-METER</option>
     <option value="prog">FORTSCHRITT</option>
     <option value="feedback">FEEDBACK</option>
@@ -459,7 +457,7 @@ async function routeView() {
   if (!view) return;
   if (aktiveAnsicht === 'log') logScrollY = view.scrollTop;
   let hash = (location.hash.replace('#', '') || 'log');
-  if (!['log', 'profile', 'faq', 'meter', 'prog', 'feedback', 'notizbuch', ...RECHTSSEITEN].includes(hash)) hash = 'log';
+  if (!['log', 'profile', 'faq', 'meter', 'prog', 'feedback', ...RECHTSSEITEN].includes(hash)) hash = 'log';
   setNavActive(hash);
 
   cleanupActive();
@@ -500,10 +498,6 @@ async function routeView() {
       await mountProg(ziel, { userId: session.user.id });
     } else if (hash === 'feedback') {
       await mountFeedback(ziel, { session });
-    } else if (hash === 'notizbuch') {
-      // Die Huelle und der lokale Spiegel erscheinen sofort; der Serverstand
-      // wird innerhalb der Seite nachgeladen und blockiert den Wechsel nicht.
-      mountNotizbuch(ziel, { userId: session.user.id });
     } else if (RECHTSSEITEN.includes(hash)) {
       mountRechtliches(ziel, { seite: hash, angemeldet: true });
     }

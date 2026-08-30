@@ -55,18 +55,10 @@ export function clearTrainingData(uid) {
 export const readProfile = (uid) => safeGet(PROFILE_KEY(uid));
 export const writeProfile = (uid, profile) => safeSet(PROFILE_KEY(uid), profile);
 
-// Notizbuch: reiner LESE-Spiegel, anders als das Log.
-//
-// Geschrieben wird weiterhin nur online. Der Grund fuer den Spiegel ist das
-// Lesen: Cues, Sitzhoehen und Griffbreiten schlaegt man MITTEN in der Einheit
-// nach – im Keller ohne Empfang. Ohne Spiegel war die Seite dort leer, also
-// genau in dem Fall unbrauchbar, fuer den sie gebaut wurde.
-//
-// Deshalb auch keine Zusammenfuehrung wie bei mergePayload: Es gibt keine
-// lokalen Aenderungen, die mit dem Server streiten koennten. Der Server hat
-// immer recht, der Spiegel ist nur die letzte gesehene Fassung.
+// Altbestand der entfernten Notizbuchseite: bleibt ausschließlich lesbar,
+// damit ein Datenexport oder die Kontolöschung keine früher gespeicherten
+// Inhalte übersieht. Neue Notizbuchdaten schreibt die App nicht mehr.
 export const readNotizen = (uid) => safeGet(NOTIZ_KEY(uid));
-export const writeNotizen = (uid, notizen) => safeSet(NOTIZ_KEY(uid), notizen);
 
 // Nach einer Kontoloeschung duerfen auf einem gemeinsam genutzten Geraet weder
 // Trainingsdaten noch Profil/Notizen des geloeschten Kontos zurueckbleiben.

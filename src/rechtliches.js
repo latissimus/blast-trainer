@@ -53,11 +53,6 @@ function datenschutzInhalt() {
         Darstellungs- und Tutorialeinstellungen sowie der aktuelle
         Synchronisationsstand.</p>
 
-      <h3>Notizbuch</h3>
-      <p>Frei eingegebene Titel, Texte und Links sowie freiwillig hochgeladene
-        Bilder. Bitte trage dort keine Diagnosen oder Informationen über andere
-        Personen ein, die für dein Training nicht erforderlich sind.</p>
-
       <h3>Feedback und Benachrichtigungen</h3>
       <p>Abgesendete Rückmeldungen mit Kategorie, Text und Zeitpunkt. Wenn du
         Benachrichtigungen aktivierst, werden außerdem technische Push-Endpunkte,
@@ -118,10 +113,12 @@ function datenschutzInhalt() {
     <section class="recht-karte">
       <h2>6. Speicherdauer und Löschung</h2>
       <p>Konto- und Trainingsdaten werden grundsätzlich bis zur Löschung des
-        Kontos gespeichert. Notizen, Bilder und Feedback bleiben gespeichert,
-        bis du sie löschst, dein Konto löschst oder ihre weitere Speicherung
-        für den jeweiligen Zweck nicht mehr erforderlich ist. Gesetzliche
-        Aufbewahrungspflichten bleiben unberührt.</p>
+        Kontos gespeichert. Feedback bleibt gespeichert, bis du dein Konto
+        löschst oder seine weitere Speicherung für den jeweiligen Zweck nicht
+        mehr erforderlich ist. Ältere Notizbuchinhalte aus einer früheren
+        App-Version werden nicht mehr ergänzt und beim Löschen des Kontos
+        ebenfalls entfernt. Gesetzliche Aufbewahrungspflichten bleiben
+        unberührt.</p>
       <p>Über <b>Profil → Account löschen</b> kannst du dein Konto und die damit
         verbundenen App-Daten löschen. Lokal gespeicherte App-Daten können nach
         der Kontolöschung zusätzlich durch Entfernen der App beziehungsweise
@@ -185,7 +182,7 @@ function impressumInhalt() {
 
     <section class="recht-karte">
       <h2>Externe Links</h2>
-      <p>LOGMAN verweist im FAQ und im Notizbuch auf externe Inhalte. Für deren
+      <p>LOGMAN verweist im FAQ auf externe Inhalte. Für deren
         Inhalt und Verfügbarkeit sind die jeweiligen Anbieter verantwortlich.
         Beim Öffnen gelten deren Datenschutzbestimmungen.</p>
     </section>
@@ -236,7 +233,7 @@ function nutzungsbedingungenInhalt() {
       <h2>3. Leistung und Offlinebetrieb</h2>
       <p>LOGMAN unterstützt die Planung, Dokumentation und Auswertung des
         Trainings. Dazu gehören insbesondere Trainingslog, Cycles,
-        Fortschrittsanzeige, Set-O-Meter, Notizen, eigene Übungen und
+        Fortschrittsanzeige, Set-O-Meter, Übungsnotizen, eigene Übungen und
         Synchronisation.</p>
       <p>Teile der App funktionieren offline. Änderungen werden zunächst auf
         dem Gerät gespeichert und bei verfügbarer Verbindung synchronisiert.
@@ -267,7 +264,7 @@ function nutzungsbedingungenInhalt() {
         <li>Angriffe, Manipulationsversuche oder eine Umgehung von
           Sicherheits- und Zugriffsbeschränkungen,</li>
         <li>automatisierte Zugriffe, die den Betrieb unangemessen belasten,</li>
-        <li>das Hochladen rechtswidriger Inhalte oder von Inhalten, an denen
+        <li>das Speichern rechtswidriger Inhalte oder von Inhalten, an denen
           keine erforderlichen Rechte bestehen,</li>
         <li>die Nutzung fremder Konten oder das Auslesen fremder Daten.</li>
       </ul>
@@ -279,7 +276,7 @@ function nutzungsbedingungenInhalt() {
 
     <section class="recht-karte">
       <h2>6. Eigene Inhalte</h2>
-      <p>Notizen, Bilder, Links, Übungsvarianten und sonstige eigene Inhalte
+      <p>Übungsnotizen, Übungsvarianten und sonstige eigene Inhalte
         bleiben den Nutzenden zugeordnet. Sie räumen dem Anbieter nur die
         technisch erforderlichen, nicht ausschließlichen Rechte ein, diese
         Inhalte zu speichern, zu verarbeiten und auf ihren Geräten anzuzeigen,

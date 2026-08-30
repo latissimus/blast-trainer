@@ -67,7 +67,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie finde ich mich in der App zurecht?</summary>
       <div class="faq-a">
-        <p><b>Im Log</b> stellst du unten Cycle, Einheit, Level und das tatsächliche Trainingsdatum ein. Das violette Menü führt zu Notizbuch, Set-O-Meter, Fortschritt, Feedback und FAQs. Auf Unterseiten bringt dich „← Log“ zurück.</p>
+        <p><b>Im Log</b> stellst du unten Cycle, Einheit, Level und das tatsächliche Trainingsdatum ein. Das violette Menü führt zu Set-O-Meter, Fortschritt, Feedback und FAQs. Auf Unterseiten bringt dich „← Log“ zurück.</p>
         <p>Im Einheiten-Menü bedeutet <b>◦ angefangen</b> und <b>✓ vollständig</b>. Ist eine Einheit komplett eingetragen, bietet LOGMAN oberhalb des ersten Muskelblocks direkt die nächste offene Einheit an.</p>
         <p><b>Gym / Info</b> ist ein optionales Feld für das verwendete Studio oder Hinweise. Der Text gilt für diese Einheit in allen Cycles. Im Profil unter Darstellung kannst du das Feld ausblenden.</p>
         <p>Der Speicherstatus neben dem Profilbild bedeutet: <b>✓</b> gespeichert · <b>↻</b> speichert · <b>↑</b> wartet auf Verbindung · <b>⚠</b> Upload fehlgeschlagen. Deine Eingabe liegt auch in den letzten beiden Fällen bereits auf dem Gerät.</p>
@@ -76,7 +76,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie exportiere oder lösche ich meine Daten?</summary>
       <div class="faq-a">
-        <p>Tippe oben rechts auf dein Profilbild. Unter <b>„Meine Daten“</b> kannst du Profil, Trainingslog und Notizen als JSON-Datei exportieren. Auf der Seite <b>„Fortschritt“</b> kannst du zusätzlich ausschließlich deine HEAVYS- und MIDDLES-Leistung als CSV-Datei herunterladen.</p>
+        <p>Tippe oben rechts auf dein Profilbild. Unter <b>„Meine Daten“</b> kannst du Profil und Trainingslog als JSON-Datei exportieren. Auf der Seite <b>„Fortschritt“</b> kannst du zusätzlich ausschließlich deine HEAVYS- und MIDDLES-Leistung als CSV-Datei herunterladen.</p>
         <p>Dort kannst du auch Account und App-Daten endgültig löschen. Zur Sicherheit musst du das Wort <b>LÖSCHEN</b> vollständig bestätigen.</p>
       </div>
     </details>
@@ -145,7 +145,6 @@ export function mountFaq(container) {
     <details class="faq"><summary>Wofür sind die Übungsnotizen?</summary>
       <div class="faq-a">
         <p>Bei <b>HEAVYS und MIDDLES</b> ist die Übungsnotiz für dauerhafte Einstellungen und Cues wie Sitzhöhe, Griff oder Fußposition. Sie wird zusammen mit der festen Übung in allen Cycles angezeigt. Bei <b>PUMPS</b> gilt die Notiz nur für den aktuellen Cycle, weil die Übung frei wechseln kann.</p>
-        <p>Das getrennte <b>Notizbuch</b> sammelt allgemeine Gedanken, Links und Bilder und bleibt bei einer neuen Phase erhalten.</p>
       </div>
     </details>
 
@@ -218,7 +217,7 @@ export function mountFaq(container) {
     <details class="faq"><summary>Was passiert beim Start einer neuen Phase?</summary>
       <div class="faq-a">
         <p>Eine neue Phase beginnt wieder bei <b>Cycle 1 · OK HEAVYS · Level II</b>. Übungen, Satzdaten, Übungsnotizen, Prioritäten, Datum und Gym/Info des abgeschlossenen Blocks werden bewusst gelöscht. Die neue Phase baut nicht auf dessen Planfeldern auf.</p>
-        <p>Erhalten bleiben dein <b>PUMPS-Übungspool</b>, deine selbst angelegten Übungen und das getrennte <b>Notizbuch</b>. Vor dem Löschen zeigt LOGMAN eine genaue Bestätigung an.</p>
+        <p>Erhalten bleiben dein <b>PUMPS-Übungspool</b> und deine selbst angelegten Übungen. Vor dem Löschen zeigt LOGMAN eine genaue Bestätigung an.</p>
       </div>
     </details>
 

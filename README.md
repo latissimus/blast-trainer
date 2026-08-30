@@ -60,7 +60,7 @@ Migrationen sind davon getrennt und muessen ueber Supabase ausgerollt werden.
 
 - `profiles`: Name, E-Mail und komprimiertes Profilbild
 - `training_logs`: ein JSON-Trainingsstand je Nutzer
-- `notizen` und privater Storage-Bucket `notizbuch`: persoenliche Notizen und Bilder
+- `notizen` und privater Storage-Bucket `notizbuch`: nur noch Altbestand der entfernten Notizbuchseite; bleibt für Export und Kontolöschung erreichbar
 - `feedback`: Kundenfeedback fuer die Bearbeitung im geschuetzten Backend
 - `push_subscriptions`, `rest_timers`, `push_versuche`: Push- und Pausentimer-Infrastruktur
 

@@ -420,7 +420,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   // Datenschutz, aber keine Handlung waehrend des Trainings.
   const dataCard = profilSektion('Meine Daten');
   dataCard.innerHTML = `
-    <p class="profile-hinweis">Exportiert Profil, Trainingslog und Notizen als JSON-Datei.</p>
+    <p class="profile-hinweis">Exportiert Profil und Trainingslog als JSON-Datei. Frühere Notizbuchdaten werden, falls vorhanden, ebenfalls mit ausgegeben.</p>
     <button class="btn btn-block" type="button" data-export>Daten exportieren</button>
     <div class="profile-daten-status" aria-live="polite"></div>`;
 
@@ -460,7 +460,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
 
   const dangerCard = profilSektion('Account löschen', false, 'gefahr');
   dangerCard.innerHTML = `
-    <p class="profile-hinweis">Entfernt Account, Trainingsdaten und Notizbuch endgültig.</p>
+    <p class="profile-hinweis">Entfernt Account und alle zugehörigen App-Daten endgültig.</p>
     <button class="btn btn-block btn-danger" type="button" data-account-weg>Account und Daten löschen</button>
     <div class="profile-daten-status" aria-live="polite"></div>`;
   const dangerStatus = dangerCard.querySelector('.profile-daten-status');

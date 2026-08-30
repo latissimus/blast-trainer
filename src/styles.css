@@ -97,7 +97,7 @@
    waehrend die Ränder im Dunkeln ruhiger als im Retro-Theme auftreten.
    ============================================================ */
 :root[data-theme="dark"]{
-  --bg:#101A2B;       /* einheitliches tiefes Navy aus dem Notizbuch */
+  --bg:#101A2B;       /* einheitliches tiefes Navy */
   --surface:#191C24;
   --surface2:#232733;
   --ink:#697486;
@@ -290,7 +290,7 @@ html.statusleiste-overlay .topbar::before{background:var(--statusbar-bg,var(--bg
 .btn-navy{background:var(--navy);color:#fff}
 .btn-block{width:100%}
 .btn:disabled{opacity:.5}
-.btn:active,.nb-chip:active,.log-tutorial-weiter:active,.som-prio-toggle:active,
+.btn:active,.log-tutorial-weiter:active,.som-prio-toggle:active,
 .som-modusseg button:active,.som-spender-wahl:active,.faq-tutorial-start:active{
   transform:translateY(1px)}
 
@@ -666,8 +666,7 @@ html.statusleiste-overlay .ctrlbar{z-index:50;background:var(--bg)}
    "TAG 3" in Versalkursive wirken laut, und beim Datum aendert sich ohnehin
    nichts. */
 /* 9.5px statt 8px und ein dunkleres Grau: Bei 8px war die Beschriftung im
-   Studio kaum zu lesen. Das Sperren faellt dabei von .06 auf .04em – sonst
-   wuerde "NOTIZBUCH" auf einem schmalen Telefon abgeschnitten. */
+   Studio kaum zu lesen. */
 .ci .lbl{font-family:var(--mono);font-size:10px;font-weight:800;color:var(--text);opacity:.72;
   text-transform:uppercase;letter-spacing:.04em;
   max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1217,17 +1216,8 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 :root[data-seite="faq"]{--bg:#FBE7A4}
 :root[data-seite="profile"]{--bg:#BFE7D2}
 :root[data-seite="nutzung"],:root[data-seite="datenschutz"],:root[data-seite="impressum"]{--bg:#BFE7D2}
-/* Hellblauer Grund, weisse Flaechen. Anders als die uebrigen Seiten setzt diese
-   auch --surface und --surface2 um: Damit werden Karte, Notizfeld UND der
-   "+ Bild"-Chip von selbst weiss, statt jede Flaeche einzeln einzufaerben.
-   (--surface2 traegt sonst einen Blaustich, den der Chip sichtbar machen wuerde.) */
-/* Kein eigenes --bg mehr: Die Seite nimmt das globale Hellblau. Frueher stand
-   hier der alte Wert #AEDCF6 und blieb nach der Farbanpassung zurueck. */
-:root[data-seite="notizbuch"]{--surface:#FFFFFF;--surface2:#FFFFFF}
-
 :root[data-theme="dark"][data-seite="meter"]{--bg:#101A2B;--surface:#191C24;--surface2:#232733}
 /* Dunkel: ein gemeinsamer Navy-Grund, die individuellen Muster bleiben bestehen. */
-:root[data-theme="dark"][data-seite="notizbuch"]{--bg:#101A2B;--surface:#1C2637;--surface2:#1C2637}
 :root[data-theme="dark"][data-seite="prog"]{--bg:#101A2B}
 :root[data-theme="dark"][data-seite="feedback"]{--bg:#101A2B}
 :root[data-theme="dark"][data-seite="faq"]{--bg:#101A2B}
@@ -1246,7 +1236,6 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 :root[data-seite="nutzung"] .seitenkopf-kicker,
 :root[data-seite="datenschutz"] .seitenkopf-kicker,
 :root[data-seite="impressum"] .seitenkopf-kicker{background:#BFE7D2;color:#141414;border-color:#141414}
-:root[data-seite="notizbuch"] .seitenkopf-kicker{background:#AEDCF6;color:#141414;border-color:#141414}
 
 /* ---------- Seitenmuster ----------
    Zwei Muster, ueber Variablen waehlbar: die bisherigen Dreiecke und die
@@ -1264,15 +1253,15 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
    abgeschnittene Muster auf kurzen Seiten als auch doppelte Deckkraft. */
 :root[data-seite="meter"] #view,:root[data-seite="feedback"] #view,
 :root[data-seite="faq"] #view,:root[data-seite="profile"] #view,
-:root[data-seite="prog"] #view,:root[data-seite="notizbuch"] #view,
+:root[data-seite="prog"] #view,
 :root[data-seite="meter"],:root[data-seite="feedback"],
 :root[data-seite="faq"],:root[data-seite="profile"],
-:root[data-seite="prog"],:root[data-seite="notizbuch"],
+:root[data-seite="prog"],
 :root[data-seite="meter"] #app,:root[data-seite="feedback"] #app,
 :root[data-seite="faq"] #app,:root[data-seite="profile"] #app,
-:root[data-seite="prog"] #app,:root[data-seite="notizbuch"] #app,
+:root[data-seite="prog"] #app,
 body[data-seite="meter"],body[data-seite="feedback"],body[data-seite="faq"],
-body[data-seite="profile"],body[data-seite="prog"],body[data-seite="notizbuch"]{
+body[data-seite="profile"],body[data-seite="prog"]{
   background-color:var(--bg);
   background-image:var(--muster-dreieck);
   background-size:auto;
@@ -1291,10 +1280,10 @@ body[data-seite="nutzung"],body[data-seite="datenschutz"],body[data-seite="impre
    bei identischen 7 % deshalb kräftiger. Eine transparente Schicht in exakt
    der Seitenfarbe senkt ihren sichtbaren Kontrast auf rund 4,5 %, ohne den
    Grundton zu verändern. */
-:root[data-seite="prog"] #view,:root[data-seite="notizbuch"] #view,
-:root[data-seite="prog"],:root[data-seite="notizbuch"],
-:root[data-seite="prog"] #app,:root[data-seite="notizbuch"] #app,
-body[data-seite="prog"],body[data-seite="notizbuch"]{
+:root[data-seite="prog"] #view,
+:root[data-seite="prog"],
+:root[data-seite="prog"] #app,
+body[data-seite="prog"]{
   background-image:
     linear-gradient(color-mix(in srgb,var(--bg) 35%,transparent),color-mix(in srgb,var(--bg) 35%,transparent)),
     var(--muster-tropfen);
@@ -1330,13 +1319,9 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 :root[data-theme="dark"] body[data-seite="impressum"]{
   background-image:var(--muster-dreieck-dunkel)}
 :root[data-theme="dark"][data-seite="prog"] #view,
-:root[data-theme="dark"][data-seite="notizbuch"] #view,
 :root[data-theme="dark"][data-seite="prog"],
-:root[data-theme="dark"][data-seite="notizbuch"],
 :root[data-theme="dark"][data-seite="prog"] #app,
-:root[data-theme="dark"][data-seite="notizbuch"] #app,
-:root[data-theme="dark"] body[data-seite="prog"],
-:root[data-theme="dark"] body[data-seite="notizbuch"]{
+:root[data-theme="dark"] body[data-seite="prog"]{
   background-image:
     linear-gradient(color-mix(in srgb,var(--bg) 35%,transparent),color-mix(in srgb,var(--bg) 35%,transparent)),
     var(--muster-tropfen-dunkel)}
@@ -1551,15 +1536,14 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .mess-datum{font-size:13px;color:#D8E0F5;margin-top:7px}
 .mess-kopf>.mess-datum:first-child{margin:0 0 6px}
 .mess-leer{font-size:14.5px;color:var(--muted)}
-.prog-leer,.nb-leer{display:flex;flex-direction:column;align-items:center;justify-content:center;
+.prog-leer{display:flex;flex-direction:column;align-items:center;justify-content:center;
   min-height:190px;padding:24px 18px;text-align:center}
-.prog-leer-icon,.nb-leer-icon{display:grid;place-items:center;width:48px;height:48px;margin-bottom:12px;
+.prog-leer-icon{display:grid;place-items:center;width:48px;height:48px;margin-bottom:12px;
   border:var(--bw) solid var(--ink);border-radius:10px;background:var(--pink);color:var(--accent-ink);
   font-family:var(--display);font-style:italic;font-size:27px;font-weight:700}
-.nb-leer-icon{font-family:var(--mono);font-style:normal;line-height:1}
-.prog-leer b,.nb-leer b{font-family:var(--display);font-style:italic;font-size:18px;
+.prog-leer b{font-family:var(--display);font-style:italic;font-size:18px;
   text-transform:uppercase}
-.prog-leer p,.nb-leer p{max-width:360px;margin:7px 0 0;color:var(--muted);
+.prog-leer p{max-width:360px;margin:7px 0 0;color:var(--muted);
   font-size:13px;line-height:1.5}
 .mess-hinweis{font-size:12.5px;color:var(--muted);line-height:1.5;margin:10px 0 0;
   border-left:var(--bw) solid var(--faint);padding-left:9px}
@@ -1582,88 +1566,13 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .kurve-leer{font-size:13px;color:var(--muted);text-align:center;padding:18px 0;line-height:1.6}
 .kurve-leer span{font-size:12px;opacity:.75}
 
-/* ---------- Notizbuch ---------- */
-/* Zweispaltiges Raster statt gestapelter Karten: Frueher trug jede Notiz das
-   volle Karten-Gewicht der App (3px Rand, Schatten, 18px Polster, 21px Titel) –
-   dieselbe Lautstaerke, mit der im Log ein ganzer Trainingsblock gerahmt wird,
-   bei einem Zehntel Inhalt. */
-/* Luft nach dem "+ Neue Notiz"-Chip: Der Chip ist eine Handlung, die Kacheln
-   sind Inhalt. Ohne Abstand lasen sich beide wie eine zusammenhaengende Gruppe. */
-/* Abstand wie auf der Kollektionsseite (dort 22.5px). */
-.nb-raster{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:22px}
-/* Hinweis, wenn der Spiegel gezeigt wird statt frischer Serverdaten. */
-.nb-offline{margin:14px 0 0;font-size:12.5px;line-height:1.5;color:var(--muted);
-  border-left:var(--bw) solid var(--ink);padding-left:9px;border-radius:0}
-.nb-kachel{position:relative;display:flex;flex-direction:column;gap:5px;text-align:left;
-  background:var(--surface);border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
-  padding:15px 10px 10px;min-height:84px;overflow:hidden}
-.nb-kachel::before{content:"";position:absolute;inset:0 0 auto;height:6px;background:var(--pink)}
-.nb-k-titel{font-family:var(--display);font-style:italic;font-weight:700;
-  font-size:15.5px;line-height:1.15;color:var(--text);overflow-wrap:anywhere}
-/* Zwei Zeilen Vorschau, dann Schluss – mehr waere Fliesstext in Briefmarken. */
-.nb-k-text{font-size:12px;line-height:1.4;color:var(--muted);
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.nb-k-bilder{font-size:11px;color:var(--faint);margin-top:auto}
-
-/* Knoepfe nach dem Vorbild der Kollektionsseite (FILTER / SORT).
-   Gemessen dort: 18px, kursiv, Versalien, Gewicht 700, Polster 13.5/18px,
-   Radius 6.75px, 2px Rand – und als FLAECHE DIE SEITENFARBE, nicht Weiss.
-   Das Letzte ist ihr eigentliches Kennzeichen: Die Knoepfe sind Umrisse auf
-   dem Grund, keine aufgesetzten Flaechen.
-   Polster seitlich 12px statt der dort gemessenen 18px: Mit 18px war die
-   Mindestbreite zweier Knoepfe groesser als die Zeile, sie stapelten sich
-   statt nebeneinander zu sitzen. */
-.nb-leiste{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.nb-leer{margin-top:18px;border:var(--bw) solid var(--ink);border-radius:var(--r-karte);
-  background:var(--surface)}
-.nb-chip{flex:1 1 105px;min-height:44px;font-family:var(--display);font-style:italic;font-weight:700;
-  font-size:16px;text-transform:uppercase;letter-spacing:.01em;
-  color:var(--text);background:var(--bg);
-  border:var(--bw) solid var(--ink);border-radius:var(--r);
-  padding:9px 10px;text-align:center;white-space:nowrap;cursor:pointer}
-.nb-chip.pink{background:var(--pink);color:var(--accent-ink)}
-
-/* Leseansicht – der einzige Ort, an dem Links anklickbar sind. */
-.nb-titel{font-size:20px;margin:0 0 8px;overflow-wrap:anywhere}
-.nb-text{margin:0;font-size:16px;line-height:1.65;overflow-wrap:anywhere}
-.nb-text a{color:var(--link);text-decoration:underline;text-underline-offset:2px}
-:root[data-theme="dark"] .nb-text a{color:var(--pink)}
-
-.nb-bilder{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.nb-bild{max-width:100%;width:120px;height:120px;object-fit:cover;
-  border:var(--bw) solid var(--ink);border-radius:10px;background:var(--surface2);display:block}
-/* Antippbare Vorschau: nur in der Leseansicht, im Formular traegt das Bild
-   stattdessen sein Entfernen-Kreuz. */
-.nb-bild.auf{cursor:zoom-in}
-.nb-lupe{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.88);
-  display:flex;align-items:center;justify-content:center;
-  padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px)}
-.nb-lupe-bild{position:relative;display:flex;align-items:center;justify-content:center;
-  max-width:100%;max-height:100%}
-.nb-lupe img{max-width:100%;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px);
-  width:auto;height:auto;object-fit:contain;
-  border:var(--bw) solid #fff;border-radius:10px;display:block}
-.nb-lupe-zu{position:absolute;top:-10px;right:-10px;display:grid;place-items:center;
-  flex:0 0 40px;width:40px;height:40px;aspect-ratio:1;padding:0;
-  border:var(--bw) solid #0A0A0A;border-radius:50%;
-  background:#fff;color:#0A0A0A;font-size:22px;font-weight:700;line-height:1}
-.nb-slot{position:relative;display:inline-block}
-.nb-bildweg{position:absolute;top:-7px;right:-7px;width:24px;height:24px;padding:0;
-  border:var(--bw) solid var(--ink);border-radius:50%;background:var(--surface);
-  font-weight:700;line-height:1;font-size:15.5px;color:var(--text)}
-
-.nb-in-titel{font-family:var(--display);font-style:italic;font-weight:700;font-size:18px}
-.nb-in-text{font-size:16px;line-height:1.6;resize:vertical}
-/* Die Dateiauswahl liegt versteckt im Label – der Chip IST das Label. */
-.nb-upload{display:block}
-
 /* ---------- Erklaertexte ----------
    Diese kurzen Hinweise lagen vorher bei 10, 12, 12.5, 13 und 14.5px, mal
    linksbuendig, mal mittig – ohne System. Jetzt EINE Groesse, EINE Farbe und
    mittig im Kasten, wie der weisse Kasten auf ihrer Bewertungsseite (dort
    18px, zentriert, Monospace, Zeilenhoehe 1.2).
    Ausgenommen bleiben Fliesstexte (FAQ-Antworten) und Randnotizen mit eigener
-   Auszeichnung (.nb-offline, .src). */
+   Auszeichnung. */
 .som-hinweis,.mess-leer,.mess-hinweis,.kurve-leer{
   font-family:var(--mono);font-size:14px;line-height:1.5;color:var(--muted);text-align:center}
 
@@ -1696,7 +1605,6 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .faq-startkarte li,
 .profile-hinweis,
 .prog-leer p,
-.nb-leer p,
 .mess-hinweis,
 .recht-karte p,
 .recht-karte li,
@@ -1719,7 +1627,6 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .faq-startkarte li b,
 .profile-hinweis b,
 .prog-leer p b,
-.nb-leer p b,
 .mess-hinweis b,
 .recht-karte p b,
 .recht-karte li b,
@@ -1797,8 +1704,8 @@ body,body *{
 .ibtn,.delrow,.ex-picker-zu,.log-tutorial-kopf button,.som-info-knopf,
 .pb-x{position:relative}
 .ibtn::after,.delrow::after,.ex-picker-zu::after,.log-tutorial-kopf button::after,
-.som-info-knopf::after,.faq-suche button::after,.nb-bildweg::after,
-.nb-lupe-zu::after,.timerfeld .x::after,.pb-x::after{
+.som-info-knopf::after,.faq-suche button::after,
+.timerfeld .x::after,.pb-x::after{
   content:"";position:absolute;left:50%;top:50%;width:max(44px,100%);
   height:max(44px,100%);transform:translate(-50%,-50%)}
 
