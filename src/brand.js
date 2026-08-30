@@ -34,7 +34,7 @@ export function brandSvg() {
   // die Kontur im Hintergrund und das pinke LOGMAN schwebt konturlos.
   return `<svg class="brand-svg" viewBox="18 19 318 85" role="img" aria-label="LOGMAN">
   <defs><path id="${id}" d="${d}" fill="none"/></defs>
-  <g font-family="'Helvetica Neue',Arial,system-ui,sans-serif" font-style="italic" font-weight="900"
+  <g font-family="'Work Sans'" font-style="italic" font-weight="900"
      font-size="54" letter-spacing="-1.62" text-anchor="middle"
      stroke="var(--brand-outline)" stroke-width="5.2" stroke-linejoin="round">
     <text transform="translate(4.2,4.2)" fill="var(--brand-outline)">${path}</text>
@@ -66,7 +66,7 @@ let aktionPfadlaenge = null;   // einmal berechnet, danach wiederverwendet
 function textVorschub(text, fontSize) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('style', 'position:absolute;left:-9999px;top:-9999px');
-  svg.innerHTML = `<text font-family="'Helvetica Neue',Arial,system-ui,sans-serif"
+  svg.innerHTML = `<text font-family="'Work Sans'"
     font-style="italic" font-weight="900" font-size="${fontSize}"
     letter-spacing="${AKTION_SPERRUNG}">${text}</text>`;
   document.body.appendChild(svg);
@@ -98,7 +98,7 @@ export function actionTitleSvg(text) {
   const path = `<textPath href="#${id}" startOffset="50%">${text}</textPath>`;
   return `<svg class="action-title-svg" viewBox="0 0 360 112" role="img" aria-label="${text}">
     <defs><path id="${id}" d="${AKTION_PFAD}" fill="none"/></defs>
-    <g font-family="'Helvetica Neue',Arial,system-ui,sans-serif" font-style="italic"
+    <g font-family="'Work Sans'" font-style="italic"
        font-weight="900" font-size="${fontSize}" letter-spacing="${spacing}" text-anchor="middle"
        stroke="var(--navy)" stroke-width="${strokeWidth}" stroke-linejoin="round">
       <text transform="translate(4,4)" fill="var(--navy)">${path}</text>
