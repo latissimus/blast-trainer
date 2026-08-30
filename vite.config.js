@@ -40,8 +40,9 @@ export default defineConfig({
         // Nur App-Dateien. Nichts davon spricht mit Supabase.
         // webp gehoert dazu: Ohne die Endung blieb das Portraet in der FAQ
         // ausserhalb des Caches – im Keller ohne Empfang zeigte die Seite
-        // dort ein kaputtes Bild.
-        globPatterns: ['**/*.{js,css,html,png,svg,webp,webmanifest}'],
+        // dort ein kaputtes Bild. woff2 und ttf halten die beiden lokal
+        // ausgelieferten App-Schriften auch beim kalten Offline-Start stabil.
+        globPatterns: ['**/*.{js,css,html,png,svg,webp,woff2,ttf,webmanifest}'],
       },
       devOptions: { enabled: true, type: 'module' },
     }),
