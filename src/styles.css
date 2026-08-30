@@ -2,10 +2,12 @@
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-Medium.woff2') format('woff2');font-style:normal;font-weight:500;font-display:swap}
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-SemiBold.woff2') format('woff2');font-style:normal;font-weight:600;font-display:swap}
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-Bold.woff2') format('woff2');font-style:normal;font-weight:700;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-ExtraBold.woff2') format('woff2');font-style:normal;font-weight:800;font-display:swap}
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-Italic.woff2') format('woff2');font-style:italic;font-weight:400;font-display:swap}
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-MediumItalic.woff2') format('woff2');font-style:italic;font-weight:500;font-display:swap}
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-SemiBoldItalic.woff2') format('woff2');font-style:italic;font-weight:600;font-display:swap}
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-BoldItalic.woff2') format('woff2');font-style:italic;font-weight:700;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-ExtraBoldItalic.woff2') format('woff2');font-style:italic;font-weight:800;font-display:swap}
 @font-face{font-family:'Work Sans';src:url('../Work_Sans/WorkSans-VariableFont_wght.ttf') format('truetype');font-style:normal;font-weight:100 900;font-display:swap}
 @font-face{font-family:'Work Sans';src:url('../Work_Sans/WorkSans-Italic-VariableFont_wght.ttf') format('truetype');font-style:italic;font-weight:100 900;font-display:swap}
 
@@ -404,7 +406,7 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
    ueber die volle Hoehe zentriert. */
 .chip{display:inline-flex;align-items:center;justify-content:center;line-height:1.2;
   font-size:12.5px;color:var(--text);background:var(--surface2);border:0;
-  padding:7px 7px;border-radius:20px;font-weight:700;white-space:nowrap}
+  padding:7px 7px;border-radius:20px;font-weight:800;white-space:nowrap}
 .chip.stretch{background:var(--pink);color:var(--accent-ink)}
 .chip.rest{background:var(--surface);border:var(--bw) solid var(--ink);
   font-family:var(--mono);font-weight:800}
@@ -572,8 +574,8 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 .sidx{font-family:var(--display);font-style:italic;font-size:14.5px;color:var(--text);width:16px;text-align:center;flex:0 0 auto;font-weight:700}
 .fld{position:relative;flex:1;min-width:0}
 .fld input{width:100%;background:var(--surface);border:var(--bw) solid var(--ink);color:var(--text);
-  font-family:var(--mono);font-size:17px;font-weight:900;
-  -webkit-text-stroke:.22px currentColor;text-align:center;padding:11px 4px;border-radius:var(--r)}
+  font-family:var(--mono);font-size:17px;font-weight:800;
+  text-align:center;padding:11px 4px;border-radius:var(--r)}
 .fld input:focus{outline:none;border-color:var(--pink)}
 .fld .u{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:9px;color:var(--faint);font-family:var(--mono);pointer-events:none}
 .times{color:var(--text);font-family:var(--display);font-style:italic;font-size:16px;flex:0 0 auto;font-weight:700}
