@@ -1,6 +1,10 @@
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-Regular.woff2') format('woff2');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-Medium.woff2') format('woff2');font-style:normal;font-weight:500;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-SemiBold.woff2') format('woff2');font-style:normal;font-weight:600;font-display:swap}
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-Bold.woff2') format('woff2');font-style:normal;font-weight:700;font-display:swap}
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-Italic.woff2') format('woff2');font-style:italic;font-weight:400;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-MediumItalic.woff2') format('woff2');font-style:italic;font-weight:500;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-SemiBoldItalic.woff2') format('woff2');font-style:italic;font-weight:600;font-display:swap}
 @font-face{font-family:'JetBrains Mono';src:url('../JetBrainsMono/fonts/webfonts/JetBrainsMono-BoldItalic.woff2') format('woff2');font-style:italic;font-weight:700;font-display:swap}
 
 /* ============================================================
@@ -148,7 +152,9 @@ html.statusleiste-overlay #app{background:var(--statusbar-bg,var(--bg))}
 html.statusleiste-overlay #view{background-color:var(--bg)}
 body{
   background:var(--bg);color:var(--text);font-family:var(--mono);
-  font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  font-size:16px;font-weight:500;line-height:1.45;
+  font-variant-numeric:slashed-zero;font-feature-settings:"zero" 1;
+  -webkit-font-smoothing:antialiased;
 }
 /* 700 statt 900: Das Vorbild setzt --heading-font-weight auf 700. Unsere
    kursiven Versalien waren spuerbar wuchtiger als dort. */
@@ -1392,7 +1398,7 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 .faq{scroll-margin-top:10px;border:var(--bw) solid var(--ink);
   border-radius:var(--r-karte);background:var(--surface);margin-bottom:10px;overflow:hidden}
 .faq>summary{list-style:none;cursor:pointer;padding:18px 46px 18px 18px;position:relative;
-  font-family:var(--mono);font-weight:400;text-transform:uppercase;font-size:16px;
+  font-family:var(--mono);font-weight:500;text-transform:uppercase;font-size:16px;
   line-height:1.35;color:var(--text)}
 .faq>summary::-webkit-details-marker{display:none}
 /* Gezeichnetes Chevron statt "+"/"–" – dasselbe Zeichen wie in den
