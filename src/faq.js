@@ -76,7 +76,7 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie exportiere oder lösche ich meine Daten?</summary>
       <div class="faq-a">
-        <p>Tippe oben rechts auf dein Profilbild. Unter <b>„Meine Daten“</b> kannst du Profil, Trainingslog und Notizen als JSON-Datei exportieren.</p>
+        <p>Tippe oben rechts auf dein Profilbild. Unter <b>„Meine Daten“</b> kannst du Profil, Trainingslog und Notizen als JSON-Datei exportieren. Auf der Seite <b>„Fortschritt“</b> kannst du zusätzlich ausschließlich deine HEAVYS- und MIDDLES-Leistung als CSV-Datei herunterladen.</p>
         <p>Dort kannst du auch Account und App-Daten endgültig löschen. Zur Sicherheit musst du das Wort <b>LÖSCHEN</b> vollständig bestätigen.</p>
       </div>
     </details>

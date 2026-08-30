@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { e1rm, bestE1, vergleichE1, heavyReihen, progressionsReihen, verlauf } from './progression.js';
+import { e1rm, bestE1, vergleichE1, heavyReihen, progressionsReihen,
+  progressionsExportZeilen, progressionsCsv, verlauf } from './progression.js';
 
 // Eine falsche Progressionskurve sieht aus wie eine richtige – und sie ist der
 // Wert, an dem man das ganze Training misst. Deshalb festgezurrt.
@@ -159,5 +160,47 @@ describe('verlauf', () => {
   });
   it('gibt null bei zu wenig Punkten', () => {
     expect(verlauf([{ week: 1, e1: 100 }])).toBeNull();
+  });
+});
+
+describe('Fortschritts-Export', () => {
+  const exportPayload = {
+    ex: {
+      'OK-H': { chest_comp: ['Bankdrücken'] },
+      'OK-P': { back_thick: ['PL Rudern'] },
+    },
+    datum: { 'OK-H|1': '2026-08-30' },
+    tier: { 'OK-H|1': 1 },
+    data: {
+      'OK-H': {
+        1: { chest_comp: { sets: [[
+          { w: '80', r: '8', rir: '1' },
+          { w: '0', r: '10', rir: '0' },
+        ]] } },
+      },
+      'OK-P': {
+        1: {
+          back_thick: { sets: [[{ w: '45,5', r: '12', rir: '2' }]] },
+          chest_iso: { names: ['Kabel Flys'], sets: [[{ w: '20', r: '18', rir: '1' }]] },
+        },
+      },
+    },
+  };
+
+  it('exportiert nur ausgefüllte HEAVYS- und MIDDLES-Sätze', () => {
+    const zeilen = progressionsExportZeilen(exportPayload);
+    expect(zeilen).toHaveLength(3);
+    expect(zeilen.map((z) => z.satzart)).toEqual(['HEAVYS', 'HEAVYS', 'MIDDLES']);
+    expect(zeilen.some((z) => z.uebung === 'Kabel Flys')).toBe(false);
+    expect(zeilen[0]).toMatchObject({ datum: '2026-08-30', level: 'II', muskel: 'Brust' });
+  });
+
+  it('behält Körpergewicht mit 0 kg und erzeugt eine Excel-taugliche CSV', () => {
+    const zeilen = progressionsExportZeilen(exportPayload);
+    expect(zeilen.some((z) => z.gewicht === 0 && z.wiederholungen === 10)).toBe(true);
+    const csv = progressionsCsv(exportPayload);
+    expect(csv.startsWith('\uFEFF"Cycle";')).toBe(true);
+    expect(csv).toContain('"45,5"');
+    expect(csv).not.toContain('Kabel Flys');
   });
 });

@@ -110,6 +110,78 @@ export const heavyReihen = (payload) => reihenFuerTypen(payload, ['load']);
 // Die Progressionsseite führt beide Double-Progression-Satzarten auf.
 export const progressionsReihen = (payload) => reihenFuerTypen(payload, ['load', 'middle']);
 
+// Datenschutzarmer Fortschritts-Export: ausschliesslich die tatsaechlich
+// geloggten HEAVYS- und MIDDLES-Saetze. Profil, Notizen, PUMPS und sonstiger
+// Oberflaechenzustand verlassen die App dabei nicht.
+export function progressionsExportZeilen(payload) {
+  const data = payload?.data || {};
+  const festeNamen = payload?.ex || {};
+  const datum = payload?.datum || {};
+  const tier = payload?.tier || {};
+  const levelNamen = ['I', 'II', 'III'];
+  const zeilen = [];
+
+  Object.keys(data).forEach((tag) => {
+    const tplTag = TPL[tag];
+    if (!tplTag || tag.endsWith('-D')) return;
+    Object.keys(data[tag] || {})
+      .map(Number)
+      .filter((cycle) => Number.isFinite(cycle) && cycle > 0 && cycle < 8)
+      .sort((a, b) => a - b)
+      .forEach((cycle) => {
+        const zelle = data[tag][String(cycle)] || data[tag][cycle] || {};
+        Object.keys(zelle).forEach((blockId) => {
+          const block = tplTag.blocks.find((b) => b.id === blockId);
+          const istPrio = blockId.startsWith('prio:');
+          const type = block?.type || (istPrio && tag.endsWith('-H') ? 'load' : null);
+          if (type !== 'load' && type !== 'middle') return;
+          const eintrag = zelle[blockId] || {};
+          const namen = eintrag.names || (festeNamen[tplTag.nameSource || tag] || {})[blockId] || [];
+          (eintrag.sets || []).forEach((saetze, xi) => {
+            const name = String(namen[xi] || '').trim();
+            if (!name) return;
+            (saetze || []).forEach((satz, satzIndex) => {
+              if (!satzGueltig(satz)) return;
+              const gewicht = parseFloat(String(satz.w).replace(',', '.'));
+              const wiederholungen = parseFloat(satz.r);
+              zeilen.push({
+                cycle,
+                datum: datum[`${tag}|${cycle}`] || '',
+                einheit: tplTag.short,
+                level: levelNamen[Number(tier[`${tag}|${cycle}`] ?? 1)] || 'II',
+                satzart: type === 'middle' ? 'MIDDLES' : 'HEAVYS',
+                muskel: block?.mus || blockId.slice('prio:'.length),
+                rolle: block?.ex?.[xi]?.r || (istPrio ? 'Comp/Iso' : ''),
+                uebung: name,
+                satz: satzIndex + 1,
+                gewicht,
+                wiederholungen,
+                rir: String(satz.rir ?? '').trim(),
+                ein_rm: Math.round(e1rm(gewicht, wiederholungen) * 10) / 10,
+              });
+            });
+          });
+        });
+      });
+  });
+
+  return zeilen.sort((a, b) => a.cycle - b.cycle || a.einheit.localeCompare(b.einheit, 'de') ||
+    a.muskel.localeCompare(b.muskel, 'de') || a.uebung.localeCompare(b.uebung, 'de') || a.satz - b.satz);
+}
+
+const csvZelle = (wert) => `"${String(wert ?? '').replace(/"/g, '""')}"`;
+
+export function progressionsCsv(payload) {
+  const kopf = ['Cycle', 'Datum', 'Einheit', 'Level', 'Satzart', 'Muskel', 'Comp/Iso',
+    'Übung', 'Satz', 'Gewicht (kg)', 'Wiederholungen', 'RIR', '1RM (kg)'];
+  const zeilen = progressionsExportZeilen(payload).map((z) => [
+    z.cycle, z.datum, z.einheit, z.level, z.satzart, z.muskel, z.rolle,
+    z.uebung, z.satz, String(z.gewicht).replace('.', ','), z.wiederholungen,
+    z.rir, String(z.ein_rm).replace('.', ','),
+  ]);
+  return '\uFEFF' + [kopf, ...zeilen].map((zeile) => zeile.map(csvZelle).join(';')).join('\r\n');
+}
+
 // Veraenderung vom ersten zum letzten Punkt, in kg und Prozent.
 export function verlauf(punkte) {
   if (!punkte || punkte.length < 2) return null;
