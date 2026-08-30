@@ -76,7 +76,8 @@ export function mountFaq(container) {
 
     <details class="faq"><summary>Wie exportiere oder lösche ich meine Daten?</summary>
       <div class="faq-a">
-        <p>Tippe oben rechts auf dein Profilbild. Unter <b>„Meine Daten“</b> kannst du Profil und Trainingslog als JSON-Datei exportieren. Auf der Seite <b>„Fortschritt“</b> kannst du zusätzlich ausschließlich deine HEAVYS- und MIDDLES-Leistung als CSV-Datei herunterladen.</p>
+        <p>Tippe oben rechts auf dein Profilbild. Unter <b>„Meine Daten“</b> kannst du zwischen zwei Exporten wählen: <b>Kompletter Export</b> lädt Profil und Trainingsstand als JSON-Datei herunter. <b>Nur Fortschritt</b> enthält ausschließlich die ausgefüllten HEAVYS- und MIDDLES-Sätze der aktuellen Trainingsphase als CSV-Datei.</p>
+        <p>Wenn du nach dem Deload eine neue Phase startest, wird der alte Trainingsstand zurückgesetzt. Der Fortschritts-Export bezieht sich danach nur noch auf die neue Phase.</p>
         <p>Dort kannst du auch Account und App-Daten endgültig löschen. Zur Sicherheit musst du das Wort <b>LÖSCHEN</b> vollständig bestätigen.</p>
       </div>
     </details>

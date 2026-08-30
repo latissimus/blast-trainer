@@ -1,7 +1,6 @@
 import { supabase } from './supabase.js';
 import { readLog } from './localstore.js';
 import { mountFortschritt } from './fortschritt.js';
-import { progressionsCsv, progressionsExportZeilen } from './progression.js';
 
 // Progression der festen HEAVYS- und MIDDLES-Übungen als eigene Seite.
 //
@@ -34,10 +33,6 @@ export async function mountProg(container, { userId }) {
       <p>Gezeigt wird das <b>geschätzte 1RM nach Epley</b> aus deinem besten Satz je Cycle. Dadurch zählen sowohl mehr Gewicht als auch mehr Wiederholungen bei gleichem Gewicht. Es ist eine Rechengröße, kein Maximalkrafttest und kein direkter Beweis für Muskelwachstum.</p>
       <p>Ausgewertet werden nur <b>HEAVYS- und MIDDLES-Sätze</b>. Bei beiden steigerst du zuerst die Wiederholungen und danach das Gewicht. PUMPS sind nicht als vergleichbarer Leistungstest gedacht.</p>
     </div>
-    <div class="prog-export">
-      <button class="btn btn-block" id="prog-export-knopf" type="button">Fortschritt exportieren</button>
-      <p class="prog-export-status" id="prog-export-status" aria-live="polite"></p>
-    </div>
     <div id="prog-inhalt"></div>`;
   container.appendChild(wrap);
 
@@ -61,26 +56,6 @@ export async function mountProg(container, { userId }) {
     }
   }
   if (payload?.v !== 4) payload = { v: 4 };
-
-  const exportKnopf = wrap.querySelector('#prog-export-knopf');
-  const exportStatus = wrap.querySelector('#prog-export-status');
-  exportKnopf.onclick = () => {
-    const anzahl = progressionsExportZeilen(payload).length;
-    if (!anzahl) {
-      exportStatus.textContent = 'Noch keine ausgefüllten HEAVYS- oder MIDDLES-Sätze vorhanden.';
-      return;
-    }
-    const blob = new Blob([progressionsCsv(payload)], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `logman-fortschritt-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-    exportStatus.textContent = `${anzahl} Sätze als CSV exportiert.`;
-  };
 
   // Ohne eigenen Kartentitel – die Seitenueberschrift sagt es bereits.
   mountFortschritt(wrap.querySelector('#prog-inhalt'), { session: null, payload, titel: '' });

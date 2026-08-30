@@ -1041,9 +1041,6 @@ html.statusleiste-overlay body::before{content:"";position:fixed;z-index:90;
 .prog-statuskopf{align-items:center}
 .prog-info-titel{flex:1;margin:0;padding:2px 4px;font-family:var(--display);font-style:italic;
   font-size:13px;font-weight:700;text-transform:uppercase;color:var(--text)}
-.prog-export{margin:0 0 12px}
-.prog-export-status{min-height:17px;margin:6px 2px 0;color:var(--muted);
-  font-family:var(--mono);font-size:12px;line-height:1.45;text-align:center}
 .som-legende{display:flex;gap:13px;margin:0 3px 9px;font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase}
 .som-legende span{display:flex;align-items:center;gap:5px}
 .som-legende i{display:inline-block;width:17px;height:7px;border-radius:999px;border:0}
@@ -1455,6 +1452,7 @@ body[data-seite="prog"]{
 :root[data-theme="dark"] .btn-danger{background:#3B211D;color:#FF9A83}
 :root[data-theme="dark"] .profile-abschnitt.gefahr>summary{color:#FF9A83}
 .profile-daten-status{min-height:17px;margin-top:8px;color:var(--muted);font-size:11.5px;text-align:center}
+.profile-export-aktionen{display:grid;gap:8px;margin-top:10px}
 .profile-recht-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .profile-recht-links .btn{display:flex;align-items:center;justify-content:center;
   min-height:42px;padding:8px;text-align:center;text-decoration:none;font-size:12px}

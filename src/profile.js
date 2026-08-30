@@ -13,6 +13,7 @@ import {
   setzeEigeneUebungAktiv,
 } from './eigene-uebungen.js';
 import { KONTEN } from './katalog.js';
+import { progressionsCsv, progressionsExportZeilen } from './progression.js';
 
 const initials = (name, email) => {
   const src = (name || email || '?').trim();
@@ -60,6 +61,18 @@ function avatarNode(profile, email) {
 
 function downloadJson(name, daten) {
   const blob = new Blob([JSON.stringify(daten, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadCsv(name, inhalt) {
+  const blob = new Blob([inhalt], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -420,12 +433,16 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   // Datenschutz, aber keine Handlung waehrend des Trainings.
   const dataCard = profilSektion('Meine Daten');
   dataCard.innerHTML = `
-    <p class="profile-hinweis">Exportiert Profil und Trainingslog als JSON-Datei. Frühere Notizbuchdaten werden, falls vorhanden, ebenfalls mit ausgegeben.</p>
-    <button class="btn btn-block" type="button" data-export>Daten exportieren</button>
+    <p class="profile-hinweis"><b>Kompletter Export:</b> Profil und gesamter aktueller Trainingsstand als JSON-Datei. Frühere Notizbuchdaten werden, falls vorhanden, ebenfalls mit ausgegeben.</p>
+    <p class="profile-hinweis"><b>Nur Fortschritt:</b> ausschließlich ausgefüllte HEAVYS- und MIDDLES-Sätze der aktuellen Trainingsphase als CSV-Datei. Nach einem Phasen-Reset beginnt dieser Export wieder leer.</p>
+    <div class="profile-export-aktionen">
+      <button class="btn btn-block" type="button" data-export-komplett>Kompletter Export</button>
+      <button class="btn btn-block" type="button" data-export-fortschritt>Nur Fortschritt</button>
+    </div>
     <div class="profile-daten-status" aria-live="polite"></div>`;
 
   const datenStatus = dataCard.querySelector('.profile-daten-status');
-  dataCard.querySelector('[data-export]').onclick = async (e) => {
+  dataCard.querySelector('[data-export-komplett]').onclick = async (e) => {
     const btn = e.currentTarget;
     btn.disabled = true;
     datenStatus.textContent = 'Export wird erstellt…';
@@ -453,6 +470,33 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
       datenStatus.textContent = 'Export heruntergeladen.';
     } catch (err) {
       datenStatus.textContent = 'Export fehlgeschlagen. Bitte Verbindung prüfen.';
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  dataCard.querySelector('[data-export-fortschritt]').onclick = async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    datenStatus.textContent = 'Fortschritt wird erstellt…';
+    try {
+      let payload = readLog(session.user.id)?.payload || null;
+      if (!payload) {
+        const { data, error } = await supabase
+          .from('training_logs').select('payload').eq('user_id', session.user.id).maybeSingle();
+        if (error) throw error;
+        payload = data?.payload || null;
+      }
+      const anzahl = progressionsExportZeilen(payload).length;
+      if (!anzahl) {
+        datenStatus.textContent = 'In dieser Trainingsphase sind noch keine ausgefüllten HEAVYS- oder MIDDLES-Sätze vorhanden.';
+        return;
+      }
+      const heute = new Date().toISOString().slice(0, 10);
+      downloadCsv(`logman-fortschritt-phase-${heute}.csv`, progressionsCsv(payload));
+      datenStatus.textContent = `${anzahl} Sätze der aktuellen Trainingsphase exportiert.`;
+    } catch (err) {
+      datenStatus.textContent = 'Fortschritts-Export fehlgeschlagen. Bitte Verbindung prüfen.';
     } finally {
       btn.disabled = false;
     }
