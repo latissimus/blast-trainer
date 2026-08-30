@@ -1678,6 +1678,56 @@ body[data-seite="prog"],body[data-seite="notizbuch"]{
 #view,.ex-picker-liste{scrollbar-width:none;-ms-overflow-style:none}
 #view::-webkit-scrollbar,.ex-picker-liste::-webkit-scrollbar{display:none;width:0;height:0}
 
+/* Lesbare Informationstexte auf den Unterseiten: Sie folgen bewusst dem
+   FAQ-Antwortstil (JetBrains Mono, ruhiger Zeilenabstand, gut lesbare Groesse).
+   Kleine Statuszeilen, Chips und Legenden bleiben von dieser Regel unberuehrt. */
+.seiten-einstieg span,
+.som-kurzhilfe,
+.som-einfach,
+.feedback-intro span,
+.faq-startkarte li,
+.profile-hinweis,
+.prog-leer p,
+.nb-leer p,
+.mess-hinweis,
+.recht-karte p,
+.recht-karte li,
+.recht-karte address{
+  font-family:var(--mono);
+  font-size:14px;
+  font-weight:500;
+  line-height:1.55;
+}
+.seiten-einstieg span,
+.feedback-intro span,
+.faq-startkarte li,
+.profile-hinweis,
+.recht-karte p,
+.recht-karte li,
+.recht-karte address{color:var(--muted)}
+.som-kurzhilfe b,
+.som-einfach b,
+.feedback-intro span b,
+.faq-startkarte li b,
+.profile-hinweis b,
+.prog-leer p b,
+.nb-leer p b,
+.mess-hinweis b,
+.recht-karte p b,
+.recht-karte li b,
+.recht-karte address b{
+  color:var(--text);
+  font-weight:800;
+}
+
+/* Durchgestrichene Null fuer jeden Textknoten im App-Bereich erzwingen.
+   Das ist auch fuer SVG-Achsen und Eingabefelder wichtig, bei denen die
+   Vererbung der OpenType-Einstellung je nach Browser sonst verloren geht. */
+body,body *{
+  font-variant-numeric:slashed-zero;
+  font-feature-settings:"zero" 1;
+}
+
 .log-kontext{display:grid;gap:3px;margin:3px 0 12px;padding:8px 10px;
   background:color-mix(in srgb,var(--surface) 58%,transparent);
   border:var(--hairline) solid color-mix(in srgb,var(--ink) 38%,transparent);
