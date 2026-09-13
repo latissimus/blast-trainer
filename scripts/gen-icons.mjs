@@ -5,7 +5,7 @@
 import { Resvg } from '@resvg/resvg-js';
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const svg = readFileSync('LOGMANAPPSYMBOL.svg', 'utf8');
+const svg = readFileSync('LOGMANNSYMBOL.svg', 'utf8');
 
 const targets = [
   ['public/icon-512.png', 512],
