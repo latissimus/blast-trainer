@@ -531,7 +531,7 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   // aussen zurueckholen; der Server sichert dabei vorher den aktuellen Stand.
   const verlaufCard = profilSektion('Frühere Trainingsstände');
   verlaufCard.innerHTML = `
-    <p class="profile-hinweis">Vor jeder Änderung sichert LOGMAN deinen bisherigen Trainingsstand für 180 Tage. Holst du einen früheren Stand zurück, wird dein aktueller vorher ebenfalls gesichert – du kannst also jederzeit wieder zurück.</p>
+    <p class="profile-hinweis">LOGMAN sichert deinen Trainingsstand automatisch: beim Eintragen höchstens alle 30 Minuten und sofort, bevor Sätze wegfallen. Jede Sicherung bleibt 180 Tage. Hier siehst du die letzten 30. Holst du einen früheren Stand zurück, wird dein aktueller vorher gesichert – du kannst also jederzeit wieder zurück.</p>
     <div class="profile-verlauf-liste"></div>
     <div class="profile-daten-status" aria-live="polite"></div>`;
   const verlaufListe = verlaufCard.querySelector('.profile-verlauf-liste');
