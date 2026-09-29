@@ -8,9 +8,11 @@
 --
 -- 1) Verlauf: Vor jeder Aenderung wird der bisherige Stand gesichert – bei
 --    Rueckgang der Satzanzahl immer, sonst hoechstens alle 30 Minuten.
--- 2) Sperre: Ein Upload, der ein Log mit Eintraegen leert oder mehr als die
---    Haelfte der Saetze verliert, wird abgelehnt – ausser die App markiert ihn
---    als bewussten Phasenreset (meta.phasenReset mit neuem Zeitstempel).
+-- 2) Sperre: Ab 6 Saetzen wird ein Upload abgelehnt, der mehr als die Haelfte
+--    verliert (Leeren eingeschlossen) – ausser die App markiert ihn als
+--    bewussten Phasenreset (meta.phasenReset mit neuerem Zeitstempel).
+--    Unter 6 Saetzen keine Sperre: Ein falsch eingetragener erster Satz muss
+--    sich loeschen lassen. Gesichert wird jeder Rueckgang trotzdem.
 --
 -- Bewusst KEIN Trigger fuer DELETE: Zeilen verschwinden nur beim Konto-
 -- Loeschen (Kaskade von auth.users). Ein Insert in den Verlauf waehrend
@@ -76,8 +78,8 @@ begin
   bewusster_reset :=
     coalesce((new.payload #>> '{meta,phasenReset}') > coalesce(old.payload #>> '{meta,phasenReset}', ''), false);
 
-  if saetze_alt > 0
-     and (saetze_neu = 0 or (saetze_alt >= 6 and saetze_neu * 2 < saetze_alt))
+  if saetze_alt >= 6
+     and saetze_neu * 2 < saetze_alt
      and not bewusster_reset then
     raise exception using
       errcode = 'P0001',
