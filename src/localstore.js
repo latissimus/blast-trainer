@@ -43,9 +43,27 @@ export const readLog = (uid) => safeGet(LOG_KEY(uid));
 export const writeLog = (uid, payload, dirty, replace = false) =>
   safeSet(LOG_KEY(uid), { payload, dirty, replace, at: Date.now() });
 
+// Die Serverversion, auf der der lokale Stand aufbaut. Der Server nimmt einen
+// Upload nur an, wenn er auf seiner aktuellen Version aufbaut; sonst muss die
+// App erst zusammenfuehren. null heisst "unbekannt" und fuehrt beim naechsten
+// Speichern zum Abgleich – nie zum blinden Ueberschreiben.
+const VERSION_KEY = (uid) => 'blast:log-version:' + uid;
+export function readServerVersion(uid) {
+  const v = safeGet(VERSION_KEY(uid));
+  return Number.isFinite(v) ? v : null;
+}
+export function writeServerVersion(uid, version) {
+  if (version == null || !Number.isFinite(Number(version))) {
+    try { localStorage.removeItem(VERSION_KEY(uid)); } catch (e) { /* bleibt unbekannt */ }
+    return;
+  }
+  safeSet(VERSION_KEY(uid), Number(version));
+}
+
 export function clearTrainingData(uid) {
   try {
     localStorage.removeItem(LOG_KEY(uid));
+    localStorage.removeItem(VERSION_KEY(uid));
     return true;
   } catch (e) {
     return false;

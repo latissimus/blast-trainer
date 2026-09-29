@@ -9,7 +9,7 @@ import {
   pumpMoeglichkeiten,
   spenderKandidaten,
 } from './prioritaet.js';
-import { synchronisiereTraining, ladeServerTraining } from './trainingssync.js';
+import { synchronisiereTraining, ladeServerTraining, serverstandUebernommen } from './trainingssync.js';
 import { strukturellGleich } from './datenvergleich.js';
 
 // Der Pfeil steht aufrecht in Monospace – wie in der unteren Bedienleiste.
@@ -99,10 +99,11 @@ export async function mountMeter(container, { userId }) {
   if (!basisBekannt && navigator.onLine) {
     try {
       const server = await ladeServerTraining(userId);
-      if (server) {
-        payload = normalisiere(server);
+      if (server?.payload) {
+        payload = normalisiere(server.payload);
         writeLog(userId, payload, false, false);
       }
+      serverstandUebernommen(userId, server?.version ?? null);
       basisBekannt = true;
     } catch (e) { /* bleibt unbekannt – render() zeigt den Hinweis */ }
   }
@@ -385,12 +386,16 @@ export async function mountMeter(container, { userId }) {
     const startRevision = revision;
     ladeServerTraining(userId)
       .then((server) => {
-        if (destroyed || revision !== startRevision || !server) return;
-        if (strukturellGleich(server, payload)) return;
+        if (destroyed || revision !== startRevision || !server?.payload) return;
+        if (strukturellGleich(server.payload, payload)) {
+          serverstandUebernommen(userId, server.version);
+          return;
+        }
         // Wie im Log: Ein leerer Serverstand ersetzt kein gefuelltes Geraet.
-        if (saetzeImPayload(server) === 0 && saetzeImPayload(payload) > 0
-            && !((server.meta?.phasenReset || '') > (payload.meta?.phasenReset || ''))) return;
-        payload = normalisiere(server);
+        if (saetzeImPayload(server.payload) === 0 && saetzeImPayload(payload) > 0
+            && !((server.payload.meta?.phasenReset || '') > (payload.meta?.phasenReset || ''))) return;
+        serverstandUebernommen(userId, server.version);
+        payload = normalisiere(server.payload);
         cycle = Math.min(8, Math.max(1, Number(payload.week) || 1));
         writeLog(userId, payload, false, false);
         render();

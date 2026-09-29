@@ -3,8 +3,8 @@ import { signOut } from './auth.js';
 import { toast } from './log.js';
 import { escapeHtml } from './html.js';
 import { getTheme, setTheme } from './theme.js';
-import { readLog, writeLog, readNotizen, clearUserData } from './localstore.js';
-import { synchronisiereTraining, ladeServerTraining } from './trainingssync.js';
+import { readLog, writeLog, readNotizen, clearUserData, saetzeImPayload } from './localstore.js';
+import { synchronisiereTraining, ladeServerTraining, serverstandUebernommen } from './trainingssync.js';
 import {
   aktualisiereEigeneZuordnung,
   benenneEigeneUebungUm,
@@ -253,7 +253,8 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   } else {
     ladeServerTraining(session.user.id)
       .then((server) => {
-        eigenesPayload = server || { v: 4, week: 1, day: 'OK-H' };
+        eigenesPayload = server?.payload || { v: 4, week: 1, day: 'OK-H' };
+        serverstandUebernommen(session.user.id, server?.version ?? null);
         eigenesPayload.eigeneUebungen = normalisiereEigeneUebungen(eigenesPayload.eigeneUebungen);
         eigeneZeichnen();
       })
@@ -523,6 +524,90 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
       btn.disabled = false;
     }
   };
+
+  // --- Frühere Trainingsstände --------------------------------------------
+  // Der Server sichert vor Aenderungen den bisherigen Stand (Tabelle
+  // training_logs_verlauf, 180 Tage). Hier laesst er sich ohne Hilfe von
+  // aussen zurueckholen; der Server sichert dabei vorher den aktuellen Stand.
+  const verlaufCard = profilSektion('Frühere Trainingsstände');
+  verlaufCard.innerHTML = `
+    <p class="profile-hinweis">Vor jeder Änderung sichert LOGMAN deinen bisherigen Trainingsstand für 180 Tage. Holst du einen früheren Stand zurück, wird dein aktueller vorher ebenfalls gesichert – du kannst also jederzeit wieder zurück.</p>
+    <div class="profile-verlauf-liste"></div>
+    <div class="profile-daten-status" aria-live="polite"></div>`;
+  const verlaufListe = verlaufCard.querySelector('.profile-verlauf-liste');
+  const verlaufStatus = verlaufCard.querySelector('.profile-daten-status');
+  const VERLAUF_ANLASS = {
+    takt: 'Zwischenstand',
+    rueckgang: 'vor dem Entfernen von Sätzen',
+    vor_wiederherstellung: 'vor einem Zurückholen',
+  };
+  const verlaufZeit = (iso) => new Date(iso).toLocaleString('de-DE', {
+    weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+  });
+  const saetzeText = (n) => `${n} ${n === 1 ? 'Satz' : 'Sätze'}`;
+
+  async function verlaufLaden() {
+    verlaufListe.innerHTML = '<p class="profile-hinweis">lädt…</p>';
+    const { data, error } = await supabase.from('training_logs_verlauf')
+      .select('id, gesichert_am, saetze, anlass')
+      .eq('user_id', session.user.id)
+      .order('gesichert_am', { ascending: false })
+      .limit(30);
+    if (error) {
+      verlaufListe.innerHTML = '<p class="profile-hinweis">Frühere Stände konnten nicht geladen werden. Bitte Verbindung prüfen.</p>';
+      return;
+    }
+    if (!data.length) {
+      verlaufListe.innerHTML = '<p class="profile-hinweis">Noch keine früheren Stände gesichert.</p>';
+      return;
+    }
+    const aktuell = saetzeImPayload(readLog(session.user.id)?.payload);
+    verlaufListe.innerHTML = `<p class="profile-hinweis">Aktuell auf diesem Gerät: <b>${saetzeText(aktuell)}</b></p>`;
+    data.forEach((eintrag) => {
+      const zeile = document.createElement('div');
+      zeile.className = 'profile-verlauf-zeile';
+      const text = document.createElement('span');
+      text.innerHTML = `<b>${escapeHtml(verlaufZeit(eintrag.gesichert_am))}</b> · ${saetzeText(eintrag.saetze)}`
+        + `<small>${escapeHtml(VERLAUF_ANLASS[eintrag.anlass] || '')}</small>`;
+      const knopf = document.createElement('button');
+      knopf.type = 'button';
+      knopf.className = 'btn';
+      knopf.textContent = 'Zurückholen';
+      knopf.onclick = () => verlaufZurueckholen(eintrag, knopf);
+      zeile.append(text, knopf);
+      verlaufListe.appendChild(zeile);
+    });
+  }
+
+  async function verlaufZurueckholen(eintrag, knopf) {
+    // Noch nicht hochgeladene Eingaben wuerden nach dem Zurueckholen mit dem
+    // alten Stand zusammengefuehrt und ihn teilweise wieder ueberschreiben.
+    if (readLog(session.user.id)?.dirty) {
+      verlaufStatus.textContent = 'Auf diesem Gerät gibt es noch nicht gespeicherte Eingaben. Öffne einmal das Log mit Internetverbindung, bis oben der ✓ erscheint – dann kannst du zurückholen.';
+      return;
+    }
+    if (!confirm(`Trainingsstand vom ${verlaufZeit(eintrag.gesichert_am)} (${saetzeText(eintrag.saetze)}) zurückholen?\n\nDein aktueller Stand wird vorher gesichert.`)) return;
+    knopf.disabled = true;
+    verlaufStatus.textContent = 'Wird zurückgeholt…';
+    const { data, error } = await supabase.rpc('training_log_wiederherstellen', { p_verlauf_id: eintrag.id });
+    if (error || data?.status !== 'ok') {
+      verlaufStatus.textContent = 'Zurückholen fehlgeschlagen. Bitte Verbindung prüfen und erneut versuchen.';
+      knopf.disabled = false;
+      return;
+    }
+    writeLog(session.user.id, data.payload, false, false);
+    serverstandUebernommen(session.user.id, data.version);
+    if (eigenesPayload) {
+      eigenesPayload = data.payload;
+      eigenesPayload.eigeneUebungen = normalisiereEigeneUebungen(eigenesPayload.eigeneUebungen);
+      eigeneZeichnen();
+    }
+    verlaufStatus.textContent = `Stand vom ${verlaufZeit(eintrag.gesichert_am)} zurückgeholt.`;
+    await verlaufLaden();
+  }
+  verlaufCard.parentElement.addEventListener('toggle', (e) => {
+    if (e.currentTarget.open) verlaufLaden();
+  });
 
   const dangerCard = profilSektion('Account löschen', false, 'gefahr');
   dangerCard.innerHTML = `

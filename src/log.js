@@ -15,7 +15,7 @@ import { prioritaetsAnpassungen, sortiereBloeckeNachPrioritaet, slotKey } from '
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
-import { synchronisiereTraining, ladeServerTraining, TRAININGSSTAND_EREIGNIS } from './trainingssync.js';
+import { synchronisiereTraining, ladeServerTraining, serverstandUebernommen, TRAININGSSTAND_EREIGNIS } from './trainingssync.js';
 import { escapeHtml } from './html.js';
 import { strukturellGleich } from './datenvergleich.js';
 import { vergleichE1 } from './progression.js';
@@ -57,7 +57,12 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // Der Serverabgleich laeuft danach im Hintergrund. Nur beim allerersten
   // Oeffnen auf einem Geraet muessen wir auf den Server warten.
   const local = readLog(userId);
-  const serverLaden = async () => (await ladeServerTraining(userId)) || {};
+  let serverVersion = null;
+  const serverLaden = async () => {
+    const server = await ladeServerTraining(userId);
+    serverVersion = server?.version ?? null;
+    return server?.payload || {};
+  };
   const serverPromise = navigator.onLine ? serverLaden() : null;
   let server = null;
   let serverSchonVerarbeitet = false;
@@ -1592,6 +1597,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
 
   async function serverAbgleichen(serverPayload) {
     if (destroyed) return;
+    // Ab hier baut jeder weitere Upload auf genau dieser Serverversion auf –
+    // ob der Serverstand uebernommen, eingemischt oder bewusst ersetzt wird.
+    if (!readOnly) serverstandUebernommen(userId, serverVersion);
     const serverAltschema = hatInhalt(serverPayload) && serverPayload.v !== 4;
     const lokalJetzt = readLog(userId);
     const lokalerStand = payloadOut();

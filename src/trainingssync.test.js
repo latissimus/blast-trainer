@@ -177,3 +177,75 @@ describe('Schutzfehler des Servers', () => {
     expect(istSchutzFehler(null)).toBe(false);
   });
 });
+
+describe('Speichern mit Versionspruefung', () => {
+  const zusammenfuehren = (server, lokal) => ({ ...server, ...lokal, zusammen: true });
+
+  it('speichert direkt, wenn die Basis aktuell ist', async () => {
+    const { speichereVersioniert } = await import('./trainingssync.js');
+    const speichern = vi.fn().mockResolvedValue({ data: { status: 'ok', version: 8 }, error: null });
+    const ergebnis = await speichereVersioniert({
+      payload: { week: 2 }, basis: 7, speichern, ladeServer: vi.fn(), zusammenfuehren,
+    });
+    expect(speichern).toHaveBeenCalledWith({ week: 2 }, 7);
+    expect(ergebnis).toMatchObject({ error: null, version: 8, zusammengefuehrt: false });
+  });
+
+  it('fuehrt bei einem Konflikt mit dem Serverstand zusammen und sendet auf dessen Version', async () => {
+    const { speichereVersioniert } = await import('./trainingssync.js');
+    const speichern = vi.fn()
+      .mockResolvedValueOnce({ data: { status: 'konflikt', version: 9, payload: { vomServer: 1 } }, error: null })
+      .mockResolvedValueOnce({ data: { status: 'ok', version: 10 }, error: null });
+    const ergebnis = await speichereVersioniert({
+      payload: { week: 2 }, basis: 7, speichern, ladeServer: vi.fn(), zusammenfuehren,
+    });
+    expect(speichern.mock.calls[1]).toEqual([{ vomServer: 1, week: 2, zusammen: true }, 9]);
+    expect(ergebnis).toMatchObject({ error: null, version: 10, basis: 9, zusammengefuehrt: true });
+  });
+
+  it('holt bei einer Ablehnung durch den Schutz den Serverstand und fuehrt zusammen', async () => {
+    const { speichereVersioniert } = await import('./trainingssync.js');
+    const speichern = vi.fn()
+      .mockResolvedValueOnce({ data: null, error: { message: 'LOGMAN_SCHUTZ: Upload wuerde eingetragene Saetze entfernen' } })
+      .mockResolvedValueOnce({ data: { status: 'ok', version: 5 }, error: null });
+    const ladeServer = vi.fn().mockResolvedValue({ payload: { saetze: 60 }, version: 4 });
+    const ergebnis = await speichereVersioniert({
+      payload: { leer: true }, basis: 4, speichern, ladeServer, zusammenfuehren,
+    });
+    expect(ladeServer).toHaveBeenCalledTimes(1);
+    expect(speichern.mock.calls[1][0]).toMatchObject({ saetze: 60, leer: true });
+    expect(ergebnis).toMatchObject({ error: null, version: 5, zusammengefuehrt: true });
+  });
+
+  it('gibt einen Netzfehler unveraendert zurueck, ohne zusammenzufuehren', async () => {
+    const { speichereVersioniert } = await import('./trainingssync.js');
+    const netz = new Error('Failed to fetch');
+    const ergebnis = await speichereVersioniert({
+      payload: { week: 1 }, basis: 3,
+      speichern: vi.fn().mockResolvedValue({ data: null, error: netz }),
+      ladeServer: vi.fn(), zusammenfuehren,
+    });
+    expect(ergebnis).toMatchObject({ error: netz, zusammengefuehrt: false });
+  });
+
+  it('bricht nach wiederholten Konflikten mit Fehler ab, behaelt aber den zusammengefuehrten Stand', async () => {
+    const { speichereVersioniert } = await import('./trainingssync.js');
+    const speichern = vi.fn().mockResolvedValue({ data: { status: 'konflikt', version: 2, payload: { s: 1 } }, error: null });
+    const ergebnis = await speichereVersioniert({
+      payload: { week: 1 }, basis: 1, speichern, ladeServer: vi.fn(), zusammenfuehren, maxVersuche: 3,
+    });
+    expect(speichern).toHaveBeenCalledTimes(3);
+    expect(ergebnis.error).toBeInstanceOf(Error);
+    expect(ergebnis).toMatchObject({ zusammengefuehrt: true, basis: 2 });
+  });
+
+  it('gibt der Warteschlange den beim Einreihen gueltigen Kontext mit', async () => {
+    let epoche = 1;
+    const upload = vi.fn().mockResolvedValue(null);
+    const queue = createLatestTrainingQueue({ upload, markClean: vi.fn(), holeKontext: () => epoche });
+    const gespeichert = queue.enqueue({ v: 4 });
+    epoche = 2;
+    await gespeichert;
+    expect(upload.mock.calls[0][2]).toBe(1);
+  });
+});
