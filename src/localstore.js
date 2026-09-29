@@ -91,6 +91,18 @@ const blockHasData = (b) =>
 
 const pickBlock = (srv, loc) => (blockHasData(loc) ? loc : (srv || loc));
 
+// Zaehlt Saetze mit Gewicht oder Wiederholungen – dieselbe Groesse, an der der
+// Server-Trigger training_logs_schutz einen gefaehrlichen Upload erkennt.
+export function saetzeImPayload(payload) {
+  let n = 0;
+  Object.values(payload?.data || {}).forEach((tag) =>
+    Object.values(tag || {}).forEach((woche) =>
+      Object.values(woche || {}).forEach((block) =>
+        ((block && block.sets) || []).forEach((reihe) =>
+          (reihe || []).forEach((s) => { if (s && (s.w || s.r)) n++; })))));
+  return n;
+}
+
 // Flache Namens-/Notiz-Speicher: Tag -> BlockId -> Array. Gleiche Logik.
 const listHasData = (a) => (a || []).some((n) => n && String(n).trim());
 const pickList = (srv, loc) => (listHasData(loc) ? loc : (srv || loc));

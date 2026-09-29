@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js';
-import { readLog, writeLog } from './localstore.js';
+import { readLog, writeLog, saetzeImPayload } from './localstore.js';
 import { zaehleCycle, sortiert, zeigName } from './setometer.js';
 import { KONTEN } from './katalog.js';
 import {
@@ -9,7 +9,7 @@ import {
   pumpMoeglichkeiten,
   spenderKandidaten,
 } from './prioritaet.js';
-import { synchronisiereTraining } from './trainingssync.js';
+import { synchronisiereTraining, ladeServerTraining } from './trainingssync.js';
 import { strukturellGleich } from './datenvergleich.js';
 
 // Der Pfeil steht aufrecht in Monospace – wie in der unteren Bedienleiste.
@@ -90,6 +90,22 @@ export async function mountMeter(container, { userId }) {
   // Aktualisierung; so bleibt das Meter offline und ohne leere Wartephase
   // nutzbar.
   let payload = normalisiere(lokal?.payload || {});
+
+  // Das Meter speichert Prioritaeten als Teil des GANZEN Logs. Ohne lokalen
+  // Spiegel kennt dieses Geraet den Trainingsstand aber noch nicht – ein hier
+  // angenommener Leerstand wuerde beim ersten Speichern alle Saetze ersetzen.
+  // Deshalb in diesem Fall zuerst den Server laden; ohne ihn keine Aenderung.
+  let basisBekannt = !!lokal?.payload;
+  if (!basisBekannt && navigator.onLine) {
+    try {
+      const server = await ladeServerTraining(userId);
+      if (server) {
+        payload = normalisiere(server);
+        writeLog(userId, payload, false, false);
+      }
+      basisBekannt = true;
+    } catch (e) { /* bleibt unbekannt – render() zeigt den Hinweis */ }
+  }
 
   let cycle = Math.min(8, Math.max(1, Number(payload.week) || 1));
   const lage = wrap.querySelector('#som-lage');
@@ -210,6 +226,11 @@ export async function mountMeter(container, { userId }) {
   }
 
   function render() {
+    if (!basisBekannt) {
+      lage.innerHTML = '';
+      body.innerHTML = '<p class="som-hinweis">Dein Trainingsstand ist auf diesem Gerät noch nicht geladen. Öffne das Set-O-Meter einmal mit Internetverbindung – vorher lassen sich hier keine Prioritäten ändern, damit nichts überschrieben wird.</p>';
+      return;
+    }
     const werte = zaehleCycle(payload, cycle);
     const { konten, ohneZuordnung, unbekannte, gesamt, prioritaet } = werte;
     const prios = prioritaetenVon(payload);
@@ -327,9 +348,15 @@ export async function mountMeter(container, { userId }) {
     const vorherTop = scrollAusgleich
       ? body.querySelector('.som-muskel.offen')?.getBoundingClientRect().top
       : null;
+    if (!basisBekannt) return;
     const rev = ++revision;
     const lokalJetzt = readLog(userId);
-    writeLog(userId, payload, true, !!lokalJetzt?.replace);
+    // Nur die Prioritaeten gehoeren dem Meter. Alles andere kommt aus dem
+    // aktuellsten lokalen Stand, nicht aus dem Schnappschuss beim Oeffnen.
+    const stand = lokalJetzt?.payload
+      ? { ...lokalJetzt.payload, volumen: payload.volumen, v: 4 }
+      : payload;
+    writeLog(userId, stand, true, !!lokalJetzt?.replace);
     speicher.textContent = 'Auf diesem Gerät gespeichert · synchronisiert…';
     render();
     // Wird die offene Box durch ihre neue Prioritaet an den Listenanfang
@@ -340,7 +367,7 @@ export async function mountMeter(container, { userId }) {
       const delta = nachher.getBoundingClientRect().top - vorherTop;
       if (Math.abs(delta) > 1) document.getElementById('view')?.scrollBy({ top: delta, behavior: 'smooth' });
     });
-    await synchronisiereTraining(userId, payload, (status) => {
+    await synchronisiereTraining(userId, stand, (status) => {
       if (rev !== revision) return;
       if (status === 'saving') speicher.textContent = 'Auf diesem Gerät gespeichert · synchronisiert…';
       if (status === 'saved') speicher.textContent = 'Gespeichert';
@@ -354,14 +381,16 @@ export async function mountMeter(container, { userId }) {
   // Einen sauberen lokalen Stand im Hintergrund aktualisieren. Beginnt der
   // Nutzer vorher mit einer Änderung, darf eine langsamere Serverantwort diese
   // lokale Eingabe nicht mehr überschreiben.
-  if (!lokal?.dirty && navigator.onLine) {
+  if (lokal?.payload && !lokal.dirty && navigator.onLine) {
     const startRevision = revision;
-    supabase
-      .from('training_logs').select('payload').eq('user_id', userId).maybeSingle()
-      .then(({ data, error }) => {
-        if (error || destroyed || revision !== startRevision || !data?.payload) return;
-        if (strukturellGleich(data.payload, payload)) return;
-        payload = normalisiere(data.payload);
+    ladeServerTraining(userId)
+      .then((server) => {
+        if (destroyed || revision !== startRevision || !server) return;
+        if (strukturellGleich(server, payload)) return;
+        // Wie im Log: Ein leerer Serverstand ersetzt kein gefuelltes Geraet.
+        if (saetzeImPayload(server) === 0 && saetzeImPayload(payload) > 0
+            && !((server.meta?.phasenReset || '') > (payload.meta?.phasenReset || ''))) return;
+        payload = normalisiere(server);
         cycle = Math.min(8, Math.max(1, Number(payload.week) || 1));
         writeLog(userId, payload, false, false);
         render();

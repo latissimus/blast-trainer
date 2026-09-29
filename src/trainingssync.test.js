@@ -144,4 +144,36 @@ describe('Trainings-Synchronisation', () => {
     expect(upload.mock.calls[0][0].data.wert).toBe('alt');
     expect(markClean.mock.calls[0][0].data.wert).toBe('alt');
   });
+
+  it('markiert nach einem Zusammenfuehren den tatsaechlich gesendeten Stand als sauber', async () => {
+    const vereinigt = { v: 4, week: 2, data: { vom: 'server+lokal' } };
+    const upload = vi.fn().mockResolvedValue({ error: null, gesendet: vereinigt });
+    const markClean = vi.fn();
+    const queue = createLatestTrainingQueue({ upload, markClean });
+
+    const result = await queue.enqueue({ v: 4, week: 1, data: {} });
+
+    expect(result.status).toBe('saved');
+    expect(markClean).toHaveBeenCalledWith(vereinigt);
+  });
+
+  it('markiert nichts als sauber, wenn auch der zusammengefuehrte Upload scheitert', async () => {
+    const upload = vi.fn().mockResolvedValue({ error: new Error('weg'), gesendet: { v: 4 } });
+    const markClean = vi.fn();
+    const queue = createLatestTrainingQueue({ upload, markClean });
+
+    const result = await queue.enqueue({ v: 4, week: 1 });
+
+    expect(result.status).toBe('error');
+    expect(markClean).not.toHaveBeenCalled();
+  });
+});
+
+describe('Schutzfehler des Servers', () => {
+  it('erkennt die Ablehnung des Schutz-Triggers an der Meldung', async () => {
+    const { istSchutzFehler } = await import('./trainingssync.js');
+    expect(istSchutzFehler({ message: 'LOGMAN_SCHUTZ: Upload wuerde eingetragene Saetze entfernen' })).toBe(true);
+    expect(istSchutzFehler({ message: 'new row violates row-level security policy' })).toBe(false);
+    expect(istSchutzFehler(null)).toBe(false);
+  });
 });

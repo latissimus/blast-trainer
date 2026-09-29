@@ -1,5 +1,5 @@
 import { supabase } from './supabase.js';
-import { readLog, writeLog, mergePayload } from './localstore.js';
+import { readLog, writeLog, mergePayload, saetzeImPayload } from './localstore.js';
 import { TPL, TIER_NAMES, CYCLE_TAGE, DELOAD_TAGE } from './template.js';
 import { targetSets, effTypeOf, exOf, setsForExercise, extraSets } from './saetze.js';
 import { memKey, harvestMem, recentNames as poolNames } from './pool.js';
@@ -15,7 +15,7 @@ import { prioritaetsAnpassungen, sortiereBloeckeNachPrioritaet, slotKey } from '
 import { startePause } from './pause.js';
 import { actionTitleSvg } from './brand.js';
 import { setStatusleistenOverlay } from './theme.js';
-import { synchronisiereTraining } from './trainingssync.js';
+import { synchronisiereTraining, ladeServerTraining, TRAININGSSTAND_EREIGNIS } from './trainingssync.js';
 import { escapeHtml } from './html.js';
 import { strukturellGleich } from './datenvergleich.js';
 import { vergleichE1 } from './progression.js';
@@ -57,15 +57,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // Der Serverabgleich laeuft danach im Hintergrund. Nur beim allerersten
   // Oeffnen auf einem Geraet muessen wir auf den Server warten.
   const local = readLog(userId);
-  const serverLaden = async () => {
-    const { data, error } = await supabase
-      .from('training_logs')
-      .select('payload')
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (error) throw error;
-    return data?.payload || {};
-  };
+  const serverLaden = async () => (await ladeServerTraining(userId)) || {};
   const serverPromise = navigator.onLine ? serverLaden() : null;
   let server = null;
   let serverSchonVerarbeitet = false;
@@ -1527,6 +1519,9 @@ export async function mountLog(container, { userId, readOnly = false }) {
     state.data = {}; state.ex = {}; state.notes = {}; state.tier = {}; state.datum = {};
     state.volumen = { prioritaet: {} };
     state.week = 1; state.day = 'OK-H';
+    // Ausweis fuer den Server: Nur ein neuerer Zeitstempel erlaubt es, ein Log
+    // mit Eintraegen zu leeren. Ohne ihn lehnt der Schutz-Trigger den Upload ab.
+    state.meta = { ...state.meta, phasenReset: new Date().toISOString() };
     ['OK-H', 'UK-H', 'OK-P', 'UK-P'].forEach((day) =>
       localStorage.removeItem(`blast:log-kontext:${userId}:${day}`));
     // Entfernt auch einen Eintrag aus der kurzen Übergangsphase, in der das
@@ -1633,6 +1628,23 @@ export async function mountLog(container, { userId, readOnly = false }) {
       return;
     }
 
+    // Ein LEERER Serverstand ersetzt nie ein Geraet mit eingetragenen Saetzen.
+    // Genau so ist am 29.09.2026 ein volles Log verloren gegangen: Die Anfrage
+    // lief ohne Anmeldung, der Server lieferte "keine Zeile", die App uebernahm
+    // das als Wahrheit und lud den Leerstand danach hoch. Einzige Ausnahme ist
+    // ein neuerer bewusster Phasenreset von einem anderen Geraet.
+    const serverResetNeuer =
+      (serverPayload?.meta?.phasenReset || '') > (lokalerStand.meta?.phasenReset || '');
+    if (saetzeImPayload(serverPayload) === 0 && saetzeImPayload(lokalerStand) > 0 && !serverResetNeuer) {
+      if (!readOnly) {
+        lokaleAenderungenSeitMount = true;
+        writeLog(userId, lokalerStand, true, false);
+        setStatus(navigator.onLine ? 'pending' : 'offline');
+        if (navigator.onLine) await persist();
+      }
+      return;
+    }
+
     // Ohne lokale Aenderung ist der Server der aktuelle gemeinsame Stand. Nur
     // wenn er wirklich abweicht, wird die bereits sichtbare Seite neu gezeichnet.
     if (!strukturellGleich(serverPayload, lokalerStand)) {
@@ -1690,12 +1702,27 @@ export async function mountLog(container, { userId, readOnly = false }) {
   // Sync-Punkt in der Kopfleiste. Ein Knopf, der nur das ausloest, was ohnehin
   // laeuft, verspricht eine Notwendigkeit, die es nicht gibt.
 
+  // Hat der Server einen Upload abgelehnt, weil er mehr Saetze kennt, fuehrt
+  // die Synchronisation beide Staende zusammen und legt das Ergebnis lokal ab.
+  // Die sichtbare Seite muss diesen Stand uebernehmen – sonst schickt die
+  // naechste Eingabe wieder den alten, lueckenhaften Stand.
+  const beiNeuemTrainingsstand = (e) => {
+    if (destroyed || e.detail?.userId !== userId) return;
+    const lokalJetzt = readLog(userId);
+    if (!lokalJetzt?.payload || strukturellGleich(lokalJetzt.payload, payloadOut())) return;
+    uebernehmePayload(lokalJetzt.payload);
+    migriereMiddleNamen();
+    renderAll();
+  };
+  if (!readOnly) window.addEventListener(TRAININGSSTAND_EREIGNIS, beiNeuemTrainingsstand);
+
   return {
     destroy() {
       destroyed = true;
       clearTimeout(saveTimer);
       clearInterval(retryId);
       window.removeEventListener('online', retrySync);
+      window.removeEventListener(TRAININGSSTAND_EREIGNIS, beiNeuemTrainingsstand);
       // Die App-Huelle blendet die Felder auf Unterseiten aus; stilllegen wir
       // sie trotzdem, damit kein verdecktes natives Element reagieren kann.
       const slots = document.querySelector('#app-slots');

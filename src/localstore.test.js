@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mergePayload } from './localstore.js';
+import { mergePayload, saetzeImPayload } from './localstore.js';
 
 // Der Abgleich ist die einzige Stelle im Projekt, deren Fehler still bleiben:
 // Es gibt keine Fehlermeldung, kein ⚠ – es fehlen einfach Saetze. Deshalb liegen
@@ -177,5 +177,24 @@ describe('mergePayload – Vollstaendigkeit', () => {
       { meta: { einstiegErledigt: true } },
     );
     expect(m.meta).toEqual({ einstiegErledigt: true, serverHinweis: true });
+  });
+});
+
+describe('Satzzaehlung fuer den Schutz vor Leerstaenden', () => {
+  it('zaehlt nur Saetze mit Gewicht oder Wiederholungen', () => {
+    const payload = { data: { 'OK-H': { 1: {
+      chest_comp: { sets: [[{ w: '80', r: '8', rir: '1' }, { w: '', r: '', rir: '' }]] },
+      back_wide: { sets: [[{ w: '', r: '12', rir: '' }]] },
+    } } } };
+    expect(saetzeImPayload(payload)).toBe(2);
+  });
+
+  it('wertet das leere Geruest vom 29.09. als null Saetze', () => {
+    const geruest = { v: 4, week: 2, data: { 'UK-H': { 2: {
+      legs_comp: { sets: [[{ r: '', w: '', rir: '' }, { r: '', w: '', rir: '' }]] },
+    } } } };
+    expect(saetzeImPayload(geruest)).toBe(0);
+    expect(saetzeImPayload({})).toBe(0);
+    expect(saetzeImPayload(null)).toBe(0);
   });
 });

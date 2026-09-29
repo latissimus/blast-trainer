@@ -4,7 +4,7 @@ import { toast } from './log.js';
 import { escapeHtml } from './html.js';
 import { getTheme, setTheme } from './theme.js';
 import { readLog, writeLog, readNotizen, clearUserData } from './localstore.js';
-import { synchronisiereTraining } from './trainingssync.js';
+import { synchronisiereTraining, ladeServerTraining } from './trainingssync.js';
 import {
   aktualisiereEigeneZuordnung,
   benenneEigeneUebungUm,
@@ -241,11 +241,27 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
   eigeneStatus.setAttribute('aria-live', 'polite');
   eigeneCard.append(eigeneHinweis, eigeneListe, eigeneStatus);
 
+  // Eigene Uebungen werden als Teil des GANZEN Trainingslogs gespeichert
+  // (Umbenennen schreibt den Namen sogar in alle Saetze). Ohne lokalen Spiegel
+  // darf hier deshalb kein Leerstand angenommen werden – der wuerde beim ersten
+  // Speichern alle Eintraege ersetzen. Stattdessen erst den Server laden.
   let eigenerStand = readLog(session.user.id);
-  let eigenesPayload = eigenerStand?.payload || { v: 4, week: 1, day: 'OK-H' };
-  eigenesPayload.eigeneUebungen = normalisiereEigeneUebungen(eigenesPayload.eigeneUebungen);
+  let eigenesPayload = eigenerStand?.payload || null;
+  let eigenesLadeproblem = false;
+  if (eigenesPayload) {
+    eigenesPayload.eigeneUebungen = normalisiereEigeneUebungen(eigenesPayload.eigeneUebungen);
+  } else {
+    ladeServerTraining(session.user.id)
+      .then((server) => {
+        eigenesPayload = server || { v: 4, week: 1, day: 'OK-H' };
+        eigenesPayload.eigeneUebungen = normalisiereEigeneUebungen(eigenesPayload.eigeneUebungen);
+        eigeneZeichnen();
+      })
+      .catch(() => { eigenesLadeproblem = true; eigeneZeichnen(); });
+  }
 
   const eigeneSpeichern = async () => {
+    if (!eigenesPayload) return;
     eigenerStand = readLog(session.user.id);
     writeLog(session.user.id, eigenesPayload, true, !!eigenerStand?.replace);
     eigeneStatus.textContent = 'Auf diesem Gerät gespeichert · synchronisiert…';
@@ -257,6 +273,12 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
 
   const eigeneZeichnen = () => {
     eigeneListe.innerHTML = '';
+    if (!eigenesPayload) {
+      eigeneListe.innerHTML = eigenesLadeproblem
+        ? '<p class="profile-eigene-leer">Dein Trainingsstand konnte nicht geladen werden. Öffne das Profil einmal mit Internetverbindung, um eigene Übungen zu bearbeiten.</p>'
+        : '<p class="profile-eigene-leer">lädt…</p>';
+      return;
+    }
     const alle = normalisiereEigeneUebungen(eigenesPayload.eigeneUebungen)
       .filter((eintrag) => !eintrag.geloescht);
     if (!alle.length) {

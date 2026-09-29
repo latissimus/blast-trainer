@@ -1,5 +1,31 @@
 import { supabase } from './supabase.js';
-import { readLog, writeLog } from './localstore.js';
+import { readLog, writeLog, mergePayload } from './localstore.js';
+
+// Der Server lehnt Uploads ab, die ein Log mit Eintraegen leeren oder mehr als
+// die Haelfte der Saetze verlieren wuerden (Trigger training_logs_schutz).
+export const istSchutzFehler = (error) =>
+  String(error?.message || '').startsWith('LOGMAN_SCHUTZ');
+
+export const TRAININGSSTAND_EREIGNIS = 'logman:trainingsstand';
+
+// Serverstand nur mit echter Anmeldung lesen. Beim Start nutzt die App die
+// lokal gespeicherte Sitzung sofort, waehrend Supabase sie im Hintergrund
+// erneuert. In diesem Fenster gingen Anfragen anonym raus; die Datenbank
+// blendete die Zeile per RLS aus und antwortete "keine Zeile" – und die App
+// hielt ein volles Log fuer leer (Datenverlust am 29.09.2026). getSession()
+// wartet die Erneuerung ab; stimmt der Nutzer danach nicht, gilt der
+// Serverstand als unbekannt, nicht als leer.
+export async function ladeServerTraining(userId) {
+  const { data: auth } = await supabase.auth.getSession();
+  if (auth?.session?.user?.id !== userId) {
+    throw Object.assign(new Error('Keine gültige Anmeldung – Trainingsstand vom Server nicht geprüft.'),
+      { name: 'KeineSitzung' });
+  }
+  const { data, error } = await supabase
+    .from('training_logs').select('payload').eq('user_id', userId).maybeSingle();
+  if (error) throw error;
+  return data?.payload || null;
+}
 
 // Server-Synchronisation fuer das Trainingslog.
 //
@@ -50,8 +76,15 @@ export function createLatestTrainingQueue({
         } catch (error) {
           uploadVersuch = Promise.reject(error);
         }
+        // Ein Upload darf statt des Fehlers auch { error, gesendet } liefern,
+        // wenn er einen anderen Stand als den eingereihten hochgeladen hat
+        // (nach dem Zusammenfuehren mit dem Server). Dann wird genau dieser
+        // Stand als sauber markiert, nicht der urspruengliche.
         const uploadResultat = Promise.resolve(uploadVersuch)
-          .then((error) => ({ error }), (error) => ({ error }));
+          .then(
+            (ergebnis) => (ergebnis && 'gesendet' in ergebnis ? ergebnis : { error: ergebnis }),
+            (error) => ({ error }),
+          );
         const zeitlimit = new Promise((resolve) => {
           timer = setTimeout(() => {
             const error = Object.assign(
@@ -62,7 +95,7 @@ export function createLatestTrainingQueue({
             resolve({ error });
           }, timeoutMs);
         });
-        const { error } = await Promise.race([uploadResultat, zeitlimit]);
+        const { error, gesendet } = await Promise.race([uploadResultat, zeitlimit]);
         clearTimeout(timer);
 
         if (error) {
@@ -83,7 +116,7 @@ export function createLatestTrainingQueue({
         // nur ein Zwischenstand. Lokal darf er deshalb noch nicht als sauber
         // markiert werden; die Schleife sendet direkt den neuesten Stand nach.
         if (job.sequence === sequence && !pending) {
-          markClean(job.payload);
+          markClean(gesendet || job.payload);
           status(job, 'saved');
           job.resolve({ status: 'saved' });
         } else {
@@ -122,11 +155,31 @@ function queueFor(userId) {
   const queue = createLatestTrainingQueue({
     isOnline: () => navigator.onLine,
     upload: async (payload, signal) => {
-      const { error } = await supabase.from('training_logs').upsert(
-        { user_id: userId, payload, updated_at: new Date().toISOString() },
-        { onConflict: 'user_id' },
-      ).abortSignal(signal);
-      return error;
+      const hochladen = async (stand) => {
+        const { error } = await supabase.from('training_logs').upsert(
+          { user_id: userId, payload: stand, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id' },
+        ).abortSignal(signal);
+        return error;
+      };
+      const error = await hochladen(payload);
+      if (!istSchutzFehler(error)) return error;
+
+      // Der Server kennt Saetze, die dieser Stand nicht mehr hat – typisch fuer
+      // ein Geraet mit veraltetem oder leerem Spiegel. Nicht erneut draengeln,
+      // sondern den Serverstand holen, blockweise zusammenfuehren und genau
+      // den vereinigten Stand senden. Ein bewusster Phasenreset kommt hier nie
+      // an, weil der Server ihn am neueren meta.phasenReset erkennt.
+      const { data, error: ladeFehler } = await supabase
+        .from('training_logs').select('payload').eq('user_id', userId)
+        .maybeSingle().abortSignal(signal);
+      if (ladeFehler || !data?.payload) return error;
+      const vereinigt = mergePayload(data.payload, payload);
+      writeLog(userId, vereinigt, true, false);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(TRAININGSSTAND_EREIGNIS, { detail: { userId } }));
+      }
+      return { error: await hochladen(vereinigt), gesendet: vereinigt };
     },
     markClean: (payload) => writeLog(userId, payload, false, false),
   });
