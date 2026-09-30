@@ -569,6 +569,22 @@ label.fld-l{display:block;font-size:12px;font-weight:700;text-transform:uppercas
 :root[data-theme="dark"] .d-up{background:#163527;color:#7DE0A7}
 :root[data-theme="dark"] .d-hold{background:#3A3018;color:#F0C96A}
 :root[data-theme="dark"] .d-down{background:#3B211D;color:#FF9A83}
+/* Steigerungswarnung (nur HEAVYS/MIDDLES): ab +10 % und mehr als +2,5 kg
+   gegenueber dem schwersten Satz vom letzten Mal. Eine Stufe, ein Orange. */
+button.delta{-webkit-appearance:none;appearance:none;line-height:inherit;cursor:pointer}
+.d-warn{background:#FFB38A;color:#141414}
+:root[data-theme="dark"] .d-warn{background:#FFB38A;color:#0B1B44}
+.steigerung-info{display:block;margin-top:7px;padding:8px 10px;border:var(--bw) solid var(--ink);
+  border-radius:12px;background:#FFF1E8;color:var(--text);font-family:var(--display);
+  font-size:13px;line-height:1.45}
+.steigerung-info[hidden]{display:none}
+:root[data-theme="dark"] .steigerung-info{background:#3A2418}
+.fld .steigerung-badge{position:absolute;top:-9px;right:-4px;z-index:2;-webkit-appearance:none;appearance:none;
+  font:800 10px/1.3 var(--mono);color:#141414;background:#FFB38A;border:var(--bw) solid var(--ink);
+  border-radius:999px;padding:1px 6px;cursor:pointer}
+.fld .steigerung-badge[hidden]{display:none}
+.fld.steigerung input{box-shadow:inset 0 0 0 2px #FFB38A;background:#FFF1E8}
+:root[data-theme="dark"] .fld.steigerung input{background:#3A2418}
 
 .setrow{display:flex;align-items:center;gap:7px;margin-top:8px}
 .sidx{font-family:var(--display);font-style:italic;font-size:14.5px;color:var(--text);width:16px;text-align:center;flex:0 0 auto;font-weight:700}

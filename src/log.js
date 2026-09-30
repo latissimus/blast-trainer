@@ -18,6 +18,9 @@ import { setStatusleistenOverlay } from './theme.js';
 import { synchronisiereTraining, ladeServerTraining, serverstandUebernommen, TRAININGSSTAND_EREIGNIS } from './trainingssync.js';
 import { escapeHtml } from './html.js';
 import { strukturellGleich } from './datenvergleich.js';
+import {
+  schwerstesGewicht, steigerungsWarnung, staerksteSteigerung, steigerungsErklaerung, kgText,
+} from './steigerung.js';
 import { vergleichE1 } from './progression.js';
 
 function effektivePause(blk) {
@@ -887,7 +890,31 @@ export async function mountLog(container, { userId, readOnly = false }) {
       else if (vergleich < 0) chip = `<span class="delta d-down">▼ gesunken</span>`;
       else chip = `<span class="delta d-hold">= gehalten</span>`;
     }
-    node.innerHTML = `<b>Cycle ${escapeHtml(pWeek)}: ${escapeHtml(txt)}</b>${chip}`;
+    // Reine Anzeige neben den bestehenden Chips; die Erklaerung bleibt offen,
+    // auch wenn die Zeile bei jeder Eingabe neu gezeichnet wird.
+    const sprung = staerksteSteigerung(prevSets, todaySets);
+    let warnung = '';
+    if (sprung) {
+      const offen = node.dataset.steigerungOffen === '1';
+      warnung = `<button type="button" class="delta d-warn" data-steigerung aria-expanded="${offen}">großer Sprung · +${sprung.prozent} %</button>`
+        + `<span class="steigerung-info"${offen ? '' : ' hidden'}>${escapeHtml(steigerungsErklaerung(sprung))}</span>`;
+    } else {
+      delete node.dataset.steigerungOffen;
+    }
+    node.innerHTML = `<b>Cycle ${escapeHtml(pWeek)}: ${escapeHtml(txt)}</b>${chip}${warnung}`;
+    node.onclick = (e) => {
+      if (!e.target.closest('[data-steigerung]')) return;
+      steigerungInfoUmschalten(node);
+    };
+  }
+
+  function steigerungInfoUmschalten(node, oeffnen) {
+    const info = node.querySelector('.steigerung-info');
+    if (!info) return;
+    const offen = oeffnen ?? info.hidden;
+    info.hidden = !offen;
+    node.dataset.steigerungOffen = offen ? '1' : '0';
+    node.querySelector('[data-steigerung]')?.setAttribute('aria-expanded', String(offen));
   }
 
   function setRow(entry, xi, si, blk, prevLine, prevSets, prev, count) {
@@ -900,6 +927,29 @@ export async function mountLog(container, { userId, readOnly = false }) {
     wIn.disabled = readOnly; wF.appendChild(wIn);
     const wU = document.createElement('span'); wU.className = 'u'; wU.textContent = 'kg'; wF.appendChild(wU);
     row.appendChild(wF);
+
+    // Steigerungswarnung nur bei festen Uebungen (HEAVYS/MIDDLES), die ein
+    // "letztes Mal" haben. Liest nur mit: s.w und alle Berechnungen bleiben
+    // unberuehrt.
+    let steigerungAktualisieren = () => {};
+    const vorherMax = istGetrackt(blk.type) ? schwerstesGewicht(prevSets) : null;
+    if (vorherMax != null) {
+      const badge = document.createElement('button');
+      badge.type = 'button';
+      badge.className = 'steigerung-badge';
+      badge.onclick = () => steigerungInfoUmschalten(prevLine, true);
+      wF.appendChild(badge);
+      steigerungAktualisieren = () => {
+        const sprung = steigerungsWarnung(vorherMax, wIn.value);
+        wF.classList.toggle('steigerung', !!sprung);
+        badge.hidden = !sprung;
+        if (sprung) {
+          badge.textContent = `+${sprung.prozent} %`;
+          badge.setAttribute('aria-label', `Großer Sprung: +${kgText(sprung.kg)} kg (+${sprung.prozent} %) gegenüber dem letzten Mal`);
+        }
+      };
+      steigerungAktualisieren();
+    }
 
     const times = document.createElement('span'); times.className = 'times'; times.textContent = '×'; row.appendChild(times);
 
@@ -921,6 +971,7 @@ export async function mountLog(container, { userId, readOnly = false }) {
       const upd = () => {
         s.w = wIn.value; s.r = rIn.value;
         renderPrev(prevLine, prevSets, entry.sets[xi].slice(0, count), prev ? prev.week : null);
+        steigerungAktualisieren();
         refreshVolume(); renderControls(); queuePersist();
       };
       wIn.oninput = upd; rIn.oninput = upd;
