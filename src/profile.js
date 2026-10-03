@@ -525,6 +525,76 @@ export function mountProfile(container, { session, profile, onProfileUpdated }) 
     }
   };
 
+  // --- CAPBOY ---------------------------------------------------------------
+  // CAPBOY wertet die Einheiten abends zusammen mit Schlaf, Ernaehrung und
+  // Koerperwerten aus. Gekoppelt wird per Code statt per Export: Der Code gilt
+  // 10 Minuten, CAPBOY tauscht ihn gegen einen Schluessel, der nur LESEN kann
+  // (Migration 20261002210000_capboy_kopplung). Jedes Konto koppelt sein
+  // eigenes CAPBOY.
+  const capboyCard = profilSektion('CAPBOY');
+  capboyCard.innerHTML = `
+    <p class="profile-hinweis">Verbinde LOGMAN mit deiner CAPBOY-App. CAPBOY liest dann deine Einheiten selbst und wertet sie mit Schlaf, Ernährung und Körperwerten aus. CAPBOY kann dein Log nur lesen, nie verändern.</p>
+    <div class="capboy-status" aria-live="polite"></div>
+    <div class="capboy-code" hidden>
+      <span class="capboy-code-wert"></span>
+      <small class="capboy-code-hinweis"></small>
+    </div>
+    <div class="profile-export-aktionen">
+      <button class="btn btn-block" type="button" data-capboy-verbinden>Mit CAPBOY verbinden</button>
+      <button class="btn btn-block" type="button" data-capboy-trennen hidden>Verbindung trennen</button>
+    </div>`;
+  const capboyStatus = capboyCard.querySelector('.capboy-status');
+  const capboyCode = capboyCard.querySelector('.capboy-code');
+  const capboyVerbinden = capboyCard.querySelector('[data-capboy-verbinden]');
+  const capboyTrennen = capboyCard.querySelector('[data-capboy-trennen]');
+  const capboyZeit = (iso) => new Date(iso).toLocaleString('de-DE', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+
+  async function capboyLaden() {
+    capboyStatus.textContent = 'lädt…';
+    const { data, error } = await supabase.rpc('capboy_kopplung_status');
+    if (error) {
+      capboyStatus.textContent = 'Status konnte nicht geladen werden. Bitte Verbindung prüfen.';
+      return;
+    }
+    capboyTrennen.hidden = !data?.verbunden;
+    capboyVerbinden.textContent = data?.verbunden ? 'Neu verbinden' : 'Mit CAPBOY verbinden';
+    capboyStatus.innerHTML = data?.verbunden
+      ? `<b>Verbunden</b> seit ${escapeHtml(capboyZeit(data.seit))}${data.zuletzt_gelesen_am ? ` · zuletzt gelesen ${escapeHtml(capboyZeit(data.zuletzt_gelesen_am))}` : ''}`
+      : 'Nicht verbunden.';
+  }
+
+  capboyVerbinden.onclick = async () => {
+    capboyVerbinden.disabled = true;
+    const { data, error } = await supabase.rpc('capboy_code_erstellen');
+    capboyVerbinden.disabled = false;
+    if (error || !data?.code) {
+      capboyStatus.textContent = 'Code konnte nicht erstellt werden. Bitte Verbindung prüfen.';
+      return;
+    }
+    const bis = new Date(data.gueltig_bis).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    capboyCode.querySelector('.capboy-code-wert').textContent = data.code;
+    capboyCode.querySelector('.capboy-code-hinweis').textContent = `Gib den Code in CAPBOY unter Profil → „LOGMAN verbinden“ ein. Gültig bis ${bis} Uhr.`;
+    capboyCode.hidden = false;
+  };
+
+  capboyTrennen.onclick = async () => {
+    if (!confirm('Verbindung zu CAPBOY trennen?\n\nCAPBOY kann danach keine neuen Einheiten mehr lesen.')) return;
+    capboyTrennen.disabled = true;
+    const { error } = await supabase.rpc('capboy_kopplung_trennen');
+    capboyTrennen.disabled = false;
+    if (error) {
+      capboyStatus.textContent = 'Trennen fehlgeschlagen. Bitte Verbindung prüfen.';
+      return;
+    }
+    capboyCode.hidden = true;
+    await capboyLaden();
+  };
+  capboyCard.parentElement.addEventListener('toggle', (e) => {
+    if (e.currentTarget.open) capboyLaden();
+  });
+
   // --- Frühere Trainingsstände --------------------------------------------
   // Der Server sichert vor Aenderungen den bisherigen Stand (Tabelle
   // training_logs_verlauf, 180 Tage). Hier laesst er sich ohne Hilfe von

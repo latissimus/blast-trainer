@@ -1780,3 +1780,11 @@ body[data-seite]:not([data-seite="log"]) #app.app-shell{
 body[data-seite]:not([data-seite="log"]) #app.app-shell>#view{
   padding-bottom:env(safe-area-inset-bottom)
 }
+
+/* CAPBOY-Kopplung im Profil: Der Code steht groß und gut abzutippen, darunter
+   wo er hin muss und wie lange er gilt. */
+.capboy-status{margin:0 0 12px;font-size:13px;line-height:1.5}
+.capboy-code{display:grid;gap:6px;margin:0 0 12px;padding:14px 12px;border:var(--bw) solid var(--line);border-radius:12px;background:var(--surface);text-align:center}
+.capboy-code[hidden]{display:none}
+.capboy-code-wert{font-family:var(--mono);font-size:26px;font-weight:800;letter-spacing:.12em;user-select:all;-webkit-user-select:all}
+.capboy-code-hinweis{color:var(--muted);font-size:12px;line-height:1.4}
